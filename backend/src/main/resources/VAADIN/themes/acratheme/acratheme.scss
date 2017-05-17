@@ -1,0 +1,68 @@
+@import "../valo/valo.scss";
+
+@mixin acratheme {
+  @include valo;
+
+  .v-gridlayout-slot {
+    box-shadow: inset -1px -1px 0px 0px black;
+    .v-widget {
+      display: inline;
+      padding-bottom: 4px;
+      pre {
+        padding-left: 6px;
+        padding-right: 6px;
+        display: inline;
+      }
+    }
+  }
+  .v-gridlayout-slot:last-child {
+    box-shadow: inset -1px 0px 0px 0px black;
+  }
+  .v-gridlayout-slot:nth-last-child(2) {
+    box-shadow: inset -1px 0px 0px 0px black;
+  }
+
+  .no-padding {
+    padding: 0 !important;
+  }
+
+  $padding: 10px;
+
+  .padding-left {
+    padding-left: $padding !important;
+  }
+
+  .padding-top {
+    padding-top: $padding !important;
+  }
+
+  .padding-right {
+    padding-right: $padding !important;
+  }
+
+  .padding-bottom {
+    padding-bottom: $padding !important;
+  }
+
+  $margin: 10px;
+
+  .margin-left {
+    margin-left: $margin;
+  }
+
+  .margin-top {
+    margin-top: $margin;
+  }
+
+  .margin-right {
+    margin-right: $margin;
+  }
+
+  .margin-bottom {
+    margin-bottom: $margin;
+  }
+
+  .background-light-gray {
+    background: lightgray;
+  }
+}

@@ -1,0 +1,46 @@
+buildscript {
+    ext {
+        springBootVersion = '1.5.3.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+plugins {
+    id "net.ltgt.apt" version "0.10"
+}
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'war'
+
+group 'com.faendir'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+
+dependencies {
+    compile('org.springframework.boot:spring-boot-starter-data-mongodb')
+    compile('org.springframework.boot:spring-boot-starter-security')
+    compile('com.vaadin:vaadin-spring-boot-starter')
+    compile('org.codeartisans:org.json:20161124')
+    compile('org.apache.commons:commons-collections4:4.1')
+    compile('org.ocpsoft.prettytime:prettytime:3.2.7.Final')
+    compileOnly project(':annotation')
+    apt project(':annotationprocessor')
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "com.vaadin:vaadin-bom:8.0.6"
+    }
+}
+
+war {
+    archiveName = "acra.war"
+    version = version
+}
