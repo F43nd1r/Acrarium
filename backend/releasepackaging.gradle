@@ -1,0 +1,10 @@
+apply plugin: 'war'
+
+war {
+    archiveName = "acra.war"
+    version = version
+}
+
+dependencies{
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+}

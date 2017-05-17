@@ -1,7 +1,7 @@
 package com.faendir.acra.ui.view;
 
 import com.faendir.acra.data.Bug;
-import com.faendir.acra.data.Report;
+import com.faendir.acra.data.ReportManager;
 import com.faendir.acra.data.ReportUtils;
 import com.faendir.acra.ui.NavigationManager;
 import com.faendir.acra.util.StringUtils;
@@ -10,19 +10,22 @@ import com.vaadin.event.selection.SelectionEvent;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.VerticalLayout;
 
-import java.util.List;
-
 /**
  * @author Lukas
  * @since 17.05.2017
  */
-public class BugTab extends CustomComponent {
+public class BugTab extends CustomComponent implements ReportManager.ChangeListener {
     private final VerticalLayout root;
+    private final String app;
     private final NavigationManager navigationManager;
+    private final ReportManager reportManager;
+    private final MyGrid<Bug> bugs;
 
-    public BugTab(List<Report> reportList, NavigationManager navigationManager) {
+    public BugTab(String app, NavigationManager navigationManager, ReportManager reportManager) {
+        this.app = app;
         this.navigationManager = navigationManager;
-        MyGrid<Bug> bugs = new MyGrid<>(null, ReportUtils.getBugs(reportList));
+        this.reportManager = reportManager;
+        bugs = new MyGrid<>(null, ReportUtils.getBugs(reportManager.getReports(app)));
         bugs.setSizeFull();
         bugs.addColumn(bug -> String.valueOf(bug.getReports().size()), "Reports");
         bugs.addColumn(bug -> StringUtils.distanceFromNowAsString(bug.getLastDate()), "Latest Report");
@@ -35,12 +38,19 @@ public class BugTab extends CustomComponent {
         setCompositionRoot(root);
         setSizeFull();
         setCaption("Bugs");
+        addAttachListener(e -> reportManager.addListener(this));
+        addDetachListener(e -> reportManager.removeListener(this));
     }
 
     private void handleBugSelection(SelectionEvent<Bug> e) {
         if(root.getComponentCount() == 2){
             root.removeComponent(root.getComponent(1));
         }
-        e.getFirstSelectedItem().ifPresent(bug -> root.addComponent(new ReportList(bug.getReports(), navigationManager)));
+        e.getFirstSelectedItem().ifPresent(bug -> root.addComponent(new ReportList(app, navigationManager, reportManager)));
+    }
+
+    @Override
+    public void onChange() {
+        bugs.setItems(ReportUtils.getBugs(reportManager.getReports(app)));
     }
 }

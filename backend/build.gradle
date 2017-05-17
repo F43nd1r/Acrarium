@@ -16,11 +16,11 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
-apply plugin: 'war'
 
 group 'com.faendir'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
+ext.debug = true;
 
 dependencies {
     compile('org.springframework.boot:spring-boot-starter-data-mongodb')
@@ -31,7 +31,6 @@ dependencies {
     compile('org.ocpsoft.prettytime:prettytime:3.2.7.Final')
     compileOnly project(':annotation')
     apt project(':annotationprocessor')
-    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 }
 
 dependencyManagement {
@@ -40,7 +39,6 @@ dependencyManagement {
     }
 }
 
-war {
-    archiveName = "acra.war"
-    version = version
+if(!ext.debug){
+    apply from: 'releasepackaging.gradle'
 }

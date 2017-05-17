@@ -6,6 +6,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,14 +16,17 @@ import java.util.List;
 @Component
 public class ReportManager {
     private final ReportRepository reportRepository;
+    private final List<ChangeListener> listeners;
 
     @Autowired
     public ReportManager(ReportRepository reportRepository) {
         this.reportRepository = reportRepository;
+        listeners = new ArrayList<>();
     }
 
-    public Report newReport(JSONObject content) {
-        return reportRepository.save(new Report(content, SecurityContextHolder.getContext().getAuthentication().getName()));
+    public void newReport(JSONObject content) {
+        reportRepository.save(new Report(content, SecurityContextHolder.getContext().getAuthentication().getName()));
+        listeners.forEach(ChangeListener::onChange);
     }
 
     public List<Report> getReports(String app) {
@@ -31,5 +35,22 @@ public class ReportManager {
 
     public Report getReport(String id) {
         return reportRepository.findOne(id);
+    }
+
+    public void remove(Report report){
+        reportRepository.delete(report);
+        listeners.forEach(ChangeListener::onChange);
+    }
+
+    public boolean addListener(ChangeListener changeListener) {
+        return listeners.add(changeListener);
+    }
+
+    public boolean removeListener(ChangeListener changeListener) {
+        return listeners.remove(changeListener);
+    }
+
+    public interface ChangeListener {
+        void onChange();
     }
 }

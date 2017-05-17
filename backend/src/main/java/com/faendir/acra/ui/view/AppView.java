@@ -2,7 +2,6 @@ package com.faendir.acra.ui.view;
 
 import com.faendir.acra.data.App;
 import com.faendir.acra.data.AppManager;
-import com.faendir.acra.data.Report;
 import com.faendir.acra.data.ReportManager;
 import com.faendir.acra.util.Style;
 import com.vaadin.data.ValueProvider;
@@ -16,8 +15,6 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * @author Lukas
@@ -51,7 +48,6 @@ public class AppView extends NamedView {
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         App app = appManager.getApp(event.getParameters());
-        List<Report> reportList = reportManager.getReports(app.getId());
         VerticalLayout statistics = new VerticalLayout(new Label("Coming soon"));
         statistics.setCaption("Statistics");
         statistics.setSizeFull();
@@ -62,7 +58,7 @@ public class AppView extends NamedView {
                 location, app.getId(), app.getPassword()), ContentMode.HTML));
         properties.setCaption("Properties");
         properties.setSizeFull();
-        TabSheet tabSheet = new TabSheet(new BugTab(reportList, getNavigationManager()), new ReportList(reportList, getNavigationManager()), statistics, properties);
+        TabSheet tabSheet = new TabSheet(new BugTab(app.getId(), getNavigationManager(), reportManager), new ReportList(app.getId(), getNavigationManager(), reportManager), statistics, properties);
         tabSheet.setSizeFull();
         VerticalLayout content = new VerticalLayout(tabSheet);
         content.setSizeFull();
