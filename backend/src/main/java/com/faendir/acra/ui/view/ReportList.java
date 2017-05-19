@@ -20,19 +20,14 @@ public class ReportList extends MyGrid<Report> implements ReportManager.ChangeLi
         this.reportManager = reportManager;
         setSizeFull();
         addColumn(report -> StringUtils.distanceFromNowAsString(report.getDate()), "Date");
-        addReportColumn("APP_VERSION_NAME", "App Version");
-        addReportColumn("ANDROID_VERSION", "Android Version");
-        addReportColumn("PHONE_MODEL", "Device");
-        addColumn(report -> report.getContent().getString("STACK_TRACE").split("\n", 2)[0], "Stacktrace").setExpandRatio(1);
+        addColumn(report -> String.valueOf(report.getVersionCode()), "App Version");
+        addColumn(Report::getAndroidVersion, "Android Version");
+        addColumn(Report::getPhoneModel, "Device");
+        addColumn(report -> report.getStacktrace().split("\n", 2)[0], "Stacktrace").setExpandRatio(1);
         addColumn(report -> "Delete", new ButtonRenderer<>(e -> reportManager.remove(e.getItem())));
         addItemClickListener(e -> navigationManager.navigateTo(ReportView.class, e.getItem().getId()));
         addAttachListener(e -> reportManager.addListener(this));
         addDetachListener(e -> reportManager.removeListener(this));
-    }
-
-
-    private void addReportColumn(String key, String caption) {
-        addColumn(report -> report.getContent().getString(key), caption);
     }
 
     @Override

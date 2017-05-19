@@ -1,6 +1,7 @@
 package com.faendir.acra.ui.view;
 
 import com.faendir.acra.data.AttachmentManager;
+import com.faendir.acra.data.MappingManager;
 import com.faendir.acra.data.Report;
 import com.faendir.acra.data.ReportManager;
 import com.faendir.acra.util.Style;
@@ -36,11 +37,13 @@ public class ReportView extends NamedView {
 
     private final ReportManager reportManager;
     private final AttachmentManager attachmentManager;
+    private final MappingManager mappingManager;
 
     @Autowired
-    public ReportView(ReportManager reportManager, AttachmentManager attachmentManager) {
+    public ReportView(ReportManager reportManager, AttachmentManager attachmentManager, MappingManager mappingManager) {
         this.reportManager = reportManager;
         this.attachmentManager = attachmentManager;
+        this.mappingManager = mappingManager;
     }
 
     private Stream<Component> getLayoutForEntry(String key, Object value) {
@@ -86,21 +89,10 @@ public class ReportView extends NamedView {
             return button;
         }).toArray(Component[]::new));
         GridLayout summaryGrid = new GridLayout(2, 1);
-        summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(report.getContent().getString("APP_VERSION_NAME"), ContentMode.PREFORMATTED));
-        summaryGrid.addComponents(new Label("Email", ContentMode.PREFORMATTED), new Label(report.getContent().getString("USER_EMAIL"), ContentMode.PREFORMATTED));
-        summaryGrid.addComponents(new Label("Comment", ContentMode.PREFORMATTED), new Label(report.getContent().getString("USER_COMMENT"), ContentMode.PREFORMATTED));
-        String trace = report.getContent().getString("STACK_TRACE");
-        String[] lines = trace.split("\n");
-        String exception = lines[0];
-        String cause = "";
-        for(int i = lines.length -1; i >= 1; i--){
-            if(lines[i].charAt(0) != '\t'){
-                cause = lines[i];
-                break;
-            }
-        }
-        summaryGrid.addComponents(new Label("Exception", ContentMode.PREFORMATTED), new Label(exception, ContentMode.PREFORMATTED));
-        summaryGrid.addComponents(new Label("Root cause", ContentMode.PREFORMATTED), new Label(cause, ContentMode.PREFORMATTED));
+        summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(report.getVersionName(), ContentMode.PREFORMATTED));
+        summaryGrid.addComponents(new Label("Email", ContentMode.PREFORMATTED), new Label(report.getUserEmail(), ContentMode.PREFORMATTED));
+        summaryGrid.addComponents(new Label("Comment", ContentMode.PREFORMATTED), new Label(report.getUserComment(), ContentMode.PREFORMATTED));
+        summaryGrid.addComponents(new Label("De-obfuscated Stacktrace", ContentMode.PREFORMATTED), new Label(report.getDeObfuscatedStacktrace(mappingManager), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Attachments", ContentMode.PREFORMATTED), attachments);
         summaryGrid.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
         summaryGrid.setSizeFull();

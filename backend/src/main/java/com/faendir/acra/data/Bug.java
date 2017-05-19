@@ -15,12 +15,12 @@ public class Bug {
 
     public Bug(Report report){
         reports = new ArrayList<>();
-        this.trace = report.getContent().getString("STACK_TRACE");
-        this.versionCode = report.getContent().getInt("APP_VERSION_CODE");
+        this.trace = report.getStacktrace();
+        this.versionCode = report.getVersionCode();
     }
 
     public boolean is(Report report){
-        return report.getContent().getString("STACK_TRACE").equals(trace) && report.getContent().getInt("APP_VERSION_CODE") == versionCode;
+        return report.getStacktrace().equals(trace) && report.getVersionCode() == versionCode;
     }
 
     public List<Report> getReports() {

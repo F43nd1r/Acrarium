@@ -57,9 +57,8 @@ public class Overview extends NamedView {
         Grid.Column column = grid.addColumn(App::getName, "Name");
         grid.addColumn(app -> String.valueOf(reportManager.getReports(app.getId()).size()), "Reports");
         FooterCell footerCell = grid.appendFooterRow().getCell(column.getId());
-        Button add = new Button("New App");
+        Button add = new Button("New App", e -> addApp());
         add.setSizeFull();
-        add.addClickListener(e -> addApp());
         footerCell.setComponent(add);
         VerticalLayout layout = new VerticalLayout(grid);
         Style.apply(layout, Style.NO_PADDING, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
