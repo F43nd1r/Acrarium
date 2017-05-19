@@ -14,8 +14,8 @@ public class MyGrid<T> extends Grid<T> {
         super(caption, items);
     }
 
-    public Grid.Column addColumn(ValueProvider<T, String> valueProvider, String caption) {
-        Grid.Column column = addColumn(valueProvider);
+    public Grid.Column<T, String> addColumn(ValueProvider<T, String> valueProvider, String caption) {
+        Grid.Column<T, String> column = addColumn(valueProvider);
         column.setId(caption);
         column.setCaption(caption);
         return column;

@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.convert.DbRefResolver;
 import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 
 /**
  * @author Lukas
@@ -22,5 +23,10 @@ public class MongoConfiguration {
         mongoConverter.setMapKeyDotReplacement("%&&%");
 
         return mongoConverter;
+    }
+
+    @Bean
+    public GridFsTemplate gridFsTemplate(MongoDbFactory mongoDbFactory, MappingMongoConverter mappingMongoConverter){
+        return new GridFsTemplate(mongoDbFactory, mappingMongoConverter);
     }
 }
