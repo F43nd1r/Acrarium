@@ -15,6 +15,7 @@ import com.vaadin.ui.VerticalLayout;
  * @since 17.05.2017
  */
 public class BugTab extends CustomComponent implements ReportManager.ChangeListener {
+    public static final String CAPTION = "Bugs";
     private final VerticalLayout root;
     private final String app;
     private final NavigationManager navigationManager;
@@ -37,7 +38,7 @@ public class BugTab extends CustomComponent implements ReportManager.ChangeListe
         root.setSizeFull();
         setCompositionRoot(root);
         setSizeFull();
-        setCaption("Bugs");
+        setCaption(CAPTION);
         addAttachListener(e -> reportManager.addListener(this));
         addDetachListener(e -> reportManager.removeListener(this));
     }

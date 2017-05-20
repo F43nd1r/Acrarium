@@ -48,6 +48,8 @@ public final class ReportUtils {
         FileUtils.writeStringToFile(file, mapping.getMappings());
         StringWriter writer = new StringWriter();
         new ReTrace(ReTrace.STACK_TRACE_EXPRESSION, false, file).retrace(new LineNumberReader(new StringReader(stacktrace)), new PrintWriter(writer));
+        //noinspection ResultOfMethodCallIgnored
+        file.delete();
         return writer.toString();
     }
 

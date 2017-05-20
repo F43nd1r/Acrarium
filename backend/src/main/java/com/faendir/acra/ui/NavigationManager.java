@@ -54,7 +54,8 @@ public class NavigationManager {
     }
 
     public void navigateTo(Class<? extends NamedView> namedView, String contentId) {
-        String target = applicationContext.getBean(namedView).getName() + (contentId == null ? "" : "/" + contentId);
+        NamedView view = applicationContext.getBean(namedView);
+        String target = view.getName() + (contentId == null ? "" : "/" + contentId) + view.fragmentSuffix();
         backStack.add(0, target);
         navigator.navigateTo(target);
     }

@@ -19,6 +19,10 @@ public abstract class NamedView extends CustomComponent implements View {
 
     public abstract String getName();
 
+    public String fragmentSuffix(){
+        return "";
+    }
+
     NavigationManager getNavigationManager() {
         return navigationManager;
     }

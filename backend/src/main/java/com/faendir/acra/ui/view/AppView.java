@@ -38,8 +38,14 @@ public class AppView extends NamedView {
     }
 
     @Override
+    public String fragmentSuffix() {
+        return "/" + BugTab.CAPTION;
+    }
+
+    @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        App app = appManager.getApp(event.getParameters());
+        String[] parameters = event.getParameters().split("/");
+        App app = appManager.getApp(parameters[0]);
         VerticalLayout statistics = new VerticalLayout(new Label("Coming soon"));
         statistics.setCaption("Statistics");
         statistics.setSizeFull();
@@ -52,5 +58,14 @@ public class AppView extends NamedView {
         Style.apply(content, Style.NO_PADDING, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
         setCompositionRoot(content);
         setSizeFull();
+        if (parameters.length >= 2) {
+            for (com.vaadin.ui.Component component : tabSheet) {
+                if (component.getCaption().equals(parameters[1])) {
+                    tabSheet.setSelectedTab(component);
+                    break;
+                }
+            }
+        }
+        tabSheet.addSelectedTabChangeListener(e -> getUI().getPage().setUriFragment(getName() + "/" + app.getId() + "/" + tabSheet.getSelectedTab().getCaption(), false));
     }
 }
