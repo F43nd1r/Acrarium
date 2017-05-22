@@ -1,4 +1,4 @@
-package com.faendir.acra.data;
+package com.faendir.acra.mongod;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

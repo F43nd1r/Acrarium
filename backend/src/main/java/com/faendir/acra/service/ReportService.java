@@ -1,6 +1,6 @@
 package com.faendir.acra.service;
 
-import com.faendir.acra.data.ReportManager;
+import com.faendir.acra.mongod.data.DataManager;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -26,18 +26,18 @@ import java.util.List;
  */
 @RestController
 public class ReportService {
-    private final ReportManager reportManager;
+    private final DataManager dataManager;
 
     @Autowired
-    public ReportService(ReportManager reportManager) {
-        this.reportManager = reportManager;
+    public ReportService(DataManager dataManager) {
+        this.dataManager = dataManager;
     }
 
     @PreAuthorize("hasRole('REPORTER')")
     @RequestMapping(value = "/report", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void report(@RequestBody String content) throws IOException {
         JSONObject jsonObject = new JSONObject(content);
-        reportManager.newReport(jsonObject);
+        dataManager.newReport(jsonObject);
     }
 
     @PreAuthorize("hasRole('REPORTER')")
@@ -56,7 +56,7 @@ public class ReportService {
             }
         }
         if(jsonObject != null) {
-            reportManager.newReport(jsonObject, attachments);
+            dataManager.newReport(jsonObject, attachments);
             return ResponseEntity.ok().build();
         }else {
             return ResponseEntity.badRequest().build();

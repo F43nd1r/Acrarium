@@ -1,9 +1,8 @@
 package com.faendir.acra.ui.view;
 
-import com.faendir.acra.data.AttachmentManager;
-import com.faendir.acra.data.MappingManager;
-import com.faendir.acra.data.Report;
-import com.faendir.acra.data.ReportManager;
+import com.faendir.acra.mongod.data.DataManager;
+import com.faendir.acra.mongod.model.Report;
+import com.faendir.acra.ui.view.base.NamedView;
 import com.faendir.acra.util.Style;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.vaadin.navigator.ViewChangeListener;
@@ -35,15 +34,11 @@ import java.util.stream.Stream;
 @org.springframework.stereotype.Component
 public class ReportView extends NamedView {
 
-    private final ReportManager reportManager;
-    private final AttachmentManager attachmentManager;
-    private final MappingManager mappingManager;
+    private final DataManager dataManager;
 
     @Autowired
-    public ReportView(ReportManager reportManager, AttachmentManager attachmentManager, MappingManager mappingManager) {
-        this.reportManager = reportManager;
-        this.attachmentManager = attachmentManager;
-        this.mappingManager = mappingManager;
+    public ReportView(DataManager dataManager) {
+        this.dataManager = dataManager;
     }
 
     private Stream<Component> getLayoutForEntry(String key, Object value) {
@@ -81,8 +76,8 @@ public class ReportView extends NamedView {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Report report = reportManager.getReport(event.getParameters());
-        List<GridFSDBFile> attachmentList = attachmentManager.getAttachments(report.getId());
+        Report report = dataManager.getReport(event.getParameters());
+        List<GridFSDBFile> attachmentList = dataManager.getAttachments(report.getId());
         HorizontalLayout attachments = new HorizontalLayout(attachmentList.stream().map(file -> {
             Button button = new Button(file.getFilename());
             new FileDownloader(new StreamResource(file::getInputStream, file.getFilename())).extend(button);
@@ -92,7 +87,7 @@ public class ReportView extends NamedView {
         summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(report.getVersionName(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Email", ContentMode.PREFORMATTED), new Label(report.getUserEmail(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Comment", ContentMode.PREFORMATTED), new Label(report.getUserComment(), ContentMode.PREFORMATTED));
-        summaryGrid.addComponents(new Label("De-obfuscated Stacktrace", ContentMode.PREFORMATTED), new Label(report.getDeObfuscatedStacktrace(mappingManager), ContentMode.PREFORMATTED));
+        summaryGrid.addComponents(new Label("De-obfuscated Stacktrace", ContentMode.PREFORMATTED), new Label(report.getDeObfuscatedStacktrace(dataManager), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Attachments", ContentMode.PREFORMATTED), attachments);
         summaryGrid.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
         summaryGrid.setSizeFull();

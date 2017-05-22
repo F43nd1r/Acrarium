@@ -1,11 +1,12 @@
 package com.faendir.acra.security;
 
-import com.faendir.acra.data.App;
-import com.faendir.acra.data.AppManager;
+import com.faendir.acra.mongod.data.DataManager;
+import com.faendir.acra.mongod.model.App;
+import com.faendir.acra.mongod.model.User;
+import com.faendir.acra.mongod.user.UserManager;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,11 +21,14 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+import java.util.Collection;
 
 /**
  * @author Lukas
@@ -39,57 +43,62 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         SecurityContextHolder.setStrategyName(VaadinSessionSecurityContextHolderStrategy.class.getName());
     }
 
-    private final String user;
-    private final String password;
-    private final AppManager appManager;
-    private final AuthenticationProvider authenticationProvider = new AuthenticationProvider() {
-        @Override
-        public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-            if (authentication instanceof UsernamePasswordAuthenticationToken) {
-                if (user.equals(authentication.getName())) {
-                    if (password.equals(authentication.getCredentials())) {
-                        return new UsernamePasswordAuthenticationToken(authentication.getName(), authentication.getCredentials(), AuthorityUtils.createAuthorityList("ROLE_ADMIN"));
-                    } else {
-                        throw new BadCredentialsException("Password mismatch for user " + authentication.getName());
-                    }
-                }
-                App app = appManager.getApp(authentication.getName());
-                if (app != null) {
-                    if (app.getPassword().equals(authentication.getCredentials())) {
-                        Authentication auth = new UsernamePasswordAuthenticationToken(authentication.getName(), authentication.getCredentials(), AuthorityUtils.createAuthorityList("ROLE_REPORTER"));
-                        VaadinSession session = VaadinSession.getCurrent();
-                        if (session == null) session = new VaadinSession(VaadinService.getCurrent());
-                        VaadinSession.setCurrent(session);
-                        SecurityContext securityContext = new SecurityContextImpl();
-                        securityContext.setAuthentication(auth);
-                        session.setAttribute(SecurityContext.class, securityContext);
-                        return auth;
-                    } else {
-                        throw new BadCredentialsException("Password mismatch for user " + authentication.getName());
-                    }
-                } else {
-                    throw new UsernameNotFoundException("Username " + authentication.getName() + " not found");
-                }
-            }
-            return null;
-        }
-
-        @Override
-        public boolean supports(Class<?> authentication) {
-            return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
-        }
-    };
+    private final DataManager dataManager;
+    private final UserManager userManager;
 
     @Autowired
-    public WebSecurityConfig(@Value("${security.user.name}") String user, @Value("${security.user.password}") String password, AppManager appManager) {
-        this.user = user;
-        this.password = password;
-        this.appManager = appManager;
+    public WebSecurityConfig(DataManager dataManager, UserManager userManager) {
+        this.dataManager = dataManager;
+        this.userManager = userManager;
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(authenticationProvider);
+        auth.authenticationProvider(new AuthenticationProvider() {
+            @Override
+            public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+                if (authentication instanceof UsernamePasswordAuthenticationToken) {
+                    App app = dataManager.getApp(authentication.getName());
+                    User user;
+                    if (app != null) {
+                        if (app.getPassword().equals(authentication.getCredentials())) {
+                            return getGrantedToken(app.getId(), app.getPassword(), AuthorityUtils.createAuthorityList("ROLE_REPORTER"));
+                        } else {
+                            throwBadCredentials(app.getId());
+                        }
+                    } else if ((user = userManager.getUser(authentication.getName())) != null) {
+                        if (userManager.checkPassword(user, (String) authentication.getCredentials())) {
+                            return getGrantedToken(user.getUsername(), user.getPassword(), user.getAuthorities());
+                        } else {
+                            throwBadCredentials(user.getUsername());
+                        }
+                    } else {
+                        throw new UsernameNotFoundException("Username " + authentication.getName() + " not found");
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            public boolean supports(Class<?> authentication) {
+                return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
+            }
+        });
+    }
+
+    private void throwBadCredentials(String username) {
+        throw new BadCredentialsException("Password mismatch for user " + username);
+    }
+
+    private Authentication getGrantedToken(String username, String password, Collection<? extends GrantedAuthority> authorities) {
+        Authentication auth = new UsernamePasswordAuthenticationToken(username, password, authorities);
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session == null) session = new VaadinSession(VaadinService.getCurrent());
+        VaadinSession.setCurrent(session);
+        SecurityContext securityContext = new SecurityContextImpl();
+        securityContext.setAuthentication(auth);
+        session.setAttribute(SecurityContext.class, securityContext);
+        return auth;
     }
 
     @Override

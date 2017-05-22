@@ -1,7 +1,9 @@
 package com.faendir.acra.ui;
 
 import com.faendir.acra.gen.ViewDefinition;
-import com.faendir.acra.ui.view.NamedView;
+import com.faendir.acra.security.SecurityUtils;
+import com.faendir.acra.ui.view.ErrorView;
+import com.faendir.acra.ui.view.base.NamedView;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewProvider;
@@ -37,7 +39,7 @@ public class NavigationManager {
             @Override
             public String getViewName(String viewAndParameters) {
                 String name = viewAndParameters.split("/", 2)[0];
-                if (views.stream().map(applicationContext::getBean).map(NamedView.class::cast).map(NamedView::getName).anyMatch(name::equals))
+                if (views.stream().map(applicationContext::getBean).map(NamedView.class::cast).filter(view -> SecurityUtils.hasRole(view.requiredRole())).map(NamedView::getName).anyMatch(name::equals))
                     return name;
                 return null;
             }
@@ -47,6 +49,7 @@ public class NavigationManager {
                 return views.stream().map(applicationContext::getBean).map(NamedView.class::cast).filter(view -> view.getName().equals(viewName)).findAny().orElse(null);
             }
         });
+        navigator.setErrorView(ErrorView.class);
         views = ViewDefinition.getViewClasses();
         String target = Optional.ofNullable(ui.getPage().getLocation().getFragment()).orElse("").replace("!", "");
         backStack.add(target);
@@ -56,8 +59,10 @@ public class NavigationManager {
     public void navigateTo(Class<? extends NamedView> namedView, String contentId) {
         NamedView view = applicationContext.getBean(namedView);
         String target = view.getName() + (contentId == null ? "" : "/" + contentId) + view.fragmentSuffix();
-        backStack.add(0, target);
-        navigator.navigateTo(target);
+        if (!backStack.get(0).equals(target)) {
+            backStack.add(0, target);
+            navigator.navigateTo(target);
+        }
     }
 
     public void navigateBack() {

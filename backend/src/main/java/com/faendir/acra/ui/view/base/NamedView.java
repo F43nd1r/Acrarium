@@ -1,6 +1,7 @@
-package com.faendir.acra.ui.view;
+package com.faendir.acra.ui.view.base;
 
 import com.faendir.acra.annotation.AutoDiscoverView;
+import com.faendir.acra.mongod.user.UserManager;
 import com.faendir.acra.ui.NavigationManager;
 import com.vaadin.navigator.View;
 import com.vaadin.ui.CustomComponent;
@@ -23,7 +24,11 @@ public abstract class NamedView extends CustomComponent implements View {
         return "";
     }
 
-    NavigationManager getNavigationManager() {
+    public String requiredRole(){
+        return UserManager.ROLE_USER;
+    }
+
+    protected NavigationManager getNavigationManager() {
         return navigationManager;
     }
 

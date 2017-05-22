@@ -30,8 +30,6 @@ public class Rfc1341ServletFileUpload extends ServletFileUpload {
 
     /**
      * Modified copy (with appropriate cast) of {@link FileUploadBase#parseRequest(RequestContext)}
-     *
-     * @inheritDoc
      */
     @Override
     public List<FileItem> parseRequest(RequestContext ctx) throws FileUploadException {

@@ -1,4 +1,4 @@
-package com.faendir.acra.data;
+package com.faendir.acra.mongod.model;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 

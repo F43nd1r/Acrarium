@@ -1,4 +1,4 @@
-package com.faendir.acra.ui.view;
+package com.faendir.acra.ui.view.base;
 
 import com.vaadin.data.ValueProvider;
 import com.vaadin.ui.Grid;
@@ -10,6 +10,10 @@ import java.util.Collection;
  * @since 14.05.2017
  */
 public class MyGrid<T> extends Grid<T> {
+    public MyGrid(String caption) {
+        super(caption);
+    }
+
     public MyGrid(String caption, Collection<T> items) {
         super(caption, items);
     }

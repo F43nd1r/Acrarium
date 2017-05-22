@@ -1,4 +1,4 @@
-package com.faendir.acra.data;
+package com.faendir.acra.mongod.model;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -33,11 +33,11 @@ public class ProguardMapping {
         return mappings;
     }
 
-    static class MetaData implements Serializable {
+    public static class MetaData implements Serializable {
         private String app;
         private int version;
 
-        MetaData(String app, int version) {
+        public MetaData(String app, int version) {
             this.app = app;
             this.version = version;
         }

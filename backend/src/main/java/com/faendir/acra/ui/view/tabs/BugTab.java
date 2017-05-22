@@ -1,9 +1,11 @@
-package com.faendir.acra.ui.view;
+package com.faendir.acra.ui.view.tabs;
 
-import com.faendir.acra.data.Bug;
-import com.faendir.acra.data.ReportManager;
-import com.faendir.acra.data.ReportUtils;
+import com.faendir.acra.mongod.data.DataManager;
+import com.faendir.acra.mongod.model.Bug;
+import com.faendir.acra.mongod.data.ReportUtils;
 import com.faendir.acra.ui.NavigationManager;
+import com.faendir.acra.ui.view.base.MyGrid;
+import com.faendir.acra.ui.view.base.ReportList;
 import com.faendir.acra.util.StringUtils;
 import com.faendir.acra.util.Style;
 import com.vaadin.event.selection.SelectionEvent;
@@ -14,19 +16,19 @@ import com.vaadin.ui.VerticalLayout;
  * @author Lukas
  * @since 17.05.2017
  */
-public class BugTab extends CustomComponent implements ReportManager.ChangeListener {
+public class BugTab extends CustomComponent implements DataManager.ReportChangeListener {
     public static final String CAPTION = "Bugs";
     private final VerticalLayout root;
     private final String app;
     private final NavigationManager navigationManager;
-    private final ReportManager reportManager;
+    private final DataManager dataManager;
     private final MyGrid<Bug> bugs;
 
-    public BugTab(String app, NavigationManager navigationManager, ReportManager reportManager) {
+    public BugTab(String app, NavigationManager navigationManager, DataManager dataManager) {
         this.app = app;
         this.navigationManager = navigationManager;
-        this.reportManager = reportManager;
-        bugs = new MyGrid<>(null, ReportUtils.getBugs(reportManager.getReports(app)));
+        this.dataManager = dataManager;
+        bugs = new MyGrid<>(null, ReportUtils.getBugs(dataManager.getReports(app)));
         bugs.setSizeFull();
         bugs.addColumn(bug -> String.valueOf(bug.getReports().size()), "Reports");
         bugs.addColumn(bug -> StringUtils.distanceFromNowAsString(bug.getLastDate()), "Latest Report");
@@ -39,19 +41,19 @@ public class BugTab extends CustomComponent implements ReportManager.ChangeListe
         setCompositionRoot(root);
         setSizeFull();
         setCaption(CAPTION);
-        addAttachListener(e -> reportManager.addListener(this));
-        addDetachListener(e -> reportManager.removeListener(this));
+        addAttachListener(e -> dataManager.addListener(this));
+        addDetachListener(e -> dataManager.removeListener(this));
     }
 
     private void handleBugSelection(SelectionEvent<Bug> e) {
         if(root.getComponentCount() == 2){
             root.removeComponent(root.getComponent(1));
         }
-        e.getFirstSelectedItem().ifPresent(bug -> root.addComponent(new ReportList(app, navigationManager, reportManager)));
+        e.getFirstSelectedItem().ifPresent(bug -> root.addComponent(new ReportList(app, navigationManager, dataManager)));
     }
 
     @Override
     public void onChange() {
-        bugs.setItems(ReportUtils.getBugs(reportManager.getReports(app)));
+        bugs.setItems(ReportUtils.getBugs(dataManager.getReports(app)));
     }
 }

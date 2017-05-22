@@ -1,8 +1,13 @@
-package com.faendir.acra.ui.view;
+package com.faendir.acra.ui.view.tabs;
 
-import com.faendir.acra.data.MappingManager;
-import com.faendir.acra.data.ProguardMapping;
+import com.faendir.acra.mongod.data.DataManager;
+import com.faendir.acra.mongod.model.Permission;
+import com.faendir.acra.mongod.model.ProguardMapping;
+import com.faendir.acra.security.SecurityUtils;
+import com.faendir.acra.ui.view.base.MyGrid;
+import com.faendir.acra.util.Style;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -17,21 +22,28 @@ import java.io.ByteArrayOutputStream;
  * @author Lukas
  * @since 19.05.2017
  */
-public class DeObfuscationTab extends MyGrid<ProguardMapping> {
+public class DeObfuscationTab extends CustomComponent {
     private final String app;
-    private final MappingManager mappingManager;
+    private final DataManager dataManager;
+    private final MyGrid<ProguardMapping> grid;
     private boolean validNumber;
     private boolean validFile;
 
-    public DeObfuscationTab(String app, MappingManager mappingManager) {
-        super("De-Obfuscation", mappingManager.getMappings(app));
+    public DeObfuscationTab(String app, DataManager dataManager) {
+        setCaption("De-Obfuscation");
+        grid = new MyGrid<>(null, dataManager.getMappings(app));
         this.app = app;
-        this.mappingManager = mappingManager;
-        Column column = addColumn(mapping -> String.valueOf(mapping.getVersion()), "Version");
-        setSizeFull();
-        Button add = new Button("Add File", e -> addFile());
-        add.setSizeFull();
-        appendFooterRow().getCell(column).setComponent(add);
+        this.dataManager = dataManager;
+        grid.addColumn(mapping -> String.valueOf(mapping.getVersion()), "Version");
+        grid.setSizeFull();
+        VerticalLayout layout = new VerticalLayout(grid);
+        layout.setSizeFull();
+        Style.NO_PADDING.apply(layout);
+        setCompositionRoot(layout);
+        if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
+            layout.addComponent(new Button("Add File", e -> addFile()));
+        }
+
     }
 
     private void addFile() {
@@ -64,8 +76,8 @@ public class DeObfuscationTab extends MyGrid<ProguardMapping> {
         });
         upload.setSizeFull();
         confirm.addClickListener(e -> {
-            mappingManager.addMapping(app, Integer.parseInt(version.getValue()), out.toString());
-            setItems(mappingManager.getMappings(app));
+            dataManager.addMapping(app, Integer.parseInt(version.getValue()), out.toString());
+            grid.setItems(dataManager.getMappings(app));
             window.close();
         });
         confirm.setSizeFull();

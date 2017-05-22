@@ -12,6 +12,7 @@ buildscript {
 
 plugins {
     id "net.ltgt.apt" version "0.10"
+    id 'fi.jasoft.plugin.vaadin' version '1.1.10'
 }
 apply plugin: 'java'
 apply plugin: 'eclipse'
@@ -20,7 +21,9 @@ apply plugin: 'org.springframework.boot'
 group 'com.faendir'
 version = '0.1.0-SNAPSHOT'
 sourceCompatibility = 1.8
-ext.debug = true;
+ext {
+    debug = true
+}
 
 dependencies {
     compile 'org.springframework.boot:spring-boot-starter-data-mongodb'
@@ -31,9 +34,21 @@ dependencies {
     compile 'org.ocpsoft.prettytime:prettytime:3.2.7.Final'
     compile 'commons-fileupload:commons-fileupload:1.3.2'
     compile 'net.sf.proguard:proguard-retrace:5.3.3'
+    compile 'org.vaadin.addons:popupbutton:3.0.0'
 
     compileOnly project(':annotation')
     apt project(':annotationprocessor')
+}
+
+configurations {
+    'vaadin-client' {
+        resolutionStrategy {
+            dependencySubstitution {
+                substitute module('javax.validation:validation-api') with module('javax.validation:validation-api:1.0.0.GA')
+            }
+            //force 'javax.validation:validation-api:1.0.0.GA'
+        }
+    }
 }
 
 dependencyManagement {
@@ -42,6 +57,16 @@ dependencyManagement {
     }
 }
 
-if(!ext.debug){
+bootRun {
+    // Needed by Vaadin plugin (https://github.com/johndevs/gradle-vaadin-plugin/issues/325)
+    classpath += configurations['vaadin-server']
+    classpath += configurations['vaadin-client']
+
+    dependsOn 'vaadinCompile', 'vaadinThemeCompile'
+}
+
+project.convention.getPlugin(WarPluginConvention).webAppDirName = "src/main/resources"
+
+if (!ext.debug) {
     apply from: 'releasepackaging.gradle'
 }

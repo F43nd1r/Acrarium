@@ -1,5 +1,7 @@
-package com.faendir.acra.data;
+package com.faendir.acra.mongod.model;
 
+import com.faendir.acra.mongod.data.DataManager;
+import com.faendir.acra.mongod.data.ReportUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -47,11 +49,11 @@ public class Report {
         return getValueSafe("STACK_TRACE", content::getString, "");
     }
 
-    public String getDeObfuscatedStacktrace(MappingManager mappingManager){
+    public String getDeObfuscatedStacktrace(DataManager dataManager){
         if (deObfuscatedTrace != null) {
             return deObfuscatedTrace;
         }
-        ProguardMapping mapping = mappingManager.getMapping(app, getVersionCode());
+        ProguardMapping mapping = dataManager.getMapping(app, getVersionCode());
         if (mapping != null) {
             try {
                 deObfuscatedTrace = ReportUtils.retrace(getStacktrace(), mapping);

@@ -1,5 +1,8 @@
-package com.faendir.acra.data;
+package com.faendir.acra.mongod.data;
 
+import com.faendir.acra.mongod.model.Bug;
+import com.faendir.acra.mongod.model.ProguardMapping;
+import com.faendir.acra.mongod.model.Report;
 import org.apache.commons.io.FileUtils;
 import proguard.retrace.ReTrace;
 
@@ -35,7 +38,7 @@ public final class ReportUtils {
         return bugs;
     }
 
-    static Date getDateFromString(String s) {
+    public static Date getDateFromString(String s) {
         try {
             return dateFormat.parse(s);
         } catch (ParseException e) {
@@ -43,7 +46,7 @@ public final class ReportUtils {
         }
     }
 
-    static String retrace(String stacktrace, ProguardMapping mapping) throws IOException {
+    public static String retrace(String stacktrace, ProguardMapping mapping) throws IOException {
         File file = File.createTempFile("mapping", ".txt");
         FileUtils.writeStringToFile(file, mapping.getMappings());
         StringWriter writer = new StringWriter();

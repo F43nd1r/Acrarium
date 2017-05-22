@@ -1,4 +1,4 @@
-package com.faendir.acra.data;
+package com.faendir.acra.mongod.model;
 
 import java.util.ArrayList;
 import java.util.Date;

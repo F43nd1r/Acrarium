@@ -1,9 +1,14 @@
 package com.faendir.acra.ui.view;
 
-import com.faendir.acra.data.App;
-import com.faendir.acra.data.AppManager;
-import com.faendir.acra.data.MappingManager;
-import com.faendir.acra.data.ReportManager;
+import com.faendir.acra.mongod.data.DataManager;
+import com.faendir.acra.mongod.model.App;
+import com.faendir.acra.mongod.model.Permission;
+import com.faendir.acra.security.SecurityUtils;
+import com.faendir.acra.ui.view.base.NamedView;
+import com.faendir.acra.ui.view.base.ReportList;
+import com.faendir.acra.ui.view.tabs.BugTab;
+import com.faendir.acra.ui.view.tabs.DeObfuscationTab;
+import com.faendir.acra.ui.view.tabs.PropertiesTab;
 import com.faendir.acra.util.Style;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.annotation.UIScope;
@@ -21,15 +26,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class AppView extends NamedView {
 
-    private final AppManager appManager;
-    private final ReportManager reportManager;
-    private final MappingManager mappingManager;
+    private final DataManager dataManager;
 
     @Autowired
-    public AppView(AppManager appManager, ReportManager reportManager, MappingManager mappingManager) {
-        this.appManager = appManager;
-        this.reportManager = reportManager;
-        this.mappingManager = mappingManager;
+    public AppView(DataManager dataManager) {
+        this.dataManager = dataManager;
     }
 
     @Override
@@ -45,13 +46,16 @@ public class AppView extends NamedView {
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         String[] parameters = event.getParameters().split("/");
-        App app = appManager.getApp(parameters[0]);
+        App app = dataManager.getApp(parameters[0]);
         VerticalLayout statistics = new VerticalLayout(new Label("Coming soon"));
         statistics.setCaption("Statistics");
         statistics.setSizeFull();
-        TabSheet tabSheet = new TabSheet(new BugTab(app.getId(), getNavigationManager(), reportManager),
-                new ReportList(app.getId(), getNavigationManager(), reportManager),
-                statistics, new DeObfuscationTab(app.getId(), mappingManager), new PropertiesTab(app));
+        TabSheet tabSheet = new TabSheet(new BugTab(app.getId(), getNavigationManager(), dataManager),
+                new ReportList(app.getId(), getNavigationManager(), dataManager),
+                statistics, new DeObfuscationTab(app.getId(), dataManager));
+        if(SecurityUtils.hasPermission(app.getId(), Permission.Level.ADMIN)){
+            tabSheet.addComponent(new PropertiesTab(app, dataManager, getNavigationManager()));
+        }
         tabSheet.setSizeFull();
         VerticalLayout content = new VerticalLayout(tabSheet);
         content.setSizeFull();
@@ -66,6 +70,7 @@ public class AppView extends NamedView {
                 }
             }
         }
-        tabSheet.addSelectedTabChangeListener(e -> getUI().getPage().setUriFragment(getName() + "/" + app.getId() + "/" + tabSheet.getSelectedTab().getCaption(), false));
+        tabSheet.addSelectedTabChangeListener(e -> getUI().getPage()
+                .setUriFragment(getName() + "/" + app.getId() + "/" + tabSheet.getSelectedTab().getCaption(), false));
     }
 }
