@@ -64,7 +64,7 @@ public class Overview extends NamedView {
         grid.setSizeFull();
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.addColumn(App::getName, "Name");
-        grid.addColumn(app -> String.valueOf(dataManager.getReports(app.getId()).size()), "Reports");
+        grid.addColumn(app -> dataManager.getReports(app.getId()).size(), "Reports");
         VerticalLayout layout = new VerticalLayout(grid);
         if(SecurityUtils.hasRole(UserManager.ROLE_ADMIN)){
             Button add = new Button("New App", e -> addApp());

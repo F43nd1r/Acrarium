@@ -6,7 +6,8 @@ import com.faendir.acra.mongod.model.Report;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.ui.NavigationManager;
 import com.faendir.acra.ui.view.ReportView;
-import com.faendir.acra.util.StringUtils;
+import com.faendir.acra.util.TimeSpanRenderer;
+import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.ui.renderers.ButtonRenderer;
 
 /**
@@ -23,12 +24,12 @@ public class ReportList extends MyGrid<Report> implements DataManager.ReportChan
         this.dataManager = dataManager;
         setSizeFull();
         setSelectionMode(SelectionMode.NONE);
-        addColumn(report -> StringUtils.distanceFromNowAsString(report.getDate()), "Date");
-        addColumn(report -> String.valueOf(report.getVersionCode()), "App Version");
+        sort(addColumn(Report::getDate, new TimeSpanRenderer(), "Date"), SortDirection.DESCENDING);
+        addColumn(Report::getVersionCode, "App Version");
         addColumn(Report::getAndroidVersion, "Android Version");
         addColumn(Report::getPhoneModel, "Device");
         addColumn(report -> report.getStacktrace().split("\n", 2)[0], "Stacktrace").setExpandRatio(1);
-        if(SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
+        if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
             addColumn(report -> "Delete", new ButtonRenderer<>(e -> dataManager.remove(e.getItem())));
         }
         addItemClickListener(e -> navigationManager.navigateTo(ReportView.class, e.getItem().getId()));

@@ -67,6 +67,7 @@ public class UserManagerView extends NamedView {
                         ((user, permissions) -> permissions.forEach(p -> userManager.setPermission(user, p.getApp(), p.getLevel())))));
         Button newUser = new Button("New User", e -> newUser());
         VerticalLayout layout = new VerticalLayout(userGrid, newUser);
+        layout.setExpandRatio(userGrid, 1);
         layout.setSizeFull();
         Style.NO_PADDING.apply(layout);
         setCompositionRoot(layout);

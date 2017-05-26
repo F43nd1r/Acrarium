@@ -7,7 +7,6 @@ import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.util.Style;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -22,7 +21,7 @@ import java.io.ByteArrayOutputStream;
  * @author Lukas
  * @since 19.05.2017
  */
-public class DeObfuscationTab extends CustomComponent {
+public class DeObfuscationTab extends VerticalLayout {
     private final String app;
     private final DataManager dataManager;
     private final MyGrid<ProguardMapping> grid;
@@ -34,15 +33,15 @@ public class DeObfuscationTab extends CustomComponent {
         grid = new MyGrid<>(null, dataManager.getMappings(app));
         this.app = app;
         this.dataManager = dataManager;
-        grid.addColumn(mapping -> String.valueOf(mapping.getVersion()), "Version");
+        grid.addColumn(ProguardMapping::getVersion, "Version");
         grid.setSizeFull();
-        VerticalLayout layout = new VerticalLayout(grid);
-        layout.setSizeFull();
-        Style.NO_PADDING.apply(layout);
-        setCompositionRoot(layout);
+        addComponent(grid);
+        setSizeFull();
+        Style.NO_PADDING.apply(this);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-            layout.addComponent(new Button("Add File", e -> addFile()));
+            addComponent(new Button("Add File", e -> addFile()));
         }
+        setExpandRatio(grid, 1);
 
     }
 

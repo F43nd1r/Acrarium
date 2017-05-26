@@ -9,10 +9,10 @@ import com.faendir.acra.ui.view.base.ReportList;
 import com.faendir.acra.ui.view.tabs.BugTab;
 import com.faendir.acra.ui.view.tabs.DeObfuscationTab;
 import com.faendir.acra.ui.view.tabs.PropertiesTab;
+import com.faendir.acra.ui.view.tabs.StatisticsTab;
 import com.faendir.acra.util.Style;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.annotation.UIScope;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,12 +47,9 @@ public class AppView extends NamedView {
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         String[] parameters = event.getParameters().split("/");
         App app = dataManager.getApp(parameters[0]);
-        VerticalLayout statistics = new VerticalLayout(new Label("Coming soon"));
-        statistics.setCaption("Statistics");
-        statistics.setSizeFull();
         TabSheet tabSheet = new TabSheet(new BugTab(app.getId(), getNavigationManager(), dataManager),
                 new ReportList(app.getId(), getNavigationManager(), dataManager),
-                statistics, new DeObfuscationTab(app.getId(), dataManager));
+                new StatisticsTab(app.getId(), dataManager), new DeObfuscationTab(app.getId(), dataManager));
         if(SecurityUtils.hasPermission(app.getId(), Permission.Level.ADMIN)){
             tabSheet.addComponent(new PropertiesTab(app, dataManager, getNavigationManager()));
         }

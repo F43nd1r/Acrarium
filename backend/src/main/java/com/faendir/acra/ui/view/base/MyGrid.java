@@ -2,6 +2,8 @@ package com.faendir.acra.ui.view.base;
 
 import com.vaadin.data.ValueProvider;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.renderers.AbstractRenderer;
+import com.vaadin.ui.renderers.TextRenderer;
 
 import java.util.Collection;
 
@@ -18,10 +20,11 @@ public class MyGrid<T> extends Grid<T> {
         super(caption, items);
     }
 
-    public Grid.Column<T, String> addColumn(ValueProvider<T, String> valueProvider, String caption) {
-        Grid.Column<T, String> column = addColumn(valueProvider);
-        column.setId(caption);
-        column.setCaption(caption);
-        return column;
+    public <R> Grid.Column<T, R> addColumn(ValueProvider<T, R> valueProvider, String caption) {
+        return addColumn(valueProvider, new TextRenderer(), caption);
+    }
+
+    public <R> Grid.Column<T, R> addColumn(ValueProvider<T, R> valueProvider, AbstractRenderer<? super T, ? super R> renderer, String caption) {
+        return addColumn(valueProvider, renderer).setId(caption).setCaption(caption);
     }
 }
