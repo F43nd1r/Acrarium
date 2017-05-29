@@ -10,18 +10,19 @@ import com.faendir.acra.util.TimeSpanRenderer;
 import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.ui.renderers.ButtonRenderer;
 
+import java.util.List;
+import java.util.function.Supplier;
+
 /**
  * @author Lukas
  * @since 14.05.2017
  */
 public class ReportList extends MyGrid<Report> implements DataManager.ReportChangeListener {
-    private final String app;
-    private final DataManager dataManager;
+    private final Supplier<List<Report>> reportSupplier;
 
-    public ReportList(String app, NavigationManager navigationManager, DataManager dataManager) {
-        super("Reports", dataManager.getReports(app));
-        this.app = app;
-        this.dataManager = dataManager;
+    public ReportList(String app, NavigationManager navigationManager, DataManager dataManager, Supplier<List<Report>> reportSupplier) {
+        super("Reports", reportSupplier.get());
+        this.reportSupplier = reportSupplier;
         setSizeFull();
         setSelectionMode(SelectionMode.NONE);
         sort(addColumn(Report::getDate, new TimeSpanRenderer(), "Date"), SortDirection.DESCENDING);
@@ -39,6 +40,6 @@ public class ReportList extends MyGrid<Report> implements DataManager.ReportChan
 
     @Override
     public void onChange() {
-        setItems(dataManager.getReports(app));
+        setItems(reportSupplier.get());
     }
 }

@@ -56,7 +56,7 @@ public class BackendUI extends UI {
 
     private boolean login(String username, String password) {
         try {
-            Authentication token = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+            Authentication token = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username.toLowerCase(), password));
             VaadinService.reinitializeSession(VaadinService.getCurrentRequest());
             SecurityContextHolder.getContext().setAuthentication(token);
             showMain();

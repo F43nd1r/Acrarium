@@ -46,17 +46,16 @@ public class ChangePasswordView extends NamedView {
         PasswordField repeatPassword = new PasswordField("Repeat Password");
         Button confirm = new Button("Confirm", e -> {
             User user = userManager.getUser(SecurityUtils.getUsername());
-            if(userManager.checkPassword(user, oldPassword.getValue())) {
-                if (newPassword.getValue().equals(repeatPassword.getValue())) {
-                    user.setPassword(newPassword.getValue());
+            if (newPassword.getValue().equals(repeatPassword.getValue())) {
+                if (userManager.changePassword(user, oldPassword.getValue(), newPassword.getValue())) {
                     Notification.show("Successful!");
                     getNavigationManager().navigateBack();
                     backendUI.logout();
                 } else {
-                    repeatPassword.setComponentError(new UserError("Passwords do not match"));
+                    oldPassword.setComponentError(new UserError("Incorrect password"));
                 }
-            }else {
-                oldPassword.setComponentError(new UserError("Incorrect password"));
+            } else {
+                repeatPassword.setComponentError(new UserError("Passwords do not match"));
             }
 
         });

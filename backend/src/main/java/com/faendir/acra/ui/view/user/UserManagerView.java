@@ -90,7 +90,7 @@ public class UserManagerView extends NamedView {
         Button create = new Button("Create");
         create.addClickListener(e -> {
             if (password.getValue().equals(repeatPassword.getValue())) {
-                userManager.createUser(name.getValue(), password.getValue());
+                userManager.createUser(name.getValue().toLowerCase(), password.getValue());
                 userGrid.setItems(userManager.getUsers());
                 window.close();
             } else {

@@ -5,10 +5,10 @@ import com.faendir.acra.mongod.model.App;
 import com.faendir.acra.mongod.model.Permission;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.ui.view.base.NamedView;
-import com.faendir.acra.ui.view.base.ReportList;
 import com.faendir.acra.ui.view.tabs.BugTab;
 import com.faendir.acra.ui.view.tabs.DeObfuscationTab;
 import com.faendir.acra.ui.view.tabs.PropertiesTab;
+import com.faendir.acra.ui.view.tabs.ReportTab;
 import com.faendir.acra.ui.view.tabs.StatisticsTab;
 import com.faendir.acra.util.Style;
 import com.vaadin.navigator.ViewChangeListener;
@@ -48,7 +48,7 @@ public class AppView extends NamedView {
         String[] parameters = event.getParameters().split("/");
         App app = dataManager.getApp(parameters[0]);
         TabSheet tabSheet = new TabSheet(new BugTab(app.getId(), getNavigationManager(), dataManager),
-                new ReportList(app.getId(), getNavigationManager(), dataManager),
+                new ReportTab(app.getId(), getNavigationManager(), dataManager),
                 new StatisticsTab(app.getId(), dataManager), new DeObfuscationTab(app.getId(), dataManager));
         if(SecurityUtils.hasPermission(app.getId(), Permission.Level.ADMIN)){
             tabSheet.addComponent(new PropertiesTab(app, dataManager, getNavigationManager()));

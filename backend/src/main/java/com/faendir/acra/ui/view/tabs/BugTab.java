@@ -46,7 +46,7 @@ public class BugTab extends VerticalLayout implements DataManager.ReportChangeLi
         if (getComponentCount() == 2) {
             removeComponent(getComponent(1));
         }
-        e.getFirstSelectedItem().ifPresent(bug -> addComponent(new ReportList(app, navigationManager, dataManager)));
+        e.getFirstSelectedItem().ifPresent(bug -> addComponent(new ReportList(app, navigationManager, dataManager, bug::getReports)));
     }
 
     @Override
