@@ -47,9 +47,11 @@ public class UserManager {
     public User getUser(String username) {
         User user = userRepository.findOne(username);
         if (user == null && defaultUser.equals(username)) {
-            return getDefaultUser();
+            user = getDefaultUser();
         }
-        ensureValidPermissions(user);
+        if(user != null) {
+            ensureValidPermissions(user);
+        }
         return user;
     }
 

@@ -1,13 +1,11 @@
 package com.faendir.acra.mongod.model;
 
-import com.faendir.acra.mongod.data.DataManager;
 import com.faendir.acra.mongod.data.ReportUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.function.Function;
 
@@ -21,7 +19,6 @@ public class Report {
     @Indexed
     private String app;
     private JSONObject content;
-    private String deObfuscatedTrace;
 
     public Report() {
     }
@@ -30,7 +27,6 @@ public class Report {
         this.content = content;
         this.app = app;
         id = content == null ? null : getValueSafe("REPORT_ID", content::getString, "");
-        deObfuscatedTrace = null;
     }
 
     public JSONObject getContent() {
@@ -45,23 +41,12 @@ public class Report {
         return id;
     }
 
-    public String getStacktrace() {
-        return getValueSafe("STACK_TRACE", content::getString, "");
+    public String getApp() {
+        return app;
     }
 
-    public String getDeObfuscatedStacktrace(DataManager dataManager){
-        if (deObfuscatedTrace != null) {
-            return deObfuscatedTrace;
-        }
-        ProguardMapping mapping = dataManager.getMapping(app, getVersionCode());
-        if (mapping != null) {
-            try {
-                deObfuscatedTrace = ReportUtils.retrace(getStacktrace(), mapping);
-                return deObfuscatedTrace;
-            } catch (IOException ignored) {
-            }
-        }
-        return getStacktrace();
+    public String getStacktrace() {
+        return getValueSafe("STACK_TRACE", content::getString, "");
     }
 
     public int getVersionCode() {

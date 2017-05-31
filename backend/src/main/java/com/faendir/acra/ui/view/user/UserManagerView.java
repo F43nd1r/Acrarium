@@ -1,18 +1,20 @@
 package com.faendir.acra.ui.view.user;
 
 import com.faendir.acra.mongod.data.DataManager;
+import com.faendir.acra.mongod.model.App;
+import com.faendir.acra.mongod.model.Permission;
 import com.faendir.acra.mongod.model.User;
 import com.faendir.acra.mongod.user.UserManager;
 import com.faendir.acra.security.SecurityUtils;
+import com.faendir.acra.ui.view.base.MyCheckBox;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.NamedView;
 import com.faendir.acra.util.Style;
-import com.vaadin.data.Binder;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.UserError;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
@@ -22,7 +24,7 @@ import com.vaadin.ui.Window;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.stream.Collectors;
+import java.util.Arrays;
 
 /**
  * @author Lukas
@@ -54,17 +56,28 @@ public class UserManagerView extends NamedView {
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         userGrid = new MyGrid<>("Users", userManager.getUsers());
-        userGrid.getEditor().setEnabled(true).setBuffered(false);
         userGrid.setSelectionMode(Grid.SelectionMode.NONE);
         userGrid.addColumn(User::getUsername, "Username");
-        Binder<User> binder = userGrid.getEditor().getBinder();
-        userGrid.addColumn(user -> user.getRoles().contains(UserManager.ROLE_ADMIN) ? "Yes" : "No").setCaption("Admin")
-                .setEditorBinding(binder.forField(new CheckBox())
-                        .withValidator(bool -> bool || !binder.getBean().getUsername().equals(SecurityUtils.getUsername()), "Cannot revoke own admin privileges")
-                        .bind(user -> user.getRoles().contains(UserManager.ROLE_ADMIN), userManager::setAdmin));
-        userGrid.addColumn(this::getPermissionString, "App Permissions")
-                .setEditorBinding(userGrid.getEditor().getBinder().bind(new PermissionEditor(dataManager), User::getPermissions,
-                        ((user, permissions) -> permissions.forEach(p -> userManager.setPermission(user, p.getApp(), p.getLevel())))));
+        userGrid.addComponentColumn(user -> new MyCheckBox(user.getRoles().contains(UserManager.ROLE_ADMIN), e -> {
+            if (!e.getValue() && user.getUsername().equals(SecurityUtils.getUsername())) {
+                MyCheckBox checkBox = ((MyCheckBox) e.getComponent());
+                checkBox.setComponentError(new UserError("Cannot revoke own admin privileges"));
+                checkBox.setValue(true);
+            } else {
+                userManager.setAdmin(user, e.getValue());
+            }
+        })).setCaption("Admin");
+        for (App app : dataManager.getApps()) {
+            userGrid.addComponentColumn(user -> {
+                Permission permission = user.getPermissions().stream().filter(p -> p.getApp().equals(app.getId())).findAny().orElseThrow(IllegalStateException::new);
+                ComboBox<Permission.Level> levelComboBox = new ComboBox<>(null, Arrays.asList(Permission.Level.values()));
+                levelComboBox.setEmptySelectionAllowed(false);
+                levelComboBox.setValue(permission.getLevel());
+                levelComboBox.addValueChangeListener(e -> userManager.setPermission(user, permission.getApp(), e.getValue()));
+                return levelComboBox;
+            }).setCaption("Access Permission for " + app.getName());
+        }
+        userGrid.setRowHeight(42);
         Button newUser = new Button("New User", e -> newUser());
         VerticalLayout layout = new VerticalLayout(userGrid, newUser);
         layout.setExpandRatio(userGrid, 1);
@@ -74,12 +87,6 @@ public class UserManagerView extends NamedView {
         userGrid.setSizeFull();
         setSizeFull();
         Style.apply(this, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
-    }
-
-    private String getPermissionString(User user) {
-        return user.getPermissions().stream()
-                .map(permission -> dataManager.getApp(permission.getApp()).getName() + ": " + permission.getLevel().name())
-                .collect(Collectors.joining(", "));
     }
 
     private void newUser() {

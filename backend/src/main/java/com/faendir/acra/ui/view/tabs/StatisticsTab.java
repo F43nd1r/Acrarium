@@ -48,7 +48,7 @@ public class StatisticsTab extends HorizontalLayout {
         numberField.setValue(30);
         numberField.setMinValue(5);
         numberField.addValueChangeListener(e -> setTimeChart(e.getValue()));
-        reports = dataManager.getReports(app);
+        reports = dataManager.getReportsForApp(app);
         timeLayout = new VerticalLayout(numberField);
         Style.NO_PADDING.apply(timeLayout);
         addComponent(timeLayout);

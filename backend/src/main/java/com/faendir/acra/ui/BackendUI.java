@@ -14,6 +14,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.LoginForm;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,15 +55,14 @@ public class BackendUI extends UI {
         }
     }
 
-    private boolean login(String username, String password) {
+    private void login(String username, String password) {
         try {
             Authentication token = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username.toLowerCase(), password));
             VaadinService.reinitializeSession(VaadinService.getCurrentRequest());
             SecurityContextHolder.getContext().setAuthentication(token);
             showMain();
-            return true;
         } catch (AuthenticationException ex) {
-            return false;
+            Notification.show("Unknown username/password combination", Notification.Type.ERROR_MESSAGE);
         }
     }
 

@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,14 +36,14 @@ public class ReportService {
 
     @PreAuthorize("hasRole('REPORTER')")
     @RequestMapping(value = "/report", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void report(@RequestBody String content) throws IOException {
+    public void report(@RequestBody String content, Principal principal) throws IOException {
         JSONObject jsonObject = new JSONObject(content);
-        dataManager.newReport(jsonObject);
+        dataManager.newReport(principal.getName(), jsonObject);
     }
 
     @PreAuthorize("hasRole('REPORTER')")
     @RequestMapping(value = "/report", consumes = "multipart/mixed")
-    public ResponseEntity report(MultipartHttpServletRequest request) throws IOException, ServletException {
+    public ResponseEntity report(MultipartHttpServletRequest request, Principal principal) throws IOException, ServletException {
         MultiValueMap<String, MultipartFile> fileMap = request.getMultiFileMap();
         List<MultipartFile> files = fileMap.get(null);
         JSONObject jsonObject = null;
@@ -56,7 +57,7 @@ public class ReportService {
             }
         }
         if(jsonObject != null) {
-            dataManager.newReport(jsonObject, attachments);
+            dataManager.newReport(principal.getName(), jsonObject, attachments);
             return ResponseEntity.ok().build();
         }else {
             return ResponseEntity.badRequest().build();

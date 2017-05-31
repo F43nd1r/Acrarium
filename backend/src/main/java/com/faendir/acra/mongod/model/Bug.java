@@ -1,41 +1,58 @@
 package com.faendir.acra.mongod.model;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.io.Serializable;
 
 /**
  * @author Lukas
  * @since 13.05.2017
  */
+@Document
 public class Bug {
-    private List<Report> reports;
-    private String trace;
-    private int versionCode;
+    private Identification id;
+    @Indexed
+    private String app;
+    private boolean solved;
+    private String stacktrace;
 
-    public Bug(Report report){
-        reports = new ArrayList<>();
-        this.trace = report.getStacktrace();
-        this.versionCode = report.getVersionCode();
+    public Bug(){
+    }
+
+    public Bug(String app, String stacktrace, int versionCode){
+        this.id = new Identification(stacktrace.hashCode(), versionCode);
+        this.app = app;
+        this.stacktrace = stacktrace;
     }
 
     public boolean is(Report report){
-        return report.getStacktrace().equals(trace) && report.getVersionCode() == versionCode;
+        return report.getStacktrace().hashCode() == id.stacktraceHash && report.getVersionCode() == id.versionCode;
     }
 
-    public List<Report> getReports() {
-        return reports;
+    public boolean isSolved() {
+        return solved;
     }
 
-    public Date getLastDate(){
-        return reports.stream().map(Report::getDate).reduce((d1, d2) -> d1.after(d2) ? d1 : d2).orElse(new Date());
+    public void setSolved(boolean solved) {
+        this.solved = solved;
     }
 
-    public String getTrace() {
-        return trace;
+    public String getStacktrace() {
+        return stacktrace;
     }
 
     public int getVersionCode() {
-        return versionCode;
+        return id.versionCode;
+    }
+
+    public static class Identification implements Serializable {
+        private int stacktraceHash;
+        private int versionCode;
+
+        public Identification(int stacktraceHash, int versionCode) {
+            this.stacktraceHash = stacktraceHash;
+            this.versionCode = versionCode;
+        }
     }
 }

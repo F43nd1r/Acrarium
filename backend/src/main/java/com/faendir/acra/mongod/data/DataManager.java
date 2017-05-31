@@ -1,6 +1,7 @@
 package com.faendir.acra.mongod.data;
 
 import com.faendir.acra.mongod.model.App;
+import com.faendir.acra.mongod.model.Bug;
 import com.faendir.acra.mongod.model.ProguardMapping;
 import com.faendir.acra.mongod.model.Report;
 import com.mongodb.BasicDBObjectBuilder;
@@ -9,12 +10,9 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,16 +31,18 @@ import java.util.List;
 public class DataManager {
     private final MappingRepository mappingRepository;
     private final ReportRepository reportRepository;
+    private final AppRepository appRepository;
+    private final BugRepository bugRepository;
     private final List<ReportChangeListener> listeners;
     private final GridFsTemplate gridFsTemplate;
     private final Logger logger;
     private final SecureRandom secureRandom;
-    private final AppRepository appRepository;
 
     @Autowired
-    public DataManager(SecureRandom secureRandom, AppRepository appRepository, GridFsTemplate gridFsTemplate, MappingRepository mappingRepository, ReportRepository reportRepository) {
+    public DataManager(SecureRandom secureRandom, AppRepository appRepository, GridFsTemplate gridFsTemplate, MappingRepository mappingRepository, ReportRepository reportRepository, BugRepository bugRepository) {
         this.secureRandom = secureRandom;
         this.appRepository = appRepository;
+        this.bugRepository = bugRepository;
         logger = LoggerFactory.getLogger(DataManager.class);
         this.gridFsTemplate = gridFsTemplate;
         this.mappingRepository = mappingRepository;
@@ -50,45 +50,31 @@ public class DataManager {
         this.listeners = new ArrayList<>();
     }
 
-    public void createNewApp(String name){
+    public synchronized void createNewApp(String name) {
         byte[] bytes = new byte[12];
         secureRandom.nextBytes(bytes);
         appRepository.save(new App(name, Base64Utils.encodeToString(bytes)));
     }
 
-    public List<App> getApps(){
+    public List<App> getApps() {
         return appRepository.findAll();
     }
 
-    public App getApp(String id){
+    public App getApp(String id) {
         return appRepository.findOne(id);
     }
 
-    public void deleteApp(String id){
+    public synchronized void deleteApp(String id) {
         appRepository.delete(id);
-        getReports(id).forEach(this::remove);
+        getReportsForApp(id).forEach(this::deleteReport);
         mappingRepository.delete(getMappings(id));
-    }
-
-    public void saveAttachments(String report, List<MultipartFile> attachments) {
-        for (MultipartFile a : attachments) {
-            try {
-                gridFsTemplate.store(a.getInputStream(), a.getOriginalFilename(), a.getContentType(), new BasicDBObjectBuilder().add("reportId", report).get());
-            } catch (IOException e) {
-                logger.warn("Failed to load attachment", e);
-            }
-        }
     }
 
     public List<GridFSDBFile> getAttachments(String report) {
         return gridFsTemplate.find(new Query(Criteria.where("metadata.reportId").is(report)));
     }
 
-    public void removeAttachments(String report) {
-        gridFsTemplate.delete(new Query(Criteria.where("metadata.reportId").is(report)));
-    }
-
-    public void addMapping(String app, int version, String mappings) {
+    public synchronized void addMapping(String app, int version, String mappings) {
         mappingRepository.save(new ProguardMapping(app, version, mappings));
     }
 
@@ -97,31 +83,72 @@ public class DataManager {
     }
 
     public List<ProguardMapping> getMappings(String app) {
-        return mappingRepository.findAll(Example.of(new ProguardMapping(app, -1, null), ExampleMatcher.matchingAny()));
+        return mappingRepository.findByApp(app);
     }
 
-    public void newReport(JSONObject content) {
-        newReport(content, Collections.emptyList());
+    public void newReport(String app, JSONObject content) {
+        newReport(app, content, Collections.emptyList());
     }
 
-    public void newReport(JSONObject content, List<MultipartFile> attachments) {
-        Report report = reportRepository.save(new Report(content, SecurityContextHolder.getContext().getAuthentication().getName()));
-        saveAttachments(report.getId(), attachments);
+    public synchronized void newReport(String app, JSONObject content, List<MultipartFile> attachments) {
+        Report report = reportRepository.save(new Report(content, app));
+        for (MultipartFile a : attachments) {
+            try {
+                gridFsTemplate.store(a.getInputStream(), a.getOriginalFilename(), a.getContentType(), new BasicDBObjectBuilder().add("reportId", report.getId()).get());
+            } catch (IOException e) {
+                logger.warn("Failed to load attachment", e);
+            }
+        }
+        Bug bug = bugRepository.findOne(new Bug.Identification(report.getStacktrace().hashCode(), report.getVersionCode()));
+        if (bug == null) {
+            bugRepository.save(new Bug(app, report.getStacktrace(), report.getVersionCode()));
+        }
         listeners.forEach(ReportChangeListener::onChange);
     }
 
-    public List<Report> getReports(String app) {
-        return reportRepository.findAll(Example.of(new Report(null, app)));
+    public List<Report> getReportsForApp(String app) {
+        return reportRepository.findByApp(app);
     }
 
     public Report getReport(String id) {
         return reportRepository.findOne(id);
     }
 
-    public void remove(Report report){
+    public synchronized void deleteReport(Report report) {
         reportRepository.delete(report);
-        removeAttachments(report.getId());
+        gridFsTemplate.delete(new Query(Criteria.where("metadata.reportId").is(report.getId())));
+        if(reportRepository.countByBug(report.getStacktrace(), report.getVersionCode()) == 0){
+            bugRepository.delete(bugRepository.findOne(new Bug.Identification(report.getStacktrace().hashCode(), report.getVersionCode())));
+        }
         listeners.forEach(ReportChangeListener::onChange);
+    }
+
+    public List<Bug> getBugs(String app) {
+        return bugRepository.findByApp(app);
+    }
+
+    public List<Report> getReportsForBug(Bug bug) {
+        return reportRepository.findByBug(bug.getStacktrace(), bug.getVersionCode());
+    }
+
+    public int countReportsForBug(Bug bug){
+        return reportRepository.countByBug(bug.getStacktrace(), bug.getVersionCode());
+    }
+
+    public String retrace(Report report){
+        ProguardMapping mapping = getMapping(report.getApp(), report.getVersionCode());
+        if (mapping != null) {
+            try {
+                return ReportUtils.retrace(report.getStacktrace(), mapping);
+            } catch (IOException ignored) {
+            }
+        }
+        return report.getStacktrace();
+    }
+
+    public void setBugSolved(Bug bug, boolean solved){
+        bug.setSolved(solved);
+        bugRepository.save(bug);
     }
 
     public boolean addListener(ReportChangeListener reportChangeListener) {
@@ -135,4 +162,5 @@ public class DataManager {
     public interface ReportChangeListener {
         void onChange();
     }
+
 }
