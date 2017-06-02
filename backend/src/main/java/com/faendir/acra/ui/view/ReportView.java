@@ -9,7 +9,7 @@ import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.spring.annotation.UIScope;
+import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
@@ -30,8 +30,7 @@ import java.util.stream.Stream;
  * @author Lukas
  * @since 13.05.2017
  */
-@UIScope
-@org.springframework.stereotype.Component
+@SpringView(name = "report")
 public class ReportView extends NamedView {
 
     private final DataManager dataManager;
@@ -67,11 +66,6 @@ public class ReportView extends NamedView {
             return getLayoutForMap(map);
         }
         return new Label(value.toString(), ContentMode.PREFORMATTED);
-    }
-
-    @Override
-    public String getName() {
-        return "report";
     }
 
     @Override

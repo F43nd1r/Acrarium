@@ -9,7 +9,7 @@ import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.NamedView;
 import com.faendir.acra.util.Style;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.spring.annotation.UIScope;
+import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.TextField;
@@ -17,7 +17,6 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,8 +25,7 @@ import java.util.stream.Collectors;
  * @author Lukas
  * @since 23.03.2017
  */
-@UIScope
-@Component
+@SpringView(name = "")
 public class Overview extends NamedView {
 
     private final DataManager dataManager;
@@ -73,10 +71,5 @@ public class Overview extends NamedView {
         Style.apply(layout, Style.NO_PADDING, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
         setCompositionRoot(layout);
         grid.addItemClickListener(e -> getNavigationManager().navigateTo(AppView.class, e.getItem().getId()));
-    }
-
-    @Override
-    public String getName() {
-        return "";
     }
 }

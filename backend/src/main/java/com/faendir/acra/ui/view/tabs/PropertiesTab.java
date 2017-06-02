@@ -4,12 +4,17 @@ import com.faendir.acra.mongod.data.DataManager;
 import com.faendir.acra.mongod.model.App;
 import com.faendir.acra.ui.NavigationManager;
 import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import org.vaadin.risto.stepper.IntStepper;
+
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * @author Lukas
@@ -31,6 +36,17 @@ public class PropertiesTab extends VerticalLayout {
                         "httpMethod = HttpSender.Method.POST,<br>reportType = HttpSender.Type.JSON</code>",
                 location, app.getId(), app.getPassword()), ContentMode.HTML));
         addComponent(new Button("Delete App", e -> deleteApp()));
+        IntStepper age = new IntStepper();
+        age.setValue(30);
+        age.setMinValue(0);
+        HorizontalLayout purgeAge = new HorizontalLayout(new Button("Purge", e->{
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DAY_OF_MONTH, -age.getValue());
+            Date keepAfter = calendar.getTime();
+            dataManager.getReportsForApp(app.getId()).stream().filter(report -> report.getDate().before(keepAfter)).forEach(dataManager::deleteReport);
+        }), new Label("Reports older than "), age, new Label("Days"));
+        purgeAge.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
+        addComponent(purgeAge);
         setCaption("Properties");
         setSizeUndefined();
     }

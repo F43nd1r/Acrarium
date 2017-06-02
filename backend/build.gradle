@@ -5,9 +5,11 @@ buildscript {
     repositories {
         mavenCentral()
         maven { url "https://oss.sonatype.org/content/repositories/vaadin-snapshots/"}
+        maven { url "https://maven.eveoh.nl/content/repositories/releases" }
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("nl.eveoh:gradle-aspectj:1.6")
     }
 }
 
@@ -18,6 +20,10 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
+/*project.ext {
+    aspectjVersion = '1.8.4'
+}
+apply plugin: 'aspectj'*/
 
 group 'com.faendir'
 version = '0.1.0-SNAPSHOT'
@@ -30,6 +36,8 @@ dependencies {
     //core
     compile 'org.springframework.boot:spring-boot-starter-data-mongodb'
     compile 'org.springframework.boot:spring-boot-starter-security'
+    compile "org.springframework.boot:spring-boot-starter-cache"
+    compile "org.springframework:spring-aspects:4.3.8.RELEASE"
     compile 'com.vaadin:vaadin-spring-boot-starter'
     //addons
     compile 'org.vaadin.addons:popupbutton:3.0.0'
@@ -42,11 +50,8 @@ dependencies {
     compile 'org.ocpsoft.prettytime:prettytime:3.2.7.Final'
     compile 'net.sf.proguard:proguard-retrace:5.3.3'
     compile ('org.jfree:jfreechart:1.0.19') {
-        exclude group:'javax.servlet'
+        exclude group:'javax.servlet', module:'servlet-api'
     }
-    //local
-    compileOnly project(':annotation')
-    apt project(':annotationprocessor')
 }
 
 configurations {
@@ -70,6 +75,7 @@ bootRun {
     // Needed by Vaadin plugin (https://github.com/johndevs/gradle-vaadin-plugin/issues/325)
     classpath += configurations['vaadin-server']
     classpath += configurations['vaadin-client']
+    jvmArgs = ["-javaagent:org.springframework.instrument.jar"]
 
     dependsOn 'vaadinCompile', 'vaadinThemeCompile'
 }

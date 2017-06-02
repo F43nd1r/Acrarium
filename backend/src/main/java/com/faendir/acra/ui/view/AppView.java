@@ -12,21 +12,21 @@ import com.faendir.acra.ui.view.tabs.ReportTab;
 import com.faendir.acra.ui.view.tabs.StatisticsTab;
 import com.faendir.acra.util.Style;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.spring.annotation.UIScope;
+import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * @author Lukas
  * @since 13.05.2017
  */
-@UIScope
-@Component
+@SpringView(name = AppView.NAME)
 public class AppView extends NamedView {
+    static final String NAME = "app";
 
     private final DataManager dataManager;
+    private App app;
 
     @Autowired
     public AppView(DataManager dataManager) {
@@ -34,19 +34,9 @@ public class AppView extends NamedView {
     }
 
     @Override
-    public String getName() {
-        return "app";
-    }
-
-    @Override
-    public String fragmentSuffix() {
-        return "/" + BugTab.CAPTION;
-    }
-
-    @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         String[] parameters = event.getParameters().split("/");
-        App app = dataManager.getApp(parameters[0]);
+        app = dataManager.getApp(parameters[0]);
         TabSheet tabSheet = new TabSheet(new BugTab(app.getId(), getNavigationManager(), dataManager),
                 new ReportTab(app.getId(), getNavigationManager(), dataManager),
                 new StatisticsTab(app.getId(), dataManager), new DeObfuscationTab(app.getId(), dataManager));
@@ -68,6 +58,6 @@ public class AppView extends NamedView {
             }
         }
         tabSheet.addSelectedTabChangeListener(e -> getUI().getPage()
-                .setUriFragment(getName() + "/" + app.getId() + "/" + tabSheet.getSelectedTab().getCaption(), false));
+                .setUriFragment(NAME + "/" + app.getId() + "/" + tabSheet.getSelectedTab().getCaption(), false));
     }
 }

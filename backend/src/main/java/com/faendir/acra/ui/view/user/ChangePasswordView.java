@@ -7,21 +7,19 @@ import com.faendir.acra.ui.BackendUI;
 import com.faendir.acra.ui.view.base.NamedView;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.UserError;
-import com.vaadin.spring.annotation.UIScope;
+import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.VerticalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * @author Lukas
  * @since 21.05.2017
  */
-@UIScope
-@Component
+@SpringView(name = "password-editor")
 public class ChangePasswordView extends NamedView {
 
     private final UserManager userManager;
@@ -32,11 +30,6 @@ public class ChangePasswordView extends NamedView {
 
         this.userManager = userManager;
         this.backendUI = backendUI;
-    }
-
-    @Override
-    public String getName() {
-        return "password-editor";
     }
 
     @Override

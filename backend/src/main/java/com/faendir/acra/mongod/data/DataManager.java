@@ -10,6 +10,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
@@ -22,6 +24,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Lukas
@@ -29,6 +32,7 @@ import java.util.List;
  */
 @Component
 public class DataManager {
+    private static final String APP_REPORT_CACHE = "appReport";
     private final MappingRepository mappingRepository;
     private final ReportRepository reportRepository;
     private final AppRepository appRepository;
@@ -90,6 +94,7 @@ public class DataManager {
         newReport(app, content, Collections.emptyList());
     }
 
+    @CacheEvict(value = APP_REPORT_CACHE, key = "#a0")
     public synchronized void newReport(String app, JSONObject content, List<MultipartFile> attachments) {
         Report report = reportRepository.save(new Report(content, app));
         for (MultipartFile a : attachments) {
@@ -106,6 +111,7 @@ public class DataManager {
         listeners.forEach(ReportChangeListener::onChange);
     }
 
+    @Cacheable(APP_REPORT_CACHE)
     public List<Report> getReportsForApp(String app) {
         return reportRepository.findByApp(app);
     }
@@ -114,11 +120,12 @@ public class DataManager {
         return reportRepository.findOne(id);
     }
 
+    @CacheEvict(value = APP_REPORT_CACHE, key = "#a0.app")
     public synchronized void deleteReport(Report report) {
         reportRepository.delete(report);
         gridFsTemplate.delete(new Query(Criteria.where("metadata.reportId").is(report.getId())));
         if(reportRepository.countByBug(report.getStacktrace(), report.getVersionCode()) == 0){
-            bugRepository.delete(bugRepository.findOne(new Bug.Identification(report.getStacktrace().hashCode(), report.getVersionCode())));
+            Optional.ofNullable(bugRepository.findOne(new Bug.Identification(report.getStacktrace().hashCode(), report.getVersionCode()))).ifPresent(bugRepository::delete);
         }
         listeners.forEach(ReportChangeListener::onChange);
     }

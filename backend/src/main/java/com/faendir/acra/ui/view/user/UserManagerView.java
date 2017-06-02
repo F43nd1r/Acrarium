@@ -6,13 +6,14 @@ import com.faendir.acra.mongod.model.Permission;
 import com.faendir.acra.mongod.model.User;
 import com.faendir.acra.mongod.user.UserManager;
 import com.faendir.acra.security.SecurityUtils;
+import com.faendir.acra.ui.view.annotation.RequiresRole;
 import com.faendir.acra.ui.view.base.MyCheckBox;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.NamedView;
 import com.faendir.acra.util.Style;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.UserError;
-import com.vaadin.spring.annotation.UIScope;
+import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Grid;
@@ -22,7 +23,6 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
@@ -30,8 +30,8 @@ import java.util.Arrays;
  * @author Lukas
  * @since 20.05.2017
  */
-@UIScope
-@Component
+@SpringView(name = "user-manager")
+@RequiresRole(UserManager.ROLE_ADMIN)
 public class UserManagerView extends NamedView {
     private final UserManager userManager;
     private final DataManager dataManager;
@@ -44,29 +44,12 @@ public class UserManagerView extends NamedView {
     }
 
     @Override
-    public String getName() {
-        return "user-manager";
-    }
-
-    @Override
-    public String requiredRole() {
-        return UserManager.ROLE_ADMIN;
-    }
-
-    @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         userGrid = new MyGrid<>("Users", userManager.getUsers());
         userGrid.setSelectionMode(Grid.SelectionMode.NONE);
         userGrid.addColumn(User::getUsername, "Username");
-        userGrid.addComponentColumn(user -> new MyCheckBox(user.getRoles().contains(UserManager.ROLE_ADMIN), e -> {
-            if (!e.getValue() && user.getUsername().equals(SecurityUtils.getUsername())) {
-                MyCheckBox checkBox = ((MyCheckBox) e.getComponent());
-                checkBox.setComponentError(new UserError("Cannot revoke own admin privileges"));
-                checkBox.setValue(true);
-            } else {
-                userManager.setAdmin(user, e.getValue());
-            }
-        })).setCaption("Admin");
+        userGrid.addComponentColumn(user -> new MyCheckBox(user.getRoles().contains(UserManager.ROLE_ADMIN), !user.getUsername().equals(SecurityUtils.getUsername()),
+                e -> userManager.setAdmin(user, e.getValue()))).setCaption("Admin");
         for (App app : dataManager.getApps()) {
             userGrid.addComponentColumn(user -> {
                 Permission permission = user.getPermissions().stream().filter(p -> p.getApp().equals(app.getId())).findAny().orElseThrow(IllegalStateException::new);

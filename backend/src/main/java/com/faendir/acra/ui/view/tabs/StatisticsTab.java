@@ -58,7 +58,7 @@ public class StatisticsTab extends HorizontalLayout {
     }
 
     private void setTimeChart(int age) {
-        for (Component component : this) {
+        for (Component component : timeLayout) {
             if (TIME_CHART_ID.equals(component.getId())) {
                 timeLayout.removeComponent(component);
             }

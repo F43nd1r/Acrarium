@@ -1,13 +1,13 @@
 package com.faendir.acra.ui;
 
-import com.faendir.acra.gen.ViewDefinition;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.ui.view.ErrorView;
+import com.faendir.acra.ui.view.annotation.RequiresRole;
 import com.faendir.acra.ui.view.base.NamedView;
-import com.vaadin.navigator.Navigator;
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewProvider;
+import com.vaadin.spring.access.ViewAccessControl;
+import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
+import com.vaadin.spring.navigator.SpringNavigator;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,41 +24,25 @@ import java.util.Optional;
  */
 @UIScope
 @Component
-public class NavigationManager {
-    private final Navigator navigator;
+public class NavigationManager implements ViewAccessControl {
+    private final SpringNavigator navigator;
     private final ApplicationContext applicationContext;
-    private final List<Class<?>> views;
     private final List<String> backStack;
 
     @Autowired
-    public NavigationManager(UI ui, VerticalLayout mainView, ApplicationContext applicationContext) {
-        navigator = new Navigator(ui, mainView);
-        backStack = new ArrayList<>();
+    public NavigationManager(UI ui, VerticalLayout mainView, SpringNavigator springNavigator, ApplicationContext applicationContext) {
+        navigator = springNavigator;
         this.applicationContext = applicationContext;
-        navigator.addProvider(new ViewProvider() {
-            @Override
-            public String getViewName(String viewAndParameters) {
-                String name = viewAndParameters.split("/", 2)[0];
-                if (views.stream().map(applicationContext::getBean).map(NamedView.class::cast).filter(view -> SecurityUtils.hasRole(view.requiredRole())).map(NamedView::getName).anyMatch(name::equals))
-                    return name;
-                return null;
-            }
-
-            @Override
-            public View getView(String viewName) {
-                return views.stream().map(applicationContext::getBean).map(NamedView.class::cast).filter(view -> view.getName().equals(viewName)).findAny().orElse(null);
-            }
-        });
+        navigator.init(ui, mainView);
+        backStack = new ArrayList<>();
         navigator.setErrorView(ErrorView.class);
-        views = ViewDefinition.getViewClasses();
         String target = Optional.ofNullable(ui.getPage().getLocation().getFragment()).orElse("").replace("!", "");
         backStack.add(target);
         navigator.navigateTo(target);
     }
 
     public void navigateTo(Class<? extends NamedView> namedView, String contentId) {
-        NamedView view = applicationContext.getBean(namedView);
-        String target = view.getName() + (contentId == null ? "" : "/" + contentId) + view.fragmentSuffix();
+        String target = namedView.getAnnotation(SpringView.class).name() + (contentId == null ? "" : "/" + contentId);
         if (!backStack.get(0).equals(target)) {
             backStack.add(0, target);
             navigator.navigateTo(target);
@@ -75,5 +59,9 @@ public class NavigationManager {
         }
     }
 
-
+    @Override
+    public boolean isAccessGranted(UI ui, String beanName) {
+        RequiresRole requiresRole = applicationContext.findAnnotationOnBean(beanName, RequiresRole.class);
+        return requiresRole == null || SecurityUtils.hasRole(requiresRole.value());
+    }
 }
