@@ -16,7 +16,9 @@ public enum Style {
     MARGIN_TOP("margin-top"),
     MARGIN_RIGHT("margin-right"),
     MARGIN_BOTTOM("margin-bottom"),
-    BACKGROUND_LIGHT_GRAY("background-light-gray");
+    BACKGROUND_LIGHT_GRAY("background-light-gray"),
+    NO_BACKGROUND("no-background"),
+    NO_BORDER("no-border");
     final String name;
 
     Style(String name) {

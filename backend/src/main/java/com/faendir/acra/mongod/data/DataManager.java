@@ -33,6 +33,7 @@ import java.util.Optional;
 @Component
 public class DataManager {
     private static final String APP_REPORT_CACHE = "appReport";
+    private static final String APP_CACHE = "app";
     private final MappingRepository mappingRepository;
     private final ReportRepository reportRepository;
     private final AppRepository appRepository;
@@ -54,12 +55,14 @@ public class DataManager {
         this.listeners = new ArrayList<>();
     }
 
+    @CacheEvict(APP_CACHE)
     public synchronized void createNewApp(String name) {
         byte[] bytes = new byte[12];
         secureRandom.nextBytes(bytes);
         appRepository.save(new App(name, Base64Utils.encodeToString(bytes)));
     }
 
+    @Cacheable(APP_CACHE)
     public List<App> getApps() {
         return appRepository.findAll();
     }
@@ -68,6 +71,7 @@ public class DataManager {
         return appRepository.findOne(id);
     }
 
+    @CacheEvict(APP_CACHE)
     public synchronized void deleteApp(String id) {
         appRepository.delete(id);
         getReportsForApp(id).forEach(this::deleteReport);

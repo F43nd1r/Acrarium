@@ -1,4 +1,2 @@
 include 'backend'
-include 'annotation'
-include 'annotationprocessor'
 

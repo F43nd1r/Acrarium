@@ -5,31 +5,50 @@ buildscript {
     repositories {
         mavenCentral()
         maven { url "https://oss.sonatype.org/content/repositories/vaadin-snapshots/"}
-        maven { url "https://maven.eveoh.nl/content/repositories/releases" }
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath("nl.eveoh:gradle-aspectj:1.6")
     }
 }
 
 plugins {
     id "net.ltgt.apt" version "0.10"
-    id 'fi.jasoft.plugin.vaadin' version '1.1.10'
+    id 'fi.jasoft.plugin.vaadin' version '1.1.11'
 }
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
-/*project.ext {
-    aspectjVersion = '1.8.4'
-}
-apply plugin: 'aspectj'*/
 
 group 'com.faendir'
 version = '0.1.0-SNAPSHOT'
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 ext {
     debug = true
+    aspectjVersion = '1.8.10'
+}
+
+configurations {
+    ajc
+    aspects
+    compile {
+        extendsFrom aspects
+    }
+}
+
+compileJava {
+    doLast {
+        ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath: configurations.ajc.asPath)
+        ant.iajc(source: sourceCompatibility, target: targetCompatibility, destDir: sourceSets.main.output.classesDir.absolutePath, maxmem: "512m", fork: "true",
+                aspectPath: configurations.aspects.asPath, inpath: sourceSets.main.output.classesDir.absolutePath,
+                sourceRootCopyFilter: "**/.svn/*,**/*.java", classpath:configurations.compile.asPath) {
+            sourceroots {
+                sourceSets.main.java.srcDirs.each {
+                    pathelement(location: it.absolutePath)
+                }
+            }
+        }
+    }
 }
 
 dependencies {
@@ -37,11 +56,16 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-data-mongodb'
     compile 'org.springframework.boot:spring-boot-starter-security'
     compile "org.springframework.boot:spring-boot-starter-cache"
-    compile "org.springframework:spring-aspects:4.3.8.RELEASE"
     compile 'com.vaadin:vaadin-spring-boot-starter'
+    aspects "org.springframework:spring-aspects"
+    ajc "org.aspectj:aspectjtools:$aspectjVersion"
+    compile "org.aspectj:aspectjrt:$aspectjVersion"
+    compile "org.aspectj:aspectjweaver:$aspectjVersion"
     //addons
     compile 'org.vaadin.addons:popupbutton:3.0.0'
-    compile 'org.vaadin.addon:jfreechartwrapper:4.0.0'
+    compile ('org.vaadin.addon:jfreechartwrapper:4.0.0'){
+        exclude group:'javax.servlet', module:'servlet-api'
+    }
     compile 'org.vaadin.addons:stepper:2.4.0'
     //utility
     compile 'org.codeartisans:org.json:20161124'
@@ -69,15 +93,6 @@ dependencyManagement {
     imports {
         mavenBom "com.vaadin:vaadin-bom:8.1-SNAPSHOT"
     }
-}
-
-bootRun {
-    // Needed by Vaadin plugin (https://github.com/johndevs/gradle-vaadin-plugin/issues/325)
-    classpath += configurations['vaadin-server']
-    classpath += configurations['vaadin-client']
-    jvmArgs = ["-javaagent:org.springframework.instrument.jar"]
-
-    dependsOn 'vaadinCompile', 'vaadinThemeCompile'
 }
 
 project.convention.getPlugin(WarPluginConvention).webAppDirName = "src/main/resources"

@@ -5,12 +5,11 @@
 
   .v-gridlayout-slot {
     box-shadow: inset -1px -1px 0px 0px black;
-    .v-widget {
-      display: inline;
-      padding-bottom: 4px;
+    line-height: 1;
+    .v-label {
+      margin-left: 6px;
+      margin-right: 6px;
       pre {
-        padding-left: 6px;
-        padding-right: 6px;
         display: inline;
       }
     }
@@ -22,11 +21,11 @@
     box-shadow: inset -1px 0px 0px 0px black;
   }
 
-  .v-panel-content>.v-gridlayout>.v-gridlayout-slot:nth-child(odd) {
+  .v-panel-content > .v-gridlayout > .v-gridlayout-slot:nth-child(odd) {
     box-shadow: inset 0px -1px 0px 0px black;
   }
 
-  .v-panel-content>.v-gridlayout>.v-gridlayout-slot:last-child {
+  .v-panel-content > .v-gridlayout > .v-gridlayout-slot:last-child {
     box-shadow: none;
   }
 
@@ -72,5 +71,13 @@
 
   .background-light-gray {
     background: lightgray;
+  }
+
+  .no-background {
+    background: transparent !important;
+  }
+
+  .no-border {
+    border: none !important;
   }
 }

@@ -77,6 +77,7 @@ public class ReportView extends NamedView {
             new FileDownloader(new StreamResource(file::getInputStream, file.getFilename())).extend(button);
             return button;
         }).toArray(Component[]::new));
+        Style.apply(attachments, Style.MARGIN_BOTTOM, Style.MARGIN_TOP, Style.MARGIN_LEFT, Style.MARGIN_RIGHT);
         GridLayout summaryGrid = new GridLayout(2, 1);
         summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(report.getVersionName(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Email", ContentMode.PREFORMATTED), new Label(report.getUserEmail(), ContentMode.PREFORMATTED));
@@ -85,18 +86,19 @@ public class ReportView extends NamedView {
         summaryGrid.addComponents(new Label("Attachments", ContentMode.PREFORMATTED), attachments);
         summaryGrid.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
         summaryGrid.setSizeFull();
-        Style.apply(attachments, Style.MARGIN_BOTTOM, Style.MARGIN_TOP, Style.MARGIN_LEFT, Style.MARGIN_RIGHT);
         Panel summary = new Panel(summaryGrid);
         summary.setCaption("Summary");
-        Panel panel = new Panel(getLayoutForMap(report.getContent().toMap()));
-        panel.setCaption("Details");
-        Style.apply(this, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
-        VerticalLayout layout = new VerticalLayout(summary, panel);
-        layout.setExpandRatio(panel, 1);
+        Panel details = new Panel(getLayoutForMap(report.getContent().toMap()));
+        details.setCaption("Details");
+        VerticalLayout layout = new VerticalLayout(summary, details);
+        layout.setSizeUndefined();
+        layout.setExpandRatio(details, 1);
         Style.NO_PADDING.apply(layout);
         Panel root = new Panel(layout);
         root.setSizeFull();
+        Style.apply(root, Style.NO_BACKGROUND, Style.NO_BORDER);
         setCompositionRoot(root);
+        Style.apply(this, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
         setSizeFull();
     }
 }

@@ -9,11 +9,13 @@ import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.multipart.MultipartResolver;
 
 import java.security.SecureRandom;
 
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
+@ComponentScan
 @EnableCaching(mode = AdviceMode.ASPECTJ)
 public class BackendApplication extends SpringBootServletInitializer {
 	@Override
