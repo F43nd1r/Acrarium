@@ -39,7 +39,7 @@ public class PropertiesTab extends VerticalLayout {
         IntStepper age = new IntStepper();
         age.setValue(30);
         age.setMinValue(0);
-        HorizontalLayout purgeAge = new HorizontalLayout(new Button("Purge", e->{
+        HorizontalLayout purgeAge = new HorizontalLayout(new Button("Purge", e -> {
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DAY_OF_MONTH, -age.getValue());
             Date keepAfter = calendar.getTime();

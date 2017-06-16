@@ -67,7 +67,7 @@ public class UserManagerView extends NamedView {
         layout.setSizeFull();
         Style.NO_PADDING.apply(layout);
         setCompositionRoot(layout);
-        userGrid.setSizeFull();
+        userGrid.setWidth(100, Unit.PERCENTAGE);
         setSizeFull();
         Style.apply(this, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
     }

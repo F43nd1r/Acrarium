@@ -1,9 +1,8 @@
 package com.faendir.acra.ui.view.tabs;
 
 import com.faendir.acra.mongod.data.DataManager;
-import com.faendir.acra.mongod.model.Report;
+import com.faendir.acra.mongod.model.ReportInfo;
 import com.faendir.acra.util.Style;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.VerticalLayout;
 import org.jfree.chart.ChartFactory;
@@ -35,41 +34,43 @@ import java.util.Optional;
  * @author Lukas
  * @since 22.05.2017
  */
-public class StatisticsTab extends HorizontalLayout {
-    private static final String TIME_CHART_ID = "timeChart";
+public class StatisticsTab extends HorizontalLayout implements DataManager.Listener<ReportInfo> {
     private static final Color BACKGROUND_GRAY = new Color(0xfafafa); //vaadin gray
     private static final Color BLUE = new Color(0x197de1); //vaadin blue
-    private final List<Report> reports;
     private final VerticalLayout timeLayout;
+    private final IntStepper numberField;
+    private final String app;
+    private final DataManager dataManager;
+    private JFreeChartWrapper timeChart;
+    private JFreeChartWrapper versionChart;
 
     public StatisticsTab(String app, DataManager dataManager) {
+        this.app = app;
+        this.dataManager = dataManager;
         setCaption("Statistics");
-        IntStepper numberField = new IntStepper("Days");
+        numberField = new IntStepper("Days");
         numberField.setValue(30);
         numberField.setMinValue(5);
-        numberField.addValueChangeListener(e -> setTimeChart(e.getValue()));
-        reports = dataManager.getReportsForApp(app);
+        numberField.addValueChangeListener(e -> setTimeChart(e.getValue(), dataManager.getReportsForApp(app)));
         timeLayout = new VerticalLayout(numberField);
         Style.NO_PADDING.apply(timeLayout);
         addComponent(timeLayout);
-        setTimeChart(30);
-        setVersionChart();
+        List<ReportInfo> reportInfos = dataManager.getReportsForApp(app);
+        setTimeChart(30, reportInfos);
+        setVersionChart(reportInfos);
         setSizeFull();
+        addAttachListener(e -> dataManager.addListener(this, ReportInfo.class));
+        addDetachListener(e -> dataManager.removeListener(this));
     }
 
-    private void setTimeChart(int age) {
-        for (Component component : timeLayout) {
-            if (TIME_CHART_ID.equals(component.getId())) {
-                timeLayout.removeComponent(component);
-            }
-        }
+    private void setTimeChart(int age, List<ReportInfo> reports) {
         TimeSeries series = new TimeSeries("Date");
         series.setMaximumItemAge(age);
         series.add(new Day(new Date()), 0);
         Calendar start = Calendar.getInstance();
         start.add(Calendar.DAY_OF_MONTH, -age);
         series.add(new Day(start.getTime()), 0);
-        for (Report report : reports) {
+        for (ReportInfo report : reports) {
             Date date = report.getDate();
             Day day = new Day(date);
             int count = Optional.ofNullable(series.getDataItem(day)).map(TimeSeriesDataItem::getValue).map(Number::intValue).orElse(0);
@@ -90,13 +91,13 @@ public class StatisticsTab extends HorizontalLayout {
         barRenderer.setBarAlignmentFactor(0.5);
         barRenderer.setMargin(0.2);
         JFreeChartWrapper wrapper = new JFreeChartWrapper(chart);
-        wrapper.setId(TIME_CHART_ID);
-        timeLayout.addComponent(wrapper);
+        timeLayout.replaceComponent(timeChart, wrapper);
+        timeChart = wrapper;
     }
 
-    private void setVersionChart() {
+    private void setVersionChart(List<ReportInfo> reports) {
         DefaultPieDataset dataset = new DefaultPieDataset();
-        for (Report report : reports) {
+        for (ReportInfo report : reports) {
             String version = report.getAndroidVersion();
             int count;
             if (dataset.getKeys().contains(version)) {
@@ -119,7 +120,20 @@ public class StatisticsTab extends HorizontalLayout {
         plot.setLabelLinkStyle(PieLabelLinkStyle.QUAD_CURVE);
         plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0} ({2})"));
         //noinspection unchecked
-        ((List<String>)dataset.getKeys()).forEach(key->plot.setExplodePercent(key, 0.01));
-        addComponent(new VerticalLayout(new JFreeChartWrapper(chart)));
+        ((List<String>) dataset.getKeys()).forEach(key -> plot.setExplodePercent(key, 0.01));
+        JFreeChartWrapper wrapper = new JFreeChartWrapper(chart);
+        replaceComponent(versionChart, wrapper);
+        versionChart = wrapper;
+    }
+
+    @Override
+    public void onChange(ReportInfo reportInfo) {
+        if (reportInfo.getApp().equals(app)) {
+            getUI().access(() -> {
+                List<ReportInfo> reportInfos = dataManager.getReportsForApp(app);
+                setTimeChart(numberField.getValue(), reportInfos);
+                setVersionChart(reportInfos);
+            });
+        }
     }
 }

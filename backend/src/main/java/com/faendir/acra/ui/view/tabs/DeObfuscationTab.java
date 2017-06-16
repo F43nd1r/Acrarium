@@ -34,7 +34,7 @@ public class DeObfuscationTab extends VerticalLayout {
         this.app = app;
         this.dataManager = dataManager;
         grid.addColumn(ProguardMapping::getVersion, "Version");
-        grid.setSizeFull();
+        grid.setWidth(100, Unit.PERCENTAGE);
         addComponent(grid);
         setSizeFull();
         Style.NO_PADDING.apply(this);

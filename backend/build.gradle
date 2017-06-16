@@ -16,7 +16,6 @@ plugins {
     id 'fi.jasoft.plugin.vaadin' version '1.1.11'
 }
 apply plugin: 'java'
-apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 
 group 'com.faendir'
@@ -24,8 +23,12 @@ version = '0.1.0-SNAPSHOT'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 ext {
-    debug = true
     aspectjVersion = '1.8.10'
+}
+
+vaadin {
+    version '8.1-SNAPSHOT'
+    push true
 }
 
 configurations {
@@ -57,6 +60,7 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-security'
     compile "org.springframework.boot:spring-boot-starter-cache"
     compile 'com.vaadin:vaadin-spring-boot-starter'
+    compile 'com.vaadin:vaadin-push'
     aspects "org.springframework:spring-aspects"
     ajc "org.aspectj:aspectjtools:$aspectjVersion"
     compile "org.aspectj:aspectjrt:$aspectjVersion"
@@ -91,12 +95,13 @@ configurations {
 
 dependencyManagement {
     imports {
-        mavenBom "com.vaadin:vaadin-bom:8.1-SNAPSHOT"
+        mavenBom "com.vaadin:vaadin-bom:${vaadin.version}"
     }
 }
 
 project.convention.getPlugin(WarPluginConvention).webAppDirName = "src/main/resources"
 
-if (!ext.debug) {
-    apply from: 'releasepackaging.gradle'
+war {
+    archiveName = "acra.war"
+    version = version
 }

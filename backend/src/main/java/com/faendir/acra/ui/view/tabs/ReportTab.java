@@ -10,6 +10,6 @@ import com.faendir.acra.ui.view.base.ReportList;
  */
 public class ReportTab extends ReportList {
     public ReportTab(String app, NavigationManager navigationManager, DataManager dataManager) {
-        super(app, navigationManager, dataManager, () -> dataManager.getReportsForApp(app));
+        super(app, navigationManager, dataManager, () -> dataManager.getReportsForApp(app), reportInfo -> reportInfo.getApp().equals(app));
     }
 }

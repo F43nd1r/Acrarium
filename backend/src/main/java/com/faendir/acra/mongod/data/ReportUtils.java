@@ -1,7 +1,7 @@
 package com.faendir.acra.mongod.data;
 
 import com.faendir.acra.mongod.model.ProguardMapping;
-import com.faendir.acra.mongod.model.Report;
+import com.faendir.acra.mongod.model.ReportInfo;
 import org.apache.commons.io.FileUtils;
 import proguard.retrace.ReTrace;
 
@@ -42,8 +42,8 @@ public final class ReportUtils {
         return writer.toString();
     }
 
-    public static Date getLastReportDate(List<Report> reports) {
-        return reports.stream().map(Report::getDate).reduce((d1, d2) -> d1.after(d2) ? d1 : d2).orElse(new Date());
+    public static Date getLastReportDate(List<ReportInfo> reports) {
+        return reports.stream().map(ReportInfo::getDate).reduce((d1, d2) -> d1.after(d2) ? d1 : d2).orElse(new Date());
     }
 
 }

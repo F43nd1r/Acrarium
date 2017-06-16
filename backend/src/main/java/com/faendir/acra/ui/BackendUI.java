@@ -8,6 +8,7 @@ import com.faendir.acra.util.Style;
 import com.vaadin.annotations.Theme;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
+import com.vaadin.shared.communication.PushMode;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
@@ -61,12 +62,14 @@ public class BackendUI extends UI {
             VaadinService.reinitializeSession(VaadinService.getCurrentRequest());
             SecurityContextHolder.getContext().setAuthentication(token);
             showMain();
+            getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
         } catch (AuthenticationException ex) {
             Notification.show("Unknown username/password combination", Notification.Type.ERROR_MESSAGE);
         }
     }
 
     public void logout() {
+        getPushConfiguration().setPushMode(PushMode.DISABLED);
         SecurityContextHolder.clearContext();
         getPage().reload();
         getSession().close();

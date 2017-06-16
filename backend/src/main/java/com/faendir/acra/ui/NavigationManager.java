@@ -38,7 +38,7 @@ public class NavigationManager implements ViewAccessControl {
         navigator.setErrorView(ErrorView.class);
         String target = Optional.ofNullable(ui.getPage().getLocation().getFragment()).orElse("").replace("!", "");
         backStack.add(target);
-        navigator.navigateTo(target);
+        ui.access(() -> navigator.navigateTo(target));
     }
 
     public void navigateTo(Class<? extends NamedView> namedView, String contentId) {

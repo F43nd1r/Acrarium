@@ -18,6 +18,7 @@ public class MyGrid<T> extends Grid<T> {
 
     public MyGrid(String caption, Collection<T> items) {
         super(caption, items);
+        setHeightByRows(items.size());
     }
 
     public <R> Grid.Column<T, R> addColumn(ValueProvider<T, R> valueProvider, String caption) {
@@ -26,5 +27,16 @@ public class MyGrid<T> extends Grid<T> {
 
     public <R> Grid.Column<T, R> addColumn(ValueProvider<T, R> valueProvider, AbstractRenderer<? super T, ? super R> renderer, String caption) {
         return addColumn(valueProvider, renderer).setId(caption).setCaption(caption);
+    }
+
+    @Override
+    public void setItems(Collection<T> items) {
+        super.setItems(items);
+        setHeightByRows(items.size());
+    }
+
+    @Override
+    public void setHeightByRows(double rows) {
+        super.setHeightByRows(rows >= 1 ? rows : 1);
     }
 }

@@ -5,18 +5,23 @@ import org.springframework.data.mongodb.repository.CountQuery;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * @author Lukas
  * @since 22.03.2017
  */
 interface ReportRepository extends MongoRepository<Report, String> {
-    List<Report> findByApp(String app);
+    @Query("{app:?0}")
+    Stream<Report> findByApp(String app);
+
+    long countByApp(String app);
 
     @Query("{content.map.STACK_TRACE:?0,content.map.APP_VERSION_CODE:?1}")
-    List<Report> findByBug(String stacktrace, int versionCode);
+    Stream<Report> findByBug(String stacktrace, int versionCode);
 
     @CountQuery("{content.map.STACK_TRACE:?0,content.map.APP_VERSION_CODE:?1}")
-    int countByBug(String stacktrace, int versionCode);
+    long countByBug(String stacktrace, int versionCode);
+
+
 }

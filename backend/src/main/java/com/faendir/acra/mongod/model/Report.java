@@ -14,7 +14,7 @@ import java.util.function.Function;
  * @since 22.03.2017
  */
 @Document
-public class Report {
+public class Report implements AppScoped {
     private String id;
     @Indexed
     private String app;
@@ -41,6 +41,7 @@ public class Report {
         return id;
     }
 
+    @Override
     public String getApp() {
         return app;
     }
@@ -53,23 +54,23 @@ public class Report {
         return getValueSafe("APP_VERSION_CODE", content::getInt, -1);
     }
 
-    public String getVersionName(){
+    public String getVersionName() {
         return getValueSafe("APP_VERSION_NAME", content::getString, "");
     }
 
-    public String getUserEmail(){
+    public String getUserEmail() {
         return getValueSafe("USER_EMAIL", content::getString, "");
     }
 
-    public String getUserComment(){
+    public String getUserComment() {
         return getValueSafe("USER_COMMENT", content::getString, "");
     }
 
-    public String getAndroidVersion(){
+    public String getAndroidVersion() {
         return getValueSafe("ANDROID_VERSION", content::getString, "");
     }
 
-    public String getPhoneModel(){
+    public String getPhoneModel() {
         return getValueSafe("PHONE_MODEL", content::getString, "");
     }
 

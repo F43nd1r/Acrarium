@@ -59,10 +59,11 @@ public class Overview extends NamedView {
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         grid = new MyGrid<>("Apps", getApps());
-        grid.setSizeFull();
+        grid.setWidth(100, Unit.PERCENTAGE);
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.addColumn(App::getName, "Name");
-        grid.addColumn(app -> dataManager.getReportsForApp(app.getId()).size(), "Reports");
+        grid.addColumn(app -> dataManager.reportCountForApp(app.getId()), "Reports");
+        grid.addItemClickListener(e -> getNavigationManager().navigateTo(AppView.class, e.getItem().getId()));
         VerticalLayout layout = new VerticalLayout(grid);
         if(SecurityUtils.hasRole(UserManager.ROLE_ADMIN)){
             Button add = new Button("New App", e -> addApp());
@@ -70,6 +71,5 @@ public class Overview extends NamedView {
         }
         Style.apply(layout, Style.NO_PADDING, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
         setCompositionRoot(layout);
-        grid.addItemClickListener(e -> getNavigationManager().navigateTo(AppView.class, e.getItem().getId()));
     }
 }
