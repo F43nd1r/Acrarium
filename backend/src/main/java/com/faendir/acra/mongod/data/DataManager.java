@@ -101,16 +101,15 @@ public class DataManager {
     }
 
     public List<ProguardMapping> getMappings(String app) {
-        return mappingRepository.findByApp(app);
+        return mappingRepository.findAllByIdApp(app);
     }
 
     public void newReport(String app, JSONObject content) {
         newReport(app, content, Collections.emptyList());
     }
 
-    @SuppressWarnings("UnusedReturnValue")
     @CacheEvict(value = APP_REPORT_CACHE, key = "#a0")
-    public synchronized ReportInfo newReport(String app, JSONObject content, List<MultipartFile> attachments) {
+    public synchronized void newReport(String app, JSONObject content, List<MultipartFile> attachments) {
         Report report = reportRepository.save(new Report(content, app));
         for (MultipartFile a : attachments) {
             try {
@@ -124,7 +123,6 @@ public class DataManager {
         Bug bug = getBugs(app).stream().filter(b -> matches(b, info)).findAny().orElseGet(() -> new Bug(info.getApp(), info.getStacktrace(), info.getVersionCode()));
         bug.getReportIds().add(info.getId());
         saveBug(bug);
-        return info;
     }
 
     @Cacheable(APP_REPORT_CACHE)
