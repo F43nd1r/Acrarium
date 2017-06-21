@@ -1,5 +1,6 @@
 package com.faendir.acra.mongod.model;
 
+import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.security.core.GrantedAuthority;
 
 /**
@@ -18,6 +19,7 @@ public class Permission implements GrantedAuthority {
     private Level level;
     private String app;
 
+    @PersistenceConstructor
     public Permission() {
     }
 

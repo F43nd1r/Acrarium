@@ -1,6 +1,7 @@
 package com.faendir.acra.mongod.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,6 +26,7 @@ public class User implements UserDetails {
     private Set<String> roles;
     private Set<Permission> permissions;
 
+    @PersistenceConstructor
     public User() {
         permissions = new HashSet<>();
         roles = new HashSet<>();

@@ -24,6 +24,7 @@ public class PropertiesTab extends VerticalLayout {
     private final App app;
     private final DataManager dataManager;
     private final NavigationManager navigationManager;
+    private final IntStepper age;
 
     public PropertiesTab(App app, DataManager dataManager, NavigationManager navigationManager) {
         this.app = app;
@@ -36,19 +37,26 @@ public class PropertiesTab extends VerticalLayout {
                         "httpMethod = HttpSender.Method.POST,<br>reportType = HttpSender.Type.JSON</code>",
                 location, app.getId(), app.getPassword()), ContentMode.HTML));
         addComponent(new Button("Delete App", e -> deleteApp()));
-        IntStepper age = new IntStepper();
+        age = new IntStepper();
         age.setValue(30);
         age.setMinValue(0);
-        HorizontalLayout purgeAge = new HorizontalLayout(new Button("Purge", e -> {
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.DAY_OF_MONTH, -age.getValue());
-            Date keepAfter = calendar.getTime();
-            dataManager.getReportsForApp(app.getId()).stream().filter(report -> report.getDate().before(keepAfter)).forEach(dataManager::deleteReport);
-        }), new Label("Reports older than "), age, new Label("Days"));
+        HorizontalLayout purgeAge = new HorizontalLayout(new Button("Purge", e -> purge()), new Label("Reports older than "), age, new Label("Days"));
         purgeAge.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
         addComponent(purgeAge);
+        addComponent(new Button("Rebuild bugs", e -> rebuildBugs()));
         setCaption("Properties");
         setSizeUndefined();
+    }
+
+    private void rebuildBugs(){
+        dataManager.rebuildBugs(app.getId());
+    }
+
+    private void purge() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, -age.getValue());
+        Date keepAfter = calendar.getTime();
+        dataManager.getReportsForApp(app.getId()).stream().filter(report -> report.getDate().before(keepAfter)).forEach(dataManager::deleteReport);
     }
 
     private void deleteApp() {

@@ -3,6 +3,7 @@ package com.faendir.acra.mongod.model;
 import com.faendir.acra.mongod.data.ReportUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -20,6 +21,7 @@ public class Report implements AppScoped {
     private String app;
     private JSONObject content;
 
+    @PersistenceConstructor
     public Report() {
     }
 

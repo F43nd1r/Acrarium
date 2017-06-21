@@ -1,31 +1,14 @@
-buildscript {
-    ext {
-        springBootVersion = '1.5.3.RELEASE'
-    }
-    repositories {
-        mavenCentral()
-        maven { url "https://oss.sonatype.org/content/repositories/vaadin-snapshots/"}
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-    }
-}
-
 plugins {
-    id "net.ltgt.apt" version "0.10"
+    id 'java'
+    id 'net.ltgt.apt' version '0.10'
     id 'fi.jasoft.plugin.vaadin' version '1.1.11'
+    id 'org.springframework.boot' version '1.5.4.RELEASE'
 }
-apply plugin: 'java'
-apply plugin: 'org.springframework.boot'
 
 group 'com.faendir'
 version = '0.1.0-SNAPSHOT'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-ext {
-    aspectjVersion = '1.8.10'
-}
-
 vaadin {
     version '8.1-SNAPSHOT'
     push true
@@ -39,47 +22,47 @@ configurations {
     }
 }
 
-compileJava {
-    doLast {
-        ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath: configurations.ajc.asPath)
-        ant.iajc(source: sourceCompatibility, target: targetCompatibility, destDir: sourceSets.main.output.classesDir.absolutePath, maxmem: "512m", fork: "true",
-                aspectPath: configurations.aspects.asPath, inpath: sourceSets.main.output.classesDir.absolutePath,
-                sourceRootCopyFilter: "**/.svn/*,**/*.java", classpath:configurations.compile.asPath) {
-            sourceroots {
-                sourceSets.main.java.srcDirs.each {
-                    pathelement(location: it.absolutePath)
-                }
-            }
+dependencyManagement {
+    dependencies {
+        dependencySet(group: 'org.aspectj', version: '1.8.10') {
+            entry 'aspectjtools'
+            entry 'aspectjrt'
+            entry 'aspectjweaver'
         }
+        dependency 'com.vaadin.external.atmosphere:atmosphere-runtime:2.4.11.vaadin1'
+    }
+    imports {
+        mavenBom "com.vaadin:vaadin-bom:${vaadin.version}"
     }
 }
 
 dependencies {
-    //core
+    //spring
     compile 'org.springframework.boot:spring-boot-starter-data-mongodb'
     compile 'org.springframework.boot:spring-boot-starter-security'
-    compile "org.springframework.boot:spring-boot-starter-cache"
+    compile 'org.springframework.boot:spring-boot-starter-cache'
+    //vaadin
     compile 'com.vaadin:vaadin-spring-boot-starter'
     compile 'com.vaadin:vaadin-push'
-    aspects "org.springframework:spring-aspects"
-    ajc "org.aspectj:aspectjtools:$aspectjVersion"
-    compile "org.aspectj:aspectjrt:$aspectjVersion"
-    compile "org.aspectj:aspectjweaver:$aspectjVersion"
-    //addons
     compile 'org.vaadin.addons:popupbutton:3.0.0'
-    compile ('org.vaadin.addon:jfreechartwrapper:4.0.0'){
+    compile('org.vaadin.addon:jfreechartwrapper:4.0.0') {
+        exclude group: 'javax.servlet', module: 'servlet-api'
+    }
+    compile ('org.jfree:jfreechart:1.0.19') {
         exclude group:'javax.servlet', module:'servlet-api'
     }
     compile 'org.vaadin.addons:stepper:2.4.0'
+    //weaving
+    aspects 'org.springframework:spring-aspects'
+    ajc 'org.aspectj:aspectjtools'
+    compile 'org.aspectj:aspectjrt'
+    compile 'org.aspectj:aspectjweaver'
     //utility
     compile 'org.codeartisans:org.json:20161124'
     compile 'org.apache.commons:commons-collections4:4.1'
     compile 'commons-fileupload:commons-fileupload:1.3.2'
     compile 'org.ocpsoft.prettytime:prettytime:3.2.7.Final'
     compile 'net.sf.proguard:proguard-retrace:5.3.3'
-    compile ('org.jfree:jfreechart:1.0.19') {
-        exclude group:'javax.servlet', module:'servlet-api'
-    }
 }
 
 configurations {
@@ -88,20 +71,28 @@ configurations {
             dependencySubstitution {
                 substitute module('javax.validation:validation-api') with module('javax.validation:validation-api:1.0.0.GA')
             }
-            //force 'javax.validation:validation-api:1.0.0.GA'
         }
     }
 }
 
-dependencyManagement {
-    imports {
-        mavenBom "com.vaadin:vaadin-bom:${vaadin.version}"
-    }
-}
-
-project.convention.getPlugin(WarPluginConvention).webAppDirName = "src/main/resources"
+project.convention.getPlugin(WarPluginConvention).webAppDirName = 'src/main/resources'
 
 war {
-    archiveName = "acra.war"
+    archiveName = 'acra.war'
     version = version
+}
+
+compileJava {
+    doLast {
+        ant.taskdef(resource: 'org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties', classpath: configurations.ajc.asPath)
+        ant.iajc(source: sourceCompatibility, target: targetCompatibility, destDir: sourceSets.main.output.classesDir.absolutePath, maxmem: '512m', fork: 'true',
+                aspectPath: configurations.aspects.asPath, inpath: sourceSets.main.output.classesDir.absolutePath,
+                sourceRootCopyFilter: '**/.svn/*,**/*.java', classpath: configurations.compile.asPath) {
+            sourceroots {
+                sourceSets.main.java.srcDirs.each {
+                    pathelement(location: it.absolutePath)
+                }
+            }
+        }
+    }
 }

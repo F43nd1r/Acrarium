@@ -66,7 +66,8 @@ public class BugTab extends VerticalLayout implements DataManager.Listener<AppSc
         Optional<Bug> selection = e.getFirstSelectedItem();
         ReportList reportList = null;
         if (selection.isPresent()) {
-            reportList = new ReportList(app, navigationManager, dataManager, () -> dataManager.getReportsForBug(selection.get()), selection.get()::is);
+            reportList = new ReportList(app, navigationManager, dataManager, () -> dataManager.getReportsForBug(selection.get()),
+                    reportInfo -> dataManager.matches(selection.get(), reportInfo));
             replaceComponent(this.reportList, reportList);
         } else {
             removeComponent(this.reportList);

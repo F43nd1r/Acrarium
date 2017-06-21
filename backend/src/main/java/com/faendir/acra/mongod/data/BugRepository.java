@@ -9,6 +9,7 @@ import java.util.List;
  * @author Lukas
  * @since 31.05.2017
  */
-interface BugRepository extends MongoRepository<Bug, Bug.Identification> {
+interface BugRepository extends MongoRepository<Bug, String> {
     List<Bug> findByApp(String app);
+    List<Bug> findByReportIdsContains(String reportId);
 }

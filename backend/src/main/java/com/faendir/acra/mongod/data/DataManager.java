@@ -2,6 +2,7 @@ package com.faendir.acra.mongod.data;
 
 import com.faendir.acra.mongod.model.App;
 import com.faendir.acra.mongod.model.Bug;
+import com.faendir.acra.mongod.model.ParsedException;
 import com.faendir.acra.mongod.model.ProguardMapping;
 import com.faendir.acra.mongod.model.Report;
 import com.faendir.acra.mongod.model.ReportInfo;
@@ -26,7 +27,6 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -109,10 +109,8 @@ public class DataManager {
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    @Caching(evict = {
-            @CacheEvict(value = APP_REPORT_CACHE, key = "#a0"),
-            @CacheEvict(value = BUG_REPORT_CACHE, key = "#result.stacktrace.hashCode() + \" \" + #result.versionCode")})
-    public synchronized Report newReport(String app, JSONObject content, List<MultipartFile> attachments) {
+    @CacheEvict(value = APP_REPORT_CACHE, key = "#a0")
+    public synchronized ReportInfo newReport(String app, JSONObject content, List<MultipartFile> attachments) {
         Report report = reportRepository.save(new Report(content, app));
         for (MultipartFile a : attachments) {
             try {
@@ -121,17 +119,17 @@ public class DataManager {
                 logger.warn("Failed to load attachment", e);
             }
         }
-        Bug bug = bugRepository.findOne(new Bug.Identification(report.getStacktrace().hashCode(), report.getVersionCode()));
-        if (bug == null) {
-            addBug(new Bug(app, report.getStacktrace(), report.getVersionCode()));
-        }
-        notifyListeners(new ReportInfo(report));
-        return report;
+        ReportInfo info = new ReportInfo(report);
+        notifyListeners(info);
+        Bug bug = getBugs(app).stream().filter(b -> matches(b, info)).findAny().orElseGet(() -> new Bug(info.getApp(), info.getStacktrace(), info.getVersionCode()));
+        bug.getReportIds().add(info.getId());
+        saveBug(bug);
+        return info;
     }
 
     @Cacheable(APP_REPORT_CACHE)
     public List<ReportInfo> getReportsForApp(String app) {
-        try (Stream<Report> stream = reportRepository.findByApp(app)) {
+        try (Stream<Report> stream = reportRepository.streamAllByApp(app)) {
             return stream.map(ReportInfo::new).collect(Collectors.toList());
         }
     }
@@ -144,15 +142,18 @@ public class DataManager {
         return reportRepository.findOne(id);
     }
 
-    @Caching(evict = {
-            @CacheEvict(value = APP_REPORT_CACHE, key = "#a0.app"),
-            @CacheEvict(value = BUG_REPORT_CACHE, key = "#a0.stacktrace.hashCode() + \" \" + #a0.versionCode")})
+    @CacheEvict(value = APP_REPORT_CACHE, key = "#a0.app")
     public synchronized void deleteReport(ReportInfo report) {
         reportRepository.delete(report.getId());
         gridFsTemplate.delete(new Query(Criteria.where("metadata.reportId").is(report.getId())));
-        if (reportRepository.countByBug(report.getStacktrace(), report.getVersionCode()) == 0) {
-            Optional.ofNullable(bugRepository.findOne(new Bug.Identification(report.getStacktrace().hashCode(), report.getVersionCode()))).ifPresent(this::deleteBug);
-        }
+        bugRepository.findByReportIdsContains(report.getId()).forEach(bug -> {
+            bug.getReportIds().remove(report.getId());
+            if (bug.getReportIds().isEmpty()) {
+                deleteBug(bug);
+            } else {
+                saveBug(bug);
+            }
+        });
         notifyListeners(report);
     }
 
@@ -164,10 +165,14 @@ public class DataManager {
     }
 
     @SuppressWarnings("WeakerAccess")
-    @CacheEvict(value = APP_BUG_CACHE, key = "#a0.app")
-    public void addBug(Bug bug) {
-        bugRepository.save(bug);
+    @Caching(evict = {
+            @CacheEvict(value = APP_BUG_CACHE, key = "#a0.app"),
+            @CacheEvict(value = BUG_REPORT_CACHE, key = "#a0.id")
+    })
+    public Bug saveBug(Bug bug) {
+        Bug b = bugRepository.save(bug);
         notifyListeners(bug);
+        return b;
     }
 
     @Cacheable(value = APP_BUG_CACHE)
@@ -175,15 +180,30 @@ public class DataManager {
         return bugRepository.findByApp(app);
     }
 
-    @Cacheable(value = BUG_REPORT_CACHE, key = "#a0.stacktrace.hashCode() + \" \" + #a0.versionCode")
+    @Cacheable(value = BUG_REPORT_CACHE, key = "#a0.id")
     public List<ReportInfo> getReportsForBug(Bug bug) {
-        try (Stream<Report> stream = reportRepository.findByBug(bug.getStacktrace(), bug.getVersionCode())) {
+        try (Stream<Report> stream = reportRepository.streamAllByIdIn(bug.getReportIds())) {
             return stream.map(ReportInfo::new).collect(Collectors.toList());
         }
     }
 
     public long reportCountForBug(Bug bug) {
-        return reportRepository.countByBug(bug.getStacktrace(), bug.getVersionCode());
+        return bug.getReportIds().size();
+    }
+
+    public void rebuildBugs(String app) {
+        getBugs(app).forEach(this::deleteBug);
+        List<Bug> bugs = new ArrayList<>();
+        getReportsForApp(app).forEach(reportInfo -> bugs.stream().filter(bug -> matches(bug, reportInfo)).findAny().orElseGet(() -> {
+            Bug bug = new Bug(reportInfo.getApp(), reportInfo.getStacktrace(), reportInfo.getVersionCode());
+            bugs.add(bug);
+            return bug;
+        }).getReportIds().add(reportInfo.getId()));
+        bugs.forEach(this::saveBug);
+    }
+
+    public boolean matches(Bug bug, ReportInfo info) {
+        return bug.getVersionCode() == info.getVersionCode() && new ParsedException(bug.getStacktrace()).equals(new ParsedException(info.getStacktrace()));
     }
 
     public String retrace(Report report) {

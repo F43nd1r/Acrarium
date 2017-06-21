@@ -1,5 +1,6 @@
 package com.faendir.acra.mongod.model;
 
+import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
@@ -12,6 +13,7 @@ public class App {
     private String name;
     private String password;
 
+    @PersistenceConstructor
     public App() {
     }
 

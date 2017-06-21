@@ -1,33 +1,36 @@
 package com.faendir.acra.mongod.model;
 
+import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Lukas
  * @since 13.05.2017
  */
 @Document
-public class Bug implements AppScoped{
-    private Identification id;
+public class Bug implements AppScoped {
+    private String id;
     @Indexed
     private String app;
     private boolean solved;
     private String stacktrace;
+    private int versionCode;
+    private List<String> reportIds;
 
-    public Bug(){
+    @PersistenceConstructor
+    public Bug() {
+        reportIds = new ArrayList<>();
     }
 
     public Bug(String app, String stacktrace, int versionCode){
-        this.id = new Identification(stacktrace.hashCode(), versionCode);
+        this();
         this.app = app;
         this.stacktrace = stacktrace;
-    }
-
-    public boolean is(ReportInfo report){
-        return report.getStacktrace().hashCode() == id.stacktraceHash && report.getVersionCode() == id.versionCode;
+        this.versionCode = versionCode;
     }
 
     public boolean isSolved() {
@@ -43,7 +46,7 @@ public class Bug implements AppScoped{
     }
 
     public int getVersionCode() {
-        return id.versionCode;
+        return versionCode;
     }
 
     @Override
@@ -51,30 +54,11 @@ public class Bug implements AppScoped{
         return app;
     }
 
-    public static class Identification implements Serializable {
-        private int stacktraceHash;
-        private int versionCode;
+    public List<String> getReportIds() {
+        return reportIds;
+    }
 
-        public Identification(int stacktraceHash, int versionCode) {
-            this.stacktraceHash = stacktraceHash;
-            this.versionCode = versionCode;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            Identification that = (Identification) o;
-
-            return stacktraceHash == that.stacktraceHash && versionCode == that.versionCode;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = stacktraceHash;
-            result = 31 * result + versionCode;
-            return result;
-        }
+    public String getId() {
+        return id;
     }
 }

@@ -11,9 +11,11 @@ import com.vaadin.spring.navigator.SpringNavigator;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +26,8 @@ import java.util.Optional;
  */
 @UIScope
 @Component
-public class NavigationManager implements ViewAccessControl {
+@Configurable
+public class NavigationManager implements ViewAccessControl, Serializable {
     private final SpringNavigator navigator;
     private final ApplicationContext applicationContext;
     private final List<String> backStack;
