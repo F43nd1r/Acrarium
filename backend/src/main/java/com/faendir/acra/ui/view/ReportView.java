@@ -1,7 +1,9 @@
 package com.faendir.acra.ui.view;
 
 import com.faendir.acra.mongod.data.DataManager;
+import com.faendir.acra.mongod.model.Permission;
 import com.faendir.acra.mongod.model.Report;
+import com.faendir.acra.ui.view.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.view.base.NamedView;
 import com.faendir.acra.util.Style;
 import com.mongodb.gridfs.GridFSDBFile;
@@ -24,6 +26,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -31,6 +34,7 @@ import java.util.stream.Stream;
  * @since 13.05.2017
  */
 @SpringView(name = "report")
+@RequiresAppPermission(Permission.Level.VIEW)
 public class ReportView extends NamedView {
 
     private final DataManager dataManager;
@@ -100,5 +104,15 @@ public class ReportView extends NamedView {
         setCompositionRoot(root);
         Style.apply(this, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
         setSizeFull();
+    }
+
+    @Override
+    public String getApp(String fragment) {
+        return Optional.ofNullable(dataManager.getReport(fragment)).map(Report::getApp).orElse(null);
+    }
+
+    @Override
+    public boolean validate(String fragment) {
+        return dataManager.getReport(fragment) != null;
     }
 }

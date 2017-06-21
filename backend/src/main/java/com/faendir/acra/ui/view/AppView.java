@@ -4,6 +4,7 @@ import com.faendir.acra.mongod.data.DataManager;
 import com.faendir.acra.mongod.model.App;
 import com.faendir.acra.mongod.model.Permission;
 import com.faendir.acra.security.SecurityUtils;
+import com.faendir.acra.ui.view.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.view.base.NamedView;
 import com.faendir.acra.ui.view.tabs.BugTab;
 import com.faendir.acra.ui.view.tabs.DeObfuscationTab;
@@ -17,13 +18,19 @@ import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * @author Lukas
  * @since 13.05.2017
  */
 @SpringView(name = AppView.NAME)
+@RequiresAppPermission(Permission.Level.VIEW)
 public class AppView extends NamedView {
     static final String NAME = "app";
+    private static final List<String> CAPTIONS = Arrays.asList(BugTab.CAPTION, ReportTab.CAPTION, StatisticsTab.CAPTION,
+            DeObfuscationTab.CAPTION);
 
     private final DataManager dataManager;
     private App app;
@@ -40,7 +47,7 @@ public class AppView extends NamedView {
         TabSheet tabSheet = new TabSheet(new BugTab(app.getId(), getNavigationManager(), dataManager),
                 new ReportTab(app.getId(), getNavigationManager(), dataManager),
                 new StatisticsTab(app.getId(), dataManager), new DeObfuscationTab(app.getId(), dataManager));
-        if(SecurityUtils.hasPermission(app.getId(), Permission.Level.ADMIN)){
+        if (SecurityUtils.hasPermission(app.getId(), Permission.Level.ADMIN)) {
             tabSheet.addComponent(new PropertiesTab(app, dataManager, getNavigationManager()));
         }
         tabSheet.setSizeFull();
@@ -57,7 +64,19 @@ public class AppView extends NamedView {
                 }
             }
         }
-        tabSheet.addSelectedTabChangeListener(e -> getUI().getPage()
-                .setUriFragment(NAME + "/" + app.getId() + "/" + tabSheet.getSelectedTab().getCaption(), false));
+        tabSheet.addSelectedTabChangeListener(e -> getNavigationManager().updatePageParameters(app.getId() + "/" + e.getTabSheet().getSelectedTab().getCaption()));
+    }
+
+    @Override
+    public String getApp(String fragment) {
+        return fragment.split("/")[0];
+    }
+
+    @Override
+    public boolean validate(String fragment) {
+        if (fragment == null) return false;
+        String[] split = fragment.split("/");
+        return split.length >= 1 && split.length <= 2 && dataManager.getApp(split[0]) != null
+                && (split.length != 2 || CAPTIONS.contains(split[1]) || PropertiesTab.CAPTION.equals(split[1]) && SecurityUtils.hasPermission(split[0], Permission.Level.ADMIN));
     }
 }

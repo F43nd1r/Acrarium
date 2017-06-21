@@ -35,6 +35,7 @@ import java.util.Optional;
  * @since 22.05.2017
  */
 public class StatisticsTab extends HorizontalLayout implements DataManager.Listener<ReportInfo> {
+    public static final String CAPTION = "Statistics";
     private static final Color BACKGROUND_GRAY = new Color(0xfafafa); //vaadin gray
     private static final Color BLUE = new Color(0x197de1); //vaadin blue
     private final VerticalLayout timeLayout;
@@ -47,7 +48,7 @@ public class StatisticsTab extends HorizontalLayout implements DataManager.Liste
     public StatisticsTab(String app, DataManager dataManager) {
         this.app = app;
         this.dataManager = dataManager;
-        setCaption("Statistics");
+        setCaption(CAPTION);
         numberField = new IntStepper("Days");
         numberField.setValue(30);
         numberField.setMinValue(5);

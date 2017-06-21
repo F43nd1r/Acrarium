@@ -21,6 +21,7 @@ import java.util.Date;
  * @since 19.05.2017
  */
 public class PropertiesTab extends VerticalLayout {
+    public static final String CAPTION = "Properties";
     private final App app;
     private final DataManager dataManager;
     private final NavigationManager navigationManager;
@@ -44,7 +45,7 @@ public class PropertiesTab extends VerticalLayout {
         purgeAge.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
         addComponent(purgeAge);
         addComponent(new Button("Rebuild bugs", e -> rebuildBugs()));
-        setCaption("Properties");
+        setCaption(CAPTION);
         setSizeUndefined();
     }
 

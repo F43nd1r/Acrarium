@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * @since 17.05.2017
  */
 public class BugTab extends VerticalLayout implements DataManager.Listener<AppScoped> {
-    private static final String CAPTION = "Bugs";
+    public static final String CAPTION = "Bugs";
     private final String app;
     private final NavigationManager navigationManager;
     private final DataManager dataManager;

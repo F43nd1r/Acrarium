@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream;
  * @since 19.05.2017
  */
 public class DeObfuscationTab extends VerticalLayout {
+    public static final String CAPTION = "De-Obfuscation";
     private final String app;
     private final DataManager dataManager;
     private final MyGrid<ProguardMapping> grid;
@@ -29,7 +30,7 @@ public class DeObfuscationTab extends VerticalLayout {
     private boolean validFile;
 
     public DeObfuscationTab(String app, DataManager dataManager) {
-        setCaption("De-Obfuscation");
+        setCaption(CAPTION);
         grid = new MyGrid<>(null, dataManager.getMappings(app));
         this.app = app;
         this.dataManager = dataManager;

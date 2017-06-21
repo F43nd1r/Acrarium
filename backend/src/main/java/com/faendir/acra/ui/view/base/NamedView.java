@@ -24,4 +24,12 @@ public abstract class NamedView extends CustomComponent implements View {
     public void setNavigationManager(NavigationManager navigationManager) {
         this.navigationManager = navigationManager;
     }
+
+    public String getApp(String fragment) {
+        return null;
+    }
+
+    public boolean validate(String fragment) {
+        return true;
+    }
 }

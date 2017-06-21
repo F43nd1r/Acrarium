@@ -19,7 +19,7 @@ import java.util.function.Supplier;
  * @since 14.05.2017
  */
 public class ReportList extends MyGrid<ReportInfo> implements DataManager.Listener<ReportInfo> {
-    private static final String CAPTION = "Reports";
+    public static final String CAPTION = "Reports";
     private final Supplier<List<ReportInfo>> reportSupplier;
     private final Function<ReportInfo, Boolean> relevanceFunction;
 
