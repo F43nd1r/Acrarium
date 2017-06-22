@@ -1,6 +1,7 @@
 package com.faendir.acra.util;
 
 import com.vaadin.ui.Component;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Lukas
@@ -19,19 +20,19 @@ public enum Style {
     BACKGROUND_LIGHT_GRAY("background-light-gray"),
     NO_BACKGROUND("no-background"),
     NO_BORDER("no-border");
-    final String name;
+    @NotNull private final String name;
 
-    Style(String name) {
+    Style(@NotNull String name) {
         this.name = name;
     }
 
-    public void apply(Component component) {
-        component.addStyleName(name);
-    }
-
-    public static void apply(Component component, Style... styles){
-        for (Style style : styles){
+    public static void apply(@NotNull Component component, @NotNull Style... styles) {
+        for (Style style : styles) {
             style.apply(component);
         }
+    }
+
+    public void apply(@NotNull Component component) {
+        component.addStyleName(name);
     }
 }

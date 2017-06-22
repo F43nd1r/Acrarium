@@ -20,6 +20,8 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Comparator;
@@ -36,27 +38,30 @@ import java.util.stream.Stream;
 @SpringView(name = "report")
 @RequiresAppPermission(Permission.Level.VIEW)
 public class ReportView extends NamedView {
-
-    private final DataManager dataManager;
+    @NotNull private final DataManager dataManager;
 
     @Autowired
-    public ReportView(DataManager dataManager) {
+    public ReportView(@NotNull DataManager dataManager) {
         this.dataManager = dataManager;
     }
 
-    private Stream<Component> getLayoutForEntry(String key, Object value) {
+    @NotNull
+    private Stream<Component> getLayoutForEntry(@NotNull String key, @NotNull Object value) {
         return Stream.of(new Label(key, ContentMode.PREFORMATTED), getComponentForContent(value));
     }
 
-    private GridLayout getLayoutForMap(Map<String, ?> map) {
-        GridLayout layout = new GridLayout(2, 1, map.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getKey)).flatMap(entry -> getLayoutForEntry(entry.getKey(), entry.getValue())).toArray(Component[]::new));
+    @NotNull
+    private GridLayout getLayoutForMap(@NotNull Map<String, ?> map) {
+        GridLayout layout = new GridLayout(2, 1, map.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getKey))
+                .flatMap(entry -> getLayoutForEntry(entry.getKey(), entry.getValue())).toArray(Component[]::new));
         layout.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
         layout.setSpacing(false);
         layout.setMargin(false);
         return layout;
     }
 
-    private Component getComponentForContent(Object value) {
+    @NotNull
+    private Component getComponentForContent(@NotNull Object value) {
         if (value instanceof Map) {
             //noinspection unchecked
             return getLayoutForMap((Map<String, ?>) value);
@@ -73,8 +78,9 @@ public class ReportView extends NamedView {
     }
 
     @Override
-    public void enter(ViewChangeListener.ViewChangeEvent event) {
+    public void enter(@NotNull ViewChangeListener.ViewChangeEvent event) {
         Report report = dataManager.getReport(event.getParameters());
+        assert report != null;
         List<GridFSDBFile> attachmentList = dataManager.getAttachments(report.getId());
         HorizontalLayout attachments = new HorizontalLayout(attachmentList.stream().map(file -> {
             Button button = new Button(file.getFilename());
@@ -107,12 +113,12 @@ public class ReportView extends NamedView {
     }
 
     @Override
-    public String getApp(String fragment) {
+    public String getApp(@NotNull String fragment) {
         return Optional.ofNullable(dataManager.getReport(fragment)).map(Report::getApp).orElse(null);
     }
 
     @Override
-    public boolean validate(String fragment) {
-        return dataManager.getReport(fragment) != null;
+    public boolean validate(@Nullable String fragment) {
+        return fragment != null && dataManager.getReport(fragment) != null;
     }
 }

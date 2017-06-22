@@ -11,6 +11,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import org.jetbrains.annotations.NotNull;
 import org.vaadin.risto.stepper.IntStepper;
 
 import java.util.Calendar;
@@ -22,12 +23,12 @@ import java.util.Date;
  */
 public class PropertiesTab extends VerticalLayout {
     public static final String CAPTION = "Properties";
-    private final App app;
-    private final DataManager dataManager;
-    private final NavigationManager navigationManager;
-    private final IntStepper age;
+    @NotNull private final App app;
+    @NotNull private final DataManager dataManager;
+    @NotNull private final NavigationManager navigationManager;
+    @NotNull private final IntStepper age;
 
-    public PropertiesTab(App app, DataManager dataManager, NavigationManager navigationManager) {
+    public PropertiesTab(@NotNull App app, @NotNull DataManager dataManager, @NotNull NavigationManager navigationManager) {
         this.app = app;
         this.dataManager = dataManager;
         this.navigationManager = navigationManager;

@@ -2,6 +2,8 @@ package com.faendir.acra.mongod;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -23,8 +25,9 @@ import java.util.Arrays;
 @Configuration
 public class MongoConfiguration {
 
+    @NotNull
     @Bean
-    public MappingMongoConverter mongoConverter(MongoDbFactory mongoFactory, MongoMappingContext mongoMappingContext) throws Exception {
+    public MappingMongoConverter mongoConverter(@NotNull MongoDbFactory mongoFactory, @NotNull MongoMappingContext mongoMappingContext) throws Exception {
         DbRefResolver dbRefResolver = new DefaultDbRefResolver(mongoFactory);
         MappingMongoConverter mongoConverter = new MappingMongoConverter(dbRefResolver, mongoMappingContext);
         mongoConverter.setMapKeyDotReplacement("%&&%");
@@ -33,15 +36,17 @@ public class MongoConfiguration {
         return mongoConverter;
     }
 
+    @NotNull
     @Bean
-    public GridFsTemplate gridFsTemplate(MongoDbFactory mongoDbFactory, MappingMongoConverter mappingMongoConverter) {
+    public GridFsTemplate gridFsTemplate(@NotNull MongoDbFactory mongoDbFactory, @NotNull MappingMongoConverter mappingMongoConverter) {
         return new GridFsTemplate(mongoDbFactory, mappingMongoConverter);
     }
 
     private static class StacktraceElementReadConverter implements Converter<DBObject, StackTraceElement> {
 
+        @Nullable
         @Override
-        public StackTraceElement convert(DBObject source) {
+        public StackTraceElement convert(@NotNull DBObject source) {
             try {
                 StackTraceElement element = new StackTraceElement("","","", -1);
                 for (Field field : StackTraceElement.class.getDeclaredFields()) {
@@ -57,8 +62,9 @@ public class MongoConfiguration {
 
     private static class StacktraceElementWriteConverter implements Converter<StackTraceElement, DBObject> {
 
+        @Nullable
         @Override
-        public DBObject convert(StackTraceElement source) {
+        public DBObject convert(@NotNull StackTraceElement source) {
             try {
                 BasicDBObject dbObject = new BasicDBObject();
                 for (Field field : StackTraceElement.class.getDeclaredFields()) {

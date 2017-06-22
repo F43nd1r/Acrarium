@@ -4,6 +4,8 @@ import com.vaadin.data.ValueProvider;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.renderers.AbstractRenderer;
 import com.vaadin.ui.renderers.TextRenderer;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
@@ -12,25 +14,24 @@ import java.util.Collection;
  * @since 14.05.2017
  */
 public class MyGrid<T> extends Grid<T> {
-    public MyGrid(String caption) {
-        super(caption);
-    }
 
-    public MyGrid(String caption, Collection<T> items) {
+    public MyGrid(@Nullable String caption, @NotNull Collection<T> items) {
         super(caption, items);
         setHeightByRows(items.size());
     }
 
-    public <R> Grid.Column<T, R> addColumn(ValueProvider<T, R> valueProvider, String caption) {
+    @NotNull
+    public <R> Grid.Column<T, R> addColumn(@NotNull ValueProvider<T, R> valueProvider, @NotNull String caption) {
         return addColumn(valueProvider, new TextRenderer(), caption);
     }
 
-    public <R> Grid.Column<T, R> addColumn(ValueProvider<T, R> valueProvider, AbstractRenderer<? super T, ? super R> renderer, String caption) {
+    @NotNull
+    public <R> Grid.Column<T, R> addColumn(@NotNull ValueProvider<T, R> valueProvider, @NotNull AbstractRenderer<? super T, ? super R> renderer, @NotNull String caption) {
         return addColumn(valueProvider, renderer).setId(caption).setCaption(caption);
     }
 
     @Override
-    public void setItems(Collection<T> items) {
+    public void setItems(@NotNull Collection<T> items) {
         super.setItems(items);
         setHeightByRows(items.size());
     }

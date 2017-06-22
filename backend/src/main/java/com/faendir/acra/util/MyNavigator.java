@@ -2,6 +2,7 @@ package com.faendir.acra.util;
 
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.navigator.SpringNavigator;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @UIScope
 public class MyNavigator extends SpringNavigator {
-    private String parameters;
+    @Nullable private String parameters;
 
     @Override
     public void navigateTo(String navigationState) {
@@ -20,6 +21,7 @@ public class MyNavigator extends SpringNavigator {
         super.navigateTo(navigationState);
     }
 
+    @Nullable
     public String getParameters() {
         return parameters;
     }

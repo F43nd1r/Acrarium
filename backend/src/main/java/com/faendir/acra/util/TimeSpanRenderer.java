@@ -3,6 +3,8 @@ package com.faendir.acra.util;
 import com.vaadin.ui.renderers.TextRenderer;
 import elemental.json.Json;
 import elemental.json.JsonValue;
+import org.jetbrains.annotations.Nullable;
+import org.ocpsoft.prettytime.PrettyTime;
 
 import java.util.Date;
 
@@ -15,10 +17,10 @@ public class TimeSpanRenderer extends TextRenderer {
     }
 
     @Override
-    public JsonValue encode(Object value) {
-        if (value == null || !(value instanceof Date)) {
-            return super.encode(null);
+    public JsonValue encode(@Nullable Object value) {
+        if (value instanceof Date) {
+            return Json.create(new PrettyTime().format(((Date) value)));
         }
-        return Json.create(StringUtils.distanceFromNowAsString((Date) value));
+        return super.encode(value);
     }
 }

@@ -17,6 +17,8 @@ import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.VerticalLayout;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,14 +31,14 @@ import java.util.stream.Collectors;
  */
 public class BugTab extends VerticalLayout implements DataManager.Listener<AppScoped> {
     public static final String CAPTION = "Bugs";
-    private final String app;
-    private final NavigationManager navigationManager;
-    private final DataManager dataManager;
-    private final MyGrid<Bug> bugs;
-    private final CheckBox hideSolved;
-    private ReportList reportList;
+    @NotNull private final String app;
+    @NotNull private final NavigationManager navigationManager;
+    @NotNull private final DataManager dataManager;
+    @NotNull private final MyGrid<Bug> bugs;
+    @NotNull private final CheckBox hideSolved;
+    @Nullable private ReportList reportList;
 
-    public BugTab(String app, NavigationManager navigationManager, DataManager dataManager) {
+    public BugTab(@NotNull String app, @NotNull NavigationManager navigationManager, @NotNull DataManager dataManager) {
         this.app = app;
         this.navigationManager = navigationManager;
         this.dataManager = dataManager;
@@ -51,10 +53,8 @@ public class BugTab extends VerticalLayout implements DataManager.Listener<AppSc
         bugs.addColumn(Bug::getVersionCode, "Version");
         bugs.addColumn(bug -> bug.getStacktrace().split("\n", 2)[0], "Stacktrace").setExpandRatio(1);
         bugs.addSelectionListener(this::handleBugSelection);
-        bugs.addComponentColumn(bug -> new MyCheckBox(bug.isSolved(), SecurityUtils.hasPermission(app, Permission.Level.EDIT), e -> {
-            dataManager.setBugSolved(bug, e.getValue());
-            setItems();
-        })).setCaption("Solved");
+        bugs.addComponentColumn(bug -> new MyCheckBox(bug.isSolved(), SecurityUtils.hasPermission(app, Permission.Level.EDIT), e -> dataManager.setBugSolved(bug, e.getValue())))
+                .setCaption("Solved");
         addComponent(bugs);
         Style.NO_PADDING.apply(this);
         setCaption(CAPTION);
@@ -62,21 +62,21 @@ public class BugTab extends VerticalLayout implements DataManager.Listener<AppSc
         addDetachListener(e -> dataManager.removeListener(this));
     }
 
-    private void handleBugSelection(SelectionEvent<Bug> e) {
+    private void handleBugSelection(@NotNull SelectionEvent<Bug> e) {
         Optional<Bug> selection = e.getFirstSelectedItem();
         ReportList reportList = null;
         if (selection.isPresent()) {
             reportList = new ReportList(app, navigationManager, dataManager, () -> dataManager.getReportsForBug(selection.get()),
-                    reportInfo -> dataManager.matches(selection.get(), reportInfo));
+                                        reportInfo -> dataManager.matches(selection.get(), reportInfo));
             replaceComponent(this.reportList, reportList);
-        } else {
+        } else if (this.reportList != null) {
             removeComponent(this.reportList);
         }
         this.reportList = reportList;
     }
 
     @Override
-    public void onChange(AppScoped appScoped) {
+    public void onChange(@NotNull AppScoped appScoped) {
         if (appScoped.getApp().equals(app)) {
             setItems();
         }
@@ -90,6 +90,7 @@ public class BugTab extends VerticalLayout implements DataManager.Listener<AppSc
         });
     }
 
+    @NotNull
     private List<Bug> getBugs() {
         List<Bug> bugs = dataManager.getBugs(app);
         if (hideSolved.getValue()) {

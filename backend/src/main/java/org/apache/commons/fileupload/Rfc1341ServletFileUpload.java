@@ -4,6 +4,8 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Closeable;
 import org.apache.commons.fileupload.util.LimitedInputStream;
 import org.apache.commons.fileupload.util.Streams;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,20 +21,22 @@ import static java.lang.String.format;
  * @since 18.05.2017
  */
 public class Rfc1341ServletFileUpload extends ServletFileUpload {
-    public Rfc1341ServletFileUpload(FileItemFactory fileItemFactory) {
+    public Rfc1341ServletFileUpload(@NotNull FileItemFactory fileItemFactory) {
         super(fileItemFactory);
     }
 
+    @NotNull
     @Override
-    public FileItemIterator getItemIterator(RequestContext ctx) throws FileUploadException, IOException {
+    public FileItemIterator getItemIterator(@Nullable RequestContext ctx) throws FileUploadException, IOException {
         return new Rfc1341FileItemIterator(ctx);
     }
 
     /**
      * Modified copy (with appropriate cast) of {@link FileUploadBase#parseRequest(RequestContext)}
      */
+    @NotNull
     @Override
-    public List<FileItem> parseRequest(RequestContext ctx) throws FileUploadException {
+    public List<FileItem> parseRequest(@NotNull RequestContext ctx) throws FileUploadException {
         List<FileItem> items = new ArrayList<>();
         boolean successful = false;
         try {
@@ -45,16 +49,14 @@ public class Rfc1341ServletFileUpload extends ServletFileUpload {
                 final FileItemStream item = iter.next();
                 // Don't use getName() here to prevent an InvalidFileNameException.
                 final String fileName = ((Rfc1341FileItemIterator.Rfc1341FileItemStream) item).name;
-                FileItem fileItem = fac.createItem(item.getFieldName(), item.getContentType(),
-                        item.isFormField(), fileName);
+                FileItem fileItem = fac.createItem(item.getFieldName(), item.getContentType(), item.isFormField(), fileName);
                 items.add(fileItem);
                 try {
                     Streams.copy(item.openStream(), fileItem.getOutputStream(), true);
                 } catch (FileUploadIOException e) {
                     throw (FileUploadException) e.getCause();
                 } catch (IOException e) {
-                    throw new IOFileUploadException(format("Processing of %s request failed. %s",
-                            MULTIPART_FORM_DATA, e.getMessage()), e);
+                    throw new IOFileUploadException(format("Processing of %s request failed. %s", MULTIPART_FORM_DATA, e.getMessage()), e);
                 }
                 final FileItemHeaders fih = item.getHeaders();
                 fileItem.setHeaders(fih);
@@ -85,212 +87,36 @@ public class Rfc1341ServletFileUpload extends ServletFileUpload {
      * @since 18.05.2017
      */
     private class Rfc1341FileItemIterator implements FileItemIterator {
-
-        /**
-         * Default implementation of {@link FileItemStream}.
-         */
-        class Rfc1341FileItemStream implements FileItemStream {
-
-            /**
-             * The file items content type.
-             */
-            private final String contentType;
-
-            /**
-             * The file items file name.
-             */
-            private final String name;
-
-            /**
-             * The file items input stream.
-             */
-            private final InputStream stream;
-
-            /**
-             * Whether the file item was already opened.
-             */
-            private boolean opened;
-
-            /**
-             * The headers, if any.
-             */
-            private FileItemHeaders headers;
-
-            /**
-             * Creates a new instance.
-             *
-             * @param pName          The items file name, or null.
-             * @param pContentType   The items content type, or null.
-             * @param pContentLength The items content length, if known, or -1
-             * @throws IOException Creating the file item failed.
-             */
-            Rfc1341FileItemStream(String pName,
-                                  String pContentType,
-                                  long pContentLength) throws IOException {
-                name = pName;
-                contentType = pContentType;
-                final MultipartStream.ItemInputStream itemStream = multi.newInputStream();
-                InputStream istream = itemStream;
-                if (fileSizeMax != -1) {
-                    if (pContentLength != -1
-                            && pContentLength > fileSizeMax) {
-                        FileSizeLimitExceededException e =
-                                new FileSizeLimitExceededException(
-                                        format("The file %s exceeds its maximum permitted size of %s bytes.",
-                                                name, fileSizeMax),
-                                        pContentLength, fileSizeMax);
-                        e.setFileName(pName);
-                        throw new FileUploadIOException(e);
-                    }
-                    istream = new LimitedInputStream(istream, fileSizeMax) {
-                        @Override
-                        protected void raiseError(long pSizeMax, long pCount)
-                                throws IOException {
-                            itemStream.close(true);
-                            FileSizeLimitExceededException e =
-                                    new FileSizeLimitExceededException(
-                                            format("The file %s exceeds its maximum permitted size of %s bytes.",
-                                                    name, pSizeMax),
-                                            pCount, pSizeMax);
-                            e.setFileName(name);
-                            throw new FileUploadIOException(e);
-                        }
-                    };
-                }
-                stream = istream;
-            }
-
-            /**
-             * Returns the items content type, or null.
-             *
-             * @return Content type, if known, or null.
-             */
-            public String getContentType() {
-                return contentType;
-            }
-
-            /**
-             * Files are not associated to fields.
-             *
-             * @return null
-             */
-            public String getFieldName() {
-                return null;
-            }
-
-            /**
-             * Returns the items file name.
-             *
-             * @return File name, if known, or null.
-             * @throws InvalidFileNameException The file name contains a NUL character,
-             *                                  which might be an indicator of a security attack. If you intend to
-             *                                  use the file name anyways, catch the exception and use
-             *                                  InvalidFileNameException#getName().
-             */
-            public String getName() {
-                return Streams.checkFileName(name);
-            }
-
-            /**
-             * Returns, whether this is a form field.
-             *
-             * @return True, if the item is a form field,
-             * otherwise false.
-             */
-            public boolean isFormField() {
-                return false;
-            }
-
-            /**
-             * Returns an input stream, which may be used to
-             * read the items contents.
-             *
-             * @return Opened input stream.
-             * @throws IOException An I/O error occurred.
-             */
-            public InputStream openStream() throws IOException {
-                if (opened) {
-                    throw new IllegalStateException(
-                            "The stream was already opened.");
-                }
-                if (((Closeable) stream).isClosed()) {
-                    throw new ItemSkippedException();
-                }
-                return stream;
-            }
-
-            /**
-             * Closes the file item.
-             *
-             * @throws IOException An I/O error occurred.
-             */
-            void close() throws IOException {
-                stream.close();
-            }
-
-            /**
-             * Returns the file item headers.
-             *
-             * @return The items header object
-             */
-            public FileItemHeaders getHeaders() {
-                return headers;
-            }
-
-            /**
-             * Sets the file item headers.
-             *
-             * @param pHeaders The items header object
-             */
-            public void setHeaders(FileItemHeaders pHeaders) {
-                headers = pHeaders;
-            }
-
-        }
-
         /**
          * The multi part stream to process.
          */
-        private final MultipartStream multi;
-
+        @NotNull private final MultipartStream multi;
         /**
          * The notifier, which used for triggering the
          * {@link ProgressListener}.
          */
-        private final MultipartStream.ProgressNotifier notifier;
-
+        @NotNull private final MultipartStream.ProgressNotifier notifier;
         /**
          * The boundary, which separates the various parts.
          */
         private final byte[] boundary;
-
         /**
          * The item, which we currently process.
          */
-        private Rfc1341FileItemStream currentItem;
-
-        /**
-         * The current items field name.
-         */
-        private String currentFieldName;
-
+        @Nullable private Rfc1341FileItemStream currentItem;
         /**
          * Whether we are currently skipping the preamble.
          */
         private boolean skipPreamble;
-
         /**
          * Whether the current item may still be read.
          */
         private boolean itemValid;
-
         /**
          * Whether we have seen the end of the file.
          */
         private boolean eof;
-
         private long fileSizeMax;
-
         /**
          * Creates a new instance.
          *
@@ -299,8 +125,7 @@ public class Rfc1341ServletFileUpload extends ServletFileUpload {
          *                             parsing the request.
          * @throws IOException         An I/O error occurred.
          */
-        Rfc1341FileItemIterator(RequestContext ctx)
-                throws FileUploadException, IOException {
+        Rfc1341FileItemIterator(@Nullable RequestContext ctx) throws FileUploadException, IOException {
             this.fileSizeMax = getFileSizeMax();
             long sizeMax = getSizeMax();
             String headerEncoding = getHeaderEncoding();
@@ -310,11 +135,9 @@ public class Rfc1341ServletFileUpload extends ServletFileUpload {
             }
 
             String contentType = ctx.getContentType();
-            if ((null == contentType)
-                    || (!contentType.toLowerCase(Locale.ENGLISH).startsWith(MULTIPART))) {
+            if ((null == contentType) || (!contentType.toLowerCase(Locale.ENGLISH).startsWith(MULTIPART))) {
                 throw new InvalidContentTypeException(
-                        format("the request doesn't contain a %s or %s stream, content type header is %s",
-                                MULTIPART_FORM_DATA, MULTIPART_MIXED, contentType));
+                        format("the request doesn't contain a %s or %s stream, content type header is %s", MULTIPART_FORM_DATA, MULTIPART_MIXED, contentType));
             }
 
             InputStream input = ctx.getInputStream();
@@ -324,25 +147,19 @@ public class Rfc1341ServletFileUpload extends ServletFileUpload {
 
             final long requestSize = UploadContext.class.isAssignableFrom(ctx.getClass())
                     // Inline conditional is OK here CHECKSTYLE:OFF
-                    ? ((UploadContext) ctx).contentLength()
-                    : contentLengthInt;
+                    ? ((UploadContext) ctx).contentLength() : contentLengthInt;
             // CHECKSTYLE:ON
 
             if (sizeMax >= 0) {
                 if (requestSize != -1 && requestSize > sizeMax) {
-                    throw new SizeLimitExceededException(
-                            format("the request was rejected because its size (%s) exceeds the configured maximum (%s)",
-                                    requestSize, sizeMax),
-                            requestSize, sizeMax);
+                    throw new SizeLimitExceededException(format("the request was rejected because its size (%s) exceeds the configured maximum (%s)", requestSize, sizeMax),
+                                                         requestSize, sizeMax);
                 }
                 input = new LimitedInputStream(input, sizeMax) {
                     @Override
-                    protected void raiseError(long pSizeMax, long pCount)
-                            throws IOException {
+                    protected void raiseError(long pSizeMax, long pCount) throws IOException {
                         FileUploadException ex = new SizeLimitExceededException(
-                                format("the request was rejected because its size (%s) exceeds the configured maximum (%s)",
-                                        pCount, pSizeMax),
-                                pCount, pSizeMax);
+                                format("the request was rejected because its size (%s) exceeds the configured maximum (%s)", pCount, pSizeMax), pCount, pSizeMax);
                         throw new FileUploadIOException(ex);
                     }
                 };
@@ -362,8 +179,7 @@ public class Rfc1341ServletFileUpload extends ServletFileUpload {
             try {
                 multi = new MultipartStream(input, boundary, notifier);
             } catch (IllegalArgumentException iae) {
-                throw new InvalidContentTypeException(
-                        format("The boundary specified in the %s header is too long", CONTENT_TYPE), iae);
+                throw new InvalidContentTypeException(format("The boundary specified in the %s header is too long", CONTENT_TYPE), iae);
             }
             multi.setHeaderEncoding(charEncoding);
 
@@ -385,30 +201,26 @@ public class Rfc1341ServletFileUpload extends ServletFileUpload {
                 currentItem.close();
                 currentItem = null;
             }
-            for (; ; ) {
-                boolean nextPart;
-                if (skipPreamble) {
-                    nextPart = multi.skipPreamble();
-                } else {
-                    nextPart = multi.readBoundary();
-                }
-                if (!nextPart) {
-                    eof = true;
-                    return false;
-                }
-                FileItemHeaders headers = getParsedHeaders(multi.readHeaders());
-                String fileName = getFileName(headers);
-                currentItem = new Rfc1341FileItemStream(fileName,
-                        headers.getHeader(CONTENT_TYPE),
-                        getContentLength(headers));
-                currentItem.setHeaders(headers);
-                notifier.noteItem();
-                itemValid = true;
-                return true;
+            boolean nextPart;
+            if (skipPreamble) {
+                nextPart = multi.skipPreamble();
+            } else {
+                nextPart = multi.readBoundary();
             }
+            if (!nextPart) {
+                eof = true;
+                return false;
+            }
+            FileItemHeaders headers = getParsedHeaders(multi.readHeaders());
+            String fileName = getFileName(headers);
+            currentItem = new Rfc1341FileItemStream(fileName, headers.getHeader(CONTENT_TYPE), getContentLength(headers));
+            currentItem.setHeaders(headers);
+            notifier.noteItem();
+            itemValid = true;
+            return true;
         }
 
-        private long getContentLength(FileItemHeaders pHeaders) {
+        private long getContentLength(@NotNull FileItemHeaders pHeaders) {
             try {
                 return Long.parseLong(pHeaders.getHeader(CONTENT_LENGTH));
             } catch (Exception e) {
@@ -452,6 +264,7 @@ public class Rfc1341ServletFileUpload extends ServletFileUpload {
          *                                          file item failed.
          * @throws IOException                      Reading the file item failed.
          */
+        @Nullable
         public FileItemStream next() throws FileUploadException, IOException {
             if (eof || (!itemValid && !hasNext())) {
                 throw new NoSuchElementException();
@@ -460,5 +273,150 @@ public class Rfc1341ServletFileUpload extends ServletFileUpload {
             return currentItem;
         }
 
+        /**
+         * Default implementation of {@link FileItemStream}.
+         */
+        class Rfc1341FileItemStream implements FileItemStream {
+            /**
+             * The file items content type.
+             */
+            private final String contentType;
+            /**
+             * The file items file name.
+             */
+            private final String name;
+            /**
+             * The file items input stream.
+             */
+            private final InputStream stream;
+            /**
+             * Whether the file item was already opened.
+             */
+            private boolean opened;
+            /**
+             * The headers, if any.
+             */
+            private FileItemHeaders headers;
+
+            /**
+             * Creates a new instance.
+             *
+             * @param pName          The items file name, or null.
+             * @param pContentType   The items content type, or null.
+             * @param pContentLength The items content length, if known, or -1
+             * @throws IOException Creating the file item failed.
+             */
+            Rfc1341FileItemStream(String pName, String pContentType, long pContentLength) throws IOException {
+                name = pName;
+                contentType = pContentType;
+                final MultipartStream.ItemInputStream itemStream = multi.newInputStream();
+                InputStream istream = itemStream;
+                if (fileSizeMax != -1) {
+                    if (pContentLength != -1 && pContentLength > fileSizeMax) {
+                        FileSizeLimitExceededException e = new FileSizeLimitExceededException(
+                                format("The file %s exceeds its maximum permitted size of %s bytes.", name, fileSizeMax), pContentLength, fileSizeMax);
+                        e.setFileName(pName);
+                        throw new FileUploadIOException(e);
+                    }
+                    istream = new LimitedInputStream(istream, fileSizeMax) {
+                        @Override
+                        protected void raiseError(long pSizeMax, long pCount) throws IOException {
+                            itemStream.close(true);
+                            FileSizeLimitExceededException e = new FileSizeLimitExceededException(
+                                    format("The file %s exceeds its maximum permitted size of %s bytes.", name, pSizeMax), pCount, pSizeMax);
+                            e.setFileName(name);
+                            throw new FileUploadIOException(e);
+                        }
+                    };
+                }
+                stream = istream;
+            }
+
+            /**
+             * Returns the items content type, or null.
+             *
+             * @return Content type, if known, or null.
+             */
+            public String getContentType() {
+                return contentType;
+            }
+
+            /**
+             * Files are not associated to fields.
+             *
+             * @return null
+             */
+            @Nullable
+            public String getFieldName() {
+                return null;
+            }
+
+            /**
+             * Returns the items file name.
+             *
+             * @return File name, if known, or null.
+             * @throws InvalidFileNameException The file name contains a NUL character,
+             *                                  which might be an indicator of a security attack. If you intend to
+             *                                  use the file name anyways, catch the exception and use
+             *                                  InvalidFileNameException#getName().
+             */
+            public String getName() {
+                return Streams.checkFileName(name);
+            }
+
+            /**
+             * Returns, whether this is a form field.
+             *
+             * @return True, if the item is a form field,
+             * otherwise false.
+             */
+            public boolean isFormField() {
+                return false;
+            }
+
+            /**
+             * Returns an input stream, which may be used to
+             * read the items contents.
+             *
+             * @return Opened input stream.
+             * @throws IOException An I/O error occurred.
+             */
+            public InputStream openStream() throws IOException {
+                if (opened) {
+                    throw new IllegalStateException("The stream was already opened.");
+                }
+                if (((Closeable) stream).isClosed()) {
+                    throw new ItemSkippedException();
+                }
+                return stream;
+            }
+
+            /**
+             * Closes the file item.
+             *
+             * @throws IOException An I/O error occurred.
+             */
+            void close() throws IOException {
+                stream.close();
+            }
+
+            /**
+             * Returns the file item headers.
+             *
+             * @return The items header object
+             */
+            public FileItemHeaders getHeaders() {
+                return headers;
+            }
+
+            /**
+             * Sets the file item headers.
+             *
+             * @param pHeaders The items header object
+             */
+            public void setHeaders(FileItemHeaders pHeaders) {
+                headers = pHeaders;
+            }
+        }
     }
 }

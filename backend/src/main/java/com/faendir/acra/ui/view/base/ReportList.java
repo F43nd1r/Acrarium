@@ -9,6 +9,7 @@ import com.faendir.acra.ui.view.ReportView;
 import com.faendir.acra.util.TimeSpanRenderer;
 import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.ui.renderers.ButtonRenderer;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Function;
@@ -20,10 +21,11 @@ import java.util.function.Supplier;
  */
 public class ReportList extends MyGrid<ReportInfo> implements DataManager.Listener<ReportInfo> {
     public static final String CAPTION = "Reports";
-    private final Supplier<List<ReportInfo>> reportSupplier;
-    private final Function<ReportInfo, Boolean> relevanceFunction;
+    @NotNull private final Supplier<List<ReportInfo>> reportSupplier;
+    @NotNull private final Function<ReportInfo, Boolean> relevanceFunction;
 
-    public ReportList(String app, NavigationManager navigationManager, DataManager dataManager, Supplier<List<ReportInfo>> reportSupplier, Function<ReportInfo, Boolean> relevanceFunction) {
+    public ReportList(String app, @NotNull NavigationManager navigationManager, @NotNull DataManager dataManager, @NotNull Supplier<List<ReportInfo>> reportSupplier,
+                      @NotNull Function<ReportInfo, Boolean> relevanceFunction) {
         super(CAPTION, reportSupplier.get());
         setId(CAPTION);
         this.reportSupplier = reportSupplier;
@@ -44,13 +46,13 @@ public class ReportList extends MyGrid<ReportInfo> implements DataManager.Listen
     }
 
     @Override
-    public void onChange(ReportInfo info) {
-        if(relevanceFunction.apply(info)) {
+    public void onChange(@NotNull ReportInfo info) {
+        if (relevanceFunction.apply(info)) {
             setItems();
         }
     }
 
-    private void setItems(){
+    private void setItems() {
         getUI().access(() -> setItems(reportSupplier.get()));
     }
 }

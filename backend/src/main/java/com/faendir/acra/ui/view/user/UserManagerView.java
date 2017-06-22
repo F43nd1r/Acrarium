@@ -22,9 +22,11 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * @author Lukas
@@ -33,19 +35,20 @@ import java.util.Arrays;
 @SpringView(name = "user-manager")
 @RequiresRole(UserManager.ROLE_ADMIN)
 public class UserManagerView extends NamedView {
-    private final UserManager userManager;
-    private final DataManager dataManager;
-    private MyGrid<User> userGrid;
+    @NotNull private final UserManager userManager;
+    @NotNull private final DataManager dataManager;
+    @NotNull private final MyGrid<User> userGrid;
 
     @Autowired
-    public UserManagerView(UserManager userManager, DataManager dataManager) {
+    public UserManagerView(@NotNull UserManager userManager, @NotNull DataManager dataManager) {
         this.userManager = userManager;
         this.dataManager = dataManager;
+        this.userGrid = new MyGrid<>("Users", Collections.emptyList());
     }
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        userGrid = new MyGrid<>("Users", userManager.getUsers());
+        userGrid.setItems(userManager.getUsers());
         userGrid.setSelectionMode(Grid.SelectionMode.NONE);
         userGrid.addColumn(User::getUsername, "Username");
         userGrid.addComponentColumn(user -> new MyCheckBox(user.getRoles().contains(UserManager.ROLE_ADMIN), !user.getUsername().equals(SecurityUtils.getUsername()),

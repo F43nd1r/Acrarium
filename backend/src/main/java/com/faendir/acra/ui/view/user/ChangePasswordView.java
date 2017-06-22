@@ -13,6 +13,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.VerticalLayout;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -21,12 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @SpringView(name = "password-editor")
 public class ChangePasswordView extends NamedView {
-
-    private final UserManager userManager;
-    private final BackendUI backendUI;
+    @NotNull private final UserManager userManager;
+    @NotNull private final BackendUI backendUI;
 
     @Autowired
-    public ChangePasswordView(UserManager userManager, BackendUI backendUI) {
+    public ChangePasswordView(@NotNull UserManager userManager, @NotNull BackendUI backendUI) {
 
         this.userManager = userManager;
         this.backendUI = backendUI;
@@ -39,6 +39,7 @@ public class ChangePasswordView extends NamedView {
         PasswordField repeatPassword = new PasswordField("Repeat Password");
         Button confirm = new Button("Confirm", e -> {
             User user = userManager.getUser(SecurityUtils.getUsername());
+            assert user != null;
             if (newPassword.getValue().equals(repeatPassword.getValue())) {
                 if (userManager.changePassword(user, oldPassword.getValue(), newPassword.getValue())) {
                     Notification.show("Successful!");
@@ -50,7 +51,6 @@ public class ChangePasswordView extends NamedView {
             } else {
                 repeatPassword.setComponentError(new UserError("Passwords do not match"));
             }
-
         });
         confirm.setSizeFull();
         VerticalLayout layout = new VerticalLayout(oldPassword, newPassword, repeatPassword, confirm);

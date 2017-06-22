@@ -1,5 +1,7 @@
 package com.faendir.acra.mongod.model;
 
+import org.jetbrains.annotations.NotNull;
+import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
@@ -10,17 +12,20 @@ import java.io.Serializable;
  */
 @Document
 public class ProguardMapping {
-    private String mappings;
-    private MetaData id;
+    @NotNull private final MetaData id;
+    @NotNull private final String mappings;
 
-    public ProguardMapping(){
-    }
-
-    public ProguardMapping(String app, int version, String mappings) {
-        this.id = new MetaData(app, version);
+    @PersistenceConstructor
+    private ProguardMapping(@NotNull MetaData id, @NotNull String mappings) {
         this.mappings = mappings;
+        this.id = id;
     }
 
+    public ProguardMapping(@NotNull String app, int version, @NotNull String mappings) {
+        this(new MetaData(app, version), mappings);
+    }
+
+    @NotNull
     public String getApp() {
         return id.app;
     }
@@ -29,15 +34,17 @@ public class ProguardMapping {
         return id.version;
     }
 
+    @NotNull
     public String getMappings() {
         return mappings;
     }
 
     public static class MetaData implements Serializable {
-        private String app;
-        private int version;
+        @NotNull private final String app;
+        private final int version;
 
-        public MetaData(String app, int version) {
+        @PersistenceConstructor
+        public MetaData(@NotNull String app, int version) {
             this.app = app;
             this.version = version;
         }

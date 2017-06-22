@@ -1,5 +1,6 @@
 package com.faendir.acra.mongod.model;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -7,12 +8,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Lukas
@@ -20,49 +20,50 @@ import java.util.stream.Collectors;
  */
 @Document
 public class User implements UserDetails {
-    @Id
-    private String username;
-    private String password;
-    private Set<String> roles;
-    private Set<Permission> permissions;
+    @NotNull @Id private final String username;
+    @NotNull private final Set<String> roles;
+    @NotNull private final Set<Permission> permissions;
+    @NotNull private String password;
 
     @PersistenceConstructor
-    public User() {
-        permissions = new HashSet<>();
-        roles = new HashSet<>();
-    }
-
-    public User(String username, String password, Collection<String> roles) {
-        this();
+    private User(@NotNull String username, @NotNull String password, @NotNull Set<String> roles, @NotNull Set<Permission> permissions) {
         this.username = username;
         this.password = password;
-        this.roles = new HashSet<>(roles);
+        this.roles = roles;
+        this.permissions = permissions;
     }
 
+    public User(@NotNull String username, @NotNull String password, @NotNull Collection<String> roles) {
+        this(username, password, new HashSet<>(roles), new HashSet<>());
+    }
+
+    @NotNull
     public Set<Permission> getPermissions() {
         return permissions;
     }
 
+    @NotNull
     public Set<String> getRoles() {
         return roles;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(@NotNull String password) {
         this.password = password;
     }
 
+    @NotNull
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<GrantedAuthority> authorities = new ArrayList<>(permissions);
-        authorities.addAll(roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
-        return authorities;
+        return Stream.concat(permissions.stream(), roles.stream().map(SimpleGrantedAuthority::new)).collect(Collectors.toList());
     }
 
+    @NotNull
     @Override
     public String getPassword() {
         return password;
     }
 
+    @NotNull
     @Override
     public String getUsername() {
         return username;

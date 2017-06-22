@@ -18,6 +18,7 @@ import com.vaadin.ui.LoginForm;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -34,12 +35,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @SpringUI
 @Theme("acratheme")
 public class BackendUI extends UI {
-    private final AuthenticationManager authenticationManager;
-    private final ApplicationContext applicationContext;
-    private final VerticalLayout content;
+    @NotNull private final AuthenticationManager authenticationManager;
+    @NotNull private final ApplicationContext applicationContext;
+    @NotNull private final VerticalLayout content;
 
     @Autowired
-    public BackendUI(AuthenticationManager authenticationManager, ApplicationContext applicationContext) {
+    public BackendUI(@NotNull AuthenticationManager authenticationManager, @NotNull ApplicationContext applicationContext) {
         this.authenticationManager = authenticationManager;
         this.applicationContext = applicationContext;
         content = new VerticalLayout();
@@ -56,7 +57,7 @@ public class BackendUI extends UI {
         }
     }
 
-    private void login(String username, String password) {
+    private void login(@NotNull String username, @NotNull String password) {
         try {
             Authentication token = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username.toLowerCase(), password));
             VaadinService.reinitializeSession(VaadinService.getCurrentRequest());
@@ -113,6 +114,7 @@ public class BackendUI extends UI {
         setContent(root);
     }
 
+    @NotNull
     @UIScope
     @Bean
     public VerticalLayout mainView() {

@@ -13,6 +13,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
 
@@ -23,13 +24,13 @@ import java.io.ByteArrayOutputStream;
  */
 public class DeObfuscationTab extends VerticalLayout {
     public static final String CAPTION = "De-Obfuscation";
-    private final String app;
-    private final DataManager dataManager;
-    private final MyGrid<ProguardMapping> grid;
+    @NotNull private final String app;
+    @NotNull private final DataManager dataManager;
+    @NotNull private final MyGrid<ProguardMapping> grid;
     private boolean validNumber;
     private boolean validFile;
 
-    public DeObfuscationTab(String app, DataManager dataManager) {
+    public DeObfuscationTab(@NotNull String app, @NotNull DataManager dataManager) {
         setCaption(CAPTION);
         grid = new MyGrid<>(null, dataManager.getMappings(app));
         this.app = app;
@@ -65,7 +66,7 @@ public class DeObfuscationTab extends VerticalLayout {
         Upload upload = new Upload("Mapping file:", (filename, mimeType) -> out);
         ProgressBar progressBar = new ProgressBar();
         progressBar.setSizeFull();
-        upload.addProgressListener((readBytes, contentLength) -> progressBar.setValue(readBytes / contentLength));
+        upload.addProgressListener((readBytes, contentLength) -> getUI().access(() -> progressBar.setValue(readBytes / contentLength)));
         upload.addSucceededListener(e -> {
             validFile = true;
             confirm.setEnabled(validNumber);

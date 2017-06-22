@@ -1,5 +1,7 @@
 package com.faendir.acra.mongod.model;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Date;
 
 /**
@@ -7,39 +9,41 @@ import java.util.Date;
  * @since 16.06.2017
  */
 public class ReportInfo implements AppScoped {
-    private final Date date;
-    private final String id;
-    private final String app;
-    private final String stacktrace;
+    @NotNull private final Date date;
+    @NotNull private final String id;
+    @NotNull private final String app;
+    @NotNull private final String stacktrace;
     private final int versionCode;
-    private final String versionName;
-    private final String androidVersion;
-    private final String phoneModel;
+    @NotNull private final String androidVersion;
+    @NotNull private final String phoneModel;
 
-    public ReportInfo(Report report) {
+    public ReportInfo(@NotNull Report report) {
         this.date = report.getDate();
         this.id = report.getId();
         this.app = report.getApp();
         this.stacktrace = report.getStacktrace();
         this.versionCode = report.getVersionCode();
-        this.versionName = report.getVersionName();
         this.androidVersion = report.getAndroidVersion();
         this.phoneModel = report.getPhoneModel();
     }
 
+    @NotNull
     public Date getDate() {
         return date;
     }
 
+    @NotNull
     public String getId() {
         return id;
     }
 
+    @NotNull
     @Override
     public String getApp() {
         return app;
     }
 
+    @NotNull
     public String getStacktrace() {
         return stacktrace;
     }
@@ -48,14 +52,12 @@ public class ReportInfo implements AppScoped {
         return versionCode;
     }
 
-    public String getVersionName() {
-        return versionName;
-    }
-
+    @NotNull
     public String getAndroidVersion() {
         return androidVersion;
     }
 
+    @NotNull
     public String getPhoneModel() {
         return phoneModel;
     }

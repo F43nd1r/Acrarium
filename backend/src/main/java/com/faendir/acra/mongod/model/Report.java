@@ -1,6 +1,7 @@
 package com.faendir.acra.mongod.model;
 
 import com.faendir.acra.mongod.data.ReportUtils;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.annotation.PersistenceConstructor;
@@ -16,38 +17,45 @@ import java.util.function.Function;
  */
 @Document
 public class Report implements AppScoped {
-    private String id;
-    @Indexed
-    private String app;
-    private JSONObject content;
+    @NotNull @Indexed private final String app;
+    @NotNull private final String id;
+    @NotNull private final JSONObject content;
 
     @PersistenceConstructor
-    public Report() {
+    private Report(@NotNull String id, @NotNull String app, @NotNull JSONObject content) {
+        this.id = id;
+        this.app = app;
+        this.content = content;
     }
 
-    public Report(JSONObject content, String app) {
+    public Report(@NotNull JSONObject content, @NotNull String app) {
         this.content = content;
         this.app = app;
-        id = content == null ? null : getValueSafe("REPORT_ID", content::getString, "");
+        id = getValueSafe("REPORT_ID", content::getString, "");
     }
 
+    @NotNull
     public JSONObject getContent() {
         return content;
     }
 
+    @NotNull
     public Date getDate() {
         return ReportUtils.getDateFromString(getValueSafe("USER_CRASH_DATE", content::getString, ""));
     }
 
+    @NotNull
     public String getId() {
         return id;
     }
 
+    @NotNull
     @Override
     public String getApp() {
         return app;
     }
 
+    @NotNull
     public String getStacktrace() {
         return getValueSafe("STACK_TRACE", content::getString, "");
     }
@@ -56,27 +64,33 @@ public class Report implements AppScoped {
         return getValueSafe("APP_VERSION_CODE", content::getInt, -1);
     }
 
+    @NotNull
     public String getVersionName() {
         return getValueSafe("APP_VERSION_NAME", content::getString, "");
     }
 
+    @NotNull
     public String getUserEmail() {
         return getValueSafe("USER_EMAIL", content::getString, "");
     }
 
+    @NotNull
     public String getUserComment() {
         return getValueSafe("USER_COMMENT", content::getString, "");
     }
 
+    @NotNull
     public String getAndroidVersion() {
         return getValueSafe("ANDROID_VERSION", content::getString, "");
     }
 
+    @NotNull
     public String getPhoneModel() {
         return getValueSafe("PHONE_MODEL", content::getString, "");
     }
 
-    private <T> T getValueSafe(String key, Function<String, T> function, T defaultValue) {
+    @NotNull
+    private <T> T getValueSafe(@NotNull String key, @NotNull Function<String, T> function, @NotNull T defaultValue) {
         try {
             return function.apply(key);
         } catch (JSONException e) {

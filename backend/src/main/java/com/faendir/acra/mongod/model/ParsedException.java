@@ -1,7 +1,8 @@
 package com.faendir.acra.mongod.model;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.data.annotation.PersistenceConstructor;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,18 +15,21 @@ import java.util.stream.Collectors;
  * @author Lukas
  * @since 17.06.2017
  */
-@Document
 public class ParsedException {
-    private String exceptionClass;
-    private String message;
-    private List<StackTraceElement> stacktraceElements;
-    private ParsedException cause;
+    @NotNull private final String exceptionClass;
+    @NotNull private final String message;
+    @NotNull private final List<StackTraceElement> stacktraceElements;
+    @Nullable private final ParsedException cause;
 
     @PersistenceConstructor
-    public ParsedException(){
+    private ParsedException(@NotNull String exceptionClass, @NotNull String message, @NotNull List<StackTraceElement> stacktraceElements, @Nullable ParsedException cause) {
+        this.exceptionClass = exceptionClass;
+        this.message = message;
+        this.stacktraceElements = stacktraceElements;
+        this.cause = cause;
     }
 
-    public ParsedException(String stacktrace) {
+    public ParsedException(@NotNull String stacktrace) {
         List<String> lines = new ArrayList<>(Arrays.asList(stacktrace.split("\r?\n")));
         Pattern headLinePattern = Pattern.compile("^([\\w.]+)(:(.*))?$");
         Pattern tracePattern = Pattern.compile("^\\s*at\\s+([\\w.$_]+)\\.([\\w$_]+)\\((.*)\\)$");
@@ -70,33 +74,15 @@ public class ParsedException {
         }
     }
 
-    public String getExceptionClass() {
-        return exceptionClass;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public List<StackTraceElement> getStacktraceElements() {
-        return stacktraceElements;
-    }
-
-    public ParsedException getCause() {
-        return cause;
-    }
-
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
         ParsedException that = (ParsedException) o;
 
-        if (!exceptionClass.equals(that.exceptionClass)) return false;
-        if (!message.equals(that.message)) return false;
-        if (!stacktraceElements.equals(that.stacktraceElements)) return false;
-        return cause != null ? cause.equals(that.cause) : that.cause == null;
+        return exceptionClass.equals(that.exceptionClass) && message.equals(that.message) && stacktraceElements.equals(that.stacktraceElements)
+                && (cause != null ? cause.equals(that.cause) : that.cause == null);
     }
 
     @Override

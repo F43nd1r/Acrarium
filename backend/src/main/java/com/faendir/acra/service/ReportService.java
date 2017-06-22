@@ -1,6 +1,7 @@
 package com.faendir.acra.service;
 
 import com.faendir.acra.mongod.data.DataManager;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -27,23 +28,25 @@ import java.util.List;
  */
 @RestController
 public class ReportService {
-    private final DataManager dataManager;
+    @NotNull private final DataManager dataManager;
 
     @Autowired
-    public ReportService(DataManager dataManager) {
+    public ReportService(@NotNull DataManager dataManager) {
         this.dataManager = dataManager;
     }
 
     @PreAuthorize("hasRole('REPORTER')")
     @RequestMapping(value = "/report", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void report(@RequestBody String content, Principal principal) throws IOException {
-        JSONObject jsonObject = new JSONObject(content);
-        dataManager.newReport(principal.getName(), jsonObject);
+    public void report(@NotNull @RequestBody String content, @NotNull Principal principal) throws IOException {
+        if (!"".equals(content)) {
+            JSONObject jsonObject = new JSONObject(content);
+            dataManager.newReport(principal.getName(), jsonObject);
+        }
     }
 
     @PreAuthorize("hasRole('REPORTER')")
     @RequestMapping(value = "/report", consumes = "multipart/mixed")
-    public ResponseEntity report(MultipartHttpServletRequest request, Principal principal) throws IOException, ServletException {
+    public ResponseEntity report(@NotNull MultipartHttpServletRequest request, @NotNull Principal principal) throws IOException, ServletException {
         MultiValueMap<String, MultipartFile> fileMap = request.getMultiFileMap();
         List<MultipartFile> files = fileMap.get(null);
         JSONObject jsonObject = null;
@@ -56,10 +59,10 @@ public class ReportService {
                 attachments.add(file);
             }
         }
-        if(jsonObject != null) {
+        if (jsonObject != null) {
             dataManager.newReport(principal.getName(), jsonObject, attachments);
             return ResponseEntity.ok().build();
-        }else {
+        } else {
             return ResponseEntity.badRequest().build();
         }
     }

@@ -5,6 +5,7 @@ import com.faendir.acra.mongod.model.ReportInfo;
 import com.faendir.acra.util.Style;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.VerticalLayout;
+import org.jetbrains.annotations.NotNull;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberTickUnitSource;
@@ -38,33 +39,34 @@ public class StatisticsTab extends HorizontalLayout implements DataManager.Liste
     public static final String CAPTION = "Statistics";
     private static final Color BACKGROUND_GRAY = new Color(0xfafafa); //vaadin gray
     private static final Color BLUE = new Color(0x197de1); //vaadin blue
-    private final VerticalLayout timeLayout;
-    private final IntStepper numberField;
-    private final String app;
-    private final DataManager dataManager;
-    private JFreeChartWrapper timeChart;
-    private JFreeChartWrapper versionChart;
+    @NotNull private final VerticalLayout timeLayout;
+    @NotNull private final IntStepper numberField;
+    @NotNull private final String app;
+    @NotNull private final DataManager dataManager;
+    @NotNull private JFreeChartWrapper timeChart;
+    @NotNull private JFreeChartWrapper versionChart;
 
-    public StatisticsTab(String app, DataManager dataManager) {
+    public StatisticsTab(@NotNull String app, @NotNull DataManager dataManager) {
         this.app = app;
         this.dataManager = dataManager;
         setCaption(CAPTION);
         numberField = new IntStepper("Days");
         numberField.setValue(30);
         numberField.setMinValue(5);
-        numberField.addValueChangeListener(e -> setTimeChart(e.getValue(), dataManager.getReportsForApp(app)));
+        numberField.addValueChangeListener(e -> timeChart = createTimeChart(e.getValue(), dataManager.getReportsForApp(app)));
         timeLayout = new VerticalLayout(numberField);
         Style.NO_PADDING.apply(timeLayout);
         addComponent(timeLayout);
         List<ReportInfo> reportInfos = dataManager.getReportsForApp(app);
-        setTimeChart(30, reportInfos);
-        setVersionChart(reportInfos);
+        timeChart = createTimeChart(30, reportInfos);
+        versionChart = createVersionChart(reportInfos);
         setSizeFull();
         addAttachListener(e -> dataManager.addListener(this, ReportInfo.class));
         addDetachListener(e -> dataManager.removeListener(this));
     }
 
-    private void setTimeChart(int age, List<ReportInfo> reports) {
+    @NotNull
+    private JFreeChartWrapper createTimeChart(int age, @NotNull List<ReportInfo> reports) {
         TimeSeries series = new TimeSeries("Date");
         series.setMaximumItemAge(age);
         series.add(new Day(new Date()), 0);
@@ -93,10 +95,11 @@ public class StatisticsTab extends HorizontalLayout implements DataManager.Liste
         barRenderer.setMargin(0.2);
         JFreeChartWrapper wrapper = new JFreeChartWrapper(chart);
         timeLayout.replaceComponent(timeChart, wrapper);
-        timeChart = wrapper;
+        return wrapper;
     }
 
-    private void setVersionChart(List<ReportInfo> reports) {
+    @NotNull
+    private JFreeChartWrapper createVersionChart(@NotNull List<ReportInfo> reports) {
         DefaultPieDataset dataset = new DefaultPieDataset();
         for (ReportInfo report : reports) {
             String version = report.getAndroidVersion();
@@ -124,16 +127,16 @@ public class StatisticsTab extends HorizontalLayout implements DataManager.Liste
         ((List<String>) dataset.getKeys()).forEach(key -> plot.setExplodePercent(key, 0.01));
         JFreeChartWrapper wrapper = new JFreeChartWrapper(chart);
         replaceComponent(versionChart, wrapper);
-        versionChart = wrapper;
+        return wrapper;
     }
 
     @Override
-    public void onChange(ReportInfo reportInfo) {
+    public void onChange(@NotNull ReportInfo reportInfo) {
         if (reportInfo.getApp().equals(app)) {
             getUI().access(() -> {
                 List<ReportInfo> reportInfos = dataManager.getReportsForApp(app);
-                setTimeChart(numberField.getValue(), reportInfos);
-                setVersionChart(reportInfos);
+                timeChart = createTimeChart(numberField.getValue(), reportInfos);
+                versionChart = createVersionChart(reportInfos);
             });
         }
     }

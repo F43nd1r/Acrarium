@@ -3,9 +3,10 @@ package com.faendir.acra.mongod.user;
 import com.faendir.acra.mongod.data.DataManager;
 import com.faendir.acra.mongod.model.Permission;
 import com.faendir.acra.mongod.model.User;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -23,39 +24,41 @@ public class UserManager {
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
     public static final String ROLE_USER = "ROLE_USER";
 
-    private final UserRepository userRepository;
-    private final DataManager dataManager;
-    private final String defaultUser;
-    private final String defaultPassword;
-    private final PasswordEncoder passwordEncoder;
+    @NotNull private final UserRepository userRepository;
+    @NotNull private final DataManager dataManager;
+    @NotNull private final String defaultUser;
+    @NotNull private final String defaultPassword;
+    @NotNull private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserManager(UserRepository userRepository, DataManager dataManager, @Value("${security.user.name}") String defaultUser, @Value("${security.user.password}") String defaultPassword) {
+    public UserManager(@NotNull UserRepository userRepository, @NotNull DataManager dataManager, @NotNull PasswordEncoder passwordEncoder,
+                       @NotNull @Value("${security.user.name}") String defaultUser, @NotNull @Value("${security.user.password}") String defaultPassword) {
         this.userRepository = userRepository;
         this.dataManager = dataManager;
+        this.passwordEncoder = passwordEncoder;
         this.defaultUser = defaultUser;
         this.defaultPassword = defaultPassword;
-        passwordEncoder = new BCryptPasswordEncoder();
     }
 
-    private void ensureValidPermissions(User user) {
+    private void ensureValidPermissions(@NotNull User user) {
         user.getPermissions().removeIf(permission -> dataManager.getApp(permission.getApp()) == null);
         dataManager.getApps().stream().filter(app -> user.getPermissions().stream().noneMatch(permission -> permission.getApp().equals(app.getId())))
-                .forEach(app -> user.getPermissions().add(new Permission(app.getId(), user.getRoles().contains(ROLE_ADMIN) ? Permission.Level.ADMIN : Permission.Level.NONE)));
+                   .forEach(app -> user.getPermissions().add(new Permission(app.getId(), user.getRoles().contains(ROLE_ADMIN) ? Permission.Level.ADMIN : Permission.Level.NONE)));
     }
 
-    public User getUser(String username) {
+    @Nullable
+    public User getUser(@NotNull String username) {
         User user = userRepository.findOne(username);
         if (user == null && defaultUser.equals(username)) {
             user = getDefaultUser();
         }
-        if(user != null) {
+        if (user != null) {
             ensureValidPermissions(user);
         }
         return user;
     }
 
-    public boolean createUser(String username, String password) {
+    public boolean createUser(@NotNull String username, @NotNull String password) {
         if (userRepository.exists(username)) {
             return false;
         }
@@ -65,11 +68,11 @@ public class UserManager {
         return true;
     }
 
-    public boolean checkPassword(User user, String password) {
+    public boolean checkPassword(@Nullable User user, @NotNull String password) {
         return user != null && passwordEncoder.matches(password, user.getPassword());
     }
 
-    public boolean changePassword(User user, String oldPassword, String newPassword) {
+    public boolean changePassword(@NotNull User user, @NotNull String oldPassword, @NotNull String newPassword) {
         if (checkPassword(user, oldPassword)) {
             user.setPassword(newPassword);
             userRepository.save(user);
@@ -78,28 +81,26 @@ public class UserManager {
         return false;
     }
 
-    public void setAdmin(User user, boolean admin) {
-        if (admin) user.getRoles().add(ROLE_ADMIN);
-        else user.getRoles().remove(ROLE_ADMIN);
+    public void setAdmin(@NotNull User user, boolean admin) {
+        if (admin) {
+            user.getRoles().add(ROLE_ADMIN);
+        } else {
+            user.getRoles().remove(ROLE_ADMIN);
+        }
         userRepository.save(user);
     }
 
-    public User setPermission(User user, String app, Permission.Level level) {
+    public void setPermission(@NotNull User user, @NotNull String app, @NotNull Permission.Level level) {
         Optional<Permission> permission = user.getPermissions().stream().filter(p -> p.getApp().equals(app)).findAny();
         if (permission.isPresent()) {
             permission.get().setLevel(level);
         } else {
             user.getPermissions().add(new Permission(app, level));
         }
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
-    public boolean hasPermission(User user, String app, Permission.Level level) {
-        ensureValidPermissions(user);
-        Optional<Permission> optional = user.getPermissions().stream().filter(permission -> permission.getApp().equals(app)).findAny();
-        return optional.isPresent() && optional.get().getLevel().ordinal() >= level.ordinal();
-    }
-
+    @NotNull
     public List<User> getUsers() {
         List<User> users = userRepository.findAll();
         if (users.stream().noneMatch(user -> user.getUsername().equals(defaultUser))) {
@@ -109,6 +110,7 @@ public class UserManager {
         return users;
     }
 
+    @NotNull
     private User getDefaultUser() {
         return new User(defaultUser, passwordEncoder.encode(defaultPassword), Arrays.asList(ROLE_USER, ROLE_ADMIN));
     }
