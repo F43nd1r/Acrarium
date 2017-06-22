@@ -10,12 +10,13 @@ import com.faendir.acra.ui.view.annotation.RequiresRole;
 import com.faendir.acra.ui.view.base.MyCheckBox;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.NamedView;
+import com.faendir.acra.ui.view.base.ValidatedField;
 import com.faendir.acra.util.Style;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.UserError;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
@@ -52,7 +53,7 @@ public class UserManagerView extends NamedView {
         userGrid.setSelectionMode(Grid.SelectionMode.NONE);
         userGrid.addColumn(User::getUsername, "Username");
         userGrid.addComponentColumn(user -> new MyCheckBox(user.getRoles().contains(UserManager.ROLE_ADMIN), !user.getUsername().equals(SecurityUtils.getUsername()),
-                e -> userManager.setAdmin(user, e.getValue()))).setCaption("Admin");
+                                                           e -> userManager.setAdmin(user, e.getValue()))).setCaption("Admin");
         for (App app : dataManager.getApps()) {
             userGrid.addComponentColumn(user -> {
                 Permission permission = user.getPermissions().stream().filter(p -> p.getApp().equals(app.getId())).findAny().orElseThrow(IllegalStateException::new);
@@ -66,8 +67,6 @@ public class UserManagerView extends NamedView {
         userGrid.setRowHeight(42);
         Button newUser = new Button("New User", e -> newUser());
         VerticalLayout layout = new VerticalLayout(userGrid, newUser);
-        layout.setExpandRatio(userGrid, 1);
-        layout.setSizeFull();
         Style.NO_PADDING.apply(layout);
         setCompositionRoot(layout);
         userGrid.setWidth(100, Unit.PERCENTAGE);
@@ -77,24 +76,23 @@ public class UserManagerView extends NamedView {
 
     private void newUser() {
         Window window = new Window("New User");
-        TextField name = new TextField("Username");
-        PasswordField password = new PasswordField("Password");
-        PasswordField repeatPassword = new PasswordField("Repeat Password");
+        ValidatedField<String, TextField> name = new ValidatedField<>(new TextField("Username")).addValidator(s -> !s.isEmpty(), "Username cannot be empty")
+                .addValidator(s -> userManager.getUser(s) == null, "User already exists");
+        ValidatedField<String, PasswordField> password = new ValidatedField<>(new PasswordField("Password")).addValidator(s -> !s.isEmpty(), "Password cannot be empty");
+        ValidatedField<String, PasswordField> repeatPassword = new ValidatedField<>(new PasswordField("Repeat Password"))
+                .addValidator(s -> s.equals(password.getValue()), "Passwords do not match");
         Button create = new Button("Create");
         create.addClickListener(e -> {
-            if (password.getValue().equals(repeatPassword.getValue())) {
+            if (name.isValid() && password.isValid() && repeatPassword.isValid()) {
                 userManager.createUser(name.getValue().toLowerCase(), password.getValue());
                 userGrid.setItems(userManager.getUsers());
                 window.close();
-            } else {
-                repeatPassword.setComponentError(new UserError("Passwords do not match"));
             }
-
         });
-        VerticalLayout layout = new VerticalLayout(name, password, repeatPassword, create);
+        create.setWidth(100, Unit.PERCENTAGE);
+        FormLayout layout = new FormLayout(name.getField(), password.getField(), repeatPassword.getField(), create);
         window.setContent(layout);
         window.center();
         UI.getCurrent().addWindow(window);
     }
-
 }

@@ -122,13 +122,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @NotNull
     @Bean
-    public SecureRandom secureRandom() {
+    public static SecureRandom secureRandom() {
         return new SecureRandom();
     }
 
     @NotNull
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public static PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
 }

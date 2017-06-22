@@ -58,14 +58,13 @@ public class UserManager {
         return user;
     }
 
-    public boolean createUser(@NotNull String username, @NotNull String password) {
+    public void createUser(@NotNull String username, @NotNull String password) {
         if (userRepository.exists(username)) {
-            return false;
+            throw new IllegalArgumentException("Username already exists");
         }
         User user = new User(username, passwordEncoder.encode(password), Collections.singleton(ROLE_USER));
         ensureValidPermissions(user);
         userRepository.save(user);
-        return true;
     }
 
     public boolean checkPassword(@Nullable User user, @NotNull String password) {

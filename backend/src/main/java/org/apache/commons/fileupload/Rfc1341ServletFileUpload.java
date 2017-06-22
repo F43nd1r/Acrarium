@@ -116,7 +116,7 @@ public class Rfc1341ServletFileUpload extends ServletFileUpload {
          * Whether we have seen the end of the file.
          */
         private boolean eof;
-        private long fileSizeMax;
+        private final long fileSizeMax;
         /**
          * Creates a new instance.
          *

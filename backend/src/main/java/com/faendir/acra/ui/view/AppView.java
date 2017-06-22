@@ -27,10 +27,9 @@ import java.util.List;
  * @author Lukas
  * @since 13.05.2017
  */
-@SpringView(name = AppView.NAME)
+@SpringView(name = "app")
 @RequiresAppPermission(Permission.Level.VIEW)
 public class AppView extends NamedView {
-    static final String NAME = "app";
     private static final List<String> CAPTIONS = Arrays.asList(BugTab.CAPTION, ReportTab.CAPTION, StatisticsTab.CAPTION,
             DeObfuscationTab.CAPTION);
 

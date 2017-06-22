@@ -11,6 +11,7 @@ import com.vaadin.server.VaadinSession;
 /**
  * A custom {@link SecurityContextHolderStrategy} that stores the {@link SecurityContext} in the Vaadin Session.
  */
+@SuppressWarnings("WeakerAccess")
 public class VaadinSessionSecurityContextHolderStrategy implements SecurityContextHolderStrategy {
 
     @Override
