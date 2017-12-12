@@ -55,6 +55,7 @@ public class BackendUI extends UI {
         } else {
             showLogin();
         }
+        //applicationContext.getBean(ToSqlMigrator.class).migrate();
     }
 
     private void login(@NotNull String username, @NotNull String password) {

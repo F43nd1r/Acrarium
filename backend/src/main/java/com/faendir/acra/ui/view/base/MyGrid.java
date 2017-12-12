@@ -1,6 +1,7 @@
 package com.faendir.acra.ui.view.base;
 
 import com.vaadin.data.ValueProvider;
+import com.vaadin.data.provider.DataProvider;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.renderers.AbstractRenderer;
 import com.vaadin.ui.renderers.TextRenderer;
@@ -14,6 +15,10 @@ import java.util.Collection;
  * @since 14.05.2017
  */
 public class MyGrid<T> extends Grid<T> {
+    public <F> MyGrid(String caption, DataProvider<T, F> dataProvider) {
+        super(caption, dataProvider);
+        setSizeFull();
+    }
 
     public MyGrid(@Nullable String caption, @NotNull Collection<T> items) {
         super(caption, items);
@@ -27,7 +32,18 @@ public class MyGrid<T> extends Grid<T> {
 
     @NotNull
     public <R> Grid.Column<T, R> addColumn(@NotNull ValueProvider<T, R> valueProvider, @NotNull AbstractRenderer<? super T, ? super R> renderer, @NotNull String caption) {
-        return addColumn(valueProvider, renderer).setId(caption).setCaption(caption);
+        return addColumn(valueProvider, renderer).setId(caption).setCaption(caption).setSortable(false);
+    }
+
+    @NotNull
+    public <R> Grid.Column<T, R> addColumn(@NotNull ValueProvider<T, R> valueProvider, @NotNull String id, @NotNull String caption) {
+        return addColumn(valueProvider, new TextRenderer(), id, caption);
+    }
+
+    @NotNull
+    public <R> Grid.Column<T, R> addColumn(@NotNull ValueProvider<T, R> valueProvider, @NotNull AbstractRenderer<? super T, ? super R> renderer, @NotNull String id,
+                                           @NotNull String caption) {
+        return addColumn(valueProvider, renderer).setId(id).setCaption(caption);
     }
 
     @Override

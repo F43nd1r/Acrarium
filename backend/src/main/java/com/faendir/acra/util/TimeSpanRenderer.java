@@ -13,8 +13,6 @@ import java.util.Date;
  * @since 26.05.2017
  */
 public class TimeSpanRenderer extends TextRenderer {
-    public TimeSpanRenderer() {
-    }
 
     @Override
     public JsonValue encode(@Nullable Object value) {

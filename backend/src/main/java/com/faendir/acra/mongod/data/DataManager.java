@@ -6,8 +6,10 @@ import com.faendir.acra.mongod.model.ParsedException;
 import com.faendir.acra.mongod.model.ProguardMapping;
 import com.faendir.acra.mongod.model.Report;
 import com.faendir.acra.mongod.model.ReportInfo;
+import com.faendir.acra.mongod.util.BufferedMongoDataProvider;
 import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.gridfs.GridFSDBFile;
+import com.mongodb.client.gridfs.model.GridFSFile;
+import com.vaadin.data.provider.DataProvider;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,12 +17,11 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.gridfs.GridFsResource;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,9 +36,12 @@ import java.io.StringWriter;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,10 +51,6 @@ import java.util.stream.Stream;
  */
 @Component
 public class DataManager {
-    private static final String APP_REPORT_CACHE = "appReport";
-    private static final String APP_CACHE = "app";
-    private static final String BUG_REPORT_CACHE = "bugReport";
-    private static final String APP_BUG_CACHE = "appBug";
     @NotNull private final MappingRepository mappingRepository;
     @NotNull private final ReportRepository reportRepository;
     @NotNull private final AppRepository appRepository;
@@ -75,14 +75,12 @@ public class DataManager {
         this.listenerExecutor = Executors.newSingleThreadExecutor();
     }
 
-    @CacheEvict(value = APP_CACHE, allEntries = true)
     public synchronized void createNewApp(@NotNull String name) {
         byte[] bytes = new byte[12];
         secureRandom.nextBytes(bytes);
         appRepository.save(new App(name, Base64Utils.encodeToString(bytes)));
     }
 
-    @Cacheable(value = APP_CACHE)
     @NotNull
     public List<App> getApps() {
         return appRepository.findAll();
@@ -90,19 +88,19 @@ public class DataManager {
 
     @Nullable
     public App getApp(@NotNull String id) {
-        return appRepository.findOne(id);
+        return appRepository.findById(id).orElse(null);
     }
 
-    @CacheEvict(value = APP_CACHE, allEntries = true)
     public synchronized void deleteApp(@NotNull String id) {
-        appRepository.delete(id);
+        appRepository.deleteById(id);
         getReportsForApp(id).forEach(this::deleteReport);
-        mappingRepository.delete(getMappings(id));
+        mappingRepository.deleteAll(getMappings(id));
     }
 
     @NotNull
-    public List<GridFSDBFile> getAttachments(@NotNull String report) {
-        return gridFsTemplate.find(new Query(Criteria.where("metadata.reportId").is(report)));
+    public List<Pair<GridFSFile, Supplier<GridFsResource>>> getAttachments(@NotNull String report) {
+        return gridFsTemplate.find(new Query(Criteria.where("metadata.reportId").is(report)))
+                .map(file -> Pair.of(file, (Supplier<GridFsResource>) () -> gridFsTemplate.getResource(file.getFilename()))).into(new ArrayList<>());
     }
 
     public synchronized void addMapping(@NotNull String app, int version, @NotNull String mappings) {
@@ -111,7 +109,7 @@ public class DataManager {
 
     @Nullable
     private ProguardMapping getMapping(@NotNull String app, int version) {
-        return mappingRepository.findOne(new ProguardMapping.MetaData(app, version));
+        return mappingRepository.findById(new ProguardMapping.MetaData(app, version)).orElse(null);
     }
 
     @NotNull
@@ -123,7 +121,6 @@ public class DataManager {
         newReport(app, content, Collections.emptyList());
     }
 
-    @CacheEvict(value = APP_REPORT_CACHE, key = "#a0")
     public synchronized void newReport(@NotNull String app, @NotNull JSONObject content, @NotNull List<MultipartFile> attachments) {
         Report report = reportRepository.save(new Report(content, app));
         for (MultipartFile a : attachments) {
@@ -137,15 +134,19 @@ public class DataManager {
         notifyListeners(info);
         Bug bug = getBugs(app).stream().filter(b -> matches(b, info)).findAny().orElseGet(() -> new Bug(info.getApp(), info.getStacktrace(), info.getVersionCode()));
         bug.getReportIds().add(info.getId());
+        bug.setLastReport(info.getDate());
         saveBug(bug);
     }
 
-    @Cacheable(APP_REPORT_CACHE)
     @NotNull
     public List<ReportInfo> getReportsForApp(@NotNull String app) {
         try (Stream<Report> stream = reportRepository.streamAllByApp(app)) {
             return stream.map(ReportInfo::new).collect(Collectors.toList());
         }
+    }
+
+    public DataProvider<ReportInfo, Void> getLazyReportsForApp(@NotNull String app) {
+        return BufferedMongoDataProvider.of(pageable -> reportRepository.findAllByApp(app, pageable), ReportInfo::new);
     }
 
     public long reportCountForApp(@NotNull String app) {
@@ -154,12 +155,11 @@ public class DataManager {
 
     @Nullable
     public Report getReport(@NotNull String id) {
-        return reportRepository.findOne(id);
+        return reportRepository.findById(id).orElse(null);
     }
 
-    @CacheEvict(value = APP_REPORT_CACHE, key = "#a0.app")
     public synchronized void deleteReport(@NotNull ReportInfo report) {
-        reportRepository.delete(report.getId());
+        reportRepository.deleteById(report.getId());
         gridFsTemplate.delete(new Query(Criteria.where("metadata.reportId").is(report.getId())));
         bugRepository.findByReportIdsContains(report.getId()).forEach(bug -> {
             bug.getReportIds().remove(report.getId());
@@ -173,33 +173,32 @@ public class DataManager {
     }
 
     @SuppressWarnings("WeakerAccess")
-    @CacheEvict(value = APP_BUG_CACHE, key = "#a0.app")
     public void deleteBug(@NotNull Bug bug) {
         bugRepository.delete(bug);
         notifyListeners(bug);
     }
 
     @SuppressWarnings("WeakerAccess")
-    @Caching(evict = {@CacheEvict(value = APP_BUG_CACHE, key = "#a0.app"), @CacheEvict(value = BUG_REPORT_CACHE, key = "#a0.id")})
-    @NotNull
-    public Bug saveBug(@NotNull Bug bug) {
+    public void saveBug(@NotNull Bug bug) {
         Bug b = bugRepository.save(bug);
         notifyListeners(bug);
-        return b;
     }
 
     @NotNull
-    @Cacheable(value = APP_BUG_CACHE)
     public List<Bug> getBugs(@NotNull String app) {
         return bugRepository.findByApp(app);
     }
 
-    @Cacheable(value = BUG_REPORT_CACHE, key = "#a0.id")
-    @NotNull
-    public List<ReportInfo> getReportsForBug(@NotNull Bug bug) {
-        try (Stream<Report> stream = reportRepository.streamAllByIdIn(bug.getReportIds())) {
-            return stream.map(ReportInfo::new).collect(Collectors.toList());
+    public DataProvider<Bug, Void> getLazyBugs(@NotNull String app, boolean includeSolved) {
+        if (includeSolved) {
+            return BufferedMongoDataProvider.of(pageable -> bugRepository.findAllByApp(app, pageable));
+        } else {
+            return BufferedMongoDataProvider.of(pageable -> bugRepository.findAllByAppAndSolvedIsFalse(app, pageable));
         }
+    }
+
+    public DataProvider<ReportInfo, Void> getLazyReportsForBug(@NotNull Bug bug) {
+        return BufferedMongoDataProvider.of(pageable -> reportRepository.findAllByIdIn(bug.getReportIds(), pageable), ReportInfo::new);
     }
 
     public long reportCountForBug(@NotNull Bug bug) {
@@ -207,14 +206,21 @@ public class DataManager {
     }
 
     public void rebuildBugs(@NotNull String app) {
-        getBugs(app).forEach(this::deleteBug);
-        List<Bug> bugs = new ArrayList<>();
-        getReportsForApp(app).forEach(reportInfo -> bugs.stream().filter(bug -> matches(bug, reportInfo)).findAny().orElseGet(() -> {
-            Bug bug = new Bug(reportInfo.getApp(), reportInfo.getStacktrace(), reportInfo.getVersionCode());
-            bugs.add(bug);
-            return bug;
-        }).getReportIds().add(reportInfo.getId()));
-        bugs.forEach(this::saveBug);
+        bugRepository.deleteAll();
+        Map<Bug, List<ReportInfo>> mapping = new HashMap<>();
+        getReportsForApp(app).forEach(reportInfo -> mapping.entrySet().stream().filter(entry -> matches(entry.getKey(), reportInfo)).map(Map.Entry::getValue).findAny()
+                .orElseGet(() -> {
+                    List<ReportInfo> list = new ArrayList<>();
+                    mapping.put(new Bug(reportInfo.getApp(), reportInfo.getStacktrace(), reportInfo.getVersionCode()), list);
+                    return list;
+                })
+                .add(reportInfo));
+        mapping.forEach((bug, reports) -> {
+            reports.forEach(report->bug.getReportIds().add(report.getId()));
+            bug.setLastReport(ReportUtils.getLastReportDate(reports));
+        });
+        bugRepository.insert(mapping.keySet());
+        mapping.keySet().stream().findAny().ifPresent(this::notifyListeners);
     }
 
     public boolean matches(@NotNull Bug bug, @NotNull ReportInfo info) {
@@ -275,5 +281,4 @@ public class DataManager {
             }
         }
     }
-
 }

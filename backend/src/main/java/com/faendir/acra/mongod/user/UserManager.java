@@ -48,18 +48,16 @@ public class UserManager {
 
     @Nullable
     public User getUser(@NotNull String username) {
-        User user = userRepository.findOne(username);
-        if (user == null && defaultUser.equals(username)) {
-            user = getDefaultUser();
+        Optional<User> user = userRepository.findById(username);
+        if (!user.isPresent() && defaultUser.equals(username)) {
+            user = Optional.of(getDefaultUser());
         }
-        if (user != null) {
-            ensureValidPermissions(user);
-        }
-        return user;
+        user.ifPresent(this::ensureValidPermissions);
+        return user.orElse(null);
     }
 
     public void createUser(@NotNull String username, @NotNull String password) {
-        if (userRepository.exists(username)) {
+        if (userRepository.existsById(username)) {
             throw new IllegalArgumentException("Username already exists");
         }
         User user = new User(username, passwordEncoder.encode(password), Collections.singleton(ROLE_USER));

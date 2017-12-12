@@ -11,6 +11,6 @@ import org.jetbrains.annotations.NotNull;
  */
 public class ReportTab extends ReportList {
     public ReportTab(@NotNull String app, @NotNull NavigationManager navigationManager, @NotNull DataManager dataManager) {
-        super(app, navigationManager, dataManager, () -> dataManager.getReportsForApp(app), reportInfo -> reportInfo.getApp().equals(app));
+        super(app, navigationManager, dataManager, dataManager.getLazyReportsForApp(app), reportInfo -> reportInfo.getApp().equals(app));
     }
 }

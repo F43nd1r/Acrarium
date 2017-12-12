@@ -6,7 +6,7 @@ import com.faendir.acra.mongod.model.Report;
 import com.faendir.acra.ui.view.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.view.base.NamedView;
 import com.faendir.acra.util.Style;
-import com.mongodb.gridfs.GridFSDBFile;
+import com.mongodb.client.gridfs.model.GridFSFile;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.StreamResource;
@@ -23,12 +23,16 @@ import com.vaadin.ui.VerticalLayout;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.gridfs.GridFsResource;
+import org.springframework.data.util.Pair;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -81,10 +85,16 @@ public class ReportView extends NamedView {
     public void enter(@NotNull ViewChangeListener.ViewChangeEvent event) {
         Report report = dataManager.getReport(event.getParameters());
         assert report != null;
-        List<GridFSDBFile> attachmentList = dataManager.getAttachments(report.getId());
+        List<Pair<GridFSFile, Supplier<GridFsResource>>> attachmentList = dataManager.getAttachments(report.getId());
         HorizontalLayout attachments = new HorizontalLayout(attachmentList.stream().map(file -> {
-            Button button = new Button(file.getFilename());
-            new FileDownloader(new StreamResource(file::getInputStream, file.getFilename())).extend(button);
+            Button button = new Button(file.getFirst().getFilename());
+            new FileDownloader(new StreamResource(() -> {
+                try {
+                    return file.getSecond().get().getInputStream();
+                } catch (IOException e) {
+                    return null;
+                }
+            }, file.getFirst().getFilename())).extend(button);
             return button;
         }).toArray(Component[]::new));
         Style.apply(attachments, Style.MARGIN_BOTTOM, Style.MARGIN_TOP, Style.MARGIN_LEFT, Style.MARGIN_RIGHT);
