@@ -1,0 +1,17 @@
+/* This file is automatically managed and will be overwritten from time to time. */
+/* Do not manually edit this file. */
+
+/* Provided by stepper-2.4.0.jar */
+@import "../../..//VAADIN/addons/stepper/stepper.scss";
+
+
+/* Provided by stepper-2.4.0.jar */
+@import "../../../VAADIN/addons/stepper/stepper.scss";
+
+
+/* Import and include this mixin into your project theme to include the addon themes */
+@mixin addons {
+	@include stepper;
+	@include stepper;
+}
+
