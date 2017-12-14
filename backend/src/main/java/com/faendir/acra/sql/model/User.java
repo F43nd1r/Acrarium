@@ -1,13 +1,15 @@
-package com.faendir.acra.mongod.model;
+package com.faendir.acra.sql.model;
 
-import org.jetbrains.annotations.NotNull;
-import org.springframework.data.annotation.Id;
+import org.springframework.lang.NonNull;
 import org.springframework.data.annotation.PersistenceConstructor;
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,52 +20,51 @@ import java.util.stream.Stream;
  * @author Lukas
  * @since 20.05.2017
  */
-@Document
+@Entity
 public class User implements UserDetails {
-    @NotNull @Id private final String username;
-    @NotNull private final Set<String> roles;
-    @NotNull private final Set<Permission> permissions;
-    @NotNull private String password;
+    @Id private String username;
+    @ElementCollection(fetch = FetchType.EAGER) private Set<String> roles;
+    @ElementCollection(fetch = FetchType.EAGER) private Set<Permission> permissions;
+    private String password;
 
     @PersistenceConstructor
-    private User(@NotNull String username, @NotNull String password, @NotNull Set<String> roles, @NotNull Set<Permission> permissions) {
+    User() {
+    }
+
+    public User(@NonNull String username, @NonNull String password, @NonNull Collection<String> roles) {
         this.username = username;
         this.password = password;
-        this.roles = roles;
-        this.permissions = permissions;
+        this.roles = new HashSet<>(roles);
+        this.permissions = new HashSet<>();
     }
 
-    public User(@NotNull String username, @NotNull String password, @NotNull Collection<String> roles) {
-        this(username, password, new HashSet<>(roles), new HashSet<>());
-    }
-
-    @NotNull
+    @NonNull
     public Set<Permission> getPermissions() {
         return permissions;
     }
 
-    @NotNull
+    @NonNull
     public Set<String> getRoles() {
         return roles;
     }
 
-    public void setPassword(@NotNull String password) {
-        this.password = password;
-    }
-
-    @NotNull
+    @NonNull
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Stream.concat(permissions.stream(), roles.stream().map(SimpleGrantedAuthority::new)).collect(Collectors.toList());
     }
 
-    @NotNull
+    @NonNull
     @Override
     public String getPassword() {
         return password;
     }
 
-    @NotNull
+    public void setPassword(@NonNull String password) {
+        this.password = password;
+    }
+
+    @NonNull
     @Override
     public String getUsername() {
         return username;

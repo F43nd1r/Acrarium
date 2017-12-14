@@ -1,7 +1,7 @@
 package com.faendir.acra.security;
 
 import com.vaadin.server.VaadinService;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.core.context.SecurityContextImpl;
@@ -35,7 +35,7 @@ public class VaadinSessionSecurityContextHolderStrategy implements SecurityConte
         getSession().setAttribute(SecurityContext.class, context);
     }
 
-    @NotNull
+    @NonNull
     @Override
     public SecurityContext createEmptyContext() {
         return new SecurityContextImpl();

@@ -1,8 +1,9 @@
 package com.faendir.acra.ui.view.user;
 
-import com.faendir.acra.mongod.model.User;
-import com.faendir.acra.mongod.user.UserManager;
 import com.faendir.acra.security.SecurityUtils;
+import com.faendir.acra.sql.model.App;
+import com.faendir.acra.sql.model.User;
+import com.faendir.acra.sql.user.UserManager;
 import com.faendir.acra.ui.BackendUI;
 import com.faendir.acra.ui.view.base.NamedView;
 import com.vaadin.navigator.ViewChangeListener;
@@ -13,8 +14,9 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.VerticalLayout;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 
 /**
  * @author Lukas
@@ -22,12 +24,11 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @SpringView(name = "password-editor")
 public class ChangePasswordView extends NamedView {
-    @NotNull private final UserManager userManager;
-    @NotNull private final BackendUI backendUI;
+    @NonNull private final UserManager userManager;
+    @NonNull private final BackendUI backendUI;
 
     @Autowired
-    public ChangePasswordView(@NotNull UserManager userManager, @NotNull BackendUI backendUI) {
-
+    public ChangePasswordView(@NonNull UserManager userManager, @NonNull BackendUI backendUI) {
         this.userManager = userManager;
         this.backendUI = backendUI;
     }
@@ -60,5 +61,14 @@ public class ChangePasswordView extends NamedView {
         root.setComponentAlignment(layout, Alignment.MIDDLE_CENTER);
         setSizeFull();
         setCompositionRoot(root);
+    }
+
+    @Nullable
+    public App parseFragment(@NonNull String fragment) {
+        return null;
+    }
+
+    public boolean validate(@Nullable String fragment) {
+        return true;
     }
 }

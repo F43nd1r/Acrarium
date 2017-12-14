@@ -1,10 +1,10 @@
 package com.faendir.acra.ui.view;
 
-import com.faendir.acra.mongod.data.DataManager;
-import com.faendir.acra.mongod.model.App;
-import com.faendir.acra.mongod.model.Permission;
-import com.faendir.acra.mongod.user.UserManager;
 import com.faendir.acra.security.SecurityUtils;
+import com.faendir.acra.sql.data.DataManager;
+import com.faendir.acra.sql.model.App;
+import com.faendir.acra.sql.model.Permission;
+import com.faendir.acra.sql.user.UserManager;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.NamedView;
 import com.faendir.acra.util.Style;
@@ -16,8 +16,9 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,11 +31,11 @@ import java.util.stream.Collectors;
 @SpringView(name = "")
 public class Overview extends NamedView {
 
-    @NotNull private final DataManager dataManager;
-    @NotNull private final MyGrid<App> grid;
+    @NonNull private final DataManager dataManager;
+    @NonNull private final MyGrid<App> grid;
 
     @Autowired
-    public Overview(@NotNull DataManager dataManager) {
+    public Overview(@NonNull DataManager dataManager) {
         this.dataManager = dataManager;
         grid = new MyGrid<>("Apps", Collections.emptyList());
     }
@@ -45,8 +46,8 @@ public class Overview extends NamedView {
         grid.setWidth(100, Unit.PERCENTAGE);
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.addColumn(App::getName, "Name");
-        grid.addColumn(app -> dataManager.reportCountForApp(app.getId()), "Reports");
-        grid.addItemClickListener(e -> getNavigationManager().navigateTo(AppView.class, e.getItem().getId()));
+        grid.addColumn(dataManager::reportCountForApp, "Reports");
+        grid.addItemClickListener(e -> getNavigationManager().navigateTo(AppView.class, String.valueOf(e.getItem().getId())));
         VerticalLayout layout = new VerticalLayout(grid);
         if(SecurityUtils.hasRole(UserManager.ROLE_ADMIN)){
             Button add = new Button("New App", e -> addApp());
@@ -56,9 +57,9 @@ public class Overview extends NamedView {
         setCompositionRoot(layout);
     }
 
-    @NotNull
+    @NonNull
     private List<App> getApps(){
-        return dataManager.getApps().stream().filter(app -> SecurityUtils.hasPermission(app.getId(), Permission.Level.VIEW)).collect(Collectors.toList());
+        return dataManager.getApps().stream().filter(app -> SecurityUtils.hasPermission(app, Permission.Level.VIEW)).collect(Collectors.toList());
     }
 
     private void addApp() {
@@ -66,7 +67,7 @@ public class Overview extends NamedView {
         TextField name = new TextField("Name");
         Button create = new Button("Create");
         create.addClickListener(e -> {
-            dataManager.createNewApp(name.getValue());
+            dataManager.newApp(name.getValue());
             window.close();
             grid.setItems(getApps());
 
@@ -75,5 +76,14 @@ public class Overview extends NamedView {
         window.setContent(layout);
         window.center();
         UI.getCurrent().addWindow(window);
+    }
+
+    @Nullable
+    public App parseFragment(@NonNull String fragment) {
+        return null;
+    }
+
+    public boolean validate(@Nullable String fragment) {
+        return true;
     }
 }

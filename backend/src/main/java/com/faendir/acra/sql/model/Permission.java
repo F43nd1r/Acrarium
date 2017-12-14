@@ -1,47 +1,50 @@
-package com.faendir.acra.mongod.model;
+package com.faendir.acra.sql.model;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.security.core.GrantedAuthority;
+
+import javax.persistence.Embeddable;
+import javax.persistence.ManyToOne;
 
 /**
  * @author Lukas
  * @since 20.05.2017
  */
+@Embeddable
 public class Permission implements GrantedAuthority {
-
-    public enum Level {
-        NONE,
-        VIEW,
-        EDIT,
-        ADMIN
-    }
-
-    @NotNull private final String app;
-    @NotNull private Level level;
+    @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private App app;
+    private Level level;
 
     @PersistenceConstructor
-    public Permission(@NotNull String app, @NotNull Level level) {
+    Permission() {
+    }
+
+    public Permission(@NonNull App app, @NonNull Level level) {
         this.level = level;
         this.app = app;
     }
 
-    @NotNull
+    @NonNull
     public Level getLevel() {
         return level;
     }
 
-    public void setLevel(@NotNull Level level) {
+    public void setLevel(@NonNull Level level) {
         this.level = level;
     }
 
-    @NotNull
-    public String getApp() {
+    @NonNull
+    public App getApp() {
         return app;
     }
 
-    @NotNull
+    @NonNull
     @Override
     public String getAuthority() {
         return "PERMISSION_" + level.name() + "_" + app;
@@ -60,5 +63,12 @@ public class Permission implements GrantedAuthority {
     @Override
     public int hashCode() {
         return app.hashCode();
+    }
+
+    public enum Level {
+        NONE,
+        VIEW,
+        EDIT,
+        ADMIN
     }
 }

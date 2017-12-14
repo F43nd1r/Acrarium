@@ -1,13 +1,13 @@
 package com.faendir.acra.security;
 
-import com.faendir.acra.mongod.data.DataManager;
-import com.faendir.acra.mongod.model.App;
-import com.faendir.acra.mongod.model.User;
-import com.faendir.acra.mongod.user.UserManager;
+import com.faendir.acra.sql.data.DataManager;
+import com.faendir.acra.sql.model.App;
+import com.faendir.acra.sql.model.User;
+import com.faendir.acra.sql.user.UserManager;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinSession;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +34,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.security.SecureRandom;
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * @author Lukas
@@ -48,29 +49,30 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         SecurityContextHolder.setStrategyName(VaadinSessionSecurityContextHolderStrategy.class.getName());
     }
 
-    @NotNull private final DataManager dataManager;
-    @NotNull private final UserManager userManager;
+    @NonNull private final DataManager dataManager;
+    @NonNull private final UserManager userManager;
 
     @Autowired
-    public SecurityConfiguration(@NotNull DataManager dataManager, @NotNull UserManager userManager) {
+    public SecurityConfiguration(@NonNull DataManager dataManager, @NonNull UserManager userManager) {
         this.dataManager = dataManager;
         this.userManager = userManager;
     }
 
     @Override
-    protected void configure(@NotNull AuthenticationManagerBuilder auth) throws Exception {
+    protected void configure(@NonNull AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(new AuthenticationProvider() {
             @Nullable
             @Override
             public Authentication authenticate(Authentication authentication) throws AuthenticationException {
                 if (authentication instanceof UsernamePasswordAuthenticationToken) {
-                    App app = dataManager.getApp(authentication.getName());
+                    Optional<App> appOptional = dataManager.getApp(authentication.getName());
                     User user;
-                    if (app != null) {
+                    if (appOptional.isPresent()) {
+                        App app = appOptional.get();
                         if (app.getPassword().equals(authentication.getCredentials())) {
-                            return getGrantedToken(app.getId(), app.getPassword(), AuthorityUtils.createAuthorityList("ROLE_REPORTER"));
+                            return getGrantedToken(authentication.getName(), app.getPassword(), AuthorityUtils.createAuthorityList("ROLE_REPORTER"));
                         } else {
-                            throwBadCredentials(app.getId());
+                            throwBadCredentials(authentication.getName());
                         }
                     } else if ((user = userManager.getUser(authentication.getName())) != null) {
                         if (userManager.checkPassword(user, (String) authentication.getCredentials())) {
@@ -86,18 +88,18 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             }
 
             @Override
-            public boolean supports(@NotNull Class<?> authentication) {
+            public boolean supports(@NonNull Class<?> authentication) {
                 return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
             }
         });
     }
 
-    private void throwBadCredentials(@NotNull String username) {
+    private void throwBadCredentials(@NonNull String username) {
         throw new BadCredentialsException("Password mismatch for user " + username);
     }
 
-    @NotNull
-    private Authentication getGrantedToken(@NotNull String username, @NotNull String password, @NotNull Collection<? extends GrantedAuthority> authorities) {
+    @NonNull
+    private Authentication getGrantedToken(@NonNull String username, @NonNull String password, @NonNull Collection<? extends GrantedAuthority> authorities) {
         Authentication auth = new UsernamePasswordAuthenticationToken(username, password, authorities);
         VaadinSession session = VaadinSession.getCurrent();
         if (session == null) session = new VaadinSession(VaadinService.getCurrent());
@@ -109,24 +111,24 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    protected void configure(@NotNull HttpSecurity http) throws Exception {
-        http.csrf().disable().headers().disable().httpBasic();
+    protected void configure(@NonNull HttpSecurity http) throws Exception {
+        http.csrf().disable().headers().disable().anonymous().disable().httpBasic();
     }
 
-    @NotNull
+    @NonNull
     @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return authenticationManager();
     }
 
-    @NotNull
+    @NonNull
     @Bean
     public static SecureRandom secureRandom() {
         return new SecureRandom();
     }
 
-    @NotNull
+    @NonNull
     @Bean
     public static PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();

@@ -4,8 +4,8 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Closeable;
 import org.apache.commons.fileupload.util.LimitedInputStream;
 import org.apache.commons.fileupload.util.Streams;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,11 +21,11 @@ import static java.lang.String.format;
  * @since 18.05.2017
  */
 public class Rfc1341ServletFileUpload extends ServletFileUpload {
-    public Rfc1341ServletFileUpload(@NotNull FileItemFactory fileItemFactory) {
+    public Rfc1341ServletFileUpload(@NonNull FileItemFactory fileItemFactory) {
         super(fileItemFactory);
     }
 
-    @NotNull
+    @NonNull
     @Override
     public FileItemIterator getItemIterator(@Nullable RequestContext ctx) throws FileUploadException, IOException {
         return new Rfc1341FileItemIterator(ctx);
@@ -34,9 +34,9 @@ public class Rfc1341ServletFileUpload extends ServletFileUpload {
     /**
      * Modified copy (with appropriate cast) of {@link FileUploadBase#parseRequest(RequestContext)}
      */
-    @NotNull
+    @NonNull
     @Override
-    public List<FileItem> parseRequest(@NotNull RequestContext ctx) throws FileUploadException {
+    public List<FileItem> parseRequest(@NonNull RequestContext ctx) throws FileUploadException {
         List<FileItem> items = new ArrayList<>();
         boolean successful = false;
         try {
@@ -90,12 +90,12 @@ public class Rfc1341ServletFileUpload extends ServletFileUpload {
         /**
          * The multi part stream to process.
          */
-        @NotNull private final MultipartStream multi;
+        @NonNull private final MultipartStream multi;
         /**
          * The notifier, which used for triggering the
          * {@link ProgressListener}.
          */
-        @NotNull private final MultipartStream.ProgressNotifier notifier;
+        @NonNull private final MultipartStream.ProgressNotifier notifier;
         /**
          * The boundary, which separates the various parts.
          */
@@ -220,7 +220,7 @@ public class Rfc1341ServletFileUpload extends ServletFileUpload {
             return true;
         }
 
-        private long getContentLength(@NotNull FileItemHeaders pHeaders) {
+        private long getContentLength(@NonNull FileItemHeaders pHeaders) {
             try {
                 return Long.parseLong(pHeaders.getHeader(CONTENT_LENGTH));
             } catch (Exception e) {

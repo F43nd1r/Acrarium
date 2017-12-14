@@ -1,7 +1,7 @@
 package com.faendir.acra.ui;
 
-import com.faendir.acra.mongod.user.UserManager;
 import com.faendir.acra.security.SecurityUtils;
+import com.faendir.acra.sql.user.UserManager;
 import com.faendir.acra.ui.view.user.ChangePasswordView;
 import com.faendir.acra.ui.view.user.UserManagerView;
 import com.faendir.acra.util.Style;
@@ -18,7 +18,7 @@ import com.vaadin.ui.LoginForm;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -35,12 +35,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @SpringUI
 @Theme("acratheme")
 public class BackendUI extends UI {
-    @NotNull private final AuthenticationManager authenticationManager;
-    @NotNull private final ApplicationContext applicationContext;
-    @NotNull private final VerticalLayout content;
+    @NonNull private final AuthenticationManager authenticationManager;
+    @NonNull private final ApplicationContext applicationContext;
+    @NonNull private final VerticalLayout content;
 
     @Autowired
-    public BackendUI(@NotNull AuthenticationManager authenticationManager, @NotNull ApplicationContext applicationContext) {
+    public BackendUI(@NonNull AuthenticationManager authenticationManager, @NonNull ApplicationContext applicationContext) {
         this.authenticationManager = authenticationManager;
         this.applicationContext = applicationContext;
         content = new VerticalLayout();
@@ -55,10 +55,9 @@ public class BackendUI extends UI {
         } else {
             showLogin();
         }
-        //applicationContext.getBean(ToSqlMigrator.class).migrate();
     }
 
-    private void login(@NotNull String username, @NotNull String password) {
+    private void login(@NonNull String username, @NonNull String password) {
         try {
             Authentication token = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username.toLowerCase(), password));
             VaadinService.reinitializeSession(VaadinService.getCurrentRequest());
@@ -115,7 +114,7 @@ public class BackendUI extends UI {
         setContent(root);
     }
 
-    @NotNull
+    @NonNull
     @UIScope
     @Bean
     public VerticalLayout mainView() {

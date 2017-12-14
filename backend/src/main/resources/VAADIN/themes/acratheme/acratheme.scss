@@ -79,5 +79,7 @@
 
   .no-border {
     border: none !important;
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
   }
 }

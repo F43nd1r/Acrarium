@@ -1,35 +1,27 @@
-plugins {
-    id 'java'
-    id 'net.ltgt.apt' version '0.10'
-    id 'fi.jasoft.plugin.vaadin' version '1.1.11'
-    id 'org.springframework.boot' version '1.5.4.RELEASE'
-}
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'com.devsoap.plugin.vaadin'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'idea'
+//apply plugin: 'war'
 
 group 'com.faendir'
 version = '0.1.0-SNAPSHOT'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-vaadin {
-    version '8.1-SNAPSHOT'
-    push true
-}
 
-configurations {
-    ajc
-    aspects
-    compile {
-        extendsFrom aspects
-    }
+vaadin {
+    version '8.1.7'
+    push true
 }
 
 dependencyManagement {
     dependencies {
-        dependencySet(group: 'org.aspectj', version: '1.8.10') {
-            entry 'aspectjtools'
-            entry 'aspectjrt'
-            entry 'aspectjweaver'
+        dependencySet(group: 'com.vaadin', version: '2.1.0.beta2') {
+            entry 'vaadin-spring-boot-starter'
+            entry 'vaadin-spring-boot'
+            entry 'vaadin-spring'
         }
-        dependency 'com.vaadin.external.atmosphere:atmosphere-runtime:2.4.11.vaadin1'
     }
     imports {
         mavenBom "com.vaadin:vaadin-bom:${vaadin.version}"
@@ -38,32 +30,36 @@ dependencyManagement {
 
 dependencies {
     //spring
-    compile 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    compile 'org.springframework.boot:spring-boot-starter-data-jpa'
+    compile 'mysql:mysql-connector-java'
     compile 'org.springframework.boot:spring-boot-starter-security'
-    compile 'org.springframework.boot:spring-boot-starter-cache'
+    compile 'org.springframework:spring-orm'
+    //compile 'org.hibernate:hibernate-validator:5.4.2.Final'
+    //compile 'javax.validation:validation-api:1.1.0.Final'
     //vaadin
-    compile 'com.vaadin:vaadin-spring-boot-starter'
+    compile('com.vaadin:vaadin-spring-boot-starter') {
+        //exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+        //exclude group: 'org.hibernate.validator'
+    }
+    //providedCompile 'org.springframework.boot:spring-boot-starter-tomcat'
     compile 'com.vaadin:vaadin-push'
     compile 'org.vaadin.addons:popupbutton:3.0.0'
     compile('org.vaadin.addon:jfreechartwrapper:4.0.0') {
         exclude group: 'javax.servlet', module: 'servlet-api'
     }
-    compile ('org.jfree:jfreechart:1.0.19') {
-        exclude group:'javax.servlet', module:'servlet-api'
+    compile('org.jfree:jfreechart:1.0.19') {
+        exclude group: 'javax.servlet', module: 'servlet-api'
     }
+    compile 'javax.servlet:javax.servlet-api:3.1.0'
     compile 'org.vaadin.addons:stepper:2.4.0'
-    //weaving
-    aspects 'org.springframework:spring-aspects'
-    ajc 'org.aspectj:aspectjtools'
-    compile 'org.aspectj:aspectjrt'
-    compile 'org.aspectj:aspectjweaver'
     //utility
     compile 'org.codeartisans:org.json:20161124'
     compile 'org.apache.commons:commons-collections4:4.1'
     compile 'commons-fileupload:commons-fileupload:1.3.2'
     compile 'org.ocpsoft.prettytime:prettytime:3.2.7.Final'
     compile 'net.sf.proguard:proguard-retrace:5.3.3'
-    compile 'org.jetbrains:annotations:15.0'
+    compile 'com.faendir.acra:acra-javacore:5.0.0-rc2'
+    compile 'com.diffplug.durian:durian:3.4.0'
 }
 
 configurations {
@@ -76,24 +72,28 @@ configurations {
     }
 }
 
+/*
 project.convention.getPlugin(WarPluginConvention).webAppDirName = 'src/main/resources'
 
 war {
     archiveName = 'acra.war'
     version = version
+    enabled = false
+}*/
+
+idea {
+    module {
+        afterEvaluate {
+            scopes.COMPILE.plus -= [configurations['vaadin-client']]
+            scopes.COMPILE.plus += [configurations['vaadin-client']]
+        }
+    }
 }
 
-compileJava {
+task printScopes {
     doLast {
-        ant.taskdef(resource: 'org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties', classpath: configurations.ajc.asPath)
-        ant.iajc(source: sourceCompatibility, target: targetCompatibility, destDir: sourceSets.main.output.classesDir.absolutePath, maxmem: '512m', fork: 'true',
-                aspectPath: configurations.aspects.asPath, inpath: sourceSets.main.output.classesDir.absolutePath,
-                sourceRootCopyFilter: '**/.svn/*,**/*.java', classpath: configurations.compile.asPath) {
-            sourceroots {
-                sourceSets.main.java.srcDirs.each {
-                    pathelement(location: it.absolutePath)
-                }
-            }
+        idea.module.scopes.forEach{name, content->
+                println name + ": " + content
         }
     }
 }

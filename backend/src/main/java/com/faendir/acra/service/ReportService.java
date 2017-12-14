@@ -1,8 +1,8 @@
 package com.faendir.acra.service;
 
-import com.faendir.acra.mongod.data.DataManager;
-import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
+import com.faendir.acra.sql.data.DataManager;
+import com.faendir.acra.sql.model.App;
+import org.springframework.lang.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Lukas
@@ -28,39 +29,41 @@ import java.util.List;
  */
 @RestController
 public class ReportService {
-    @NotNull private final DataManager dataManager;
+    @NonNull private final DataManager dataManager;
 
     @Autowired
-    public ReportService(@NotNull DataManager dataManager) {
+    public ReportService(@NonNull DataManager dataManager) {
         this.dataManager = dataManager;
     }
 
     @PreAuthorize("hasRole('REPORTER')")
     @RequestMapping(value = "/report", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void report(@NotNull @RequestBody String content, @NotNull Principal principal) throws IOException {
+    public void report(@NonNull @RequestBody String content, @NonNull Principal principal) {
         if (!"".equals(content)) {
-            JSONObject jsonObject = new JSONObject(content);
-            dataManager.newReport(principal.getName(), jsonObject);
+            Optional<App> app = dataManager.getApp(principal.getName());
+            app.ifPresent(a -> dataManager.newReport(a, content, Collections.emptyList()));
         }
     }
 
     @PreAuthorize("hasRole('REPORTER')")
     @RequestMapping(value = "/report", consumes = "multipart/mixed")
-    public ResponseEntity report(@NotNull MultipartHttpServletRequest request, @NotNull Principal principal) throws IOException, ServletException {
+    public ResponseEntity report(@NonNull MultipartHttpServletRequest request, @NonNull Principal principal) throws IOException {
         MultiValueMap<String, MultipartFile> fileMap = request.getMultiFileMap();
         List<MultipartFile> files = fileMap.get(null);
-        JSONObject jsonObject = null;
+        String content = null;
         List<MultipartFile> attachments = new ArrayList<>();
         for (MultipartFile file : files) {
             String filename = file.getOriginalFilename();
             if (filename.isEmpty()) {
-                jsonObject = new JSONObject(StreamUtils.copyToString(file.getInputStream(), StandardCharsets.UTF_8));
+                content = StreamUtils.copyToString(file.getInputStream(), StandardCharsets.UTF_8);
             } else {
                 attachments.add(file);
             }
         }
-        if (jsonObject != null) {
-            dataManager.newReport(principal.getName(), jsonObject, attachments);
+        if (content != null) {
+            Optional<App> app = dataManager.getApp(principal.getName());
+            String finalContent = content;
+            app.ifPresent(a -> dataManager.newReport(a, finalContent, attachments));
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.badRequest().build();

@@ -1,10 +1,11 @@
-package com.faendir.acra.mongod.user;
+package com.faendir.acra.sql.user;
 
-import com.faendir.acra.mongod.data.DataManager;
-import com.faendir.acra.mongod.model.Permission;
-import com.faendir.acra.mongod.model.User;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.faendir.acra.sql.data.DataManager;
+import com.faendir.acra.sql.model.App;
+import com.faendir.acra.sql.model.Permission;
+import com.faendir.acra.sql.model.User;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,15 +25,15 @@ public class UserManager {
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
     public static final String ROLE_USER = "ROLE_USER";
 
-    @NotNull private final UserRepository userRepository;
-    @NotNull private final DataManager dataManager;
-    @NotNull private final String defaultUser;
-    @NotNull private final String defaultPassword;
-    @NotNull private final PasswordEncoder passwordEncoder;
+    @NonNull private final UserRepository userRepository;
+    @NonNull private final DataManager dataManager;
+    @NonNull private final String defaultUser;
+    @NonNull private final String defaultPassword;
+    @NonNull private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserManager(@NotNull UserRepository userRepository, @NotNull DataManager dataManager, @NotNull PasswordEncoder passwordEncoder,
-                       @NotNull @Value("${security.user.name}") String defaultUser, @NotNull @Value("${security.user.password}") String defaultPassword) {
+    public UserManager(@NonNull UserRepository userRepository, @NonNull DataManager dataManager, @NonNull PasswordEncoder passwordEncoder,
+                       @NonNull @Value("${security.user.name}") String defaultUser, @NonNull @Value("${security.user.password}") String defaultPassword) {
         this.userRepository = userRepository;
         this.dataManager = dataManager;
         this.passwordEncoder = passwordEncoder;
@@ -40,14 +41,13 @@ public class UserManager {
         this.defaultPassword = defaultPassword;
     }
 
-    private void ensureValidPermissions(@NotNull User user) {
-        user.getPermissions().removeIf(permission -> dataManager.getApp(permission.getApp()) == null);
-        dataManager.getApps().stream().filter(app -> user.getPermissions().stream().noneMatch(permission -> permission.getApp().equals(app.getId())))
-                   .forEach(app -> user.getPermissions().add(new Permission(app.getId(), user.getRoles().contains(ROLE_ADMIN) ? Permission.Level.ADMIN : Permission.Level.NONE)));
+    private void ensureValidPermissions(@NonNull User user) {
+        dataManager.getApps().stream().filter(app -> user.getPermissions().stream().noneMatch(permission -> permission.getApp().equals(app)))
+                   .forEach(app -> user.getPermissions().add(new Permission(app, user.getRoles().contains(ROLE_ADMIN) ? Permission.Level.ADMIN : Permission.Level.NONE)));
     }
 
     @Nullable
-    public User getUser(@NotNull String username) {
+    public User getUser(@NonNull String username) {
         Optional<User> user = userRepository.findById(username);
         if (!user.isPresent() && defaultUser.equals(username)) {
             user = Optional.of(getDefaultUser());
@@ -56,20 +56,20 @@ public class UserManager {
         return user.orElse(null);
     }
 
-    public void createUser(@NotNull String username, @NotNull String password) {
+    public User createUser(@NonNull String username, @NonNull String password) {
         if (userRepository.existsById(username)) {
             throw new IllegalArgumentException("Username already exists");
         }
         User user = new User(username, passwordEncoder.encode(password), Collections.singleton(ROLE_USER));
         ensureValidPermissions(user);
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
-    public boolean checkPassword(@Nullable User user, @NotNull String password) {
+    public boolean checkPassword(@Nullable User user, @NonNull String password) {
         return user != null && passwordEncoder.matches(password, user.getPassword());
     }
 
-    public boolean changePassword(@NotNull User user, @NotNull String oldPassword, @NotNull String newPassword) {
+    public boolean changePassword(@NonNull User user, @NonNull String oldPassword, @NonNull String newPassword) {
         if (checkPassword(user, oldPassword)) {
             user.setPassword(newPassword);
             userRepository.save(user);
@@ -78,7 +78,7 @@ public class UserManager {
         return false;
     }
 
-    public void setAdmin(@NotNull User user, boolean admin) {
+    public void setAdmin(@NonNull User user, boolean admin) {
         if (admin) {
             user.getRoles().add(ROLE_ADMIN);
         } else {
@@ -87,7 +87,7 @@ public class UserManager {
         userRepository.save(user);
     }
 
-    public void setPermission(@NotNull User user, @NotNull String app, @NotNull Permission.Level level) {
+    public void setPermission(@NonNull User user, @NonNull App app, @NonNull Permission.Level level) {
         Optional<Permission> permission = user.getPermissions().stream().filter(p -> p.getApp().equals(app)).findAny();
         if (permission.isPresent()) {
             permission.get().setLevel(level);
@@ -97,7 +97,7 @@ public class UserManager {
         userRepository.save(user);
     }
 
-    @NotNull
+    @NonNull
     public List<User> getUsers() {
         List<User> users = userRepository.findAll();
         if (users.stream().noneMatch(user -> user.getUsername().equals(defaultUser))) {
@@ -107,7 +107,7 @@ public class UserManager {
         return users;
     }
 
-    @NotNull
+    @NonNull
     private User getDefaultUser() {
         return new User(defaultUser, passwordEncoder.encode(defaultPassword), Arrays.asList(ROLE_USER, ROLE_ADMIN));
     }

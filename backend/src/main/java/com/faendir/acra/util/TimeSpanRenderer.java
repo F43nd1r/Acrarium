@@ -3,7 +3,7 @@ package com.faendir.acra.util;
 import com.vaadin.ui.renderers.TextRenderer;
 import elemental.json.Json;
 import elemental.json.JsonValue;
-import org.jetbrains.annotations.Nullable;
+import org.springframework.lang.Nullable;
 import org.ocpsoft.prettytime.PrettyTime;
 
 import java.util.Date;

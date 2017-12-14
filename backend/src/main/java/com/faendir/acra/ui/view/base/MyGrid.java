@@ -5,8 +5,8 @@ import com.vaadin.data.provider.DataProvider;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.renderers.AbstractRenderer;
 import com.vaadin.ui.renderers.TextRenderer;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import java.util.Collection;
 
@@ -20,34 +20,34 @@ public class MyGrid<T> extends Grid<T> {
         setSizeFull();
     }
 
-    public MyGrid(@Nullable String caption, @NotNull Collection<T> items) {
+    public MyGrid(@Nullable String caption, @NonNull Collection<T> items) {
         super(caption, items);
         setHeightByRows(items.size());
     }
 
-    @NotNull
-    public <R> Grid.Column<T, R> addColumn(@NotNull ValueProvider<T, R> valueProvider, @NotNull String caption) {
+    @NonNull
+    public <R> Grid.Column<T, R> addColumn(@NonNull ValueProvider<T, R> valueProvider, @NonNull String caption) {
         return addColumn(valueProvider, new TextRenderer(), caption);
     }
 
-    @NotNull
-    public <R> Grid.Column<T, R> addColumn(@NotNull ValueProvider<T, R> valueProvider, @NotNull AbstractRenderer<? super T, ? super R> renderer, @NotNull String caption) {
+    @NonNull
+    public <R> Grid.Column<T, R> addColumn(@NonNull ValueProvider<T, R> valueProvider, @NonNull AbstractRenderer<? super T, ? super R> renderer, @NonNull String caption) {
         return addColumn(valueProvider, renderer).setId(caption).setCaption(caption).setSortable(false);
     }
 
-    @NotNull
-    public <R> Grid.Column<T, R> addColumn(@NotNull ValueProvider<T, R> valueProvider, @NotNull String id, @NotNull String caption) {
+    @NonNull
+    public <R> Grid.Column<T, R> addColumn(@NonNull ValueProvider<T, R> valueProvider, @NonNull String id, @NonNull String caption) {
         return addColumn(valueProvider, new TextRenderer(), id, caption);
     }
 
-    @NotNull
-    public <R> Grid.Column<T, R> addColumn(@NotNull ValueProvider<T, R> valueProvider, @NotNull AbstractRenderer<? super T, ? super R> renderer, @NotNull String id,
-                                           @NotNull String caption) {
+    @NonNull
+    public <R> Grid.Column<T, R> addColumn(@NonNull ValueProvider<T, R> valueProvider, @NonNull AbstractRenderer<? super T, ? super R> renderer, @NonNull String id,
+                                           @NonNull String caption) {
         return addColumn(valueProvider, renderer).setId(id).setCaption(caption);
     }
 
     @Override
-    public void setItems(@NotNull Collection<T> items) {
+    public void setItems(@NonNull Collection<T> items) {
         super.setItems(items);
         setHeightByRows(items.size());
     }

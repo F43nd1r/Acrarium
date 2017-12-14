@@ -1,7 +1,7 @@
 package com.faendir.acra.ui.view.base;
 
 import com.vaadin.ui.CheckBox;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 
 /**
  * @author Lukas
@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class MyCheckBox extends CheckBox {
 
-    public MyCheckBox(boolean value, boolean enabled, @NotNull ValueChangeListener<Boolean> changeListener) {
+    public MyCheckBox(boolean value, boolean enabled, @NonNull ValueChangeListener<Boolean> changeListener) {
         setValue(value);
         setEnabled(enabled);
         addValueChangeListener(changeListener);

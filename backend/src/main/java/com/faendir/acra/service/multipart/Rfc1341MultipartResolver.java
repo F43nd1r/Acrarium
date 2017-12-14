@@ -3,7 +3,7 @@ package com.faendir.acra.service.multipart;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.Rfc1341ServletFileUpload;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 /**
@@ -12,7 +12,7 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
  */
 public class Rfc1341MultipartResolver extends CommonsMultipartResolver {
 
-    @NotNull
+    @NonNull
     @Override
     protected FileUpload newFileUpload(FileItemFactory fileItemFactory) {
         return new Rfc1341ServletFileUpload(fileItemFactory);

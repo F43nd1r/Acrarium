@@ -1,11 +1,11 @@
 package com.faendir.acra.ui.view.user;
 
-import com.faendir.acra.mongod.data.DataManager;
-import com.faendir.acra.mongod.model.App;
-import com.faendir.acra.mongod.model.Permission;
-import com.faendir.acra.mongod.model.User;
-import com.faendir.acra.mongod.user.UserManager;
 import com.faendir.acra.security.SecurityUtils;
+import com.faendir.acra.sql.data.DataManager;
+import com.faendir.acra.sql.model.App;
+import com.faendir.acra.sql.model.Permission;
+import com.faendir.acra.sql.model.User;
+import com.faendir.acra.sql.user.UserManager;
 import com.faendir.acra.ui.view.annotation.RequiresRole;
 import com.faendir.acra.ui.view.base.MyCheckBox;
 import com.faendir.acra.ui.view.base.MyGrid;
@@ -23,8 +23,9 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,12 +37,12 @@ import java.util.Collections;
 @SpringView(name = "user-manager")
 @RequiresRole(UserManager.ROLE_ADMIN)
 public class UserManagerView extends NamedView {
-    @NotNull private final UserManager userManager;
-    @NotNull private final DataManager dataManager;
-    @NotNull private final MyGrid<User> userGrid;
+    @NonNull private final UserManager userManager;
+    @NonNull private final DataManager dataManager;
+    @NonNull private final MyGrid<User> userGrid;
 
     @Autowired
-    public UserManagerView(@NotNull UserManager userManager, @NotNull DataManager dataManager) {
+    public UserManagerView(@NonNull UserManager userManager, @NonNull DataManager dataManager) {
         this.userManager = userManager;
         this.dataManager = dataManager;
         this.userGrid = new MyGrid<>("Users", Collections.emptyList());
@@ -56,7 +57,7 @@ public class UserManagerView extends NamedView {
                                                            e -> userManager.setAdmin(user, e.getValue()))).setCaption("Admin");
         for (App app : dataManager.getApps()) {
             userGrid.addComponentColumn(user -> {
-                Permission permission = user.getPermissions().stream().filter(p -> p.getApp().equals(app.getId())).findAny().orElseThrow(IllegalStateException::new);
+                Permission permission = user.getPermissions().stream().filter(p -> p.getApp().equals(app)).findAny().orElseThrow(IllegalStateException::new);
                 ComboBox<Permission.Level> levelComboBox = new ComboBox<>(null, Arrays.asList(Permission.Level.values()));
                 levelComboBox.setEmptySelectionAllowed(false);
                 levelComboBox.setValue(permission.getLevel());
@@ -94,5 +95,14 @@ public class UserManagerView extends NamedView {
         window.setContent(layout);
         window.center();
         UI.getCurrent().addWindow(window);
+    }
+
+    @Nullable
+    public App parseFragment(@NonNull String fragment) {
+        return null;
+    }
+
+    public boolean validate(@Nullable String fragment) {
+        return true;
     }
 }
