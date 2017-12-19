@@ -36,7 +36,7 @@ public class UserManager {
 
     @Autowired
     public UserManager(@NonNull UserRepository userRepository, @NonNull PasswordEncoder passwordEncoder, @NonNull AcraConfiguration acraConfiguration,
-                       @NonNull SecureRandom secureRandom) {
+            @NonNull SecureRandom secureRandom) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.acraConfiguration = acraConfiguration;
@@ -66,9 +66,7 @@ public class UserManager {
             username = generator.generate(16);
         } while (userRepository.existsById(username));
         String password = generator.generate(16);
-        User user = new User(username, passwordEncoder.encode(password), Collections.singleton(ROLE_REPORTER));
-        userRepository.save(user);
-        return Pair.of(user, password);
+        return Pair.of(new User(username, passwordEncoder.encode(password), Collections.singleton(ROLE_REPORTER)), password);
     }
 
     public boolean checkPassword(@Nullable User user, @NonNull String password) {

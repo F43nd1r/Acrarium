@@ -26,18 +26,16 @@ public interface ReportRepository extends JpaRepository<Report, String> {
     int countAllByBugApp(@NonNull App app);
 
     @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
-    @Query("select new com.faendir.acra.sql.util.DayCount(report.date, count(report)) from Report report join Bug bug on report.bug = bug " +
-            "where bug.app = ?1 and report.date > ?2 group by function('year',report.date), function('month',report.date), function('day',report.date)")
+    @Query("select new com.faendir.acra.sql.util.DayCount(report.date, count(report)) from Report report join Bug bug on report.bug = bug "
+           + "where bug.app = ?1 and report.date > ?2 group by function('year',report.date), function('month',report.date), function('day',report.date)")
     List<DayCount> countAllByDayAfter(@NonNull App app, @NonNull Date date);
-
-    List<Report> findAllByBug(@NonNull Bug bug);
 
     Slice<Report> findAllByBug(@NonNull Bug bug, @NonNull Pageable pageable);
 
     int countAllByBug(@NonNull Bug bug);
 
     @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
-    @Query("select new com.faendir.acra.sql.util.AndroidVersionCount(report.androidVersion, count(report)) from Report report join Bug bug on report.bug = bug " +
-            "where bug.app = ?1 group by report.androidVersion")
+    @Query("select new com.faendir.acra.sql.util.AndroidVersionCount(report.androidVersion, count(report)) from Report report join Bug bug on report.bug = bug "
+           + "where bug.app = ?1 group by report.androidVersion")
     List<AndroidVersionCount> countAllByAndroidVersion(@NonNull App app);
 }

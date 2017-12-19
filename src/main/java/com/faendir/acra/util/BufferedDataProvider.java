@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntSupplier;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -19,7 +18,7 @@ import java.util.stream.Stream;
  * @author Lukas
  * @since 13.12.2017
  */
-public class BufferedDataProvider<T> extends AbstractBackEndDataProvider<T, Predicate<T>> {
+public class BufferedDataProvider<T> extends AbstractBackEndDataProvider<T, Void> {
     private static final int PAGE_SIZE = 32;
     private final Function<Pageable, Slice<T>> getter;
     private final IntSupplier counter;
@@ -30,12 +29,11 @@ public class BufferedDataProvider<T> extends AbstractBackEndDataProvider<T, Pred
     }
 
     public <P> BufferedDataProvider(P parameter, BiFunction<P, Pageable, Slice<T>> getter, Function<P, Integer> counter) {
-        this.getter = pageable -> getter.apply(parameter, pageable);
-        this.counter = () -> counter.apply(parameter);
+        this(pageable -> getter.apply(parameter, pageable), () -> counter.apply(parameter));
     }
 
     @Override
-    protected Stream<T> fetchFromBackEnd(Query<T, Predicate<T>> query) {
+    protected Stream<T> fetchFromBackEnd(Query<T, Void> query) {
         Sort sort = Sort.by(query.getSortOrders().stream().map(OrderAdapter::new).collect(Collectors.toList()));
         Slice<T> slice = getter.apply(PageRequest.of(query.getOffset() / PAGE_SIZE, PAGE_SIZE, sort));
         if (!slice.hasContent()) return Stream.empty();
@@ -51,14 +49,11 @@ public class BufferedDataProvider<T> extends AbstractBackEndDataProvider<T, Pred
                 result = Stream.concat(result, content.stream());
             }
         }
-        if(query.getFilter().isPresent()){
-            result = result.filter(query.getFilter().get());
-        }
         return result;
     }
 
     @Override
-    protected int sizeInBackEnd(Query<T, Predicate<T>> query) {
+    protected int sizeInBackEnd(Query<T, Void> query) {
         return counter.getAsInt();
     }
 }

@@ -13,7 +13,6 @@ import com.faendir.acra.ui.view.base.NamedView;
 import com.faendir.acra.ui.view.base.Popup;
 import com.faendir.acra.util.BufferedDataProvider;
 import com.faendir.acra.util.Style;
-import com.vaadin.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Button;
@@ -23,8 +22,6 @@ import com.vaadin.ui.VerticalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
-
-import java.util.function.Predicate;
 
 /**
  * @author Lukas
@@ -46,10 +43,11 @@ public class Overview extends NamedView {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        ConfigurableFilterDataProvider<App, Void, Predicate<App>> dataProvider = new BufferedDataProvider<>(appRepository::findAll,
-                                                                                                            () -> Math.toIntExact(appRepository.count())).withConfigurableFilter();
-        dataProvider.setFilter(app -> SecurityUtils.hasPermission(app, Permission.Level.VIEW));
-        grid = new MyGrid<>("Apps", dataProvider);
+        grid = new MyGrid<>("Apps", new BufferedDataProvider<>(SecurityUtils.hasRole(UserManager.ROLE_ADMIN), (admin, pageable) -> admin ?
+                appRepository.findAllByPermissionWithDefaultIncluded(SecurityUtils.getUsername(), Permission.Level.VIEW, pageable) :
+                appRepository.findAllByPermissionWithDefaultExcluded(SecurityUtils.getUsername(), Permission.Level.VIEW, pageable), admin -> admin ?
+                appRepository.countByPermissionWithDefaultIncluded(SecurityUtils.getUsername(), Permission.Level.VIEW) :
+                appRepository.countByPermissionWithDefaultExcluded(SecurityUtils.getUsername(), Permission.Level.VIEW)));
         grid.setWidth(100, Unit.PERCENTAGE);
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.addColumn(App::getName, "Name");

@@ -3,9 +3,11 @@ package com.faendir.acra.ui.view.tabs;
 import com.faendir.acra.sql.data.AppRepository;
 import com.faendir.acra.sql.data.ReportRepository;
 import com.faendir.acra.sql.model.App;
+import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.sql.model.User;
 import com.faendir.acra.sql.user.UserManager;
 import com.faendir.acra.ui.NavigationManager;
+import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.view.base.ConfigurationLabel;
 import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.ui.view.base.Popup;
@@ -30,6 +32,7 @@ import java.util.Date;
  * @author Lukas
  * @since 19.05.2017
  */
+@RequiresAppPermission(Permission.Level.ADMIN)
 @SpringComponent
 @ViewScope
 public class PropertiesTab implements MyTabSheet.Tab {

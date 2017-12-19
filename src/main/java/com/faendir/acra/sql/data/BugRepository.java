@@ -15,8 +15,12 @@ import java.util.Optional;
  */
 public interface BugRepository extends JpaRepository<Bug, Integer> {
     Slice<Bug> findAllByApp(@NonNull App app, @NonNull Pageable pageable);
+
     Slice<Bug> findAllByAppAndSolvedFalse(@NonNull App app, @NonNull Pageable pageable);
+
     int countAllByApp(@NonNull App app);
+
     int countAllByAppAndSolvedFalse(@NonNull App app);
+
     Optional<Bug> findBugByAppAndStacktrace(@NonNull App app, @NonNull String stacktrace);
 }
