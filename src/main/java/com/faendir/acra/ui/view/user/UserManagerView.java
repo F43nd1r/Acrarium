@@ -7,7 +7,7 @@ import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.sql.model.User;
 import com.faendir.acra.sql.user.UserManager;
 import com.faendir.acra.sql.user.UserRepository;
-import com.faendir.acra.ui.view.annotation.RequiresRole;
+import com.faendir.acra.ui.annotation.RequiresRole;
 import com.faendir.acra.ui.view.base.MyCheckBox;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.NamedView;

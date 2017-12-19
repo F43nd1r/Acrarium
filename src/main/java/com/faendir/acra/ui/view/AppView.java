@@ -3,7 +3,7 @@ package com.faendir.acra.ui.view;
 import com.faendir.acra.sql.data.AppRepository;
 import com.faendir.acra.sql.model.App;
 import com.faendir.acra.sql.model.Permission;
-import com.faendir.acra.ui.view.annotation.RequiresAppPermission;
+import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.ui.view.base.ParametrizedNamedView;
 import com.faendir.acra.ui.view.tabs.BugTab;

@@ -9,7 +9,7 @@ import com.faendir.acra.sql.model.Attachment;
 import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.sql.model.ProguardMapping;
 import com.faendir.acra.sql.model.Report;
-import com.faendir.acra.ui.view.annotation.RequiresAppPermission;
+import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.view.base.ParametrizedNamedView;
 import com.faendir.acra.util.Style;
 import com.faendir.acra.util.Utils;

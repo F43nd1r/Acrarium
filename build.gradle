@@ -35,7 +35,7 @@ apply plugin: 'propdeps'
 apply plugin: 'propdeps-idea'
 
 group 'com.faendir'
-version = '0.1.0-SNAPSHOT'
+version = '0.2.0-SNAPSHOT'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -63,21 +63,16 @@ dependencies {
     compile 'mysql:mysql-connector-java'
     compile 'org.springframework.boot:spring-boot-starter-security'
     compile 'org.springframework:spring-orm'
-    optional "org.springframework.boot:spring-boot-configuration-processor"
-    //vaadin
-    compile('com.vaadin:vaadin-spring-boot-starter') {
-        //exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
-        //exclude group: 'org.hibernate.validator'
-    }
+    optional 'org.springframework.boot:spring-boot-configuration-processor'
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+    //vaadin
+    compile 'com.vaadin:vaadin-spring-boot-starter'
     compile 'com.vaadin:vaadin-push'
-    compile 'org.vaadin.addons:popupbutton:3.0.0'
     compile('org.vaadin.addon:jfreechartwrapper:4.0.0') {
         exclude group: 'javax.servlet', module: 'servlet-api'
+        exclude group: 'jfree'
     }
-    compile('org.jfree:jfreechart:1.0.19') {
-        exclude group: 'javax.servlet', module: 'servlet-api'
-    }
+    compile 'org.jfree:jfreechart:1.5.0'
     compile 'javax.servlet:javax.servlet-api:3.1.0'
     compile 'org.vaadin.addons:stepper:2.4.0'
     //utility

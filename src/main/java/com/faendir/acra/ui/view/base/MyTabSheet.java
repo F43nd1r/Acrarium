@@ -3,7 +3,7 @@ package com.faendir.acra.ui.view.base;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.sql.model.App;
 import com.faendir.acra.ui.NavigationManager;
-import com.faendir.acra.ui.view.annotation.RequiresAppPermission;
+import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.TabSheet;

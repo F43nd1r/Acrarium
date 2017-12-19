@@ -3,7 +3,6 @@
 <!-- WS Compiler: manually edited -->
 <module>
         <inherits name="com.vaadin.DefaultWidgetSet" />
-        <inherits name="org.vaadin.hene.popupbutton.widgetset.PopupbuttonWidgetset" />
         <inherits name="org.vaadin.risto.stepper.StepperWidgetset" />
         <set-configuration-property name="devModeRedirectEnabled" value="true" />
         <set-property name="user.agent" value="gecko1_8,safari,ie10" />
