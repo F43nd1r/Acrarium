@@ -20,6 +20,7 @@ public class ConfigurationLabel extends Label {
 
     private static String getLocation() {
         String location = UI.getCurrent().getPage().getLocation().toASCIIString();
-        return location.substring(0, location.indexOf('#'));
+        int index = location.indexOf('#');
+        return index == -1 ? location : location.substring(0, index);
     }
 }

@@ -79,7 +79,7 @@ public class ReportService {
         String content = null;
         List<MultipartFile> attachments = new ArrayList<>();
         for (MultipartFile file : files) {
-            String filename = file.getOriginalFilename();
+            String filename = file.getName();
             if (filename.isEmpty()) {
                 content = StreamUtils.copyToString(file.getInputStream(), StandardCharsets.UTF_8);
             } else {
