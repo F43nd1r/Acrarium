@@ -69,8 +69,9 @@ public class ReportView extends ParametrizedNamedView<Report> {
         summaryGrid.addComponents(new Label("Email", ContentMode.PREFORMATTED), new Label(report.getUserEmail(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Comment", ContentMode.PREFORMATTED), new Label(report.getUserComment(), ContentMode.PREFORMATTED));
         Optional<ProguardMapping> mapping = mappingRepository.findById(report.getBug().getApp(), report.getVersionCode());
-        if(mapping.isPresent()) {
-            summaryGrid.addComponents(new Label("De-obfuscated Stacktrace", ContentMode.PREFORMATTED), new Label(Utils.retrace(report.getStacktrace(), mapping.get().getMappings()), ContentMode.PREFORMATTED));
+        if (mapping.isPresent()) {
+            summaryGrid.addComponents(new Label("De-obfuscated Stacktrace", ContentMode.PREFORMATTED),
+                    new Label(Utils.retrace(report.getStacktrace(), mapping.get().getMappings()), ContentMode.PREFORMATTED));
         } else {
             summaryGrid.addComponents(new Label("Stacktrace (No mapping found)", ContentMode.PREFORMATTED), new Label(report.getStacktrace(), ContentMode.PREFORMATTED));
         }
@@ -100,8 +101,11 @@ public class ReportView extends ParametrizedNamedView<Report> {
 
     @NonNull
     private GridLayout getLayoutForMap(@NonNull Map<String, ?> map) {
-        GridLayout layout = new GridLayout(2, 1, map.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getKey))
-                .flatMap(entry -> getLayoutForEntry(entry.getKey(), entry.getValue())).toArray(Component[]::new));
+        GridLayout layout = new GridLayout(2, 1, map.entrySet()
+                .stream()
+                .sorted(Comparator.comparing(Map.Entry::getKey))
+                .flatMap(entry -> getLayoutForEntry(entry.getKey(), entry.getValue()))
+                .toArray(Component[]::new));
         layout.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
         layout.setSpacing(false);
         layout.setMargin(false);

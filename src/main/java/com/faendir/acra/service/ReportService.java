@@ -52,8 +52,8 @@ public class ReportService {
     @NonNull private final Log log;
 
     @Autowired
-    public ReportService(@NonNull AppRepository appRepository, @NonNull BugRepository bugRepository, @NonNull ReportRepository reportRepository, @NonNull AttachmentRepository attachmentRepository, @NonNull
-                         EntityManagerFactory entityManagerFactory) {
+    public ReportService(@NonNull AppRepository appRepository, @NonNull BugRepository bugRepository, @NonNull ReportRepository reportRepository,
+            @NonNull AttachmentRepository attachmentRepository, @NonNull EntityManagerFactory entityManagerFactory) {
         this.appRepository = appRepository;
         this.bugRepository = bugRepository;
         this.reportRepository = reportRepository;
@@ -101,13 +101,13 @@ public class ReportService {
         String stacktrace = jsonObject.optString(ReportField.STACK_TRACE.name());
         Date crashDate = Utils.getDateFromString(jsonObject.optString(ReportField.USER_CRASH_DATE.name()));
         Bug bug = bugRepository.findBugByAppAndStacktrace(app, stacktrace)
-                               .orElseGet(() -> new Bug(app, stacktrace, jsonObject.optInt(ReportField.APP_VERSION_CODE.name()), crashDate));
+                .orElseGet(() -> new Bug(app, stacktrace, jsonObject.optInt(ReportField.APP_VERSION_CODE.name()), crashDate));
         bug.setLastReport(crashDate);
         Report report = reportRepository.save(new Report(bug, content));
         attachments.forEach(multipartFile -> {
             try {
-                attachmentRepository.save(new Attachment(report, multipartFile.getName(), Hibernate.getLobCreator(sessionFactory.getCurrentSession())
-                                                                                                   .createBlob(multipartFile.getInputStream(), multipartFile.getSize())));
+                attachmentRepository.save(new Attachment(report, multipartFile.getName(),
+                        Hibernate.getLobCreator(sessionFactory.getCurrentSession()).createBlob(multipartFile.getInputStream(), multipartFile.getSize())));
             } catch (IOException e) {
                 log.warn("Failed to load attachment with name " + multipartFile.getName(), e);
             }

@@ -3,8 +3,8 @@ package com.faendir.acra.sql.model;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
-import org.springframework.lang.NonNull;
 import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.lang.NonNull;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

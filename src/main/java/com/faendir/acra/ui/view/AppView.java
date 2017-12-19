@@ -28,7 +28,6 @@ import java.util.Optional;
 @SpringView(name = "app")
 @RequiresAppPermission(Permission.Level.VIEW)
 public class AppView extends ParametrizedNamedView<Pair<App, String>> {
-
     @NonNull private final AppRepository appRepository;
     @NonNull private final ApplicationContext applicationContext;
     private MyTabSheet tabSheet;
@@ -55,14 +54,15 @@ public class AppView extends ParametrizedNamedView<Pair<App, String>> {
     @Override
     public Pair<App, String> validateAndParseFragment(@NonNull String fragment) {
         String[] parameters = fragment.split("/");
-        if(parameters.length > 0) {
+        if (parameters.length > 0) {
             Optional<App> appOptional = appRepository.findByEncodedId(parameters[0]);
             if (appOptional.isPresent()) {
                 App app = appOptional.get();
-                tabSheet = new MyTabSheet(app, getNavigationManager(), applicationContext, BugTab.class, ReportTab.class, StatisticsTab.class, DeObfuscationTab.class, PropertiesTab.class);
+                tabSheet = new MyTabSheet(app, getNavigationManager(), applicationContext, BugTab.class, ReportTab.class, StatisticsTab.class, DeObfuscationTab.class,
+                        PropertiesTab.class);
                 if (parameters.length == 1) {
                     return Pair.of(app, tabSheet.getCaptions().get(0));
-                } else if (tabSheet.getCaptions().contains(parameters[1])){
+                } else if (tabSheet.getCaptions().contains(parameters[1])) {
                     return Pair.of(app, parameters[1]);
                 }
             }

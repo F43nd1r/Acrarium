@@ -1,19 +1,17 @@
 package com.faendir.acra.security;
 
 import com.vaadin.server.VaadinService;
+import com.vaadin.server.VaadinSession;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.core.context.SecurityContextImpl;
-
-import com.vaadin.server.VaadinSession;
 
 /**
  * A custom {@link SecurityContextHolderStrategy} that stores the {@link SecurityContext} in the Vaadin Session.
  */
 @SuppressWarnings("WeakerAccess")
 public class VaadinSessionSecurityContextHolderStrategy implements SecurityContextHolderStrategy {
-
     @Override
     public void clearContext() {
         getSession().setAttribute(SecurityContext.class, null);

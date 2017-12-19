@@ -42,7 +42,7 @@ public class MyGrid<T> extends Grid<T> {
 
     @NonNull
     public <R> Grid.Column<T, R> addColumn(@NonNull ValueProvider<T, R> valueProvider, @NonNull AbstractRenderer<? super T, ? super R> renderer, @NonNull String id,
-                                           @NonNull String caption) {
+            @NonNull String caption) {
         return addColumn(valueProvider, renderer).setId(id).setCaption(caption);
     }
 

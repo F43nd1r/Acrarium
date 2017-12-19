@@ -7,8 +7,6 @@ import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.TabSheet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.NonNull;
 
@@ -32,7 +30,7 @@ public class MyTabSheet extends TabSheet {
         this.navigationManager = navigationManager;
         for (Class<? extends Tab> tabClass : tabs) {
             RequiresAppPermission annotation = tabClass.getAnnotation(RequiresAppPermission.class);
-            if(annotation == null || SecurityUtils.hasPermission(app, annotation.value())) {
+            if (annotation == null || SecurityUtils.hasPermission(app, annotation.value())) {
                 addTab(applicationContext.getBean(tabClass));
             }
         }
@@ -49,7 +47,9 @@ public class MyTabSheet extends TabSheet {
     }
 
     public void setInitialTab(String caption) {
-        StreamSupport.stream(Spliterators.spliterator(iterator(), getComponentCount(), Spliterator.ORDERED), false).filter(c -> c.getCaption().equals(caption)).findAny()
+        StreamSupport.stream(Spliterators.spliterator(iterator(), getComponentCount(), Spliterator.ORDERED), false)
+                .filter(c -> c.getCaption().equals(caption))
+                .findAny()
                 .ifPresent(component -> {
                     if (getSelectedTab() == component && component instanceof SelectedTabChangeListener) {
                         ((SelectedTabChangeListener) component).selectedTabChange(new SelectedTabChangeEvent(this, true));
@@ -79,11 +79,7 @@ public class MyTabSheet extends TabSheet {
         @Override
         public void selectedTabChange(@NonNull SelectedTabChangeEvent event) {
             if (this == event.getTabSheet().getSelectedTab()) {
-                Logger logger = LoggerFactory.getLogger(TabWrapper.class);
-                long start = System.currentTimeMillis();
                 setCompositionRoot(tab.createContent(app, navigationManager));
-                long end = System.currentTimeMillis();
-                logger.info("{} spent {} ms creating its content", tab.getClass().getName(), end - start);
             } else {
                 setCompositionRoot(null);
             }

@@ -1,6 +1,5 @@
 package com.faendir.acra.ui.view;
 
-
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.annotation.UIScope;

@@ -2,15 +2,15 @@ package com.faendir.acra;
 
 import com.faendir.acra.config.AcraConfiguration;
 import com.faendir.acra.service.multipart.Rfc1341MultipartResolver;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.lang.NonNull;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.lang.NonNull;
 import org.springframework.web.multipart.MultipartResolver;
 
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class})

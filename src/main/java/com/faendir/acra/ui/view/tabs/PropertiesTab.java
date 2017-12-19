@@ -60,14 +60,12 @@ public class PropertiesTab implements MyTabSheet.Tab {
                     popup.clear().addComponent(new ConfigurationLabel(userPasswordPair.getFirst().getUsername(), userPasswordPair.getSecond())).addCloseButton().show();
                 })
                 .show()));
-        layout.addComponent(new Button("Delete App", e -> new Popup().setTitle("Confirm")
-                .addComponent(new Label("Are you sure you want to delete this app and all its associated content?"))
-                .addYesNoButtons(popup -> {
+        layout.addComponent(new Button("Delete App",
+                e -> new Popup().setTitle("Confirm").addComponent(new Label("Are you sure you want to delete this app and all its associated content?")).addYesNoButtons(popup -> {
                     appRepository.delete(app);
                     popup.close();
                     navigationManager.navigateBack();
-                })
-                .show()));
+                }).show()));
         IntStepper age = new IntStepper();
         age.setValue(30);
         age.setMinValue(0);

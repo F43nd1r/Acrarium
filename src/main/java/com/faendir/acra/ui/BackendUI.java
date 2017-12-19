@@ -61,7 +61,7 @@ public class BackendUI extends UI {
     private void login(@NonNull String username, @NonNull String password) {
         try {
             Authentication token = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username.toLowerCase(), password));
-            if(token.getAuthorities().stream().noneMatch(auth -> UserManager.ROLE_USER.equals(auth.getAuthority()))){
+            if (token.getAuthorities().stream().noneMatch(auth -> UserManager.ROLE_USER.equals(auth.getAuthority()))) {
                 throw new InsufficientAuthenticationException("Missing required role");
             }
             VaadinService.reinitializeSession(VaadinService.getCurrentRequest());
@@ -96,13 +96,13 @@ public class BackendUI extends UI {
         header.setExpandRatio(up, 1);
         header.setWidth(100, Unit.PERCENTAGE);
 
-        if(SecurityUtils.hasRole(UserManager.ROLE_ADMIN)){
+        if (SecurityUtils.hasRole(UserManager.ROLE_ADMIN)) {
             Button userManager = new Button("User Manager", e -> navigationManager.navigateTo(UserManagerView.class, ""));
             header.addComponent(userManager);
             header.setComponentAlignment(userManager, Alignment.MIDDLE_RIGHT);
         }
 
-        Button changePassword = new Button("Change Password", e-> navigationManager.navigateTo(ChangePasswordView.class, ""));
+        Button changePassword = new Button("Change Password", e -> navigationManager.navigateTo(ChangePasswordView.class, ""));
         header.addComponent(changePassword);
         header.setComponentAlignment(changePassword, Alignment.MIDDLE_RIGHT);
 
@@ -124,5 +124,4 @@ public class BackendUI extends UI {
     public VerticalLayout mainView() {
         return content;
     }
-
 }

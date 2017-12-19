@@ -31,15 +31,17 @@ import org.vaadin.risto.stepper.IntStepper;
 public class DeObfuscationTab implements MyTabSheet.Tab {
     public static final String CAPTION = "De-Obfuscation";
     @NonNull private final ProguardMappingRepository mappingRepository;
+    @NonNull private final BufferedDataProvider.Factory factory;
 
-    public DeObfuscationTab(@NonNull ProguardMappingRepository mappingRepository) {
+    public DeObfuscationTab(@NonNull ProguardMappingRepository mappingRepository, @NonNull BufferedDataProvider.Factory factory) {
         this.mappingRepository = mappingRepository;
+        this.factory = factory;
     }
 
     @Override
     public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
         VerticalLayout layout = new VerticalLayout();
-        MyGrid<ProguardMapping> grid = new MyGrid<>(null, new BufferedDataProvider<>(app, mappingRepository::findAllByApp, mappingRepository::countAllByApp));
+        MyGrid<ProguardMapping> grid = new MyGrid<>(null, factory.create(app, mappingRepository::findAllByApp, mappingRepository::countAllByApp));
         grid.addColumn(ProguardMapping::getVersionCode, "Version");
         grid.setWidth(100, VerticalLayout.Unit.PERCENTAGE);
         layout.addComponent(grid);
@@ -55,7 +57,7 @@ public class DeObfuscationTab implements MyTabSheet.Tab {
                 new Popup().setTitle("New Mapping Configuration")
                         .addComponent(version)
                         .addValidatedField(ValidatedField.of(upload, () -> upload, consumer -> upload.addFinishedListener(event -> consumer.accept(upload)))
-                                                   .addValidator(InMemoryUpload::isUploaded, "Upload failed"))
+                                .addValidator(InMemoryUpload::isUploaded, "Upload failed"))
                         .addComponent(progressBar)
                         .addCreateButton(popup -> {
                             mappingRepository.save(new ProguardMapping(app, version.getValue(), upload.getUploadedString()));

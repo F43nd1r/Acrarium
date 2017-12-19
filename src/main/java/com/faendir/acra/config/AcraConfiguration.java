@@ -8,8 +8,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties(prefix = "acra")
 public class AcraConfiguration {
-
     private User user;
+    private int paginationSize;
 
     public User getUser() {
         return user;
@@ -17,6 +17,14 @@ public class AcraConfiguration {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public int getPaginationSize() {
+        return paginationSize;
+    }
+
+    public void setPaginationSize(int paginationSize) {
+        this.paginationSize = paginationSize;
     }
 
     public static class User {

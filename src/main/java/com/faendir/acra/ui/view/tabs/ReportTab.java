@@ -20,16 +20,18 @@ import org.springframework.lang.NonNull;
 @ViewScope
 public class ReportTab implements MyTabSheet.Tab {
     @NonNull private final ReportRepository reportRepository;
+    @NonNull private final BufferedDataProvider.Factory factory;
 
     @Autowired
-    public ReportTab(@NonNull ReportRepository reportRepository) {
+    public ReportTab(@NonNull ReportRepository reportRepository, @NonNull BufferedDataProvider.Factory factory) {
         this.reportRepository = reportRepository;
+        this.factory = factory;
     }
 
     @Override
     public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
         Component content = new ReportList(app, navigationManager, reportRepository::delete,
-                                           new BufferedDataProvider<>(app, reportRepository::findAllByBugApp, reportRepository::countAllByBugApp));
+                factory.create(app, reportRepository::findAllByBugApp, reportRepository::countAllByBugApp));
         content.setSizeFull();
         return content;
     }

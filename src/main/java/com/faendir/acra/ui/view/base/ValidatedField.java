@@ -24,7 +24,7 @@ public class ValidatedField<V, T extends AbstractComponent> {
     private final List<Listener> listeners;
     private boolean valid;
 
-    private ValidatedField(T field, Supplier<V> valueSupplier, Consumer<Consumer<V>> listenerRegistration){
+    private ValidatedField(T field, Supplier<V> valueSupplier, Consumer<Consumer<V>> listenerRegistration) {
         this.field = field;
         this.valueSupplier = valueSupplier;
         this.validators = new HashMap<>();
@@ -37,7 +37,7 @@ public class ValidatedField<V, T extends AbstractComponent> {
         return new ValidatedField<>(field, field::getValue, vConsumer -> field.addValueChangeListener(event -> vConsumer.accept(event.getValue())));
     }
 
-    public static <V, T extends AbstractComponent> ValidatedField<V, T> of(T field, Supplier<V> valueSupplier, Consumer<Consumer<V>> listenerRegistration){
+    public static <V, T extends AbstractComponent> ValidatedField<V, T> of(T field, Supplier<V> valueSupplier, Consumer<Consumer<V>> listenerRegistration) {
         return new ValidatedField<>(field, valueSupplier, listenerRegistration);
     }
 
@@ -64,7 +64,7 @@ public class ValidatedField<V, T extends AbstractComponent> {
                 return false;
             }
         });
-        if(this.valid != valid){
+        if (this.valid != valid) {
             this.valid = valid;
             listeners.forEach(listener -> listener.onValidationChanged(valid));
         }

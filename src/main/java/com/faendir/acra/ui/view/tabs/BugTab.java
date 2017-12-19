@@ -6,6 +6,7 @@ import com.faendir.acra.sql.data.ReportRepository;
 import com.faendir.acra.sql.model.App;
 import com.faendir.acra.sql.model.Bug;
 import com.faendir.acra.sql.model.Permission;
+import com.faendir.acra.sql.util.CountResult;
 import com.faendir.acra.ui.NavigationManager;
 import com.faendir.acra.ui.view.base.MyCheckBox;
 import com.faendir.acra.ui.view.base.MyGrid;
@@ -26,8 +27,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Lukas
@@ -39,12 +42,14 @@ public class BugTab implements MyTabSheet.Tab {
     public static final String CAPTION = "Bugs";
     @NonNull private final BugRepository bugRepository;
     @NonNull private final ReportRepository reportRepository;
+    @NonNull private final BufferedDataProvider.Factory factory;
     @Nullable private ReportList reportList;
 
     @Autowired
-    public BugTab(@NonNull BugRepository bugRepository, @NonNull ReportRepository reportRepository) {
+    public BugTab(@NonNull BugRepository bugRepository, @NonNull ReportRepository reportRepository, @NonNull BufferedDataProvider.Factory factory) {
         this.bugRepository = bugRepository;
         this.reportRepository = reportRepository;
+        this.factory = factory;
     }
 
     @Override
@@ -66,7 +71,8 @@ public class BugTab implements MyTabSheet.Tab {
         }));
         //bugs.setWidth(100, Unit.PERCENTAGE);
         bugs.setSizeFull();
-        bugs.addColumn(reportRepository::countAllByBug, "Reports");
+        Map<Integer, Long> counts = reportRepository.countAllByBug().stream().collect(Collectors.toMap(CountResult::getGroup, CountResult::getCount));
+        bugs.addColumn(bug -> counts.get(bug.getId()), "Reports");
         bugs.sort(bugs.addColumn(Bug::getLastReport, new TimeSpanRenderer(), "lastReport", "Latest Report"), SortDirection.DESCENDING);
         bugs.addColumn(Bug::getVersionCode, "versionCode", "Version");
         bugs.addColumn(bug -> bug.getStacktrace().split("\n", 2)[0], "stacktrace", "Stacktrace").setExpandRatio(1);
@@ -75,7 +81,7 @@ public class BugTab implements MyTabSheet.Tab {
             ReportList reports = null;
             if (selection.isPresent()) {
                 reports = new ReportList(app, navigationManager, reportRepository::delete,
-                                         new BufferedDataProvider<>(selection.get(), reportRepository::findAllByBug, reportRepository::countAllByBug));
+                        factory.create(selection.get(), reportRepository::findAllByBug, reportRepository::countAllByBug));
                 reports.setSizeFull();
                 layout.replaceComponent(this.reportList, reports);
                 layout.setExpandRatio(reports, 1);
@@ -96,7 +102,7 @@ public class BugTab implements MyTabSheet.Tab {
     }
 
     private BufferedDataProvider<Bug> createDataProvider(@NonNull App app, boolean hideSolved) {
-        return new BufferedDataProvider<>(app, hideSolved ? bugRepository::findAllByAppAndSolvedFalse : bugRepository::findAllByApp,
-                                          hideSolved ? bugRepository::countAllByAppAndSolvedFalse : bugRepository::countAllByApp);
+        return factory.create(app, hideSolved ? bugRepository::findAllByAppAndSolvedFalse : bugRepository::findAllByApp,
+                hideSolved ? bugRepository::countAllByAppAndSolvedFalse : bugRepository::countAllByApp);
     }
 }

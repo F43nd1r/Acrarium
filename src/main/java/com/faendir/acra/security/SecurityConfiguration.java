@@ -34,7 +34,6 @@ import java.security.SecureRandom;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-
     static {
         SecurityContextHolder.setStrategyName(VaadinSessionSecurityContextHolderStrategy.class.getName());
     }
@@ -92,7 +91,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @NonNull
     @Bean
-    public static PasswordEncoder passwordEncoder(){
+    public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }

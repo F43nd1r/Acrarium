@@ -117,6 +117,7 @@ public class Rfc1341ServletFileUpload extends ServletFileUpload {
          */
         private boolean eof;
         private final long fileSizeMax;
+
         /**
          * Creates a new instance.
          *
@@ -153,7 +154,7 @@ public class Rfc1341ServletFileUpload extends ServletFileUpload {
             if (sizeMax >= 0) {
                 if (requestSize != -1 && requestSize > sizeMax) {
                     throw new SizeLimitExceededException(format("the request was rejected because its size (%s) exceeds the configured maximum (%s)", requestSize, sizeMax),
-                                                         requestSize, sizeMax);
+                            requestSize, sizeMax);
                 }
                 input = new LimitedInputStream(input, sizeMax) {
                     @Override

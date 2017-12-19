@@ -3,8 +3,8 @@ package com.faendir.acra.sql.model;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
-import org.springframework.lang.NonNull;
 import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.lang.NonNull;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -43,6 +43,10 @@ public class Bug {
         this.solved = false;
     }
 
+    public int getId() {
+        return id;
+    }
+
     @NonNull
     public App getApp() {
         return app;
@@ -71,7 +75,19 @@ public class Bug {
     }
 
     public void setLastReport(@NonNull Date lastReport) {
-        if(this.lastReport == null || this.lastReport.before(lastReport))
-        this.lastReport = lastReport;
+        if (this.lastReport == null || this.lastReport.before(lastReport)) this.lastReport = lastReport;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Bug bug = (Bug) o;
+        return id == bug.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
     }
 }

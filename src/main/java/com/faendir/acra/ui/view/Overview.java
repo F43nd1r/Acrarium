@@ -32,18 +32,21 @@ public class Overview extends NamedView {
     @NonNull private final AppRepository appRepository;
     @NonNull private final ReportRepository reportRepository;
     @NonNull private final UserManager userManager;
+    @NonNull private final BufferedDataProvider.Factory factory;
     private MyGrid<App> grid;
 
     @Autowired
-    public Overview(@NonNull AppRepository appRepository, @NonNull ReportRepository reportRepository, @NonNull UserManager userManager) {
+    public Overview(@NonNull AppRepository appRepository, @NonNull ReportRepository reportRepository, @NonNull UserManager userManager,
+            @NonNull BufferedDataProvider.Factory factory) {
         this.appRepository = appRepository;
         this.reportRepository = reportRepository;
         this.userManager = userManager;
+        this.factory = factory;
     }
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        grid = new MyGrid<>("Apps", new BufferedDataProvider<>(SecurityUtils.hasRole(UserManager.ROLE_ADMIN), (admin, pageable) -> admin ?
+        grid = new MyGrid<>("Apps", factory.create(SecurityUtils.hasRole(UserManager.ROLE_ADMIN), (admin, pageable) -> admin ?
                 appRepository.findAllByPermissionWithDefaultIncluded(SecurityUtils.getUsername(), Permission.Level.VIEW, pageable) :
                 appRepository.findAllByPermissionWithDefaultExcluded(SecurityUtils.getUsername(), Permission.Level.VIEW, pageable), admin -> admin ?
                 appRepository.countByPermissionWithDefaultIncluded(SecurityUtils.getUsername(), Permission.Level.VIEW) :

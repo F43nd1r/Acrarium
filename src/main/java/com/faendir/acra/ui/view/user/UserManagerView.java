@@ -38,22 +38,25 @@ public class UserManagerView extends NamedView {
     @NonNull private final UserManager userManager;
     @NonNull private final AppRepository appRepository;
     @NonNull private final UserRepository userRepository;
+    @NonNull private final BufferedDataProvider.Factory factory;
     private MyGrid<User> userGrid;
 
     @Autowired
-    public UserManagerView(@NonNull UserManager userManager, @NonNull AppRepository appRepository, @NonNull UserRepository userRepository) {
+    public UserManagerView(@NonNull UserManager userManager, @NonNull AppRepository appRepository, @NonNull UserRepository userRepository,
+            @NonNull BufferedDataProvider.Factory factory) {
         this.userManager = userManager;
         this.appRepository = appRepository;
         this.userRepository = userRepository;
+        this.factory = factory;
     }
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        userGrid = new MyGrid<>("Users", new BufferedDataProvider<>(UserManager.ROLE_USER, userRepository::findAllByRoles, userRepository::countAllByRoles));
+        userGrid = new MyGrid<>("Users", factory.create(UserManager.ROLE_USER, userRepository::findAllByRoles, userRepository::countAllByRoles));
         userGrid.setSelectionMode(Grid.SelectionMode.NONE);
         userGrid.addColumn(User::getUsername, "Username");
         userGrid.addComponentColumn(user -> new MyCheckBox(user.getRoles().contains(UserManager.ROLE_ADMIN), !user.getUsername().equals(SecurityUtils.getUsername()),
-                                                           e -> userManager.setAdmin(user, e.getValue()))).setCaption("Admin");
+                e -> userManager.setAdmin(user, e.getValue()))).setCaption("Admin");
         for (App app : appRepository.findAll()) {
             userGrid.addComponentColumn(user -> {
                 Permission.Level permission = SecurityUtils.getPermission(app, user);
@@ -77,13 +80,15 @@ public class UserManagerView extends NamedView {
     private void newUser() {
         TextField name = new TextField("Username");
         PasswordField password = new PasswordField("Password");
-        new Popup().setTitle("New User").addValidatedField(ValidatedField.of(name).addValidator(s -> !s.isEmpty(), "Username cannot be empty"))
+        new Popup().setTitle("New User")
+                .addValidatedField(ValidatedField.of(name).addValidator(s -> !s.isEmpty(), "Username cannot be empty"))
                 .addValidatedField(ValidatedField.of(password).addValidator(s -> !s.isEmpty(), "Password cannot be empty"))
                 .addValidatedField(ValidatedField.of(new PasswordField("Repeat Password")).addValidator(s -> s.equals(password.getValue()), "Passwords do not match"))
-                .addCreateButton(popup->{
+                .addCreateButton(popup -> {
                     userManager.createUser(name.getValue().toLowerCase(), password.getValue());
                     userGrid.getDataProvider().refreshAll();
                     popup.close();
-                }).show();
+                })
+                .show();
     }
 }

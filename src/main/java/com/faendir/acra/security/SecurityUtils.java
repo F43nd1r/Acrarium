@@ -36,7 +36,7 @@ public final class SecurityUtils {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null
                && getPermission(app, authentication.getAuthorities().stream().filter(Permission.class::isInstance).map(Permission.class::cast),
-                                () -> hasRole(UserManager.ROLE_ADMIN)).ordinal() >= level.ordinal();
+                () -> hasRole(UserManager.ROLE_ADMIN)).ordinal() >= level.ordinal();
     }
 
     public static Permission.Level getPermission(@NonNull App app, @NonNull User user) {
@@ -46,8 +46,8 @@ public final class SecurityUtils {
     @NonNull
     private static Permission.Level getPermission(@NonNull App app, @NonNull Stream<Permission> permissionStream, BooleanSupplier isAdmin) {
         return permissionStream.filter(permission -> permission.getApp().equals(app))
-                               .findAny()
-                               .map(Permission::getLevel)
-                               .orElseGet(() -> isAdmin.getAsBoolean() ? Permission.Level.ADMIN : Permission.Level.NONE);
+                .findAny()
+                .map(Permission::getLevel)
+                .orElseGet(() -> isAdmin.getAsBoolean() ? Permission.Level.ADMIN : Permission.Level.NONE);
     }
 }

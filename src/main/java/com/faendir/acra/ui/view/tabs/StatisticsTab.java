@@ -2,7 +2,6 @@ package com.faendir.acra.ui.view.tabs;
 
 import com.faendir.acra.sql.data.ReportRepository;
 import com.faendir.acra.sql.model.App;
-import com.faendir.acra.sql.util.AndroidVersionCount;
 import com.faendir.acra.ui.NavigationManager;
 import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.util.Style;
@@ -91,7 +90,7 @@ public class StatisticsTab implements MyTabSheet.Tab {
         Calendar start = Calendar.getInstance();
         start.add(Calendar.DAY_OF_MONTH, -age);
         series.add(new Day(start.getTime()), 0);
-        reportRepository.countAllByDayAfter(app, start.getTime()).forEach(dayCount -> series.addOrUpdate(new Day(dayCount.getDay()), dayCount.getCount()));
+        reportRepository.countAllByDayAfter(app, start.getTime()).forEach(dayCount -> series.addOrUpdate(new Day(dayCount.getGroup()), dayCount.getCount()));
         JFreeChart chart = ChartFactory.createXYBarChart("", "Date", true, "Reports", new TimeSeriesCollection(series), PlotOrientation.VERTICAL, false, false, false);
         XYPlot plot = chart.getXYPlot();
         plot.getRangeAxis().setStandardTickUnits(new NumberTickUnitSource(true));
@@ -110,8 +109,7 @@ public class StatisticsTab implements MyTabSheet.Tab {
 
     private void createVersionChart(@NonNull App app, @NonNull Panel panel) {
         DefaultPieDataset dataset = new DefaultPieDataset();
-        List<AndroidVersionCount> counts = reportRepository.countAllByAndroidVersion(app);
-        counts.forEach((pair) -> dataset.insertValue(0, pair.getAndroidVersion(), pair.getCount()));
+        reportRepository.countAllByAndroidVersion(app).forEach(pair -> dataset.insertValue(0, pair.getGroup(), pair.getCount()));
         dataset.sortByKeys(SortOrder.ASCENDING);
         JFreeChart chart = ChartFactory.createPieChart("Reports per Android Version", dataset, false, false, false);
         PiePlot plot = (PiePlot) chart.getPlot();

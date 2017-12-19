@@ -1,9 +1,9 @@
 package com.faendir.acra.ui;
 
 import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.ui.view.ErrorView;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.annotation.RequiresRole;
+import com.faendir.acra.ui.view.ErrorView;
 import com.faendir.acra.ui.view.base.NamedView;
 import com.faendir.acra.ui.view.base.ParametrizedNamedView;
 import com.faendir.acra.util.MyNavigator;

@@ -2,9 +2,9 @@ package com.faendir.acra.sql.model;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
-import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.Embeddable;
