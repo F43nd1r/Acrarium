@@ -35,7 +35,7 @@ import java.util.Set;
  */
 @SpringComponent
 @ViewScope
-public class BugTab extends VerticalLayout implements MyTabSheet.Tab {
+public class BugTab implements MyTabSheet.Tab {
     public static final String CAPTION = "Bugs";
     @NonNull private final BugRepository bugRepository;
     @NonNull private final ReportRepository reportRepository;
@@ -45,16 +45,21 @@ public class BugTab extends VerticalLayout implements MyTabSheet.Tab {
     public BugTab(@NonNull BugRepository bugRepository, @NonNull ReportRepository reportRepository) {
         this.bugRepository = bugRepository;
         this.reportRepository = reportRepository;
-        setCaption(CAPTION);
+    }
+
+    @Override
+    public String getCaption() {
+        return CAPTION;
     }
 
     @Override
     public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
+        VerticalLayout layout = new VerticalLayout();
         CheckBox hideSolved = new CheckBox("Hide solved", true);
-        addComponent(hideSolved);
-        setComponentAlignment(hideSolved, Alignment.MIDDLE_RIGHT);
+        layout.addComponent(hideSolved);
+        layout.setComponentAlignment(hideSolved, Alignment.MIDDLE_RIGHT);
         MyGrid<Bug> bugs = new MyGrid<>(null, createDataProvider(app, true));
-        hideSolved.addValueChangeListener(e -> getUI().access(() -> {
+        hideSolved.addValueChangeListener(e -> layout.getUI().access(() -> {
             Set<Bug> selection = bugs.getSelectedItems();
             bugs.setDataProvider(createDataProvider(app, e.getValue()));
             selection.forEach(bugs::select);
@@ -72,10 +77,10 @@ public class BugTab extends VerticalLayout implements MyTabSheet.Tab {
                 reports = new ReportList(app, navigationManager, reportRepository::delete,
                                          new BufferedDataProvider<>(selection.get(), reportRepository::findAllByBug, reportRepository::countAllByBug));
                 reports.setSizeFull();
-                replaceComponent(this.reportList, reports);
-                setExpandRatio(reports, 1);
+                layout.replaceComponent(this.reportList, reports);
+                layout.setExpandRatio(reports, 1);
             } else if (this.reportList != null) {
-                removeComponent(this.reportList);
+                layout.removeComponent(this.reportList);
             }
             this.reportList = reports;
         });
@@ -83,11 +88,11 @@ public class BugTab extends VerticalLayout implements MyTabSheet.Tab {
             bug.setSolved(e.getValue());
             bugRepository.save(bug);
         }), new ComponentRenderer(), "Solved");
-        addComponent(bugs);
-        setExpandRatio(bugs, 1);
-        setSizeFull();
-        Style.NO_PADDING.apply(this);
-        return this;
+        layout.addComponent(bugs);
+        layout.setExpandRatio(bugs, 1);
+        layout.setSizeFull();
+        Style.NO_PADDING.apply(layout);
+        return layout;
     }
 
     private BufferedDataProvider<Bug> createDataProvider(@NonNull App app, boolean hideSolved) {

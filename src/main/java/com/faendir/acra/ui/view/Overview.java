@@ -10,6 +10,7 @@ import com.faendir.acra.sql.user.UserManager;
 import com.faendir.acra.ui.view.base.ConfigurationLabel;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.NamedView;
+import com.faendir.acra.ui.view.base.Popup;
 import com.faendir.acra.util.BufferedDataProvider;
 import com.faendir.acra.util.Style;
 import com.vaadin.data.provider.ConfigurableFilterDataProvider;
@@ -18,9 +19,7 @@ import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
@@ -66,21 +65,12 @@ public class Overview extends NamedView {
     }
 
     private void addApp() {
-        Window window = new Window("New App");
         TextField name = new TextField("Name");
-        Button create = new Button("Create");
-        VerticalLayout layout = new VerticalLayout(name, create);
-        create.addClickListener(e -> {
+        new Popup().setTitle("New App").addComponent(name).addCreateButton(popup -> {
             Pair<User, String> userPasswordPair = userManager.createReporterUser();
             appRepository.save(new App(name.getValue(), userPasswordPair.getFirst()));
             grid.getDataProvider().refreshAll();
-            layout.removeAllComponents();
-            layout.addComponent(new ConfigurationLabel(userPasswordPair.getFirst().getUsername(), userPasswordPair.getSecond()));
-            layout.addComponent(new Button("Close", e2 -> window.close()));
-            window.center();
-        });
-        window.setContent(layout);
-        window.center();
-        UI.getCurrent().addWindow(window);
+            popup.clear().addComponent(new ConfigurationLabel(userPasswordPair.getFirst().getUsername(), userPasswordPair.getSecond())).addCloseButton().show();
+        }).show();
     }
 }

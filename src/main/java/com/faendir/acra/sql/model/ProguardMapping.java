@@ -47,7 +47,7 @@ public class ProguardMapping {
     }
 
     public static class MetaData implements Serializable {
-        private App app;
+        private int app;
         private int versionCode;
 
         @PersistenceConstructor
@@ -55,16 +55,8 @@ public class ProguardMapping {
         }
 
         public MetaData(App app, int versionCode) {
-            this.app = app;
+            this.app = app.getId();
             this.versionCode = versionCode;
-        }
-
-        public App getApp() {
-            return app;
-        }
-
-        public int getVersionCode() {
-            return versionCode;
         }
 
         @Override

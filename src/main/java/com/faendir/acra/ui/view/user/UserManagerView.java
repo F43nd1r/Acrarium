@@ -6,28 +6,27 @@ import com.faendir.acra.sql.model.App;
 import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.sql.model.User;
 import com.faendir.acra.sql.user.UserManager;
+import com.faendir.acra.sql.user.UserRepository;
 import com.faendir.acra.ui.view.annotation.RequiresRole;
 import com.faendir.acra.ui.view.base.MyCheckBox;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.NamedView;
+import com.faendir.acra.ui.view.base.Popup;
 import com.faendir.acra.ui.view.base.ValidatedField;
+import com.faendir.acra.util.BufferedDataProvider;
 import com.faendir.acra.util.Style;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 /**
  * @author Lukas
@@ -38,18 +37,19 @@ import java.util.Collections;
 public class UserManagerView extends NamedView {
     @NonNull private final UserManager userManager;
     @NonNull private final AppRepository appRepository;
-    @NonNull private final MyGrid<User> userGrid;
+    @NonNull private final UserRepository userRepository;
+    private MyGrid<User> userGrid;
 
     @Autowired
-    public UserManagerView(@NonNull UserManager userManager, @NonNull AppRepository appRepository) {
+    public UserManagerView(@NonNull UserManager userManager, @NonNull AppRepository appRepository, @NonNull UserRepository userRepository) {
         this.userManager = userManager;
         this.appRepository = appRepository;
-        this.userGrid = new MyGrid<>("Users", Collections.emptyList());
+        this.userRepository = userRepository;
     }
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        userGrid.setItems(userManager.getUsers());
+        userGrid = new MyGrid<>("Users", new BufferedDataProvider<>(UserManager.ROLE_USER, userRepository::findAllByRoles, userRepository::countAllByRoles));
         userGrid.setSelectionMode(Grid.SelectionMode.NONE);
         userGrid.addColumn(User::getUsername, "Username");
         userGrid.addComponentColumn(user -> new MyCheckBox(user.getRoles().contains(UserManager.ROLE_ADMIN), !user.getUsername().equals(SecurityUtils.getUsername()),
@@ -75,24 +75,15 @@ public class UserManagerView extends NamedView {
     }
 
     private void newUser() {
-        Window window = new Window("New User");
-        ValidatedField<String, TextField> name = new ValidatedField<>(new TextField("Username")).addValidator(s -> !s.isEmpty(), "Username cannot be empty")
-                .addValidator(s -> userManager.getUser(s) == null, "User already exists");
-        ValidatedField<String, PasswordField> password = new ValidatedField<>(new PasswordField("Password")).addValidator(s -> !s.isEmpty(), "Password cannot be empty");
-        ValidatedField<String, PasswordField> repeatPassword = new ValidatedField<>(new PasswordField("Repeat Password"))
-                .addValidator(s -> s.equals(password.getValue()), "Passwords do not match");
-        Button create = new Button("Create");
-        create.addClickListener(e -> {
-            if (name.isValid() && password.isValid() && repeatPassword.isValid()) {
-                userManager.createUser(name.getValue().toLowerCase(), password.getValue());
-                userGrid.setItems(userManager.getUsers());
-                window.close();
-            }
-        });
-        create.setWidth(100, Unit.PERCENTAGE);
-        FormLayout layout = new FormLayout(name.getField(), password.getField(), repeatPassword.getField(), create);
-        window.setContent(layout);
-        window.center();
-        UI.getCurrent().addWindow(window);
+        TextField name = new TextField("Username");
+        PasswordField password = new PasswordField("Password");
+        new Popup().setTitle("New User").addValidatedField(ValidatedField.of(name).addValidator(s -> !s.isEmpty(), "Username cannot be empty"))
+                .addValidatedField(ValidatedField.of(password).addValidator(s -> !s.isEmpty(), "Password cannot be empty"))
+                .addValidatedField(ValidatedField.of(new PasswordField("Repeat Password")).addValidator(s -> s.equals(password.getValue()), "Passwords do not match"))
+                .addCreateButton(popup->{
+                    userManager.createUser(name.getValue().toLowerCase(), password.getValue());
+                    userGrid.getDataProvider().refreshAll();
+                    popup.close();
+                }).show();
     }
 }

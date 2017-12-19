@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.function.BooleanSupplier;
 import java.util.stream.Stream;
 
 public final class SecurityUtils {
@@ -34,18 +35,19 @@ public final class SecurityUtils {
     public static boolean hasPermission(@NonNull App app, @NonNull Permission.Level level) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null
-               && getPermission(app, authentication.getAuthorities().stream().filter(Permission.class::isInstance).map(Permission.class::cast)).ordinal() >= level.ordinal();
+               && getPermission(app, authentication.getAuthorities().stream().filter(Permission.class::isInstance).map(Permission.class::cast),
+                                () -> hasRole(UserManager.ROLE_ADMIN)).ordinal() >= level.ordinal();
     }
 
-    public static Permission.Level getPermission(@NonNull App app, @NonNull User user){
-        return getPermission(app, user.getPermissions().stream());
+    public static Permission.Level getPermission(@NonNull App app, @NonNull User user) {
+        return getPermission(app, user.getPermissions().stream(), () -> user.getRoles().contains(UserManager.ROLE_ADMIN));
     }
 
     @NonNull
-    private static Permission.Level getPermission(@NonNull App app, @NonNull Stream<Permission> permissionStream) {
+    private static Permission.Level getPermission(@NonNull App app, @NonNull Stream<Permission> permissionStream, BooleanSupplier isAdmin) {
         return permissionStream.filter(permission -> permission.getApp().equals(app))
                                .findAny()
                                .map(Permission::getLevel)
-                               .orElseGet(() -> hasRole(UserManager.ROLE_ADMIN) ? Permission.Level.ADMIN : Permission.Level.NONE);
+                               .orElseGet(() -> isAdmin.getAsBoolean() ? Permission.Level.ADMIN : Permission.Level.NONE);
     }
 }

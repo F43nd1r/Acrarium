@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -102,15 +101,6 @@ public class UserManager {
             user.getPermissions().add(new Permission(app, level));
         }
         userRepository.save(user);
-    }
-
-    @NonNull
-    public List<User> getUsers() {
-        List<User> users = userRepository.findAll();
-        if (users.stream().noneMatch(user -> user.getUsername().equals(acraConfiguration.getUser().getName()))) {
-            users.add(getDefaultUser());
-        }
-        return users;
     }
 
     @NonNull

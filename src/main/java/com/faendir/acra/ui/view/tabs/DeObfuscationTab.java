@@ -6,24 +6,21 @@ import com.faendir.acra.sql.model.App;
 import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.sql.model.ProguardMapping;
 import com.faendir.acra.ui.NavigationManager;
+import com.faendir.acra.ui.view.base.InMemoryUpload;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.MyTabSheet;
+import com.faendir.acra.ui.view.base.Popup;
+import com.faendir.acra.ui.view.base.ValidatedField;
+import com.faendir.acra.util.BufferedDataProvider;
 import com.faendir.acra.util.Style;
-import com.vaadin.server.UserError;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.ProgressBar;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 import org.springframework.lang.NonNull;
-
-import java.io.ByteArrayOutputStream;
+import org.vaadin.risto.stepper.IntStepper;
 
 /**
  * @author Lukas
@@ -31,70 +28,49 @@ import java.io.ByteArrayOutputStream;
  */
 @SpringComponent
 @ViewScope
-public class DeObfuscationTab extends VerticalLayout implements MyTabSheet.Tab{
+public class DeObfuscationTab implements MyTabSheet.Tab {
     public static final String CAPTION = "De-Obfuscation";
     @NonNull private final ProguardMappingRepository mappingRepository;
-    private boolean validNumber;
-    private boolean validFile;
 
     public DeObfuscationTab(@NonNull ProguardMappingRepository mappingRepository) {
         this.mappingRepository = mappingRepository;
-        setCaption(CAPTION);
     }
 
     @Override
     public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
-        MyGrid<ProguardMapping> grid = new MyGrid<>(null, mappingRepository.findAllByApp(app));
+        VerticalLayout layout = new VerticalLayout();
+        MyGrid<ProguardMapping> grid = new MyGrid<>(null, new BufferedDataProvider<>(app, mappingRepository::findAllByApp, mappingRepository::countAllByApp));
         grid.addColumn(ProguardMapping::getVersionCode, "Version");
-        grid.setWidth(100, Unit.PERCENTAGE);
-        addComponent(grid);
-        setSizeFull();
-        Style.NO_PADDING.apply(this);
+        grid.setWidth(100, VerticalLayout.Unit.PERCENTAGE);
+        layout.addComponent(grid);
+        layout.setSizeFull();
+        Style.NO_PADDING.apply(layout);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-            addComponent(new Button("Add File", e -> {
-                Window window = new Window("New Mapping Configuration");
-                Button confirm = new Button("Confirm");
-                confirm.setEnabled(false);
-                TextField version = new TextField("Version code", e1 -> {
-                    try {
-                        //noinspection ResultOfMethodCallIgnored
-                        Integer.parseInt(e1.getValue());
-                        validNumber = true;
-                        confirm.setEnabled(validFile);
-                        ((AbstractComponent) e1.getComponent()).setComponentError(null);
-                    } catch (NumberFormatException ex) {
-                        validNumber = false;
-                        confirm.setEnabled(false);
-                        ((AbstractComponent) e1.getComponent()).setComponentError(new UserError("Not a number"));
-                    }
-                });
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                Upload upload = new Upload("Mapping file:", (filename, mimeType) -> out);
+            layout.addComponent(new Button("Add File", e -> {
+                IntStepper version = new IntStepper("Version code");
+                version.setValue(1);
+                InMemoryUpload upload = new InMemoryUpload("Mapping file:");
                 ProgressBar progressBar = new ProgressBar();
-                progressBar.setSizeFull();
-                upload.addProgressListener((readBytes, contentLength) -> getUI().access(() -> progressBar.setValue((float) readBytes / contentLength)));
-                upload.addSucceededListener(e1 -> {
-                    validFile = true;
-                    confirm.setEnabled(validNumber);
-                });
-                upload.addFailedListener(e1 -> {
-                    validFile = false;
-                    confirm.setEnabled(false);
-                });
-                upload.setSizeFull();
-                confirm.addClickListener(e1 -> {
-                    mappingRepository.save(new ProguardMapping(app, Integer.parseInt(version.getValue()), out.toString()));
-                    grid.setItems(mappingRepository.findAllByApp(app));
-                    window.close();
-                });
-                confirm.setSizeFull();
-                VerticalLayout layout = new VerticalLayout(version, upload, progressBar, confirm);
-                window.setContent(layout);
-                window.center();
-                UI.getCurrent().addWindow(window);
+                upload.addProgressListener((readBytes, contentLength) -> layout.getUI().access(() -> progressBar.setValue((float) readBytes / contentLength)));
+                new Popup().setTitle("New Mapping Configuration")
+                        .addComponent(version)
+                        .addValidatedField(ValidatedField.of(upload, () -> upload, consumer -> upload.addFinishedListener(event -> consumer.accept(upload)))
+                                                   .addValidator(InMemoryUpload::isUploaded, "Upload failed"))
+                        .addComponent(progressBar)
+                        .addCreateButton(popup -> {
+                            mappingRepository.save(new ProguardMapping(app, version.getValue(), upload.getUploadedString()));
+                            grid.getDataProvider().refreshAll();
+                            popup.close();
+                        })
+                        .show();
             }));
         }
-        setExpandRatio(grid, 1);
-        return this;
+        layout.setExpandRatio(grid, 1);
+        return layout;
+    }
+
+    @Override
+    public String getCaption() {
+        return CAPTION;
     }
 }

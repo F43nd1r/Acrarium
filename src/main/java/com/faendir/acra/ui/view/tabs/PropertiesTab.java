@@ -8,6 +8,8 @@ import com.faendir.acra.sql.user.UserManager;
 import com.faendir.acra.ui.NavigationManager;
 import com.faendir.acra.ui.view.base.ConfigurationLabel;
 import com.faendir.acra.ui.view.base.MyTabSheet;
+import com.faendir.acra.ui.view.base.Popup;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
@@ -15,9 +17,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
@@ -32,7 +32,7 @@ import java.util.Date;
  */
 @SpringComponent
 @ViewScope
-public class PropertiesTab extends VerticalLayout implements MyTabSheet.Tab {
+public class PropertiesTab implements MyTabSheet.Tab {
     public static final String CAPTION = "Properties";
     @NonNull private final AppRepository appRepository;
     private final ReportRepository reportRepository;
@@ -43,44 +43,28 @@ public class PropertiesTab extends VerticalLayout implements MyTabSheet.Tab {
         this.appRepository = appRepository;
         this.reportRepository = reportRepository;
         this.userManager = userManager;
-        setCaption(CAPTION);
     }
 
     @Override
     public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
-        addComponent(new Button("Create new ACRA Configuration", e -> {
-            Window window = new Window("Confirm");
-            VerticalLayout layout = new VerticalLayout();
-            layout.addComponent(new Label("Are you sure you want to create a new ACRA configuration? The existing configuration will be invalidated"));
-            Button yes = new Button("Yes", e1 -> {
-                layout.removeAllComponents();
-                Pair<User, String> userPasswordPair = userManager.createReporterUser();
-                app.setReporter(userPasswordPair.getFirst());
-                appRepository.save(app);
-                layout.addComponent(new ConfigurationLabel(userPasswordPair.getFirst().getUsername(), userPasswordPair.getSecond()));
-                layout.addComponent(new Button("Close", e2 -> window.close()));
-                window.center();
-            });
-            Button no = new Button("No", e1 -> window.close());
-            layout.addComponent(new HorizontalLayout(yes, no));
-            window.setContent(layout);
-            window.center();
-            UI.getCurrent().addWindow(window);
-        }));
-        addComponent(new Button("Delete App", e -> {
-            Window window = new Window("Confirm");
-            Label label = new Label("Are you sure you want to delete this app and all its reports and mappings?");
-            Button yes = new Button("Yes", e1 -> {
-                appRepository.delete(app);
-                window.close();
-                navigationManager.navigateBack();
-            });
-            Button no = new Button("No", e1 -> window.close());
-            VerticalLayout layout = new VerticalLayout(label, new HorizontalLayout(yes, no));
-            window.setContent(layout);
-            window.center();
-            UI.getCurrent().addWindow(window);
-        }));
+        VerticalLayout layout = new VerticalLayout();
+        layout.addComponent(new Button("Create new ACRA Configuration", e -> new Popup().setTitle("Confirm")
+                .addComponent(new Label("Are you sure you want to create a new ACRA configuration?<br>The existing configuration will be invalidated", ContentMode.HTML))
+                .addYesNoButtons(popup -> {
+                    Pair<User, String> userPasswordPair = userManager.createReporterUser();
+                    app.setReporter(userPasswordPair.getFirst());
+                    appRepository.save(app);
+                    popup.clear().addComponent(new ConfigurationLabel(userPasswordPair.getFirst().getUsername(), userPasswordPair.getSecond())).addCloseButton().show();
+                })
+                .show()));
+        layout.addComponent(new Button("Delete App", e -> new Popup().setTitle("Confirm")
+                .addComponent(new Label("Are you sure you want to delete this app and all its associated content?"))
+                .addYesNoButtons(popup -> {
+                    appRepository.delete(app);
+                    popup.close();
+                    navigationManager.navigateBack();
+                })
+                .show()));
         IntStepper age = new IntStepper();
         age.setValue(30);
         age.setMinValue(0);
@@ -91,8 +75,13 @@ public class PropertiesTab extends VerticalLayout implements MyTabSheet.Tab {
             reportRepository.deleteAllByBugAppAndDateBefore(app, keepAfter);
         }), new Label("Reports older than "), age, new Label("Days"));
         purgeAge.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
-        addComponent(purgeAge);
-        setSizeUndefined();
-        return this;
+        layout.addComponent(purgeAge);
+        layout.setSizeUndefined();
+        return layout;
+    }
+
+    @Override
+    public String getCaption() {
+        return CAPTION;
     }
 }
