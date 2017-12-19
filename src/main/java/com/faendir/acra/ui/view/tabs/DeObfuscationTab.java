@@ -1,7 +1,7 @@
 package com.faendir.acra.ui.view.tabs;
 
 import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.sql.data.DataManager;
+import com.faendir.acra.sql.data.ProguardMappingRepository;
 import com.faendir.acra.sql.model.App;
 import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.sql.model.ProguardMapping;
@@ -10,6 +10,8 @@ import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.util.Style;
 import com.vaadin.server.UserError;
+import com.vaadin.spring.annotation.SpringComponent;
+import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
@@ -27,18 +29,22 @@ import java.io.ByteArrayOutputStream;
  * @author Lukas
  * @since 19.05.2017
  */
+@SpringComponent
+@ViewScope
 public class DeObfuscationTab extends VerticalLayout implements MyTabSheet.Tab{
     public static final String CAPTION = "De-Obfuscation";
+    @NonNull private final ProguardMappingRepository mappingRepository;
     private boolean validNumber;
     private boolean validFile;
 
-    public DeObfuscationTab() {
+    public DeObfuscationTab(@NonNull ProguardMappingRepository mappingRepository) {
+        this.mappingRepository = mappingRepository;
         setCaption(CAPTION);
     }
 
     @Override
-    public Component createContent(@NonNull App app, @NonNull DataManager dataManager, @NonNull NavigationManager navigationManager) {
-        MyGrid<ProguardMapping> grid = new MyGrid<>(null, dataManager.getMappings(app));
+    public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
+        MyGrid<ProguardMapping> grid = new MyGrid<>(null, mappingRepository.findAllByApp(app));
         grid.addColumn(ProguardMapping::getVersionCode, "Version");
         grid.setWidth(100, Unit.PERCENTAGE);
         addComponent(grid);
@@ -77,8 +83,8 @@ public class DeObfuscationTab extends VerticalLayout implements MyTabSheet.Tab{
                 });
                 upload.setSizeFull();
                 confirm.addClickListener(e1 -> {
-                    dataManager.addMapping(app, Integer.parseInt(version.getValue()), out.toString());
-                    grid.setItems(dataManager.getMappings(app));
+                    mappingRepository.save(new ProguardMapping(app, Integer.parseInt(version.getValue()), out.toString()));
+                    grid.setItems(mappingRepository.findAllByApp(app));
                     window.close();
                 });
                 confirm.setSizeFull();

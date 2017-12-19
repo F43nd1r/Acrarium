@@ -1,7 +1,7 @@
 package com.faendir.acra.ui.view.user;
 
 import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.sql.data.DataManager;
+import com.faendir.acra.sql.data.AppRepository;
 import com.faendir.acra.sql.model.App;
 import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.sql.model.User;
@@ -23,9 +23,8 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-import org.springframework.lang.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
+import org.springframework.lang.NonNull;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,13 +37,13 @@ import java.util.Collections;
 @RequiresRole(UserManager.ROLE_ADMIN)
 public class UserManagerView extends NamedView {
     @NonNull private final UserManager userManager;
-    @NonNull private final DataManager dataManager;
+    @NonNull private final AppRepository appRepository;
     @NonNull private final MyGrid<User> userGrid;
 
     @Autowired
-    public UserManagerView(@NonNull UserManager userManager, @NonNull DataManager dataManager) {
+    public UserManagerView(@NonNull UserManager userManager, @NonNull AppRepository appRepository) {
         this.userManager = userManager;
-        this.dataManager = dataManager;
+        this.appRepository = appRepository;
         this.userGrid = new MyGrid<>("Users", Collections.emptyList());
     }
 
@@ -55,13 +54,13 @@ public class UserManagerView extends NamedView {
         userGrid.addColumn(User::getUsername, "Username");
         userGrid.addComponentColumn(user -> new MyCheckBox(user.getRoles().contains(UserManager.ROLE_ADMIN), !user.getUsername().equals(SecurityUtils.getUsername()),
                                                            e -> userManager.setAdmin(user, e.getValue()))).setCaption("Admin");
-        for (App app : dataManager.getApps()) {
+        for (App app : appRepository.findAll()) {
             userGrid.addComponentColumn(user -> {
-                Permission permission = user.getPermissions().stream().filter(p -> p.getApp().equals(app)).findAny().orElseThrow(IllegalStateException::new);
+                Permission.Level permission = SecurityUtils.getPermission(app, user);
                 ComboBox<Permission.Level> levelComboBox = new ComboBox<>(null, Arrays.asList(Permission.Level.values()));
                 levelComboBox.setEmptySelectionAllowed(false);
-                levelComboBox.setValue(permission.getLevel());
-                levelComboBox.addValueChangeListener(e -> userManager.setPermission(user, permission.getApp(), e.getValue()));
+                levelComboBox.setValue(permission);
+                levelComboBox.addValueChangeListener(e -> userManager.setPermission(user, app, e.getValue()));
                 return levelComboBox;
             }).setCaption("Access Permission for " + app.getName());
         }
@@ -95,14 +94,5 @@ public class UserManagerView extends NamedView {
         window.setContent(layout);
         window.center();
         UI.getCurrent().addWindow(window);
-    }
-
-    @Nullable
-    public App parseFragment(@NonNull String fragment) {
-        return null;
-    }
-
-    public boolean validate(@Nullable String fragment) {
-        return true;
     }
 }

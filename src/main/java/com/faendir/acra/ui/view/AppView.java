@@ -1,7 +1,6 @@
 package com.faendir.acra.ui.view;
 
-import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.sql.data.DataManager;
+import com.faendir.acra.sql.data.AppRepository;
 import com.faendir.acra.sql.model.App;
 import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.ui.view.annotation.RequiresAppPermission;
@@ -16,6 +15,7 @@ import com.faendir.acra.util.Style;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.VerticalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
 
@@ -29,13 +29,15 @@ import java.util.Optional;
 @RequiresAppPermission(Permission.Level.VIEW)
 public class AppView extends ParametrizedNamedView<Pair<App, String>> {
 
-    @NonNull private final DataManager dataManager;
+    @NonNull private final AppRepository appRepository;
+    @NonNull private final ApplicationContext applicationContext;
     private MyTabSheet tabSheet;
 
     @Autowired
-    public AppView(@NonNull DataManager dataManager) {
+    public AppView(@NonNull AppRepository appRepository, @NonNull ApplicationContext applicationContext) {
         super(Pair::getFirst);
-        this.dataManager = dataManager;
+        this.appRepository = appRepository;
+        this.applicationContext = applicationContext;
     }
 
     @Override
@@ -54,13 +56,10 @@ public class AppView extends ParametrizedNamedView<Pair<App, String>> {
     public Pair<App, String> validateAndParseFragment(@NonNull String fragment) {
         String[] parameters = fragment.split("/");
         if(parameters.length > 0) {
-            Optional<App> appOptional = dataManager.getApp(parameters[0]);
+            Optional<App> appOptional = appRepository.findByEncodedId(parameters[0]);
             if (appOptional.isPresent()) {
                 App app = appOptional.get();
-                tabSheet = new MyTabSheet(app, dataManager, getNavigationManager(), new BugTab(), new ReportTab(), new StatisticsTab(), new DeObfuscationTab());
-                if (SecurityUtils.hasPermission(app, Permission.Level.ADMIN)) {
-                    tabSheet.addTab((MyTabSheet.Tab) new PropertiesTab());
-                }
+                tabSheet = new MyTabSheet(app, getNavigationManager(), applicationContext, BugTab.class, ReportTab.class, StatisticsTab.class, DeObfuscationTab.class, PropertiesTab.class);
                 if (parameters.length == 1) {
                     return Pair.of(app, tabSheet.getCaptions().get(0));
                 } else if (tabSheet.getCaptions().contains(parameters[1])){

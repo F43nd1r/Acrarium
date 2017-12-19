@@ -2,13 +2,17 @@ package com.faendir.acra.ui.view;
 
 import com.diffplug.common.base.Errors;
 import com.diffplug.common.base.Throwing;
-import com.faendir.acra.sql.data.DataManager;
+import com.faendir.acra.sql.data.AttachmentRepository;
+import com.faendir.acra.sql.data.ProguardMappingRepository;
+import com.faendir.acra.sql.data.ReportRepository;
 import com.faendir.acra.sql.model.Attachment;
 import com.faendir.acra.sql.model.Permission;
+import com.faendir.acra.sql.model.ProguardMapping;
 import com.faendir.acra.sql.model.Report;
 import com.faendir.acra.ui.view.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.view.base.ParametrizedNamedView;
 import com.faendir.acra.util.Style;
+import com.faendir.acra.util.Utils;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.ContentMode;
@@ -29,6 +33,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -38,18 +43,22 @@ import java.util.stream.Stream;
 @SpringView(name = "report")
 @RequiresAppPermission(Permission.Level.VIEW)
 public class ReportView extends ParametrizedNamedView<Report> {
-    @NonNull private final DataManager dataManager;
+    @NonNull private final ReportRepository reportRepository;
+    @NonNull private final AttachmentRepository attachmentRepository;
+    @NonNull private final ProguardMappingRepository mappingRepository;
 
     @Autowired
-    public ReportView(@NonNull DataManager dataManager) {
+    public ReportView(@NonNull ReportRepository reportRepository, @NonNull AttachmentRepository attachmentRepository, @NonNull ProguardMappingRepository mappingRepository) {
         super(report -> report.getBug().getApp());
-        this.dataManager = dataManager;
+        this.reportRepository = reportRepository;
+        this.attachmentRepository = attachmentRepository;
+        this.mappingRepository = mappingRepository;
     }
 
     @Override
     protected void enter(@NonNull Report report) {
         HorizontalLayout attachments = new HorizontalLayout();
-        for (Attachment file : dataManager.getAttachments(report)) {
+        for (Attachment file : attachmentRepository.findAllByReport(report)) {
             Button button = new Button(file.getFilename());
             new FileDownloader(new StreamResource(new ExceptionAwareStreamSource(file.getContent()::getBinaryStream), file.getFilename())).extend(button);
             attachments.addComponent(button);
@@ -59,7 +68,12 @@ public class ReportView extends ParametrizedNamedView<Report> {
         summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(report.getVersionName(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Email", ContentMode.PREFORMATTED), new Label(report.getUserEmail(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Comment", ContentMode.PREFORMATTED), new Label(report.getUserComment(), ContentMode.PREFORMATTED));
-        summaryGrid.addComponents(new Label("De-obfuscated Stacktrace", ContentMode.PREFORMATTED), new Label(dataManager.retrace(report), ContentMode.PREFORMATTED));
+        Optional<ProguardMapping> mapping = mappingRepository.findById(report.getBug().getApp(), report.getVersionCode());
+        if(mapping.isPresent()) {
+            summaryGrid.addComponents(new Label("De-obfuscated Stacktrace", ContentMode.PREFORMATTED), new Label(Utils.retrace(report.getStacktrace(), mapping.get().getMappings()), ContentMode.PREFORMATTED));
+        } else {
+            summaryGrid.addComponents(new Label("Stacktrace (No mapping found)", ContentMode.PREFORMATTED), new Label(report.getStacktrace(), ContentMode.PREFORMATTED));
+        }
         summaryGrid.addComponents(new Label("Attachments", ContentMode.PREFORMATTED), attachments);
         summaryGrid.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
         summaryGrid.setSizeFull();
@@ -113,7 +127,7 @@ public class ReportView extends ParametrizedNamedView<Report> {
 
     @Override
     public Report validateAndParseFragment(@NonNull String fragment) {
-        return dataManager.getReport(fragment).orElse(null);
+        return reportRepository.findById(fragment).orElse(null);
     }
 
     private static class ExceptionAwareStreamSource implements StreamResource.StreamSource {

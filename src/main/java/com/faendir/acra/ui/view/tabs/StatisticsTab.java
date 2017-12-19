@@ -1,11 +1,13 @@
 package com.faendir.acra.ui.view.tabs;
 
-import com.faendir.acra.sql.data.DataManager;
+import com.faendir.acra.sql.data.ReportRepository;
 import com.faendir.acra.sql.model.App;
 import com.faendir.acra.sql.util.AndroidVersionCount;
 import com.faendir.acra.ui.NavigationManager;
 import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.util.Style;
+import com.vaadin.spring.annotation.SpringComponent;
+import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
@@ -26,6 +28,7 @@ import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.util.SortOrder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.vaadin.addon.JFreeChartWrapper;
 import org.vaadin.risto.stepper.IntStepper;
@@ -39,23 +42,28 @@ import java.util.List;
  * @author Lukas
  * @since 22.05.2017
  */
+@SpringComponent
+@ViewScope
 public class StatisticsTab implements MyTabSheet.Tab {
     public static final String CAPTION = "Statistics";
     private static final Color BACKGROUND_GRAY = new Color(0xfafafa); //vaadin gray
     private static final Color BLUE = new Color(0x197de1); //vaadin blue
+    @NonNull private final ReportRepository reportRepository;
 
-    public StatisticsTab() {
+    @Autowired
+    public StatisticsTab(@NonNull ReportRepository reportRepository) {
+        this.reportRepository = reportRepository;
     }
 
     @Override
-    public Component createContent(@NonNull App app, @NonNull DataManager dataManager, @NonNull NavigationManager navigationManager) {
+    public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
         IntStepper numberField = new IntStepper("Days");
         numberField.setValue(30);
         numberField.setMinValue(5);
         Panel timePanel = new Panel();
         timePanel.setSizeUndefined();
         Style.apply(timePanel, Style.NO_BACKGROUND, Style.NO_BORDER);
-        numberField.addValueChangeListener(e -> createTimeChart(e.getValue(), app, dataManager, timePanel));
+        numberField.addValueChangeListener(e -> createTimeChart(e.getValue(), app, timePanel));
         VerticalLayout timeLayout = new VerticalLayout(numberField, timePanel);
         timeLayout.setComponentAlignment(numberField, Alignment.MIDDLE_RIGHT);
         timeLayout.setSizeUndefined();
@@ -63,8 +71,8 @@ public class StatisticsTab implements MyTabSheet.Tab {
         Panel versionPanel = new Panel();
         versionPanel.setSizeUndefined();
         Style.apply(versionPanel, Style.NO_BACKGROUND, Style.NO_BORDER, Style.PADDING_TOP);
-        createTimeChart(30, app, dataManager, timePanel);
-        createVersionChart(app, dataManager, versionPanel);
+        createTimeChart(30, app, timePanel);
+        createVersionChart(app, versionPanel);
         Panel root = new Panel((new CssLayout(timeLayout, versionPanel)));
         root.setSizeFull();
         Style.apply(root, Style.NO_BACKGROUND, Style.NO_BORDER);
@@ -76,14 +84,14 @@ public class StatisticsTab implements MyTabSheet.Tab {
         return CAPTION;
     }
 
-    private void createTimeChart(int age, @NonNull App app, @NonNull DataManager dataManager, @NonNull Panel panel) {
+    private void createTimeChart(int age, @NonNull App app, @NonNull Panel panel) {
         TimeSeries series = new TimeSeries("Date");
         series.setMaximumItemAge(age);
         series.add(new Day(new Date()), 0);
         Calendar start = Calendar.getInstance();
         start.add(Calendar.DAY_OF_MONTH, -age);
         series.add(new Day(start.getTime()), 0);
-        dataManager.getReportCountByDayAfter(app, start.getTime()).forEach(dayCount -> series.addOrUpdate(new Day(dayCount.getDay()), dayCount.getCount()));
+        reportRepository.countAllByDayAfter(app, start.getTime()).forEach(dayCount -> series.addOrUpdate(new Day(dayCount.getDay()), dayCount.getCount()));
         JFreeChart chart = ChartFactory.createXYBarChart("", "Date", true, "Reports", new TimeSeriesCollection(series), PlotOrientation.VERTICAL, false, false, false);
         XYPlot plot = chart.getXYPlot();
         plot.getRangeAxis().setStandardTickUnits(new NumberTickUnitSource(true));
@@ -100,9 +108,9 @@ public class StatisticsTab implements MyTabSheet.Tab {
         panel.setContent(new JFreeChartWrapper(chart));
     }
 
-    private void createVersionChart(@NonNull App app, @NonNull DataManager dataManager, @NonNull Panel panel) {
+    private void createVersionChart(@NonNull App app, @NonNull Panel panel) {
         DefaultPieDataset dataset = new DefaultPieDataset();
-        List<AndroidVersionCount> counts = dataManager.getReportCountByAndroidVersion(app);
+        List<AndroidVersionCount> counts = reportRepository.countAllByAndroidVersion(app);
         counts.forEach((pair) -> dataset.insertValue(0, pair.getAndroidVersion(), pair.getCount()));
         dataset.sortByKeys(SortOrder.ASCENDING);
         JFreeChart chart = ChartFactory.createPieChart("Reports per Android Version", dataset, false, false, false);
