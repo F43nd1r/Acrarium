@@ -1,3 +1,5 @@
+[![Travis](https://img.shields.io/travis/f43nd1r/acra-backend.svg)]()
+
 # Acra Backend
 A Backend for ACRA written in Java using Spring Boot, Vaadin and MySQL
 
