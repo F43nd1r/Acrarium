@@ -1,13 +1,11 @@
 package com.faendir.acra.util;
 
-import com.github.artyomcool.retrace.Retrace;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.NonNull;
+import proguard.retrace.ReTrace;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -31,9 +29,9 @@ public final class Utils {
     }
 
     public static String retrace(@NonNull String stacktrace, @NonNull String mappings) {
-        try (BufferedReader mappingsReader = new BufferedReader(new StringReader(mappings));
-             BufferedReader stacktraceReader = new BufferedReader(new StringReader(stacktrace))) {
-            return new Retrace(mappingsReader).stackTrace(stacktraceReader);
+        try (Reader mappingsReader = new StringReader(mappings); Reader stacktraceReader = new StringReader(stacktrace); StringWriter output = new StringWriter()) {
+            new ReTrace(ReTrace.STACK_TRACE_EXPRESSION, false, mappingsReader, stacktraceReader, output).execute();
+            return output.toString();
         } catch (IOException e) {
             log.error("Failed to retrace stacktrace", e);
             return stacktrace;
