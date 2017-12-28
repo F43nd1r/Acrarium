@@ -1,4 +1,4 @@
-[![Travis](https://img.shields.io/travis/f43nd1r/acra-backend.svg)]()
+[![Build Status](https://travis-ci.org/F43nd1r/acra-backend.svg?branch=master)](https://travis-ci.org/F43nd1r/acra-backend)
 
 # Acra Backend
 A Backend for ACRA written in Java using Spring Boot, Vaadin and MySQL
