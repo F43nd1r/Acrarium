@@ -12,7 +12,7 @@ import com.faendir.acra.ui.view.base.MyCheckBox;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.ui.view.base.ReportList;
-import com.faendir.acra.util.BufferedDataProvider;
+import com.faendir.acra.dataprovider.BufferedDataProvider;
 import com.faendir.acra.util.Style;
 import com.faendir.acra.util.TimeSpanRenderer;
 import com.vaadin.shared.data.sort.SortDirection;
@@ -69,13 +69,11 @@ public class BugTab implements MyTabSheet.Tab {
             bugs.setDataProvider(createDataProvider(app, e.getValue()));
             selection.forEach(bugs::select);
         }));
-        //bugs.setWidth(100, Unit.PERCENTAGE);
-        bugs.setSizeFull();
         Map<Integer, Long> counts = reportRepository.countAllByBug().stream().collect(Collectors.toMap(CountResult::getGroup, CountResult::getCount));
         bugs.addColumn(bug -> counts.get(bug.getId()), "Reports");
         bugs.sort(bugs.addColumn(Bug::getLastReport, new TimeSpanRenderer(), "lastReport", "Latest Report"), SortDirection.DESCENDING);
         bugs.addColumn(Bug::getVersionCode, "versionCode", "Version");
-        bugs.addColumn(bug -> bug.getStacktrace().split("\n", 2)[0], "stacktrace", "Stacktrace").setExpandRatio(1);
+        bugs.addColumn(bug -> bug.getStacktrace().split("\n", 2)[0], "stacktrace", "Stacktrace").setExpandRatio(1).setMinimumWidthFromContent(false);
         bugs.addSelectionListener(event -> {
             Optional<Bug> selection = event.getFirstSelectedItem();
             ReportList reports = null;

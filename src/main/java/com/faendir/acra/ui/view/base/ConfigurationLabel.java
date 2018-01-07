@@ -1,8 +1,8 @@
 package com.faendir.acra.ui.view.base;
 
+import com.faendir.acra.util.Utils;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
 
 /**
  * @author Lukas
@@ -15,12 +15,6 @@ public class ConfigurationLabel extends Label {
                             + "@AcraHttpSender(uri = \"%sreport\",<br>"
                             + "basicAuthLogin = \"%s\",<br>"
                             + "basicAuthPassword = \"%s\",<br>"
-                            + "httpMethod = HttpSender.Method.POST)<br></code>", getLocation(), username, password), ContentMode.HTML);
-    }
-
-    private static String getLocation() {
-        String location = UI.getCurrent().getPage().getLocation().toASCIIString();
-        int index = location.indexOf('#');
-        return index == -1 ? location : location.substring(0, index);
+                            + "httpMethod = HttpSender.Method.POST)<br></code>", Utils.getUrlWithFragment(null), username, password), ContentMode.HTML);
     }
 }

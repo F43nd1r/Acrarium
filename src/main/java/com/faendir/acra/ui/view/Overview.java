@@ -11,7 +11,7 @@ import com.faendir.acra.ui.view.base.ConfigurationLabel;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.NamedView;
 import com.faendir.acra.ui.view.base.Popup;
-import com.faendir.acra.util.BufferedDataProvider;
+import com.faendir.acra.dataprovider.BufferedDataProvider;
 import com.faendir.acra.util.Style;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.annotation.SpringView;
@@ -29,10 +29,14 @@ import org.springframework.lang.NonNull;
  */
 @SpringView(name = "")
 public class Overview extends NamedView {
-    @NonNull private final AppRepository appRepository;
-    @NonNull private final ReportRepository reportRepository;
-    @NonNull private final UserManager userManager;
-    @NonNull private final BufferedDataProvider.Factory factory;
+    @NonNull
+    private final AppRepository appRepository;
+    @NonNull
+    private final ReportRepository reportRepository;
+    @NonNull
+    private final UserManager userManager;
+    @NonNull
+    private final BufferedDataProvider.Factory factory;
     private MyGrid<App> grid;
 
     @Autowired
@@ -46,16 +50,16 @@ public class Overview extends NamedView {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        grid = new MyGrid<>("Apps", factory.create(SecurityUtils.hasRole(UserManager.ROLE_ADMIN), (admin, pageable) -> admin ?
-                appRepository.findAllByPermissionWithDefaultIncluded(SecurityUtils.getUsername(), Permission.Level.VIEW, pageable) :
-                appRepository.findAllByPermissionWithDefaultExcluded(SecurityUtils.getUsername(), Permission.Level.VIEW, pageable), admin -> admin ?
-                appRepository.countByPermissionWithDefaultIncluded(SecurityUtils.getUsername(), Permission.Level.VIEW) :
-                appRepository.countByPermissionWithDefaultExcluded(SecurityUtils.getUsername(), Permission.Level.VIEW)));
-        grid.setWidth(100, Unit.PERCENTAGE);
+        grid = new MyGrid<>("Apps", factory.create(SecurityUtils.hasRole(UserManager.ROLE_ADMIN),
+                (admin, pageable) -> admin ? appRepository.findAllByPermissionWithDefaultIncluded(SecurityUtils.getUsername(), Permission.Level.VIEW, pageable) :
+                        appRepository.findAllByPermissionWithDefaultExcluded(SecurityUtils.getUsername(), Permission.Level.VIEW, pageable),
+                admin -> admin ? appRepository.countByPermissionWithDefaultIncluded(SecurityUtils.getUsername(), Permission.Level.VIEW) :
+                        appRepository.countByPermissionWithDefaultExcluded(SecurityUtils.getUsername(), Permission.Level.VIEW)));
+        grid.setSizeToRows();
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.addColumn(App::getName, "Name");
         grid.addColumn(reportRepository::countAllByBugApp, "Reports");
-        grid.addItemClickListener(e -> getNavigationManager().navigateTo(AppView.class, String.valueOf(e.getItem().getId())));
+        grid.addOnClickNavigation(getNavigationManager(), AppView.class, e -> String.valueOf(e.getItem().getId()));
         VerticalLayout layout = new VerticalLayout(grid);
         if (SecurityUtils.hasRole(UserManager.ROLE_ADMIN)) {
             Button add = new Button("New App", e -> addApp());

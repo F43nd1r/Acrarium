@@ -7,6 +7,7 @@ import com.faendir.acra.ui.view.ErrorView;
 import com.faendir.acra.ui.view.base.NamedView;
 import com.faendir.acra.ui.view.base.ParametrizedNamedView;
 import com.faendir.acra.util.MyNavigator;
+import com.faendir.acra.util.Utils;
 import com.vaadin.navigator.View;
 import com.vaadin.spring.access.ViewAccessControl;
 import com.vaadin.spring.access.ViewInstanceAccessControl;
@@ -34,9 +35,12 @@ import java.util.Optional;
 @Component
 @Configurable
 public class NavigationManager implements ViewAccessControl, ViewInstanceAccessControl, Serializable {
-    @NonNull private final MyNavigator navigator;
-    @NonNull private final ApplicationContext applicationContext;
-    @NonNull private final List<String> backStack;
+    @NonNull
+    private final MyNavigator navigator;
+    @NonNull
+    private final ApplicationContext applicationContext;
+    @NonNull
+    private final List<String> backStack;
 
     @Autowired
     public NavigationManager(@NonNull UI ui, @NonNull VerticalLayout mainView, @NonNull MyNavigator navigator, @NonNull ApplicationContext applicationContext) {
@@ -51,8 +55,14 @@ public class NavigationManager implements ViewAccessControl, ViewInstanceAccessC
     }
 
     public void navigateTo(@NonNull Class<? extends NamedView> namedView, @Nullable String parameters) {
+        navigateTo(namedView, parameters, false);
+    }
+
+    public void navigateTo(@NonNull Class<? extends NamedView> namedView, @Nullable String parameters, boolean newTab) {
         String target = namedView.getAnnotation(SpringView.class).name() + (parameters == null ? "" : "/" + parameters);
-        if (!backStack.get(0).equals(target)) {
+        if (newTab) {
+            navigator.getUI().getPage().open(Utils.getUrlWithFragment(target), "_blank", false);
+        } else if (!backStack.get(0).equals(target)) {
             backStack.add(0, target);
             navigateTo(target);
         }

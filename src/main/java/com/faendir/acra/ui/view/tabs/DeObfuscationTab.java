@@ -11,7 +11,7 @@ import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.ui.view.base.Popup;
 import com.faendir.acra.ui.view.base.ValidatedField;
-import com.faendir.acra.util.BufferedDataProvider;
+import com.faendir.acra.dataprovider.BufferedDataProvider;
 import com.faendir.acra.util.Style;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -42,10 +42,9 @@ public class DeObfuscationTab implements MyTabSheet.Tab {
     public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
         VerticalLayout layout = new VerticalLayout();
         MyGrid<ProguardMapping> grid = new MyGrid<>(null, factory.create(app, mappingRepository::findAllByApp, mappingRepository::countAllByApp));
+        grid.setSizeToRows();
         grid.addColumn(ProguardMapping::getVersionCode, "Version");
-        grid.setWidth(100, VerticalLayout.Unit.PERCENTAGE);
         layout.addComponent(grid);
-        layout.setSizeFull();
         Style.NO_PADDING.apply(layout);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
             layout.addComponent(new Button("Add File", e -> {
@@ -67,7 +66,6 @@ public class DeObfuscationTab implements MyTabSheet.Tab {
                         .show();
             }));
         }
-        layout.setExpandRatio(grid, 1);
         return layout;
     }
 

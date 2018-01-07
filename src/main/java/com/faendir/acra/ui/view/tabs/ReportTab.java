@@ -5,7 +5,7 @@ import com.faendir.acra.sql.model.App;
 import com.faendir.acra.ui.NavigationManager;
 import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.ui.view.base.ReportList;
-import com.faendir.acra.util.BufferedDataProvider;
+import com.faendir.acra.dataprovider.BufferedDataProvider;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Component;

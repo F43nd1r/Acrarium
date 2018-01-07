@@ -1,6 +1,7 @@
-package com.faendir.acra.util;
+package com.faendir.acra.dataprovider;
 
 import com.faendir.acra.config.AcraConfiguration;
+import com.faendir.acra.util.OrderAdapter;
 import com.vaadin.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.data.provider.Query;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -21,15 +23,17 @@ import java.util.stream.Stream;
  * @author Lukas
  * @since 13.12.2017
  */
-public class BufferedDataProvider<T> extends AbstractBackEndDataProvider<T, Void> {
+public class BufferedDataProvider<T> extends AbstractBackEndDataProvider<T, Void> implements ObservableDataProvider<T, Void> {
     private final int pageSize;
     private final Function<Pageable, Slice<T>> getter;
     private final IntSupplier counter;
+    private final List<SizeListener> sizeListeners;
 
     private BufferedDataProvider(int pageSize, Function<Pageable, Slice<T>> getter, IntSupplier counter) {
         this.getter = getter;
         this.counter = counter;
         this.pageSize = pageSize;
+        this.sizeListeners = new ArrayList<>();
     }
 
     @Override
@@ -54,7 +58,19 @@ public class BufferedDataProvider<T> extends AbstractBackEndDataProvider<T, Void
 
     @Override
     protected int sizeInBackEnd(Query<T, Void> query) {
-        return counter.getAsInt();
+        int result = counter.getAsInt();
+        sizeListeners.forEach(listener -> listener.sizeChanged(result));
+        return result;
+    }
+
+    @Override
+    public void addSizeListener(SizeListener listener) {
+        sizeListeners.add(listener);
+    }
+
+    @Override
+    public void removeSizeListener(SizeListener listener) {
+        sizeListeners.remove(listener);
     }
 
     @Component

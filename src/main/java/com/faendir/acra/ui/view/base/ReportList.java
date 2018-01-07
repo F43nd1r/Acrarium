@@ -1,5 +1,6 @@
 package com.faendir.acra.ui.view.base;
 
+import com.faendir.acra.dataprovider.ObservableDataProvider;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.sql.model.App;
 import com.faendir.acra.sql.model.Permission;
@@ -21,19 +22,18 @@ import java.util.function.Consumer;
 public class ReportList extends MyGrid<Report> {
     public static final String CAPTION = "Reports";
 
-    public ReportList(App app, @NonNull NavigationManager navigationManager, @NonNull Consumer<Report> reportDeleter, @NonNull DataProvider<Report, ?> reportProvider) {
+    public ReportList(App app, @NonNull NavigationManager navigationManager, @NonNull Consumer<Report> reportDeleter, @NonNull ObservableDataProvider<Report, ?> reportProvider) {
         super(CAPTION, reportProvider);
         setId(CAPTION);
-        setWidth(100, Unit.PERCENTAGE);
         setSelectionMode(SelectionMode.NONE);
         sort(addColumn(Report::getDate, new TimeSpanRenderer(), "date", "Date"), SortDirection.DESCENDING);
         addColumn(Report::getVersionCode, "versionCode", "App Version");
         addColumn(Report::getAndroidVersion, "androidVersion", "Android Version");
         addColumn(Report::getPhoneModel, "phoneModel", "Device");
-        addColumn(report -> report.getStacktrace().split("\n", 2)[0], "stacktrace", "Stacktrace").setExpandRatio(1);
+        addColumn(report -> report.getStacktrace().split("\n", 2)[0], "stacktrace", "Stacktrace").setExpandRatio(1).setMinimumWidthFromContent(false);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
             addColumn(report -> "Delete", new ButtonRenderer<>(e -> reportDeleter.accept(e.getItem()))).setSortable(false);
         }
-        addItemClickListener(e -> navigationManager.navigateTo(ReportView.class, e.getItem().getId()));
+        addOnClickNavigation(navigationManager, ReportView.class, e -> e.getItem().getId());
     }
 }

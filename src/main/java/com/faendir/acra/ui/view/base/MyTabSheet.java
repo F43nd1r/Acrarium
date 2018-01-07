@@ -47,7 +47,7 @@ public class MyTabSheet extends TabSheet {
     }
 
     public void setInitialTab(String caption) {
-        StreamSupport.stream(Spliterators.spliterator(iterator(), getComponentCount(), Spliterator.ORDERED), false)
+        StreamSupport.stream(spliterator(), false)
                 .filter(c -> c.getCaption().equals(caption))
                 .findAny()
                 .ifPresent(component -> {

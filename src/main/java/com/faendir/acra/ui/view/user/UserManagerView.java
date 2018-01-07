@@ -13,7 +13,7 @@ import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.NamedView;
 import com.faendir.acra.ui.view.base.Popup;
 import com.faendir.acra.ui.view.base.ValidatedField;
-import com.faendir.acra.util.BufferedDataProvider;
+import com.faendir.acra.dataprovider.BufferedDataProvider;
 import com.faendir.acra.util.Style;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.annotation.SpringView;
@@ -54,6 +54,7 @@ public class UserManagerView extends NamedView {
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         userGrid = new MyGrid<>("Users", factory.create(UserManager.ROLE_USER, userRepository::findAllByRoles, userRepository::countAllByRoles));
         userGrid.setSelectionMode(Grid.SelectionMode.NONE);
+        userGrid.setSizeToRows();
         userGrid.addColumn(User::getUsername, "Username");
         userGrid.addComponentColumn(user -> new MyCheckBox(user.getRoles().contains(UserManager.ROLE_ADMIN), !user.getUsername().equals(SecurityUtils.getUsername()),
                 e -> userManager.setAdmin(user, e.getValue()))).setCaption("Admin");
@@ -72,7 +73,6 @@ public class UserManagerView extends NamedView {
         VerticalLayout layout = new VerticalLayout(userGrid, newUser);
         Style.NO_PADDING.apply(layout);
         setCompositionRoot(layout);
-        userGrid.setWidth(100, Unit.PERCENTAGE);
         setSizeFull();
         Style.apply(this, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
     }

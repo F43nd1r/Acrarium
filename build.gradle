@@ -85,6 +85,7 @@ dependencies {
     compile 'com.faendir.acra:acra-javacore:5.0.0-rc2'
     compile 'com.diffplug.durian:durian:3.4.0'
     compile 'com.faendir.proguard:retrace:1.2'
+    compile 'javax.xml.bind:jaxb-api:2.3.0'
 }
 
 compileJava.dependsOn(processResources)
