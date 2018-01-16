@@ -1,6 +1,7 @@
 .gradle
 /build/
 !gradle/wrapper/gradle-wrapper.jar
+/src/main/resources/VAADIN/widgetsets/
 
 ### STS ###
 .apt_generated

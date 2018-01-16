@@ -18,11 +18,9 @@ buildscript {
 repositories {
     jcenter()
     maven { url 'https://maven.google.com' }
-    mavenCentral()
     maven { url 'https://maven.vaadin.com/vaadin-addons' }
     maven { url 'https://oss.sonatype.org/content/repositories/vaadin-snapshots/' }
     maven { url 'https://repo.spring.io/libs-snapshot' }
-    maven { url 'https://dl.bintray.com/f43nd1r/maven' }
 }
 
 apply plugin: 'java'
@@ -41,8 +39,23 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 vaadin {
-    version '8.1.7'
+    version '8.2.0'
     push true
+}
+
+vaadinCompile {
+    outputDirectory 'src/main/resources'
+    strict true
+    widgetset 'com.faendir.acra.AppWidgetset'
+}
+
+vaadinThemeCompile {
+    themesDirectory 'src/main/resources/VAADIN/themes'
+}
+
+vaadinSuperDevMode {
+    noserver false
+    extraArgs ""
 }
 
 dependencyManagement {
@@ -104,22 +117,5 @@ war {
     archiveName = 'acra.war'
     version = version
     enabled = true
-}
-
-/*idea {
-    module {
-        afterEvaluate {
-            scopes.COMPILE.plus -= [configurations['vaadin-client']]
-            scopes.COMPILE.plus += [configurations['vaadin-client']]
-        }
-    }
-}*/
-
-task printScopes {
-    doLast {
-        idea.module.scopes.forEach { name, content ->
-            println name + ": " + content
-        }
-    }
 }
 
