@@ -13,7 +13,7 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 public class Rfc1341MultipartResolver extends CommonsMultipartResolver {
     @NonNull
     @Override
-    protected FileUpload newFileUpload(FileItemFactory fileItemFactory) {
+    protected FileUpload newFileUpload(@NonNull FileItemFactory fileItemFactory) {
         return new Rfc1341ServletFileUpload(fileItemFactory);
     }
 }

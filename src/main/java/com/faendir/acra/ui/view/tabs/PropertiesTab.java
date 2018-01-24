@@ -4,7 +4,9 @@ import com.faendir.acra.sql.data.AppRepository;
 import com.faendir.acra.sql.data.BugRepository;
 import com.faendir.acra.sql.data.ReportRepository;
 import com.faendir.acra.sql.model.App;
+import com.faendir.acra.sql.model.Bug;
 import com.faendir.acra.sql.model.Permission;
+import com.faendir.acra.sql.model.Report;
 import com.faendir.acra.sql.model.User;
 import com.faendir.acra.sql.user.UserManager;
 import com.faendir.acra.ui.NavigationManager;
@@ -13,6 +15,7 @@ import com.faendir.acra.ui.view.base.ConfigurationLabel;
 import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.ui.view.base.Popup;
 import com.faendir.acra.ui.view.base.ValidatedField;
+import com.faendir.acra.util.Utils;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -30,6 +33,9 @@ import org.vaadin.risto.stepper.IntStepper;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Lukas
@@ -95,7 +101,22 @@ public class PropertiesTab implements MyTabSheet.Tab {
                     .addYesNoButtons(p -> {
                         app.setConfiguration(new App.Configuration(matchByMessage.getValue(), ignoreInstanceIds.getValue(), ignoreAndroidLineNumbers.getValue()));
                         appRepository.save(app);
-                        reportRepository.reassignBugs(app);
+                        Map<String, Bug> bugs = new HashMap<>();
+                        List<Report> reports = reportRepository.findAllByAppEager(app);
+                        reports.forEach(report -> {
+                            String stacktrace = Utils.generifyStacktrace(report.getStacktrace(), app.getConfiguration());
+                            Bug bug = bugs.get(stacktrace);
+                            if (bug == null) {
+                                if (stacktrace.equals(report.getBug().getStacktrace())) {
+                                    bug = report.getBug();
+                                } else {
+                                    bug = new Bug(app, stacktrace, report.getVersionCode(), report.getDate());
+                                }
+                            }
+                            report.setBug(bug);
+                            bugs.put(stacktrace, bug);
+                        });
+                        reportRepository.saveAll(reports);
                         bugRepository.deleteOrphans();
                         p.close();
                     })

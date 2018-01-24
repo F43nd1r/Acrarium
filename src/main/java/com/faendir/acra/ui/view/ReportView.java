@@ -131,7 +131,7 @@ public class ReportView extends ParametrizedNamedView<Report> {
 
     @Override
     public Report validateAndParseFragment(@NonNull String fragment) {
-        return reportRepository.findById(fragment).orElse(null);
+        return reportRepository.findByIdEager(fragment).orElse(null);
     }
 
     private static class ExceptionAwareStreamSource implements StreamResource.StreamSource {

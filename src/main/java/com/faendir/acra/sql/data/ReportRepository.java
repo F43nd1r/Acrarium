@@ -4,19 +4,15 @@ import com.faendir.acra.sql.model.App;
 import com.faendir.acra.sql.model.Bug;
 import com.faendir.acra.sql.model.Report;
 import com.faendir.acra.sql.util.CountResult;
-import com.faendir.acra.util.Utils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
+import java.util.Optional;
 
 /**
  * @author Lukas
@@ -27,7 +23,11 @@ public interface ReportRepository extends JpaRepository<Report, String> {
 
     Slice<Report> findAllByBugApp(@NonNull App app, @NonNull Pageable pageable);
 
-    Stream<Report> findAllByBugApp(@NonNull App app);
+    @Query("select report from Report report join fetch report.bug bug join fetch bug.app app where app = ?1")
+    List<Report> findAllByAppEager(@NonNull App app);
+
+    @Query("select report from Report report join fetch report.bug bug join fetch bug.app app where report.id = ?1")
+    Optional<Report> findByIdEager(@NonNull String id);
 
     int countAllByBugApp(@NonNull App app);
 
@@ -48,20 +48,4 @@ public interface ReportRepository extends JpaRepository<Report, String> {
     @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     @Query("select new com.faendir.acra.sql.util.CountResult(bug.id, count(report)) from Report report group by report.bug")
     List<CountResult<Integer>> countAllByBug();
-
-    @Transactional
-    default void reassignBugs(App app) {
-        Map<String, Bug> bugs = new HashMap<>();
-        try(Stream<Report> stream = findAllByBugApp(app)) {
-            stream.forEach(report -> {
-                String stacktrace = Utils.generifyStacktrace(report.getStacktrace(), app.getConfiguration());
-                Bug bug = bugs.get(stacktrace);
-                if (bug == null) {
-                    bug = new Bug(app, stacktrace, report.getVersionCode(), report.getDate());
-                }
-                report.setBug(bug);
-                bugs.put(stacktrace, save(report).getBug());
-            });
-        }
-    }
 }
