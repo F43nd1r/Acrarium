@@ -58,7 +58,7 @@ public class MyGrid<T> extends Grid<T> {
     }
 
     public void setSizeToRows() {
-        ((ObservableDataProvider) getDataProvider()).addSizeListener(this::setHeightByRows);
+        ((ObservableDataProvider) getDataProvider()).addSizeListener(rows -> getUI().access(() -> setHeightByRows(rows)));
     }
 
     public void addOnClickNavigation(@NonNull NavigationManager navigationManager, Class<? extends NamedView> namedView, Function<ItemClick<T>, String> parameterGetter) {
@@ -71,9 +71,9 @@ public class MyGrid<T> extends Grid<T> {
     public static class MiddleClickExtension<T> extends AbstractGridExtension<T> {
         private MiddleClickExtension(MyGrid<T> grid) {
             super.extend(grid);
-            grid.registerRpc((rowKey, columnInternalId, details) -> grid.fireEvent(
-                    new ItemClick<>(grid, grid.getColumnByInternalId(columnInternalId), grid.getDataCommunicator().getKeyMapper().get(rowKey), details)),
-                    MiddleClickGridExtensionConnector.Rpc.class);
+            registerRpc((rowKey, columnInternalId, details) -> grid.fireEvent(
+                    new ItemClick<>(grid, grid.getColumnByInternalId(columnInternalId), grid.getDataCommunicator().getKeyMapper().get(rowKey),
+                            details)), MiddleClickGridExtensionConnector.Rpc.class);
         }
 
         public static void extend(MyGrid<?> grid) {

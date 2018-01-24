@@ -6,6 +6,7 @@ import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -25,6 +26,7 @@ public class App {
     @OneToOne(cascade = CascadeType.ALL, optional = false, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User reporter;
+    private Configuration configuration;
 
     @PersistenceConstructor
     App() {
@@ -53,6 +55,14 @@ public class App {
         this.reporter = reporter;
     }
 
+    public Configuration getConfiguration() {
+        return configuration;
+    }
+
+    public void setConfiguration(Configuration configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -64,5 +74,37 @@ public class App {
     @Override
     public int hashCode() {
         return id;
+    }
+
+    @Embeddable
+    public static class Configuration {
+        private boolean matchByMessage;
+        private boolean ignoreInstanceIds;
+        private boolean ignoreAndroidLineNumbers;
+
+        @PersistenceConstructor
+        Configuration() {
+            matchByMessage = true;
+            ignoreInstanceIds = true;
+            ignoreAndroidLineNumbers = true;
+        }
+
+        public Configuration(boolean matchByMessage, boolean ignoreInstanceIds, boolean ignoreAndroidLineNumbers) {
+            this.matchByMessage = matchByMessage;
+            this.ignoreInstanceIds = ignoreInstanceIds;
+            this.ignoreAndroidLineNumbers = ignoreAndroidLineNumbers;
+        }
+
+        public boolean matchByMessage() {
+            return matchByMessage;
+        }
+
+        public boolean ignoreInstanceIds() {
+            return ignoreInstanceIds;
+        }
+
+        public boolean ignoreAndroidLineNumbers() {
+            return ignoreAndroidLineNumbers;
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.faendir.acra.ui.view.tabs;
 
 import com.faendir.acra.sql.data.AppRepository;
+import com.faendir.acra.sql.data.BugRepository;
 import com.faendir.acra.sql.data.ReportRepository;
 import com.faendir.acra.sql.model.App;
 import com.faendir.acra.sql.model.Permission;
@@ -11,11 +12,13 @@ import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.view.base.ConfigurationLabel;
 import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.ui.view.base.Popup;
+import com.faendir.acra.ui.view.base.ValidatedField;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -38,12 +41,14 @@ import java.util.Date;
 public class PropertiesTab implements MyTabSheet.Tab {
     public static final String CAPTION = "Properties";
     @NonNull private final AppRepository appRepository;
-    private final ReportRepository reportRepository;
+    @NonNull private final BugRepository bugRepository;
+    @NonNull private final ReportRepository reportRepository;
     @NonNull private final UserManager userManager;
 
     @Autowired
-    public PropertiesTab(@NonNull AppRepository appRepository, @NonNull ReportRepository reportRepository, @NonNull UserManager userManager) {
+    public PropertiesTab(@NonNull AppRepository appRepository, @NonNull BugRepository bugRepository, @NonNull ReportRepository reportRepository, @NonNull UserManager userManager) {
         this.appRepository = appRepository;
+        this.bugRepository = bugRepository;
         this.reportRepository = reportRepository;
         this.userManager = userManager;
     }
@@ -77,6 +82,25 @@ public class PropertiesTab implements MyTabSheet.Tab {
         }), new Label("Reports older than "), age, new Label("Days"));
         purgeAge.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
         layout.addComponent(purgeAge);
+        layout.addComponent(new Button("Configure bug matching", e -> {
+            App.Configuration configuration = app.getConfiguration();
+            CheckBox matchByMessage = new CheckBox("Match by exception message", configuration.matchByMessage());
+            CheckBox ignoreInstanceIds = new CheckBox("Ignore instance ids", configuration.ignoreInstanceIds());
+            CheckBox ignoreAndroidLineNumbers = new CheckBox("Ignore android SDK line numbers", configuration.ignoreAndroidLineNumbers());
+            new Popup().addValidatedField(ValidatedField.of(matchByMessage), true)
+                    .addValidatedField(ValidatedField.of(ignoreInstanceIds), true)
+                    .addValidatedField(ValidatedField.of(ignoreAndroidLineNumbers), true)
+                    .addComponent(new Label(
+                            "Are you sure you want to save this configuration? All bugs will be recalculated, which may take some time and will reset the 'solved' status"))
+                    .addYesNoButtons(p -> {
+                        app.setConfiguration(new App.Configuration(matchByMessage.getValue(), ignoreInstanceIds.getValue(), ignoreAndroidLineNumbers.getValue()));
+                        appRepository.save(app);
+                        reportRepository.reassignBugs(app);
+                        bugRepository.deleteOrphans();
+                        p.close();
+                    })
+                    .show();
+        }));
         layout.setSizeUndefined();
         return layout;
     }

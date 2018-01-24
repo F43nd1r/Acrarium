@@ -98,7 +98,7 @@ public class ReportService {
 
     private void newReport(@NonNull App app, @NonNull String content, @NonNull List<MultipartFile> attachments) {
         JSONObject jsonObject = new JSONObject(content);
-        String stacktrace = jsonObject.optString(ReportField.STACK_TRACE.name());
+        String stacktrace = Utils.generifyStacktrace(jsonObject.optString(ReportField.STACK_TRACE.name()), app.getConfiguration());
         Date crashDate = Utils.getDateFromString(jsonObject.optString(ReportField.USER_CRASH_DATE.name()));
         Bug bug = bugRepository.findBugByAppAndStacktrace(app, stacktrace)
                 .orElseGet(() -> new Bug(app, stacktrace, jsonObject.optInt(ReportField.APP_VERSION_CODE.name()), crashDate));

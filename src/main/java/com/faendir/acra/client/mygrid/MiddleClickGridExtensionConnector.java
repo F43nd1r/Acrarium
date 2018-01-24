@@ -8,7 +8,6 @@ import com.vaadin.client.ServerConnector;
 import com.vaadin.client.connectors.grid.GridConnector;
 import com.vaadin.client.extensions.AbstractExtensionConnector;
 import com.vaadin.client.widget.grid.CellReference;
-import com.vaadin.client.widgets.Grid;
 import com.vaadin.shared.MouseEventDetails;
 import com.vaadin.shared.communication.ServerRpc;
 import com.vaadin.shared.data.DataCommunicatorConstants;
@@ -23,11 +22,10 @@ import elemental.json.JsonObject;
 public class MiddleClickGridExtensionConnector extends AbstractExtensionConnector {
     @Override
     protected void extend(ServerConnector target) {
-        Grid<JsonObject> grid = getParent().getWidget();
-        grid.addDomHandler(event -> {
+        getParent().getWidget().addDomHandler(event -> {
             if (event.getNativeButton() == NativeEvent.BUTTON_MIDDLE) {
                 event.preventDefault();
-                CellReference<JsonObject> cell = grid.getCellReference(event.getRelativeElement());
+                CellReference<JsonObject> cell = getParent().getWidget().getEventCell();
                 getRpcProxy(Rpc.class).middleClick(cell.getRow().getString(DataCommunicatorConstants.KEY), getParent().getColumnId(cell.getColumn()),
                         MouseEventDetailsBuilder.buildMouseEventDetails(event.getNativeEvent(), event.getRelativeElement()));
             }

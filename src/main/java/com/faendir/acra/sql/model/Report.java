@@ -68,6 +68,10 @@ public class Report {
         return bug;
     }
 
+    public void setBug(Bug bug) {
+        this.bug = bug;
+    }
+
     @NonNull
     public String getId() {
         return id;

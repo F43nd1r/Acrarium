@@ -54,6 +54,7 @@ public class UserManagerView extends NamedView {
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         userGrid = new MyGrid<>("Users", factory.create(UserManager.ROLE_USER, userRepository::findAllByRoles, userRepository::countAllByRoles));
         userGrid.setSelectionMode(Grid.SelectionMode.NONE);
+        userGrid.setBodyRowHeight(42);
         userGrid.setSizeToRows();
         userGrid.addColumn(User::getUsername, "Username");
         userGrid.addComponentColumn(user -> new MyCheckBox(user.getRoles().contains(UserManager.ROLE_ADMIN), !user.getUsername().equals(SecurityUtils.getUsername()),
@@ -68,7 +69,6 @@ public class UserManagerView extends NamedView {
                 return levelComboBox;
             }).setCaption("Access Permission for " + app.getName());
         }
-        userGrid.setRowHeight(42);
         Button newUser = new Button("New User", e -> newUser());
         VerticalLayout layout = new VerticalLayout(userGrid, newUser);
         Style.NO_PADDING.apply(layout);

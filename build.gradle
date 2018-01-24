@@ -44,6 +44,7 @@ vaadin {
 }
 
 vaadinCompile {
+    style 'PRETTY'
     outputDirectory 'src/main/resources'
     strict true
     widgetset 'com.faendir.acra.AppWidgetset'
