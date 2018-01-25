@@ -74,9 +74,8 @@ public class PropertiesTab implements MyTabSheet.Tab {
         layout.addComponent(new Button("Delete App",
                 e -> new Popup().setTitle("Confirm").addComponent(new Label("Are you sure you want to delete this app and all its associated content?")).addYesNoButtons(popup -> {
                     appRepository.delete(app);
-                    popup.close();
                     navigationManager.navigateBack();
-                }).show()));
+                }, true).show()));
         IntStepper age = new IntStepper();
         age.setValue(30);
         age.setMinValue(0);
@@ -118,8 +117,7 @@ public class PropertiesTab implements MyTabSheet.Tab {
                         });
                         reportRepository.saveAll(reports);
                         bugRepository.deleteOrphans();
-                        p.close();
-                    })
+                    }, true)
                     .show();
         }));
         layout.setSizeUndefined();

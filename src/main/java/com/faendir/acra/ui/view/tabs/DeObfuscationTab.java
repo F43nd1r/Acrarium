@@ -1,5 +1,6 @@
 package com.faendir.acra.ui.view.tabs;
 
+import com.faendir.acra.dataprovider.BufferedDataProvider;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.sql.data.ProguardMappingRepository;
 import com.faendir.acra.sql.model.App;
@@ -11,14 +12,15 @@ import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.ui.view.base.Popup;
 import com.faendir.acra.ui.view.base.ValidatedField;
-import com.faendir.acra.dataprovider.BufferedDataProvider;
 import com.faendir.acra.util.Style;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.renderers.ButtonRenderer;
 import org.springframework.lang.NonNull;
 import org.vaadin.risto.stepper.IntStepper;
 
@@ -44,6 +46,11 @@ public class DeObfuscationTab implements MyTabSheet.Tab {
         MyGrid<ProguardMapping> grid = new MyGrid<>(null, factory.create(app, mappingRepository::findAllByApp, mappingRepository::countAllByApp));
         grid.setSizeToRows();
         grid.addColumn(ProguardMapping::getVersionCode, "Version");
+        if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
+            grid.addColumn(report -> "Delete", new ButtonRenderer<>(e -> new Popup().setTitle("Confirm")
+                    .addComponent(new Label("Are you sure you want to delete the mapping for version " + e.getItem().getVersionCode()))
+                    .addYesNoButtons(p -> mappingRepository.delete(e.getItem()), true))).setSortable(false);
+        }
         layout.addComponent(grid);
         Style.NO_PADDING.apply(layout);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {

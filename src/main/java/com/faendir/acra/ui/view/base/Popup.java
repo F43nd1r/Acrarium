@@ -51,7 +51,17 @@ public class Popup extends Window {
 
     @NonNull
     public Popup addYesNoButtons(@NonNull Consumer<Popup> onYesAction) {
-        buttons.add(new Button("Yes", event -> onYesAction.accept(this)));
+        return addYesNoButtons(onYesAction, false);
+    }
+
+    @NonNull
+    public Popup addYesNoButtons(@NonNull Consumer<Popup> onYesAction, boolean closeAfter) {
+        buttons.add(new Button("Yes", event -> {
+            onYesAction.accept(this);
+            if(closeAfter){
+                close();
+            }
+        }));
         buttons.add(new Button("No", event -> close()));
         return this;
     }

@@ -8,8 +8,8 @@ import com.faendir.acra.sql.model.Report;
 import com.faendir.acra.ui.NavigationManager;
 import com.faendir.acra.ui.view.ReportView;
 import com.faendir.acra.util.TimeSpanRenderer;
-import com.vaadin.data.provider.DataProvider;
 import com.vaadin.shared.data.sort.SortDirection;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.renderers.ButtonRenderer;
 import org.springframework.lang.NonNull;
 
@@ -32,7 +32,9 @@ public class ReportList extends MyGrid<Report> {
         addColumn(Report::getPhoneModel, "phoneModel", "Device");
         addColumn(report -> report.getStacktrace().split("\n", 2)[0], "stacktrace", "Stacktrace").setExpandRatio(1).setMinimumWidthFromContent(false);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-            addColumn(report -> "Delete", new ButtonRenderer<>(e -> reportDeleter.accept(e.getItem()))).setSortable(false);
+            addColumn(report -> "Delete", new ButtonRenderer<>(e -> new Popup().setTitle("Confirm")
+                    .addComponent(new Label("Are you sure you want to delete the mapping for version " + e.getItem().getVersionCode()))
+                    .addYesNoButtons(p -> reportDeleter.accept(e.getItem()), true))).setSortable(false);
         }
         addOnClickNavigation(navigationManager, ReportView.class, e -> e.getItem().getId());
     }
