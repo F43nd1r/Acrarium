@@ -110,7 +110,7 @@ public class PropertiesTab implements MyTabSheet.Tab {
                                 if (stacktrace.equals(report.getBug().getStacktrace())) {
                                     bug = report.getBug();
                                 } else {
-                                    bug = new Bug(app, stacktrace, report.getVersionCode(), report.getDate());
+                                    bug = bugRepository.save(new Bug(app, stacktrace, report.getVersionCode(), report.getDate()));
                                 }
                             }
                             report.setBug(bug);

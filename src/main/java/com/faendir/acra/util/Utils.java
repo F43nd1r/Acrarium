@@ -60,7 +60,7 @@ public final class Utils {
         StringBuilder output = new StringBuilder();
         Pattern headLinePattern = Pattern.compile("^([\\w.]+)(:(.*))?$");
         Pattern tracePattern = Pattern.compile("^\\s*at\\s+([\\w.$_]+)\\.([\\w$_]+)\\((.*)\\)$");
-        Pattern sourcePattern = Pattern.compile("^(android\\..*:)(\\d+)$");
+        Pattern sourcePattern = Pattern.compile("^((android|java)\\..*:)(\\d+)$");
         Pattern instancePattern = Pattern.compile("(([a-z_$][a-z0-9_$]*\\.)+[a-zA-Z_$][a-zA-Z0-9_$]*@)([a-fA-F0-9]+)");
         while (lines.size() > 0) {
             String line;

@@ -36,6 +36,7 @@ public class App {
     public App(@NonNull String name, @NonNull User reporter) {
         this.name = name;
         this.reporter = reporter;
+        this.configuration = new Configuration();
     }
 
     public int getId() {
