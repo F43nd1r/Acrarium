@@ -33,7 +33,7 @@ public class ReportList extends MyGrid<Report> {
         addColumn(report -> report.getStacktrace().split("\n", 2)[0], "stacktrace", "Stacktrace").setExpandRatio(1).setMinimumWidthFromContent(false);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
             addColumn(report -> "Delete", new ButtonRenderer<>(e -> new Popup().setTitle("Confirm")
-                    .addComponent(new Label("Are you sure you want to delete the mapping for version " + e.getItem().getVersionCode()))
+                    .addComponent(new Label("Are you sure you want to delete this report?"))
                     .addYesNoButtons(p -> reportDeleter.accept(e.getItem()), true))).setSortable(false);
         }
         addOnClickNavigation(navigationManager, ReportView.class, e -> e.getItem().getId());

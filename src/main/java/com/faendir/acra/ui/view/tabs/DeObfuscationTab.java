@@ -48,7 +48,7 @@ public class DeObfuscationTab implements MyTabSheet.Tab {
         grid.addColumn(ProguardMapping::getVersionCode, "Version");
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
             grid.addColumn(report -> "Delete", new ButtonRenderer<>(e -> new Popup().setTitle("Confirm")
-                    .addComponent(new Label("Are you sure you want to delete the mapping for version " + e.getItem().getVersionCode()))
+                    .addComponent(new Label("Are you sure you want to delete the mapping for version " + e.getItem().getVersionCode() + "?"))
                     .addYesNoButtons(p -> mappingRepository.delete(e.getItem()), true))).setSortable(false);
         }
         layout.addComponent(grid);

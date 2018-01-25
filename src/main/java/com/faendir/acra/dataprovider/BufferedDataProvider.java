@@ -1,9 +1,10 @@
 package com.faendir.acra.dataprovider;
 
 import com.faendir.acra.config.AcraConfiguration;
-import com.faendir.acra.util.OrderAdapter;
 import com.vaadin.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.data.provider.Query;
+import com.vaadin.data.provider.QuerySortOrder;
+import com.vaadin.shared.data.sort.SortDirection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -84,6 +85,12 @@ public class BufferedDataProvider<T> extends AbstractBackEndDataProvider<T, Void
 
         public <P, T> BufferedDataProvider<T> create(P parameter, BiFunction<P, Pageable, Slice<T>> getter, Function<P, Integer> counter) {
             return new BufferedDataProvider<>(configuration.getPaginationSize(), pageable -> getter.apply(parameter, pageable), () -> counter.apply(parameter));
+        }
+    }
+
+    private static class OrderAdapter extends Sort.Order {
+        OrderAdapter(QuerySortOrder adapt) {
+            super(adapt.getDirection() == SortDirection.ASCENDING ? Sort.Direction.ASC : Sort.Direction.DESC, adapt.getSorted());
         }
     }
 }
