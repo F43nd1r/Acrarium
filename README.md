@@ -3,6 +3,10 @@
 # Acra Backend
 A Backend for ACRA written in Java using Spring Boot, Vaadin and MySQL
 
+# Setup
+
+See [Wiki Setup guide](https://github.com/F43nd1r/acra-backend/wiki/Setup-guide)
+
 # License
 
 All source code in this repository is licensed under the Apache License 2.0 (see [LICENSE](LICENSE))
