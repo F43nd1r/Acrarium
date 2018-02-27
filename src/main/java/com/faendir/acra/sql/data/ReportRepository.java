@@ -32,8 +32,8 @@ public interface ReportRepository extends JpaRepository<Report, String> {
     int countAllByBugApp(@NonNull App app);
 
     @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
-    @Query("select new com.faendir.acra.sql.util.CountResult(report.date, count(report)) from Report report join Bug bug on report.bug = bug "
-           + "where bug.app = ?1 and report.date > ?2 group by function('year',report.date), function('month',report.date), function('day',report.date)")
+    @Query("select new com.faendir.acra.sql.util.CountResult(function('date', report.date), count(report)) from Report report join Bug bug on report.bug = bug "
+           + "where bug.app = ?1 and report.date > ?2 group by function('date', report.date)")
     List<CountResult<Date>> countAllByDayAfter(@NonNull App app, @NonNull Date date);
 
     Slice<Report> findAllByBug(@NonNull Bug bug, @NonNull Pageable pageable);
