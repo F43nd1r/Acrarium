@@ -1,4 +1,4 @@
-package com.faendir.acra.ui.view.tabs;
+package com.faendir.acra.ui.view.app.tabs;
 
 import com.faendir.acra.sql.data.AppRepository;
 import com.faendir.acra.sql.data.BugRepository;
@@ -36,6 +36,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Lukas
@@ -44,7 +45,7 @@ import java.util.Map;
 @RequiresAppPermission(Permission.Level.ADMIN)
 @SpringComponent
 @ViewScope
-public class PropertiesTab implements MyTabSheet.Tab {
+public class PropertiesTab implements MyTabSheet.Tab<App> {
     public static final String CAPTION = "Properties";
     @NonNull private final AppRepository appRepository;
     @NonNull private final BugRepository bugRepository;
@@ -99,17 +100,17 @@ public class PropertiesTab implements MyTabSheet.Tab {
                             "Are you sure you want to save this configuration? All bugs will be recalculated, which may take some time and will reset the 'solved' status"))
                     .addYesNoButtons(p -> {
                         app.setConfiguration(new App.Configuration(matchByMessage.getValue(), ignoreInstanceIds.getValue(), ignoreAndroidLineNumbers.getValue()));
-                        appRepository.save(app);
+                        App a = appRepository.save(app);
                         Map<String, Bug> bugs = new HashMap<>();
-                        List<Report> reports = reportRepository.findAllByAppEager(app);
+                        List<Report> reports = reportRepository.findAllByAppEager(a);
+                        List<Bug> b = bugRepository.loadStacktraces(reports.stream().map(Report::getBug).distinct().collect(Collectors.toList()));
                         reports.forEach(report -> {
-                            String stacktrace = Utils.generifyStacktrace(report.getStacktrace(), app.getConfiguration());
+                            String stacktrace = Utils.generifyStacktrace(report.getStacktrace(), a.getConfiguration());
                             Bug bug = bugs.get(stacktrace);
                             if (bug == null) {
-                                if (stacktrace.equals(report.getBug().getStacktrace())) {
-                                    bug = report.getBug();
-                                } else {
-                                    bug = bugRepository.save(new Bug(app, stacktrace, report.getVersionCode(), report.getDate()));
+                                bug = b.get(b.indexOf(report.getBug()));
+                                if (!bug.getStacktraces().contains(stacktrace)) {
+                                    bug = bugRepository.save(new Bug(a, stacktrace, report.getVersionCode(), report.getDate()));
                                 }
                             }
                             report.setBug(bug);

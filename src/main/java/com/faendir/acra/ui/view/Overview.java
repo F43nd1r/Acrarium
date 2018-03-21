@@ -7,6 +7,7 @@ import com.faendir.acra.sql.model.App;
 import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.sql.model.User;
 import com.faendir.acra.sql.user.UserManager;
+import com.faendir.acra.ui.view.app.AppView;
 import com.faendir.acra.ui.view.base.ConfigurationLabel;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.NamedView;

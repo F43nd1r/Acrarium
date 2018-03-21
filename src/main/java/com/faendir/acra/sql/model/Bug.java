@@ -7,13 +7,16 @@ import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.CascadeType;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Lukas
@@ -24,11 +27,14 @@ public class Bug {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, optional = false, fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private App app;
     private boolean solved;
-    @Type(type = "text") private String stacktrace;
+    @ElementCollection(fetch = FetchType.LAZY)
+    @Type(type = "text")
+    private List<String> stacktraces;
+    @Type(type = "text") private String title;
     private Date lastReport;
     private int versionCode;
 
@@ -38,7 +44,9 @@ public class Bug {
 
     public Bug(@NonNull App app, @NonNull String stacktrace, int versionCode, @NonNull Date lastReport) {
         this.app = app;
-        this.stacktrace = stacktrace;
+        this.stacktraces = new ArrayList<>();
+        this.stacktraces.add(stacktrace);
+        this.title = stacktrace.split("\n", 2)[0];
         this.versionCode = versionCode;
         this.lastReport = lastReport;
         this.solved = false;
@@ -66,8 +74,17 @@ public class Bug {
     }
 
     @NonNull
-    public String getStacktrace() {
-        return stacktrace;
+    public List<String> getStacktraces() {
+        return stacktraces != null ? stacktraces : new ArrayList<>();
+    }
+
+    @NonNull
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(@NonNull String title) {
+        this.title = title;
     }
 
     @NonNull

@@ -1,4 +1,4 @@
-package com.faendir.acra.ui.view.tabs;
+package com.faendir.acra.ui.view.app.tabs;
 
 import com.faendir.acra.sql.data.ReportRepository;
 import com.faendir.acra.sql.model.App;
@@ -18,7 +18,7 @@ import org.springframework.lang.NonNull;
  */
 @SpringComponent
 @ViewScope
-public class ReportTab implements MyTabSheet.Tab {
+public class ReportTab implements MyTabSheet.Tab<App> {
     @NonNull private final ReportRepository reportRepository;
     @NonNull private final BufferedDataProvider.Factory factory;
 

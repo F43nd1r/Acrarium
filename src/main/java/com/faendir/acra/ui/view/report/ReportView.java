@@ -1,4 +1,4 @@
-package com.faendir.acra.ui.view;
+package com.faendir.acra.ui.view.report;
 
 import com.diffplug.common.base.Errors;
 import com.diffplug.common.base.Throwing;

@@ -1,9 +1,12 @@
 package com.faendir.acra.util;
 
+import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.sql.model.App;
+import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.vaadin.ui.UI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.lang.NonNull;
 import org.springframework.web.util.UriComponentsBuilder;
 import proguard.retrace.ReTrace;
@@ -18,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -92,5 +96,13 @@ public final class Utils {
             }
         }
         return output.toString();
+    }
+
+    public static <T> Optional<T> getBeanIfPermissionGranted(@NonNull ApplicationContext applicationContext, @NonNull App app, @NonNull Class<T> clazz){
+        RequiresAppPermission annotation = clazz.getAnnotation(RequiresAppPermission.class);
+        if (annotation == null || SecurityUtils.hasPermission(app, annotation.value())) {
+            return Optional.of(applicationContext.getBean(clazz));
+        }
+        return Optional.empty();
     }
 }

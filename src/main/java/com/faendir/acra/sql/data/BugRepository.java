@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -25,7 +27,13 @@ public interface BugRepository extends JpaRepository<Bug, Integer> {
 
     int countAllByAppAndSolvedFalse(@NonNull App app);
 
-    Optional<Bug> findBugByAppAndStacktrace(@NonNull App app, @NonNull String stacktrace);
+    Optional<Bug> findBugByAppAndStacktraces(@NonNull App app, @NonNull String stacktrace);
+
+    @Query("select bug from Bug bug join fetch bug.stacktraces where bug in ?1")
+    List<Bug> loadStacktraces(Collection<Bug> bugs);
+
+    @Query("select bug from Bug bug join fetch bug.app join fetch bug.stacktraces where bug.id = ?1")
+    Optional<Bug> findByIdEager(int id);
 
     @Transactional
     @Modifying

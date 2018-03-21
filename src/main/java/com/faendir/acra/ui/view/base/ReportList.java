@@ -6,7 +6,7 @@ import com.faendir.acra.sql.model.App;
 import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.sql.model.Report;
 import com.faendir.acra.ui.NavigationManager;
-import com.faendir.acra.ui.view.ReportView;
+import com.faendir.acra.ui.view.report.ReportView;
 import com.faendir.acra.util.TimeSpanRenderer;
 import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.ui.Label;

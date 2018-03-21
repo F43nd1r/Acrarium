@@ -100,7 +100,7 @@ public class ReportService {
         JSONObject jsonObject = new JSONObject(content);
         String stacktrace = Utils.generifyStacktrace(jsonObject.optString(ReportField.STACK_TRACE.name()), app.getConfiguration());
         Date crashDate = Utils.getDateFromString(jsonObject.optString(ReportField.USER_CRASH_DATE.name()));
-        Bug bug = bugRepository.findBugByAppAndStacktrace(app, stacktrace)
+        Bug bug = bugRepository.findBugByAppAndStacktraces(app, stacktrace)
                 .orElseGet(() -> new Bug(app, stacktrace, jsonObject.optInt(ReportField.APP_VERSION_CODE.name()), crashDate));
         bug.setLastReport(crashDate);
         Report report = reportRepository.save(new Report(bug, content));

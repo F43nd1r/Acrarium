@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '2.0.0.M7'
+        springBootVersion = '2.0.0.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -39,7 +39,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 vaadin {
-    version '8.2.0'
+    version '8.3.2'
     push true
 }
 

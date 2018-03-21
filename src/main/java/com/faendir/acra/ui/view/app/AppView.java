@@ -1,17 +1,18 @@
-package com.faendir.acra.ui.view;
+package com.faendir.acra.ui.view.app;
 
 import com.faendir.acra.sql.data.AppRepository;
 import com.faendir.acra.sql.model.App;
 import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
+import com.faendir.acra.ui.view.app.tabs.BugTab;
+import com.faendir.acra.ui.view.app.tabs.DeObfuscationTab;
+import com.faendir.acra.ui.view.app.tabs.PropertiesTab;
+import com.faendir.acra.ui.view.app.tabs.ReportTab;
+import com.faendir.acra.ui.view.app.tabs.StatisticsTab;
 import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.ui.view.base.ParametrizedNamedView;
-import com.faendir.acra.ui.view.tabs.BugTab;
-import com.faendir.acra.ui.view.tabs.DeObfuscationTab;
-import com.faendir.acra.ui.view.tabs.PropertiesTab;
-import com.faendir.acra.ui.view.tabs.ReportTab;
-import com.faendir.acra.ui.view.tabs.StatisticsTab;
 import com.faendir.acra.util.Style;
+import com.faendir.acra.util.Utils;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.VerticalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Lukas
@@ -30,7 +33,7 @@ import java.util.Optional;
 public class AppView extends ParametrizedNamedView<Pair<App, String>> {
     @NonNull private final AppRepository appRepository;
     @NonNull private final ApplicationContext applicationContext;
-    private MyTabSheet tabSheet;
+    private MyTabSheet<App> tabSheet;
 
     @Autowired
     public AppView(@NonNull AppRepository appRepository, @NonNull ApplicationContext applicationContext) {
@@ -58,8 +61,11 @@ public class AppView extends ParametrizedNamedView<Pair<App, String>> {
             Optional<App> appOptional = appRepository.findByEncodedId(parameters[0]);
             if (appOptional.isPresent()) {
                 App app = appOptional.get();
-                tabSheet = new MyTabSheet(app, getNavigationManager(), applicationContext, BugTab.class, ReportTab.class, StatisticsTab.class, DeObfuscationTab.class,
-                        PropertiesTab.class);
+                tabSheet = new MyTabSheet<>(app, getNavigationManager(), Stream.of(BugTab.class, ReportTab.class, StatisticsTab.class, DeObfuscationTab.class, PropertiesTab.class)
+                        .map(clazz -> Utils.getBeanIfPermissionGranted(applicationContext, app, clazz))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(Collectors.toList()));
                 if (parameters.length == 1) {
                     return Pair.of(app, tabSheet.getCaptions().get(0));
                 } else if (tabSheet.getCaptions().contains(parameters[1])) {

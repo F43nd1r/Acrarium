@@ -1,4 +1,4 @@
-package com.faendir.acra.ui.view.tabs;
+package com.faendir.acra.ui.view.app.tabs;
 
 import com.faendir.acra.dataprovider.BufferedDataProvider;
 import com.faendir.acra.security.SecurityUtils;
@@ -30,7 +30,7 @@ import org.vaadin.risto.stepper.IntStepper;
  */
 @SpringComponent
 @ViewScope
-public class DeObfuscationTab implements MyTabSheet.Tab {
+public class DeObfuscationTab implements MyTabSheet.Tab<App> {
     public static final String CAPTION = "De-Obfuscation";
     @NonNull private final ProguardMappingRepository mappingRepository;
     @NonNull private final BufferedDataProvider.Factory factory;
