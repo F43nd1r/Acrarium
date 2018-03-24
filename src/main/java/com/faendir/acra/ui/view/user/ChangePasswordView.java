@@ -1,7 +1,6 @@
 package com.faendir.acra.ui.view.user;
 
 import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.sql.model.App;
 import com.faendir.acra.sql.model.User;
 import com.faendir.acra.sql.user.UserManager;
 import com.faendir.acra.ui.BackendUI;
@@ -59,16 +58,15 @@ public class ChangePasswordView extends NamedView {
         VerticalLayout root = new VerticalLayout(layout);
         root.setSizeFull();
         root.setComponentAlignment(layout, Alignment.MIDDLE_CENTER);
-        setSizeFull();
         setCompositionRoot(root);
-    }
-
-    @Nullable
-    public App parseFragment(@NonNull String fragment) {
-        return null;
     }
 
     public boolean validate(@Nullable String fragment) {
         return true;
+    }
+
+    @Override
+    public String getTitle() {
+        return "Change Password";
     }
 }

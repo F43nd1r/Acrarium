@@ -85,13 +85,16 @@ public class ReportView extends ParametrizedNamedView<Report> {
         VerticalLayout layout = new VerticalLayout(summary, details);
         layout.setSizeUndefined();
         layout.setExpandRatio(details, 1);
-        Style.NO_PADDING.apply(layout);
+        Style.apply(layout, Style.NO_PADDING, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
         Panel root = new Panel(layout);
         root.setSizeFull();
         Style.apply(root, Style.NO_BACKGROUND, Style.NO_BORDER);
         setCompositionRoot(root);
-        Style.apply(this, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
-        setSizeFull();
+    }
+
+    @Override
+    protected String getTitle(@NonNull Report report) {
+        return report.getId();
     }
 
     @NonNull

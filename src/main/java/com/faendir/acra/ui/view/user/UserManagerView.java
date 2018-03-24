@@ -73,7 +73,6 @@ public class UserManagerView extends NamedView {
         VerticalLayout layout = new VerticalLayout(userGrid, newUser);
         Style.NO_PADDING.apply(layout);
         setCompositionRoot(layout);
-        setSizeFull();
         Style.apply(this, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
     }
 
@@ -90,5 +89,10 @@ public class UserManagerView extends NamedView {
                     popup.close();
                 })
                 .show();
+    }
+
+    @Override
+    public String getTitle() {
+        return "User Manager";
     }
 }

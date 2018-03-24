@@ -2,6 +2,7 @@ package com.faendir.acra.util;
 
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.navigator.SpringNavigator;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
@@ -12,17 +13,28 @@ import org.springframework.stereotype.Component;
 @Component
 @UIScope
 public class MyNavigator extends SpringNavigator {
+    @NonNull private String navState;
     @Nullable private String parameters;
 
+    public MyNavigator() {
+        navState = "";
+    }
+
     @Override
-    public void navigateTo(String navigationState) {
-        String[] split = navigationState.split("/", 2);
-        parameters = split.length == 2 ? split[1] : null;
-        super.navigateTo(navigationState);
+    public void navigateTo(@Nullable String navigationState) {
+        navState = navigationState != null ? navigationState : "";
+        int index;
+        parameters = (index = navState.indexOf('/')) != -1 ? navState.substring(index + 1) : null;
+        super.navigateTo(navState);
     }
 
     @Nullable
     public String getParameters() {
         return parameters;
+    }
+
+    @NonNull
+    public String getNavState() {
+        return navState;
     }
 }

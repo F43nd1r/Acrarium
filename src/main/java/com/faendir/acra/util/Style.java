@@ -18,8 +18,12 @@ public enum Style {
     MARGIN_RIGHT("margin-right"),
     MARGIN_BOTTOM("margin-bottom"),
     BACKGROUND_LIGHT_GRAY("background-light-gray"),
+    BACKGROUND_HEADER("background-header"),
     NO_BACKGROUND("no-background"),
-    NO_BORDER("no-border");
+    NO_BORDER("no-border"),
+    BORDER_TOP("border-top"),
+    BUTTON_ROUND("button-round"),
+    BUTTON_BORDERLESS("v-button-borderless");
     @NonNull private final String name;
 
     Style(@NonNull String name) {

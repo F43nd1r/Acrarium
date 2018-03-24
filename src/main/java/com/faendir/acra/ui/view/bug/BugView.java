@@ -86,6 +86,12 @@ public class BugView extends ParametrizedNamedView<Bug> {
         Style.apply(root, Style.NO_BACKGROUND, Style.NO_BORDER);
         setCompositionRoot(root);
         Style.apply(this, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
-        setSizeFull();
+    }
+
+    @Override
+    protected String getTitle(@NonNull Bug bug) {
+        String title = bug.getTitle();
+        if (title.length() > 100) title = title.substring(0, 95) + " …";
+        return title;
     }
 }

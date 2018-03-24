@@ -39,4 +39,11 @@ public abstract class ParametrizedNamedView<T> extends NamedView {
     }
 
     protected abstract void enter(@NonNull T t);
+
+    @Override
+    public String getTitle() {
+        return getTitle(t);
+    }
+
+    protected abstract String getTitle(@NonNull T t);
 }

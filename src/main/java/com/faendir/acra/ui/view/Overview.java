@@ -79,4 +79,9 @@ public class Overview extends NamedView {
             popup.clear().addComponent(new ConfigurationLabel(userPasswordPair.getFirst().getUsername(), userPasswordPair.getSecond())).addCloseButton().show();
         }).show();
     }
+
+    @Override
+    public String getTitle() {
+        return "Overview";
+    }
 }

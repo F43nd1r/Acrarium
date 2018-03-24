@@ -48,10 +48,14 @@ public class AppView extends ParametrizedNamedView<Pair<App, String>> {
         content.setSizeFull();
         Style.apply(content, Style.NO_PADDING, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
         setCompositionRoot(content);
-        setSizeFull();
         tabSheet.setSizeFull();
         tabSheet.addSelectedTabChangeListener(e -> getNavigationManager().updatePageParameters(parameter.getFirst().getId() + "/" + e.getTabSheet().getSelectedTab().getCaption()));
         tabSheet.setInitialTab(parameter.getSecond());
+    }
+
+    @Override
+    protected String getTitle(@NonNull Pair<App, String> appStringPair) {
+        return appStringPair.getFirst().getName();
     }
 
     @Override

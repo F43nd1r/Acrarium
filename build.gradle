@@ -10,7 +10,7 @@ buildscript {
     }
     dependencies {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-        classpath "com.devsoap.plugin:gradle-vaadin-plugin:1.3.0"
+        classpath "com.devsoap.plugin:gradle-vaadin-plugin:1.3.1"
         classpath 'io.spring.gradle:propdeps-plugin:0.0.9.RELEASE'
         classpath "gradle.plugin.com.github.jk1:gradle-license-report:0.4.1"
     }
@@ -60,13 +60,6 @@ vaadinSuperDevMode {
 }
 
 dependencyManagement {
-    dependencies {
-        dependencySet(group: 'com.vaadin', version: '2.1.0.beta2') {
-            entry 'vaadin-spring-boot-starter'
-            entry 'vaadin-spring-boot'
-            entry 'vaadin-spring'
-        }
-    }
     imports {
         mavenBom "com.vaadin:vaadin-bom:${vaadin.version}"
     }
@@ -87,6 +80,7 @@ dependencies {
         exclude group: 'javax.servlet', module: 'servlet-api'
         exclude group: 'jfree'
     }
+    compile 'com.vaadin:vaadin-icons:3.0.1'
     compile 'org.jfree:jfreechart:1.5.0'
     compile 'javax.servlet:javax.servlet-api:3.1.0'
     compile 'org.vaadin.addons:stepper:2.4.0'
@@ -103,16 +97,6 @@ dependencies {
 }
 
 compileJava.dependsOn(processResources)
-
-configurations {
-    'vaadin-client' {
-        resolutionStrategy {
-            dependencySubstitution {
-                substitute module('javax.validation:validation-api') with module('javax.validation:validation-api:1.0.0.GA')
-            }
-        }
-    }
-}
 
 war {
     archiveName = 'acra.war'
