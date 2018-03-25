@@ -126,4 +126,9 @@ public class StatisticsTab implements MyTabSheet.Tab<App> {
         ((List<String>) dataset.getKeys()).forEach(key -> plot.setExplodePercent(key, 0.01));
         panel.setContent(new JFreeChartWrapper(chart));
     }
+
+    @Override
+    public int getOrder() {
+        return 2;
+    }
 }

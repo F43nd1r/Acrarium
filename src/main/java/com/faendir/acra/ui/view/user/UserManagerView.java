@@ -1,5 +1,6 @@
 package com.faendir.acra.ui.view.user;
 
+import com.faendir.acra.dataprovider.BufferedDataProvider;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.sql.data.AppRepository;
 import com.faendir.acra.sql.model.App;
@@ -8,15 +9,17 @@ import com.faendir.acra.sql.model.User;
 import com.faendir.acra.sql.user.UserManager;
 import com.faendir.acra.sql.user.UserRepository;
 import com.faendir.acra.ui.annotation.RequiresRole;
+import com.faendir.acra.ui.view.base.BaseView;
 import com.faendir.acra.ui.view.base.MyCheckBox;
 import com.faendir.acra.ui.view.base.MyGrid;
-import com.faendir.acra.ui.view.base.NamedView;
 import com.faendir.acra.ui.view.base.Popup;
+import com.faendir.acra.ui.view.base.SingleViewProvider;
 import com.faendir.acra.ui.view.base.ValidatedField;
-import com.faendir.acra.dataprovider.BufferedDataProvider;
 import com.faendir.acra.util.Style;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.spring.annotation.SpringComponent;
+import com.vaadin.spring.annotation.UIScope;
+import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Grid;
@@ -32,9 +35,10 @@ import java.util.Arrays;
  * @author Lukas
  * @since 20.05.2017
  */
-@SpringView(name = "user-manager")
+@SpringComponent
+@ViewScope
 @RequiresRole(UserManager.ROLE_ADMIN)
-public class UserManagerView extends NamedView {
+public class UserManagerView extends BaseView {
     @NonNull private final UserManager userManager;
     @NonNull private final AppRepository appRepository;
     @NonNull private final UserRepository userRepository;
@@ -91,8 +95,21 @@ public class UserManagerView extends NamedView {
                 .show();
     }
 
-    @Override
-    public String getTitle() {
-        return "User Manager";
+    @SpringComponent
+    @UIScope
+    public static class Provider extends SingleViewProvider<UserManagerView> {
+        protected Provider() {
+            super(UserManagerView.class);
+        }
+
+        @Override
+        public String getTitle(String parameter) {
+            return "User Manager";
+        }
+
+        @Override
+        public String getId() {
+            return "user-manager";
+        }
     }
 }

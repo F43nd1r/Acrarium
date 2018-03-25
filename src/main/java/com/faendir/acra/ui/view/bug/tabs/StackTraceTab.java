@@ -49,4 +49,9 @@ public class StackTraceTab implements MyTabSheet.Tab<Bug>{
     public String getCaption() {
         return "Stacktraces";
     }
+
+    @Override
+    public int getOrder() {
+        return 1;
+    }
 }

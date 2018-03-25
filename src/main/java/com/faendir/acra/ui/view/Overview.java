@@ -1,5 +1,6 @@
 package com.faendir.acra.ui.view;
 
+import com.faendir.acra.dataprovider.BufferedDataProvider;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.sql.data.AppRepository;
 import com.faendir.acra.sql.data.ReportRepository;
@@ -8,14 +9,16 @@ import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.sql.model.User;
 import com.faendir.acra.sql.user.UserManager;
 import com.faendir.acra.ui.view.app.AppView;
+import com.faendir.acra.ui.view.base.BaseView;
 import com.faendir.acra.ui.view.base.ConfigurationLabel;
 import com.faendir.acra.ui.view.base.MyGrid;
-import com.faendir.acra.ui.view.base.NamedView;
 import com.faendir.acra.ui.view.base.Popup;
-import com.faendir.acra.dataprovider.BufferedDataProvider;
+import com.faendir.acra.ui.view.base.SingleViewProvider;
 import com.faendir.acra.util.Style;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.spring.annotation.SpringComponent;
+import com.vaadin.spring.annotation.UIScope;
+import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.TextField;
@@ -28,16 +31,13 @@ import org.springframework.lang.NonNull;
  * @author Lukas
  * @since 23.03.2017
  */
-@SpringView(name = "")
-public class Overview extends NamedView {
-    @NonNull
-    private final AppRepository appRepository;
-    @NonNull
-    private final ReportRepository reportRepository;
-    @NonNull
-    private final UserManager userManager;
-    @NonNull
-    private final BufferedDataProvider.Factory factory;
+@SpringComponent
+@ViewScope
+public class Overview extends BaseView {
+    @NonNull private final AppRepository appRepository;
+    @NonNull private final ReportRepository reportRepository;
+    @NonNull private final UserManager userManager;
+    @NonNull private final BufferedDataProvider.Factory factory;
     private MyGrid<App> grid;
 
     @Autowired
@@ -51,11 +51,11 @@ public class Overview extends NamedView {
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        grid = new MyGrid<>("Apps", factory.create(SecurityUtils.hasRole(UserManager.ROLE_ADMIN),
-                (admin, pageable) -> admin ? appRepository.findAllByPermissionWithDefaultIncluded(SecurityUtils.getUsername(), Permission.Level.VIEW, pageable) :
-                        appRepository.findAllByPermissionWithDefaultExcluded(SecurityUtils.getUsername(), Permission.Level.VIEW, pageable),
-                admin -> admin ? appRepository.countByPermissionWithDefaultIncluded(SecurityUtils.getUsername(), Permission.Level.VIEW) :
-                        appRepository.countByPermissionWithDefaultExcluded(SecurityUtils.getUsername(), Permission.Level.VIEW)));
+        grid = new MyGrid<>("Apps", factory.create(SecurityUtils.hasRole(UserManager.ROLE_ADMIN), (admin, pageable) -> admin ?
+                appRepository.findAllByPermissionWithDefaultIncluded(SecurityUtils.getUsername(), Permission.Level.VIEW, pageable) :
+                appRepository.findAllByPermissionWithDefaultExcluded(SecurityUtils.getUsername(), Permission.Level.VIEW, pageable), admin -> admin ?
+                appRepository.countByPermissionWithDefaultIncluded(SecurityUtils.getUsername(), Permission.Level.VIEW) :
+                appRepository.countByPermissionWithDefaultExcluded(SecurityUtils.getUsername(), Permission.Level.VIEW)));
         grid.setSizeToRows();
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.addColumn(App::getName, "Name");
@@ -80,8 +80,21 @@ public class Overview extends NamedView {
         }).show();
     }
 
-    @Override
-    public String getTitle() {
-        return "Overview";
+    @SpringComponent
+    @UIScope
+    public static class Provider extends SingleViewProvider<Overview> {
+        protected Provider() {
+            super(Overview.class);
+        }
+
+        @Override
+        public String getTitle(String parameter) {
+            return "Overview";
+        }
+
+        @Override
+        public String getId() {
+            return "";
+        }
     }
 }

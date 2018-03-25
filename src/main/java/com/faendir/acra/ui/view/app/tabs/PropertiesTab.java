@@ -129,4 +129,9 @@ public class PropertiesTab implements MyTabSheet.Tab<App> {
     public String getCaption() {
         return CAPTION;
     }
+
+    @Override
+    public int getOrder() {
+        return 4;
+    }
 }

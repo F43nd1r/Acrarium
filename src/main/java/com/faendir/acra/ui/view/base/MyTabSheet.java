@@ -4,6 +4,7 @@ import com.faendir.acra.ui.NavigationManager;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.TabSheet;
+import org.springframework.core.Ordered;
 import org.springframework.lang.NonNull;
 
 import java.util.Arrays;
@@ -54,7 +55,7 @@ public class MyTabSheet<T> extends TabSheet {
         });
     }
 
-    public interface Tab<T> {
+    public interface Tab<T> extends Ordered {
         Component createContent(@NonNull T t, @NonNull NavigationManager navigationManager);
 
         String getCaption();

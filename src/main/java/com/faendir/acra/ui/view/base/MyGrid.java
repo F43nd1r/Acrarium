@@ -61,7 +61,7 @@ public class MyGrid<T> extends Grid<T> {
         ((ObservableDataProvider) getDataProvider()).addSizeListener(rows -> getUI().access(() -> setHeightByRows(rows)));
     }
 
-    public void addOnClickNavigation(@NonNull NavigationManager navigationManager, Class<? extends NamedView> namedView, Function<ItemClick<T>, String> parameterGetter) {
+    public void addOnClickNavigation(@NonNull NavigationManager navigationManager, Class<? extends BaseView> namedView, Function<ItemClick<T>, String> parameterGetter) {
         addItemClickListener(e -> {
             boolean newTab = e.getMouseEventDetails().getButton() == MouseEventDetails.MouseButton.MIDDLE || e.getMouseEventDetails().isCtrlKey();
             navigationManager.navigateTo(namedView, parameterGetter.apply(e), newTab);

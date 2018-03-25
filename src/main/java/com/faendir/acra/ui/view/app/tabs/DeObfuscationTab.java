@@ -80,4 +80,9 @@ public class DeObfuscationTab implements MyTabSheet.Tab<App> {
     public String getCaption() {
         return CAPTION;
     }
+
+    @Override
+    public int getOrder() {
+        return 3;
+    }
 }

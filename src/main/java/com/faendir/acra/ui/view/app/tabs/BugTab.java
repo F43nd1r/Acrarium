@@ -129,4 +129,9 @@ public class BugTab implements MyTabSheet.Tab<App> {
         return factory.create(app, hideSolved ? bugRepository::findAllByAppAndSolvedFalse : bugRepository::findAllByApp,
                 hideSolved ? bugRepository::countAllByAppAndSolvedFalse : bugRepository::countAllByApp);
     }
+
+    @Override
+    public int getOrder() {
+        return 0;
+    }
 }

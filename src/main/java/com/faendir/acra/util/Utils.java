@@ -3,10 +3,12 @@ package com.faendir.acra.util;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.sql.model.App;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
+import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.vaadin.ui.UI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.lang.NonNull;
 import org.springframework.web.util.UriComponentsBuilder;
 import proguard.retrace.ReTrace;
@@ -15,6 +17,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.lang.reflect.ParameterizedType;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -75,9 +78,9 @@ public final class Utils {
                 output.append(headLineMatcher.group(1)).append(":<message>");
             } else if (configuration.ignoreInstanceIds()) {
                 String message = headLineMatcher.group(2);
-                if(message != null) {
+                if (message != null) {
                     output.append(headLineMatcher.group(1)).append(instancePattern.matcher(message).replaceAll("$1<instance>"));
-                }else {
+                } else {
                     output.append(headLineMatcher.group(1));
                 }
             }
@@ -98,11 +101,25 @@ public final class Utils {
         return output.toString();
     }
 
-    public static <T> Optional<T> getBeanIfPermissionGranted(@NonNull ApplicationContext applicationContext, @NonNull App app, @NonNull Class<T> clazz){
+    public static <T> Optional<T> getBeanIfPermissionGranted(@NonNull ApplicationContext applicationContext, @NonNull App app, @NonNull Class<T> clazz) {
         RequiresAppPermission annotation = clazz.getAnnotation(RequiresAppPermission.class);
         if (annotation == null || SecurityUtils.hasPermission(app, annotation.value())) {
             return Optional.of(applicationContext.getBean(clazz));
         }
         return Optional.empty();
+    }
+
+    public static <T> List<MyTabSheet.Tab<T>> getTabs(@NonNull ApplicationContext applicationContext, @NonNull App app, @NonNull Class<T> clazz) {
+        //noinspection unchecked
+        return applicationContext.getBeansOfType(MyTabSheet.Tab.class)
+                .values()
+                .stream()
+                .filter(tab -> clazz.equals(GenericTypeResolver.resolveTypeArgument(t)))
+                .filter(tab -> {
+                    RequiresAppPermission annotation = tab.getClass().getAnnotation(RequiresAppPermission.class);
+                    return annotation == null || SecurityUtils.hasPermission(app, annotation.value());
+                })
+                .map(tab -> (MyTabSheet.Tab<T>) tab)
+                .collect(Collectors.toList());
     }
 }

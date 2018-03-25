@@ -4,10 +4,13 @@ import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.sql.model.User;
 import com.faendir.acra.sql.user.UserManager;
 import com.faendir.acra.ui.BackendUI;
-import com.faendir.acra.ui.view.base.NamedView;
+import com.faendir.acra.ui.view.base.BaseView;
+import com.faendir.acra.ui.view.base.SingleViewProvider;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.UserError;
-import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.spring.annotation.SpringComponent;
+import com.vaadin.spring.annotation.UIScope;
+import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Notification;
@@ -21,8 +24,9 @@ import org.springframework.lang.Nullable;
  * @author Lukas
  * @since 21.05.2017
  */
-@SpringView(name = "password-editor")
-public class ChangePasswordView extends NamedView {
+@SpringComponent
+@ViewScope
+public class ChangePasswordView extends BaseView {
     @NonNull private final UserManager userManager;
     @NonNull private final BackendUI backendUI;
 
@@ -65,8 +69,21 @@ public class ChangePasswordView extends NamedView {
         return true;
     }
 
-    @Override
-    public String getTitle() {
-        return "Change Password";
+    @SpringComponent
+    @UIScope
+    public static class Provider extends SingleViewProvider<ChangePasswordView> {
+        protected Provider() {
+            super(ChangePasswordView.class);
+        }
+
+        @Override
+        public String getTitle(String parameter) {
+            return "Change Password";
+        }
+
+        @Override
+        public String getId() {
+            return "password-editor";
+        }
     }
 }

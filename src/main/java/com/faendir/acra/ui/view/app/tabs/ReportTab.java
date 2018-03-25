@@ -40,4 +40,9 @@ public class ReportTab implements MyTabSheet.Tab<App> {
     public String getCaption() {
         return ReportList.CAPTION;
     }
+
+    @Override
+    public int getOrder() {
+        return 1;
+    }
 }
