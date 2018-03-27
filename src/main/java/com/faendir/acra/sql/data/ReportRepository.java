@@ -7,8 +7,10 @@ import com.faendir.acra.sql.util.CountResult;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -19,6 +21,8 @@ import java.util.Optional;
  * @since 11.12.2017
  */
 public interface ReportRepository extends JpaRepository<Report, String> {
+    @Transactional
+    @Modifying
     void deleteAllByBugAppAndDateBefore(@NonNull App app, @NonNull Date date);
 
     Slice<Report> findAllByBugApp(@NonNull App app, @NonNull Pageable pageable);
