@@ -4,15 +4,16 @@ import com.faendir.acra.sql.data.AppRepository;
 import com.faendir.acra.sql.model.App;
 import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
+import com.faendir.acra.ui.navigation.MyNavigator;
+import com.faendir.acra.ui.navigation.SingleParametrizedViewProvider;
 import com.faendir.acra.ui.view.app.tabs.AppTab;
 import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.ui.view.base.ParametrizedBaseView;
-import com.faendir.acra.ui.navigation.MyNavigator;
-import com.faendir.acra.ui.navigation.SingleParametrizedViewProvider;
 import com.faendir.acra.util.Style;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.Panel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.util.Pair;
@@ -40,11 +41,13 @@ public class AppView extends ParametrizedBaseView<Pair<App, String>> {
     protected void enter(@NonNull Pair<App, String> parameter) {
         MyTabSheet<App> tabSheet = new MyTabSheet<>(parameter.getFirst(), getNavigationManager(), tabs);
         tabSheet.setSizeFull();
-        Style.apply(tabSheet, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
         tabSheet.addSelectedTabChangeListener(e -> getNavigationManager().updatePageParameters(parameter.getFirst().getId() + "/" + e.getTabSheet().getSelectedTab().getCaption()));
         if (tabSheet.getCaptions().contains(parameter.getSecond())) tabSheet.setInitialTab(parameter.getSecond());
         else tabSheet.setFirstTabAsInitialTab();
-        setCompositionRoot(tabSheet);
+        Panel panel = new Panel(tabSheet);
+        panel.setSizeFull();
+        Style.apply(panel, Style.NO_BORDER, Style.NO_BACKGROUND, Style.NO_PADDING, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
+        setCompositionRoot(panel);
     }
 
     @SpringComponent
