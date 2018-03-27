@@ -1,8 +1,9 @@
-package com.faendir.acra.ui.view.base;
+package com.faendir.acra.ui.navigation;
 
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.sql.model.App;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
+import com.faendir.acra.ui.view.base.ParametrizedBaseView;
 
 /**
  * @author Lukas
@@ -24,7 +25,11 @@ public abstract class SingleParametrizedViewProvider<T, V extends ParametrizedBa
     public V getView(String viewName) {
         V view = super.getView(viewName);
         if (view != null) {
-            view.setParameterParser(this::parseParameter);
+            view.setParameterParser(e -> {
+                String parameters = getParameters(
+                        e.getViewName().substring(e.getViewName().indexOf(getId())) + (e.getParameters().isEmpty() ? "" : MyNavigator.SEPARATOR_CHAR + e.getParameters()));
+                return parameters != null ? parseParameter(parameters) : null;
+            });
         }
         return view;
     }

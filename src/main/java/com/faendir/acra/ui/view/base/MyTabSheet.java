@@ -1,6 +1,6 @@
 package com.faendir.acra.ui.view.base;
 
-import com.faendir.acra.ui.NavigationManager;
+import com.faendir.acra.ui.navigation.NavigationManager;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.TabSheet;
@@ -28,7 +28,7 @@ public class MyTabSheet<T> extends TabSheet {
         this(t, navigationManager, Arrays.asList(tabs));
     }
 
-    public MyTabSheet(@NonNull T t, @NonNull NavigationManager navigationManager, Collection<Tab<T>> tabs) {
+    public MyTabSheet(@NonNull T t, @NonNull NavigationManager navigationManager, Collection<? extends Tab<T>> tabs) {
         this.t = t;
         this.navigationManager = navigationManager;
         for (Tab<T> tab : tabs) {
@@ -53,6 +53,14 @@ public class MyTabSheet<T> extends TabSheet {
             }
             setSelectedTab(component);
         });
+    }
+
+    public void setFirstTabAsInitialTab() {
+        Component component = getTab(0).getComponent();
+        if (getSelectedTab() == component && component instanceof SelectedTabChangeListener) {
+            ((SelectedTabChangeListener) component).selectedTabChange(new SelectedTabChangeEvent(this, true));
+        }
+        setSelectedTab(component);
     }
 
     public interface Tab<T> extends Ordered {

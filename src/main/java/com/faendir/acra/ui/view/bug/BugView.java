@@ -7,10 +7,10 @@ import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.ui.view.base.ParametrizedBaseView;
-import com.faendir.acra.ui.view.base.SingleParametrizedViewProvider;
-import com.faendir.acra.util.MyNavigator;
+import com.faendir.acra.ui.view.bug.tabs.BugTab;
+import com.faendir.acra.ui.navigation.MyNavigator;
+import com.faendir.acra.ui.navigation.SingleParametrizedViewProvider;
 import com.faendir.acra.util.Style;
-import com.faendir.acra.util.Utils;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
@@ -23,9 +23,11 @@ import com.vaadin.ui.VerticalLayout;
 import org.ocpsoft.prettytime.PrettyTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -36,11 +38,11 @@ import java.util.Optional;
 @ViewScope
 @RequiresAppPermission(Permission.Level.VIEW)
 public class BugView extends ParametrizedBaseView<Pair<Bug, String>> {
-    @NonNull private final ApplicationContext applicationContext;
+    private final List<BugTab> tabs;
 
     @Autowired
-    public BugView(@NonNull ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+    public BugView(@Lazy List<BugTab> tabs) {
+        this.tabs = tabs;
     }
 
     @Override
@@ -54,9 +56,11 @@ public class BugView extends ParametrizedBaseView<Pair<Bug, String>> {
         summaryGrid.setSizeFull();
         Panel summary = new Panel(summaryGrid);
         summary.setCaption("Summary");
-        MyTabSheet<Bug> tabSheet = new MyTabSheet<>(bug, getNavigationManager(), Utils.getTabs(applicationContext, bug.getApp(), Bug.class));
+        MyTabSheet<Bug> tabSheet = new MyTabSheet<>(bug, getNavigationManager(), tabs);
         tabSheet.setSizeFull();
         tabSheet.addSelectedTabChangeListener(e -> getNavigationManager().updatePageParameters(bug.getId() + "/" + e.getTabSheet().getSelectedTab().getCaption()));
+        if (tabSheet.getCaptions().contains(parameter.getSecond())) tabSheet.setInitialTab(parameter.getSecond());
+        else tabSheet.setFirstTabAsInitialTab();
         VerticalLayout layout = new VerticalLayout(summary, tabSheet);
         layout.setSizeFull();
         layout.setExpandRatio(tabSheet, 1);
@@ -90,7 +94,7 @@ public class BugView extends ParametrizedBaseView<Pair<Bug, String>> {
 
         @Override
         protected boolean isValidParameter(Pair<Bug, String> parameter) {
-            return parameter != null && Utils.getTabs(applicationContext, parameter.getFirst().getApp(), Bug.class).stream().map(MyTabSheet.Tab::getCaption).anyMatch(parameter.getSecond()::equals);
+            return parameter != null;
         }
 
         @Override
@@ -98,10 +102,9 @@ public class BugView extends ParametrizedBaseView<Pair<Bug, String>> {
             try {
                 String[] parameters = parameter.split(MyNavigator.SEPARATOR);
                 if (parameters.length > 0) {
-                    Optional<Bug> bugOptional = bugRepository.findByIdEager(Integer.parseInt(parameters[0]));
-                    if (bugOptional.isPresent()) {
-                        Bug bug = bugOptional.get();
-                        return Pair.of(bug, parameters.length == 1 ? Utils.getTabs(applicationContext, bug.getApp(), Bug.class).get(0).getCaption() : parameters[1]);
+                    Optional<Bug> bug = bugRepository.findByIdEager(Integer.parseInt(parameters[0]));
+                    if (bug.isPresent()) {
+                        return Pair.of(bug.get(), parameters.length == 1 ? "" : parameters[1]);
                     }
                 }
             } catch (IllegalArgumentException ignored) {

@@ -3,8 +3,7 @@ package com.faendir.acra.ui.view.bug.tabs;
 import com.faendir.acra.sql.data.ProguardMappingRepository;
 import com.faendir.acra.sql.model.Bug;
 import com.faendir.acra.sql.model.ProguardMapping;
-import com.faendir.acra.ui.NavigationManager;
-import com.faendir.acra.ui.view.base.MyTabSheet;
+import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.util.Utils;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -23,7 +22,7 @@ import java.util.Optional;
  */
 @SpringComponent
 @ViewScope
-public class StackTraceTab implements MyTabSheet.Tab<Bug>{
+public class StackTraceTab implements BugTab {
     @NonNull private final ProguardMappingRepository mappingRepository;
 
     @Autowired
@@ -35,8 +34,8 @@ public class StackTraceTab implements MyTabSheet.Tab<Bug>{
     public Component createContent(@NonNull Bug bug, @NonNull NavigationManager navigationManager) {
         Optional<ProguardMapping> mapping = mappingRepository.findById(bug.getApp(), bug.getVersionCode());
         Accordion accordion = new Accordion();
-        for (String stacktrace : bug.getStacktraces()){
-            if(mapping.isPresent()){
+        for (String stacktrace : bug.getStacktraces()) {
+            if (mapping.isPresent()) {
                 stacktrace = Utils.retrace(stacktrace, mapping.get().getMappings());
             }
             accordion.addTab(new Label(stacktrace, ContentMode.PREFORMATTED)).setCaption(stacktrace.split("\n", 2)[0]);

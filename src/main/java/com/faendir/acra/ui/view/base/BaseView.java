@@ -1,6 +1,6 @@
 package com.faendir.acra.ui.view.base;
 
-import com.faendir.acra.ui.NavigationManager;
+import com.faendir.acra.ui.navigation.NavigationManager;
 import com.vaadin.navigator.View;
 import com.vaadin.ui.Composite;
 import org.springframework.beans.factory.annotation.Autowired;

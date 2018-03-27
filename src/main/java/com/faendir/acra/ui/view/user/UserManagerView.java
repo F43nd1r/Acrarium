@@ -13,7 +13,7 @@ import com.faendir.acra.ui.view.base.BaseView;
 import com.faendir.acra.ui.view.base.MyCheckBox;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.Popup;
-import com.faendir.acra.ui.view.base.SingleViewProvider;
+import com.faendir.acra.ui.navigation.SingleViewProvider;
 import com.faendir.acra.ui.view.base.ValidatedField;
 import com.faendir.acra.util.Style;
 import com.vaadin.navigator.ViewChangeListener;

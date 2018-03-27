@@ -5,7 +5,7 @@ import com.faendir.acra.sql.model.User;
 import com.faendir.acra.sql.user.UserManager;
 import com.faendir.acra.ui.BackendUI;
 import com.faendir.acra.ui.view.base.BaseView;
-import com.faendir.acra.ui.view.base.SingleViewProvider;
+import com.faendir.acra.ui.navigation.SingleViewProvider;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.UserError;
 import com.vaadin.spring.annotation.SpringComponent;

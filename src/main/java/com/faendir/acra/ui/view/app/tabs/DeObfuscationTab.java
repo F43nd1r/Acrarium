@@ -6,10 +6,9 @@ import com.faendir.acra.sql.data.ProguardMappingRepository;
 import com.faendir.acra.sql.model.App;
 import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.sql.model.ProguardMapping;
-import com.faendir.acra.ui.NavigationManager;
+import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.InMemoryUpload;
 import com.faendir.acra.ui.view.base.MyGrid;
-import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.ui.view.base.Popup;
 import com.faendir.acra.ui.view.base.ValidatedField;
 import com.faendir.acra.util.Style;
@@ -30,7 +29,7 @@ import org.vaadin.risto.stepper.IntStepper;
  */
 @SpringComponent
 @ViewScope
-public class DeObfuscationTab implements MyTabSheet.Tab<App> {
+public class DeObfuscationTab implements AppTab {
     public static final String CAPTION = "De-Obfuscation";
     @NonNull private final ProguardMappingRepository mappingRepository;
     @NonNull private final BufferedDataProvider.Factory factory;

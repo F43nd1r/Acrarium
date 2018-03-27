@@ -12,7 +12,7 @@ import com.faendir.acra.sql.model.ProguardMapping;
 import com.faendir.acra.sql.model.Report;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.view.base.ParametrizedBaseView;
-import com.faendir.acra.ui.view.base.SingleParametrizedViewProvider;
+import com.faendir.acra.ui.navigation.SingleParametrizedViewProvider;
 import com.faendir.acra.util.Style;
 import com.faendir.acra.util.Utils;
 import com.vaadin.server.FileDownloader;

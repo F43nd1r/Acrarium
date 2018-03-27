@@ -2,8 +2,7 @@ package com.faendir.acra.ui.view.app.tabs;
 
 import com.faendir.acra.sql.data.ReportRepository;
 import com.faendir.acra.sql.model.App;
-import com.faendir.acra.ui.NavigationManager;
-import com.faendir.acra.ui.view.base.MyTabSheet;
+import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.util.Style;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -43,7 +42,7 @@ import java.util.List;
  */
 @SpringComponent
 @ViewScope
-public class StatisticsTab implements MyTabSheet.Tab<App> {
+public class StatisticsTab implements AppTab {
     public static final String CAPTION = "Statistics";
     private static final Color BACKGROUND_GRAY = new Color(0xfafafa); //vaadin gray
     private static final Color BLUE = new Color(0x197de1); //vaadin blue

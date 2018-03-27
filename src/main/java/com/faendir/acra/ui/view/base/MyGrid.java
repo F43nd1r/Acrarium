@@ -2,7 +2,7 @@ package com.faendir.acra.ui.view.base;
 
 import com.faendir.acra.client.mygrid.MiddleClickGridExtensionConnector;
 import com.faendir.acra.dataprovider.ObservableDataProvider;
-import com.faendir.acra.ui.NavigationManager;
+import com.faendir.acra.ui.navigation.NavigationManager;
 import com.vaadin.data.ValueProvider;
 import com.vaadin.shared.MouseEventDetails;
 import com.vaadin.ui.Grid;

@@ -3,8 +3,7 @@ package com.faendir.acra.ui.view.bug.tabs;
 import com.faendir.acra.dataprovider.BufferedDataProvider;
 import com.faendir.acra.sql.data.ReportRepository;
 import com.faendir.acra.sql.model.Bug;
-import com.faendir.acra.ui.NavigationManager;
-import com.faendir.acra.ui.view.base.MyTabSheet;
+import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.ReportList;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -18,7 +17,7 @@ import org.springframework.lang.NonNull;
  */
 @SpringComponent("bugReportTab")
 @ViewScope
-public class ReportTab implements MyTabSheet.Tab<Bug> {
+public class ReportTab implements BugTab {
     @NonNull private final ReportRepository reportRepository;
     @NonNull private final BufferedDataProvider.Factory factory;
 

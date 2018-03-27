@@ -4,19 +4,21 @@ import com.faendir.acra.sql.data.AppRepository;
 import com.faendir.acra.sql.model.App;
 import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
+import com.faendir.acra.ui.view.app.tabs.AppTab;
 import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.ui.view.base.ParametrizedBaseView;
-import com.faendir.acra.ui.view.base.SingleParametrizedViewProvider;
-import com.faendir.acra.util.MyNavigator;
-import com.faendir.acra.util.Utils;
+import com.faendir.acra.ui.navigation.MyNavigator;
+import com.faendir.acra.ui.navigation.SingleParametrizedViewProvider;
+import com.faendir.acra.util.Style;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.annotation.ViewScope;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -27,19 +29,21 @@ import java.util.Optional;
 @ViewScope
 @RequiresAppPermission(Permission.Level.VIEW)
 public class AppView extends ParametrizedBaseView<Pair<App, String>> {
-    @NonNull private final ApplicationContext applicationContext;
+    private final List<AppTab> tabs;
 
     @Autowired
-    public AppView(@NonNull ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+    public AppView(@Lazy List<AppTab> tabs) {
+        this.tabs = tabs;
     }
 
     @Override
     protected void enter(@NonNull Pair<App, String> parameter) {
-        MyTabSheet<App> tabSheet = new MyTabSheet<>(parameter.getFirst(), getNavigationManager(), Utils.getTabs(applicationContext, parameter.getFirst(), App.class));
+        MyTabSheet<App> tabSheet = new MyTabSheet<>(parameter.getFirst(), getNavigationManager(), tabs);
         tabSheet.setSizeFull();
+        Style.apply(tabSheet, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
         tabSheet.addSelectedTabChangeListener(e -> getNavigationManager().updatePageParameters(parameter.getFirst().getId() + "/" + e.getTabSheet().getSelectedTab().getCaption()));
         if (tabSheet.getCaptions().contains(parameter.getSecond())) tabSheet.setInitialTab(parameter.getSecond());
+        else tabSheet.setFirstTabAsInitialTab();
         setCompositionRoot(tabSheet);
     }
 

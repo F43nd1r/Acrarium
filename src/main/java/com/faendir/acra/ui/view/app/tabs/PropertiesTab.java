@@ -9,10 +9,9 @@ import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.sql.model.Report;
 import com.faendir.acra.sql.model.User;
 import com.faendir.acra.sql.user.UserManager;
-import com.faendir.acra.ui.NavigationManager;
+import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.view.base.ConfigurationLabel;
-import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.ui.view.base.Popup;
 import com.faendir.acra.ui.view.base.ValidatedField;
 import com.faendir.acra.util.Utils;
@@ -45,7 +44,7 @@ import java.util.stream.Collectors;
 @RequiresAppPermission(Permission.Level.ADMIN)
 @SpringComponent
 @ViewScope
-public class PropertiesTab implements MyTabSheet.Tab<App> {
+public class PropertiesTab implements AppTab {
     public static final String CAPTION = "Properties";
     @NonNull private final AppRepository appRepository;
     @NonNull private final BugRepository bugRepository;

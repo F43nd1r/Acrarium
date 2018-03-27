@@ -9,10 +9,9 @@ import com.faendir.acra.sql.model.Bug;
 import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.sql.model.Report;
 import com.faendir.acra.sql.util.CountResult;
-import com.faendir.acra.ui.NavigationManager;
+import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.MyCheckBox;
 import com.faendir.acra.ui.view.base.MyGrid;
-import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.ui.view.base.Popup;
 import com.faendir.acra.ui.view.bug.BugView;
 import com.faendir.acra.util.Style;
@@ -48,7 +47,7 @@ import java.util.stream.Collectors;
  */
 @SpringComponent
 @ViewScope
-public class BugTab implements MyTabSheet.Tab<App> {
+public class BugTab implements AppTab {
     public static final String CAPTION = "Bugs";
     @NonNull private final BugRepository bugRepository;
     @NonNull private final ReportRepository reportRepository;

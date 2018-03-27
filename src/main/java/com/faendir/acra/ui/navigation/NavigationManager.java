@@ -1,12 +1,9 @@
-package com.faendir.acra.ui;
+package com.faendir.acra.ui.navigation;
 
 import com.faendir.acra.ui.view.ErrorView;
 import com.faendir.acra.ui.view.base.BaseView;
 import com.faendir.acra.ui.view.base.Path;
-import com.faendir.acra.ui.view.base.SingleViewProvider;
-import com.faendir.acra.util.MyNavigator;
 import com.faendir.acra.util.Utils;
-import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
@@ -17,7 +14,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,23 +28,20 @@ import java.util.stream.Stream;
 public class NavigationManager implements Serializable {
     @NonNull private final Path path;
     @NonNull private final MyNavigator navigator;
-    @NonNull private final List<SingleViewProvider<?>> providers;
 
     @Autowired
-    public NavigationManager(@NonNull UI ui, @NonNull Panel mainView, @NonNull Path mainPath, @NonNull MyNavigator navigator, @NonNull List<SingleViewProvider<?>> providers) {
+    public NavigationManager(@NonNull UI ui, @NonNull Panel mainView, @NonNull Path mainPath, @NonNull MyNavigator navigator) {
         this.path = mainPath;
         this.navigator = navigator;
-        this.providers = providers;
         this.navigator.init(ui, mainView);
-        providers.forEach(navigator::addProvider);
+        this.navigator.addViewActivationListener(e -> path.set(navigator.getHierarchy()));
         navigator.setErrorView(ErrorView.class);
         String target = Optional.ofNullable(ui.getPage().getLocation().getFragment()).orElse("").replace("!", "");
         ui.access(() -> navigateTo(target));
     }
 
     public void navigateTo(@NonNull Class<? extends BaseView> namedView, @Nullable String parameters, boolean newTab) {
-        String target = Stream.of(path.isEmpty() ? null : path.getLast().getId(),
-                providers.stream().filter(p -> namedView.equals(p.getClazz())).findAny().map(SingleViewProvider::getId).orElse(""), parameters)
+        String target = Stream.of(path.asUrlFragment(), navigator.getViewProvider(namedView).map(SingleViewProvider::getId).orElse(""), parameters)
                 .filter(s -> s != null && !s.isEmpty())
                 .collect(Collectors.joining(MyNavigator.SEPARATOR));
         if (newTab) {
@@ -79,14 +72,16 @@ public class NavigationManager implements Serializable {
             }
         } else {
             path.goUp();
-            navigateTo(path.getLast().getId());
+            navigateTo(path.asUrlFragment());
         }
     }
 
     public void updatePageParameters(@Nullable String parameters) {
-        String target = navigator.getCurrentView().getClass().getAnnotation(SpringView.class).name() + (parameters == null ? "" : MyNavigator.SEPARATOR_CHAR + parameters);
+        String currentView = navigator.getViewProvider(navigator.getCurrentView().getClass()).map(SingleViewProvider::getId).orElse("");
         Path.Element element = path.goUp();
-        path.goTo(element.getLabel(), target, this::navigateTo);
+        String hierarchy = path.asUrlFragment();
+        String target = "!" + (hierarchy.isEmpty() ? "" : hierarchy + MyNavigator.SEPARATOR_CHAR) + currentView + (parameters == null ? "" : MyNavigator.SEPARATOR_CHAR + parameters);
+        path.goTo(element.getLabel(), currentView + (parameters == null ? "" : MyNavigator.SEPARATOR_CHAR + parameters));
         navigator.getUI().getPage().setUriFragment(target, false);
     }
 }

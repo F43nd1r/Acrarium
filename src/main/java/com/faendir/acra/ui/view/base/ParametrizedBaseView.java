@@ -10,16 +10,16 @@ import java.util.function.Function;
  * @since 12.12.2017
  */
 public abstract class ParametrizedBaseView<T> extends BaseView {
-    private Function<String, T> parameterParser;
+    private Function<ViewChangeListener.ViewChangeEvent, T> parameterParser;
 
     @Override
     public final void enter(ViewChangeListener.ViewChangeEvent event) {
-        enter(parameterParser.apply(event.getParameters()));
+        enter(parameterParser.apply(event));
     }
 
     protected abstract void enter(@NonNull T parameter);
 
-    public void setParameterParser(Function<String, T> parameterParser) {
+    public void setParameterParser(Function<ViewChangeListener.ViewChangeEvent, T> parameterParser) {
         this.parameterParser = parameterParser;
     }
 }
