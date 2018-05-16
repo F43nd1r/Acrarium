@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * @author Lukas
@@ -28,7 +29,7 @@ public interface ReportRepository extends JpaRepository<Report, String> {
     Slice<Report> findAllByBugApp(@NonNull App app, @NonNull Pageable pageable);
 
     @Query("select report from Report report join fetch report.bug bug join fetch bug.app app where app = ?1")
-    List<Report> findAllByAppEager(@NonNull App app);
+    Stream<Report> findAllByAppEager(@NonNull App app);
 
     @Query("select report from Report report join fetch report.bug bug join fetch bug.app app where report.id = ?1")
     Optional<Report> findByIdEager(@NonNull String id);
