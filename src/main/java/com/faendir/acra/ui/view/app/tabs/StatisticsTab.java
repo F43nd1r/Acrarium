@@ -1,7 +1,7 @@
 package com.faendir.acra.ui.view.app.tabs;
 
 import com.faendir.acra.sql.data.ReportRepository;
-import com.faendir.acra.sql.model.App;
+import com.faendir.acra.model.App;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.util.Style;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -43,7 +43,6 @@ import java.util.List;
 @SpringComponent
 @ViewScope
 public class StatisticsTab implements AppTab {
-    public static final String CAPTION = "Statistics";
     private static final Color BACKGROUND_GRAY = new Color(0xfafafa); //vaadin gray
     private static final Color BLUE = new Color(0x197de1); //vaadin blue
     @NonNull private final ReportRepository reportRepository;
@@ -79,7 +78,7 @@ public class StatisticsTab implements AppTab {
 
     @Override
     public String getCaption() {
-        return CAPTION;
+        return "Statistics";
     }
 
     private void createTimeChart(int age, @NonNull App app, @NonNull Panel panel) {
@@ -108,7 +107,7 @@ public class StatisticsTab implements AppTab {
 
     private void createVersionChart(@NonNull App app, @NonNull Panel panel) {
         DefaultPieDataset dataset = new DefaultPieDataset();
-        reportRepository.countAllByAndroidVersion(app).forEach(pair -> dataset.insertValue(0, pair.getGroup(), pair.getCount()));
+        reportRepository.countByAndroidVersion(app).forEach(pair -> dataset.insertValue(0, pair.getGroup(), pair.getCount()));
         dataset.sortByKeys(SortOrder.ASCENDING);
         JFreeChart chart = ChartFactory.createPieChart("Reports per Android Version", dataset, false, false, false);
         PiePlot plot = (PiePlot) chart.getPlot();

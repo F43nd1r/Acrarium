@@ -71,9 +71,9 @@ public class MyGrid<T> extends Grid<T> {
     public static class MiddleClickExtension<T> extends AbstractGridExtension<T> {
         private MiddleClickExtension(MyGrid<T> grid) {
             super.extend(grid);
-            registerRpc((rowKey, columnInternalId, details) -> grid.fireEvent(
+            registerRpc((rowIndex, rowKey, columnInternalId, details) -> grid.fireEvent(
                     new ItemClick<>(grid, grid.getColumnByInternalId(columnInternalId), grid.getDataCommunicator().getKeyMapper().get(rowKey),
-                            details)), MiddleClickGridExtensionConnector.Rpc.class);
+                            details, rowIndex)), MiddleClickGridExtensionConnector.Rpc.class);
         }
 
         public static void extend(MyGrid<?> grid) {

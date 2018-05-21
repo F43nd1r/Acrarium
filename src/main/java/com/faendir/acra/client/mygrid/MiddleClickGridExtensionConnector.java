@@ -26,7 +26,7 @@ public class MiddleClickGridExtensionConnector extends AbstractExtensionConnecto
             if (event.getNativeButton() == NativeEvent.BUTTON_MIDDLE) {
                 event.preventDefault();
                 CellReference<JsonObject> cell = getParent().getWidget().getEventCell();
-                getRpcProxy(Rpc.class).middleClick(cell.getRow().getString(DataCommunicatorConstants.KEY), getParent().getColumnId(cell.getColumn()),
+                getRpcProxy(Rpc.class).middleClick(cell.getRowIndex(), cell.getRow().getString(DataCommunicatorConstants.KEY), getParent().getColumnId(cell.getColumn()),
                         MouseEventDetailsBuilder.buildMouseEventDetails(event.getNativeEvent(), event.getRelativeElement()));
             }
         }, MouseDownEvent.getType());
@@ -38,6 +38,6 @@ public class MiddleClickGridExtensionConnector extends AbstractExtensionConnecto
     }
 
     public interface Rpc extends ServerRpc {
-        void middleClick(String rowKey, String columnInternalId, MouseEventDetails details);
+        void middleClick(int rowIndex, String rowKey, String columnInternalId, MouseEventDetails details);
     }
 }

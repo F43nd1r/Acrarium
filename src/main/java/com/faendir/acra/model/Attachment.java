@@ -1,4 +1,4 @@
-package com.faendir.acra.sql.model;
+package com.faendir.acra.model;
 
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.lang.NonNull;

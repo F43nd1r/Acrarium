@@ -1,7 +1,8 @@
 package com.faendir.acra.security;
 
-import com.faendir.acra.sql.model.User;
-import com.faendir.acra.sql.user.UserManager;
+import com.faendir.acra.model.User;
+import com.faendir.acra.service.user.UserService;
+import org.apache.commons.text.RandomStringGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,12 +20,15 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.security.SecureRandom;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Lukas
@@ -38,11 +42,37 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         SecurityContextHolder.setStrategyName(VaadinSessionSecurityContextHolderStrategy.class.getName());
     }
 
-    @NonNull private final UserManager userManager;
+    @NonNull private final UserService userService;
 
     @Autowired
-    public SecurityConfiguration(@NonNull UserManager userManager) {
-        this.userManager = userManager;
+    public SecurityConfiguration(@NonNull UserService userService) {
+        this.userService = userService;
+    }
+
+    @NonNull
+    @Bean
+    public static SecureRandom secureRandom() {
+        return new SecureRandom();
+    }
+
+    @NonNull
+    @Bean
+    public static PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @NonNull
+    @Bean
+    public static RandomStringGenerator randomStringGenerator(@NonNull SecureRandom secureRandom) {
+        return new RandomStringGenerator.Builder().usingRandom(secureRandom::nextInt).withinRange('0', 'z').filteredBy(Character::isLetterOrDigit).build();
+    }
+
+    @NonNull
+    @Bean
+    public static GrantedAuthoritiesMapper grantedAuthoritiesMapper() {
+        return authorities -> Stream.of(User.Role.values())
+                .filter(role -> authorities.stream().anyMatch(auth -> auth.getAuthority().equals(role.getAuthority())))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -52,11 +82,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             @Override
             public Authentication authenticate(Authentication authentication) throws AuthenticationException {
                 if (authentication instanceof UsernamePasswordAuthenticationToken) {
-                    User user = userManager.getUser(authentication.getName());
+                    User user = userService.getUser(authentication.getName());
                     if (user == null) {
                         throw new UsernameNotFoundException("Username " + authentication.getName() + " not found");
                     }
-                    if (userManager.checkPassword(user, (String) authentication.getCredentials())) {
+                    if (userService.checkPassword(user, (String) authentication.getCredentials())) {
                         return new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), user.getAuthorities());
                     }
                     throw new BadCredentialsException("Password mismatch for user " + user.getUsername());
@@ -81,17 +111,5 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return authenticationManager();
-    }
-
-    @NonNull
-    @Bean
-    public static SecureRandom secureRandom() {
-        return new SecureRandom();
-    }
-
-    @NonNull
-    @Bean
-    public static PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

@@ -1,4 +1,4 @@
-package com.faendir.acra.service.multipart;
+package com.faendir.acra.rest.multipart;
 
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUpload;

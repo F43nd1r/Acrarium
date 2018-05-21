@@ -1,6 +1,6 @@
 package com.faendir.acra.util;
 
-import com.faendir.acra.sql.model.App;
+import com.faendir.acra.model.App;
 import com.vaadin.ui.UI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

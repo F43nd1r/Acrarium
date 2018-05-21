@@ -2,7 +2,7 @@ package com.faendir.acra.ui.view.bug.tabs;
 
 import com.faendir.acra.dataprovider.BufferedDataProvider;
 import com.faendir.acra.sql.data.ReportRepository;
-import com.faendir.acra.sql.model.Bug;
+import com.faendir.acra.model.Bug;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.ReportList;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -30,7 +30,7 @@ public class ReportTab implements BugTab {
     @Override
     public Component createContent(@NonNull Bug bug, @NonNull NavigationManager navigationManager) {
         Component content = new ReportList(bug.getApp(), navigationManager, reportRepository::delete,
-                factory.create(bug, reportRepository::findAllByBug, reportRepository::countAllByBug));
+                factory.create(bug, reportRepository::findAllByBug, reportRepository::countByBug));
         content.setSizeFull();
         return content;
     }

@@ -1,11 +1,10 @@
 package com.faendir.acra.ui.view.app.tabs;
 
-import com.faendir.acra.dataprovider.BufferedDataProvider;
+import com.faendir.acra.model.App;
+import com.faendir.acra.model.Permission;
+import com.faendir.acra.model.ProguardMapping;
 import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.sql.data.ProguardMappingRepository;
-import com.faendir.acra.sql.model.App;
-import com.faendir.acra.sql.model.Permission;
-import com.faendir.acra.sql.model.ProguardMapping;
+import com.faendir.acra.service.data.DataService;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.InMemoryUpload;
 import com.faendir.acra.ui.view.base.MyGrid;
@@ -30,25 +29,22 @@ import org.vaadin.risto.stepper.IntStepper;
 @SpringComponent
 @ViewScope
 public class DeObfuscationTab implements AppTab {
-    public static final String CAPTION = "De-Obfuscation";
-    @NonNull private final ProguardMappingRepository mappingRepository;
-    @NonNull private final BufferedDataProvider.Factory factory;
+    @NonNull private final DataService dataService;
 
-    public DeObfuscationTab(@NonNull ProguardMappingRepository mappingRepository, @NonNull BufferedDataProvider.Factory factory) {
-        this.mappingRepository = mappingRepository;
-        this.factory = factory;
+    public DeObfuscationTab(@NonNull DataService dataService) {
+        this.dataService = dataService;
     }
 
     @Override
     public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
         VerticalLayout layout = new VerticalLayout();
-        MyGrid<ProguardMapping> grid = new MyGrid<>(null, factory.create(app, mappingRepository::findAllByApp, mappingRepository::countAllByApp));
+        MyGrid<ProguardMapping> grid = new MyGrid<>(null, dataService.getMappingProvider(app));
         grid.setSizeToRows();
         grid.addColumn(ProguardMapping::getVersionCode, "Version");
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
             grid.addColumn(report -> "Delete", new ButtonRenderer<>(e -> new Popup().setTitle("Confirm")
                     .addComponent(new Label("Are you sure you want to delete the mapping for version " + e.getItem().getVersionCode() + "?"))
-                    .addYesNoButtons(p -> mappingRepository.delete(e.getItem()), true))).setSortable(false);
+                    .addYesNoButtons(p -> dataService.delete(e.getItem()), true))).setSortable(false);
         }
         layout.addComponent(grid);
         Style.NO_PADDING.apply(layout);
@@ -65,10 +61,9 @@ public class DeObfuscationTab implements AppTab {
                                 .addValidator(InMemoryUpload::isUploaded, "Upload failed"))
                         .addComponent(progressBar)
                         .addCreateButton(popup -> {
-                            mappingRepository.save(new ProguardMapping(app, version.getValue(), upload.getUploadedString()));
+                            dataService.save(new ProguardMapping(app, version.getValue(), upload.getUploadedString()));
                             grid.getDataProvider().refreshAll();
-                            popup.close();
-                        })
+                        }, true)
                         .show();
             }));
         }
@@ -77,7 +72,7 @@ public class DeObfuscationTab implements AppTab {
 
     @Override
     public String getCaption() {
-        return CAPTION;
+        return "De-Obfuscation";
     }
 
     @Override

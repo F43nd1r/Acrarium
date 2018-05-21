@@ -30,7 +30,7 @@ public class BufferedDataProvider<T> extends AbstractBackEndDataProvider<T, Void
     private final IntSupplier counter;
     private final List<SizeListener> sizeListeners;
 
-    private BufferedDataProvider(int pageSize, Function<Pageable, Slice<T>> getter, IntSupplier counter) {
+    public BufferedDataProvider(int pageSize, Function<Pageable, Slice<T>> getter, IntSupplier counter) {
         this.getter = getter;
         this.counter = counter;
         this.pageSize = pageSize;

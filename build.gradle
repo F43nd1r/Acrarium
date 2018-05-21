@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '2.0.0.RELEASE'
+        springBootVersion = '2.0.2.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -12,7 +12,6 @@ buildscript {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
         classpath "com.devsoap.plugin:gradle-vaadin-plugin:1.3.1"
         classpath 'io.spring.gradle:propdeps-plugin:0.0.9.RELEASE'
-        classpath "gradle.plugin.com.github.jk1:gradle-license-report:0.4.1"
     }
 }
 repositories {
@@ -31,7 +30,6 @@ apply plugin: 'idea'
 apply plugin: 'war'
 apply plugin: 'propdeps'
 apply plugin: 'propdeps-idea'
-apply plugin: "com.github.jk1.dependency-license-report"
 
 group 'com.faendir'
 version = '0.3.1-SNAPSHOT'
@@ -39,7 +37,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 vaadin {
-    version '8.3.2'
+    version '8.4.2'
     push true
 }
 
@@ -71,6 +69,7 @@ dependencies {
     compile 'mysql:mysql-connector-java'
     compile 'org.springframework.boot:spring-boot-starter-security'
     compile 'org.springframework:spring-orm'
+    compile 'org.flywaydb:flyway-core'
     optional 'org.springframework.boot:spring-boot-configuration-processor'
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
     //vaadin

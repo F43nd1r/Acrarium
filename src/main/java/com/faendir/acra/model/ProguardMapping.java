@@ -1,4 +1,4 @@
-package com.faendir.acra.sql.model;
+package com.faendir.acra.model;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;

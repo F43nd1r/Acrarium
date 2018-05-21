@@ -2,7 +2,7 @@ package com.faendir.acra.ui.view.app.tabs;
 
 import com.faendir.acra.dataprovider.BufferedDataProvider;
 import com.faendir.acra.sql.data.ReportRepository;
-import com.faendir.acra.sql.model.App;
+import com.faendir.acra.model.App;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.ReportList;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -30,7 +30,7 @@ public class ReportTab implements AppTab {
     @Override
     public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
         Component content = new ReportList(app, navigationManager, reportRepository::delete,
-                factory.create(app, reportRepository::findAllByBugApp, reportRepository::countAllByBugApp));
+                factory.create(app, reportRepository::findAllByBugApp, reportRepository::countByBugApp));
         content.setSizeFull();
         return content;
     }

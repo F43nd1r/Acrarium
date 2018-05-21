@@ -39,7 +39,17 @@ public class Popup extends Window {
 
     @NonNull
     public Popup addCreateButton(@NonNull Consumer<Popup> onCreateAction) {
-        buttons.add(new Button("Create", event -> onCreateAction.accept(this)));
+        return addCreateButton(onCreateAction, false);
+    }
+
+    @NonNull
+    public Popup addCreateButton(@NonNull Consumer<Popup> onCreateAction, boolean closeAfter) {
+        buttons.add(new Button("Create", event -> {
+            onCreateAction.accept(this);
+            if (closeAfter) {
+                close();
+            }
+        }));
         return this;
     }
 
@@ -58,7 +68,7 @@ public class Popup extends Window {
     public Popup addYesNoButtons(@NonNull Consumer<Popup> onYesAction, boolean closeAfter) {
         buttons.add(new Button("Yes", event -> {
             onYesAction.accept(this);
-            if(closeAfter){
+            if (closeAfter) {
                 close();
             }
         }));

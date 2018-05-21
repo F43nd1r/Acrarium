@@ -1,5 +1,6 @@
 package com.faendir.acra.ui.annotation;
 
+import com.faendir.acra.model.User;
 import org.springframework.lang.NonNull;
 
 import java.lang.annotation.ElementType;
@@ -14,5 +15,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface RequiresRole {
-    @NonNull String value();
+    @NonNull User.Role value();
 }

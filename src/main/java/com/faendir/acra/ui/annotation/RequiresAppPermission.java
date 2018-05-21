@@ -1,6 +1,6 @@
 package com.faendir.acra.ui.annotation;
 
-import com.faendir.acra.sql.model.Permission;
+import com.faendir.acra.model.Permission;
 import org.springframework.lang.NonNull;
 
 import java.lang.annotation.ElementType;

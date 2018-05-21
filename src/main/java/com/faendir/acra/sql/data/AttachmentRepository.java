@@ -1,7 +1,7 @@
 package com.faendir.acra.sql.data;
 
-import com.faendir.acra.sql.model.Attachment;
-import com.faendir.acra.sql.model.Report;
+import com.faendir.acra.model.Attachment;
+import com.faendir.acra.model.Report;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.lang.NonNull;
 

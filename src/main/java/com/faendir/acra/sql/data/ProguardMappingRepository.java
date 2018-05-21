@@ -1,7 +1,7 @@
 package com.faendir.acra.sql.data;
 
-import com.faendir.acra.sql.model.App;
-import com.faendir.acra.sql.model.ProguardMapping;
+import com.faendir.acra.model.App;
+import com.faendir.acra.model.ProguardMapping;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -2,9 +2,9 @@ package com.faendir.acra.ui.view.base;
 
 import com.faendir.acra.dataprovider.ObservableDataProvider;
 import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.sql.model.App;
-import com.faendir.acra.sql.model.Permission;
-import com.faendir.acra.sql.model.Report;
+import com.faendir.acra.model.App;
+import com.faendir.acra.model.Permission;
+import com.faendir.acra.model.Report;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.report.ReportView;
 import com.faendir.acra.util.TimeSpanRenderer;

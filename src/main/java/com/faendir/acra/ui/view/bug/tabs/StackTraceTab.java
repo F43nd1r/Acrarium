@@ -1,8 +1,8 @@
 package com.faendir.acra.ui.view.bug.tabs;
 
 import com.faendir.acra.sql.data.ProguardMappingRepository;
-import com.faendir.acra.sql.model.Bug;
-import com.faendir.acra.sql.model.ProguardMapping;
+import com.faendir.acra.model.Bug;
+import com.faendir.acra.model.ProguardMapping;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.util.Utils;
 import com.vaadin.shared.ui.ContentMode;

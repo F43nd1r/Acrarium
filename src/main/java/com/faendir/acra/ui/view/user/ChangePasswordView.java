@@ -1,8 +1,8 @@
 package com.faendir.acra.ui.view.user;
 
 import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.sql.model.User;
-import com.faendir.acra.sql.user.UserManager;
+import com.faendir.acra.model.User;
+import com.faendir.acra.service.user.UserService;
 import com.faendir.acra.ui.BackendUI;
 import com.faendir.acra.ui.view.base.BaseView;
 import com.faendir.acra.ui.navigation.SingleViewProvider;
@@ -27,12 +27,12 @@ import org.springframework.lang.Nullable;
 @SpringComponent
 @ViewScope
 public class ChangePasswordView extends BaseView {
-    @NonNull private final UserManager userManager;
+    @NonNull private final UserService userService;
     @NonNull private final BackendUI backendUI;
 
     @Autowired
-    public ChangePasswordView(@NonNull UserManager userManager, @NonNull BackendUI backendUI) {
-        this.userManager = userManager;
+    public ChangePasswordView(@NonNull UserService userService, @NonNull BackendUI backendUI) {
+        this.userService = userService;
         this.backendUI = backendUI;
     }
 
@@ -42,10 +42,10 @@ public class ChangePasswordView extends BaseView {
         PasswordField newPassword = new PasswordField("New Password");
         PasswordField repeatPassword = new PasswordField("Repeat Password");
         Button confirm = new Button("Confirm", e -> {
-            User user = userManager.getUser(SecurityUtils.getUsername());
+            User user = userService.getUser(SecurityUtils.getUsername());
             assert user != null;
             if (newPassword.getValue().equals(repeatPassword.getValue())) {
-                if (userManager.changePassword(user, oldPassword.getValue(), newPassword.getValue())) {
+                if (userService.changePassword(user, oldPassword.getValue(), newPassword.getValue())) {
                     Notification.show("Successful!");
                     getNavigationManager().navigateBack();
                     backendUI.logout();

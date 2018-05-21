@@ -1,20 +1,22 @@
-package com.faendir.acra.sql.user;
+package com.faendir.acra.service.user;
 
 import com.faendir.acra.config.AcraConfiguration;
-import com.faendir.acra.sql.model.App;
-import com.faendir.acra.sql.model.Permission;
-import com.faendir.acra.sql.model.User;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.faendir.acra.dataprovider.BufferedDataProvider;
+import com.faendir.acra.dataprovider.ObservableDataProvider;
+import com.faendir.acra.model.App;
+import com.faendir.acra.model.Permission;
+import com.faendir.acra.model.User;
+import com.faendir.acra.sql.user.UserRepository;
+import com.faendir.acra.util.PlainTextUser;
 import org.apache.commons.text.RandomStringGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
@@ -23,25 +25,20 @@ import java.util.Optional;
  * @author Lukas
  * @since 20.05.2017
  */
-@Component
-public class UserManager {
-    public static final String ROLE_ADMIN = "ROLE_ADMIN";
-    public static final String ROLE_USER = "ROLE_USER";
-    public static final String ROLE_REPORTER = "ROLE_REPORTER";
+@Service
+public class UserService implements Serializable {
     @NonNull private final UserRepository userRepository;
     @NonNull private final AcraConfiguration acraConfiguration;
     @NonNull private final PasswordEncoder passwordEncoder;
-    @NonNull private final RandomStringGenerator generator;
-    @NonNull private final Log log;
+    @NonNull private final RandomStringGenerator randomStringGenerator;
 
     @Autowired
-    public UserManager(@NonNull UserRepository userRepository, @NonNull PasswordEncoder passwordEncoder, @NonNull AcraConfiguration acraConfiguration,
-            @NonNull SecureRandom secureRandom) {
+    public UserService(@NonNull UserRepository userRepository, @NonNull PasswordEncoder passwordEncoder, @NonNull AcraConfiguration acraConfiguration,
+            @NonNull RandomStringGenerator randomStringGenerator) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.acraConfiguration = acraConfiguration;
-        this.generator = new RandomStringGenerator.Builder().usingRandom(secureRandom::nextInt).withinRange('0', 'z').filteredBy(Character::isLetterOrDigit).build();
-        log = LogFactory.getLog(getClass());
+        this.randomStringGenerator = randomStringGenerator;
     }
 
     @Nullable
@@ -53,20 +50,21 @@ public class UserManager {
         return user.orElse(null);
     }
 
+    @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
     public void createUser(@NonNull String username, @NonNull String password) {
         if (userRepository.existsById(username)) {
             throw new IllegalArgumentException("Username already exists");
         }
-        userRepository.save(new User(username, passwordEncoder.encode(password), Collections.singleton(ROLE_USER)));
+        userRepository.save(new User(username, passwordEncoder.encode(password), Collections.singleton(User.Role.USER)));
     }
 
-    public Pair<User, String> createReporterUser() {
+    public PlainTextUser createReporterUser() {
         String username;
         do {
-            username = generator.generate(16);
+            username = randomStringGenerator.generate(16);
         } while (userRepository.existsById(username));
-        String password = generator.generate(16);
-        return Pair.of(new User(username, passwordEncoder.encode(password), Collections.singleton(ROLE_REPORTER)), password);
+        String password = randomStringGenerator.generate(16);
+        return new PlainTextUser(username, password, passwordEncoder.encode(password), Collections.singleton(User.Role.REPORTER));
     }
 
     public boolean checkPassword(@Nullable User user, @NonNull String password) {
@@ -82,15 +80,17 @@ public class UserManager {
         return false;
     }
 
+    @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
     public void setAdmin(@NonNull User user, boolean admin) {
         if (admin) {
-            user.getRoles().add(ROLE_ADMIN);
+            user.getRoles().add(User.Role.ADMIN);
         } else {
-            user.getRoles().remove(ROLE_ADMIN);
+            user.getRoles().remove(User.Role.ADMIN);
         }
         userRepository.save(user);
     }
 
+    @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
     public void setPermission(@NonNull User user, @NonNull App app, @NonNull Permission.Level level) {
         Optional<Permission> permission = user.getPermissions().stream().filter(p -> p.getApp().equals(app)).findAny();
         if (permission.isPresent()) {
@@ -103,6 +103,12 @@ public class UserManager {
 
     @NonNull
     private User getDefaultUser() {
-        return new User(acraConfiguration.getUser().getName(), passwordEncoder.encode(acraConfiguration.getUser().getPassword()), Arrays.asList(ROLE_USER, ROLE_ADMIN));
+        return new User(acraConfiguration.getUser().getName(), passwordEncoder.encode(acraConfiguration.getUser().getPassword()), Arrays.asList(User.Role.USER, User.Role.ADMIN));
+    }
+
+    public ObservableDataProvider<User, Void> getUserProvider() {
+        return new BufferedDataProvider<>(acraConfiguration.getPaginationSize(),
+                pageable -> userRepository.findAllByRoles(User.Role.USER, pageable),
+                () -> userRepository.countAllByRoles(User.Role.USER));
     }
 }

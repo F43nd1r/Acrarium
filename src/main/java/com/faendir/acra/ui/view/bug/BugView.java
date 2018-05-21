@@ -1,15 +1,16 @@
 package com.faendir.acra.ui.view.bug;
 
+import com.faendir.acra.model.App;
+import com.faendir.acra.model.Bug;
+import com.faendir.acra.model.Permission;
+import com.faendir.acra.service.data.DataService;
 import com.faendir.acra.sql.data.BugRepository;
-import com.faendir.acra.sql.model.App;
-import com.faendir.acra.sql.model.Bug;
-import com.faendir.acra.sql.model.Permission;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
+import com.faendir.acra.ui.navigation.MyNavigator;
+import com.faendir.acra.ui.navigation.SingleParametrizedViewProvider;
 import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.ui.view.base.ParametrizedBaseView;
 import com.faendir.acra.ui.view.bug.tabs.BugTab;
-import com.faendir.acra.ui.navigation.MyNavigator;
-import com.faendir.acra.ui.navigation.SingleParametrizedViewProvider;
 import com.faendir.acra.util.Style;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -39,10 +40,12 @@ import java.util.Optional;
 @RequiresAppPermission(Permission.Level.VIEW)
 public class BugView extends ParametrizedBaseView<Pair<Bug, String>> {
     private final List<BugTab> tabs;
+    @NonNull private final DataService dataService;
 
     @Autowired
-    public BugView(@Lazy List<BugTab> tabs) {
+    public BugView(@NonNull @Lazy List<BugTab> tabs, @NonNull DataService dataService) {
         this.tabs = tabs;
+        this.dataService = dataService;
     }
 
     @Override
@@ -51,7 +54,9 @@ public class BugView extends ParametrizedBaseView<Pair<Bug, String>> {
         GridLayout summaryGrid = new GridLayout(2, 1);
         summaryGrid.addComponents(new Label("Title", ContentMode.PREFORMATTED), new Label(bug.getTitle(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(String.valueOf(bug.getVersionCode()), ContentMode.PREFORMATTED));
-        summaryGrid.addComponents(new Label("Last Report", ContentMode.PREFORMATTED), new Label(new PrettyTime().format(bug.getLastReport()), ContentMode.PREFORMATTED));
+        dataService.getLatestReportDate(bug)
+                .ifPresent(date -> summaryGrid.addComponents(new Label("Last ReXport", ContentMode.PREFORMATTED),
+                        new Label(new PrettyTime().format(date), ContentMode.PREFORMATTED)));
         summaryGrid.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
         summaryGrid.setSizeFull();
         Panel summary = new Panel(summaryGrid);

@@ -1,13 +1,14 @@
-package com.faendir.acra.sql.model;
+package com.faendir.acra.model;
 
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import java.util.Collection;
@@ -23,7 +24,8 @@ import java.util.stream.Stream;
 @Entity
 public class User implements UserDetails {
     @Id private String username;
-    @ElementCollection(fetch = FetchType.EAGER) private Set<String> roles;
+    @Enumerated(EnumType.STRING)
+    @ElementCollection(fetch = FetchType.EAGER) private Set<Role> roles;
     @ElementCollection(fetch = FetchType.EAGER) private Set<Permission> permissions;
     private String password;
 
@@ -31,7 +33,7 @@ public class User implements UserDetails {
     User() {
     }
 
-    public User(@NonNull String username, @NonNull String password, @NonNull Collection<String> roles) {
+    public User(@NonNull String username, @NonNull String password, @NonNull Collection<Role> roles) {
         this.username = username;
         this.password = password;
         this.roles = new HashSet<>(roles);
@@ -44,14 +46,14 @@ public class User implements UserDetails {
     }
 
     @NonNull
-    public Set<String> getRoles() {
+    public Set<Role> getRoles() {
         return roles;
     }
 
     @NonNull
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Stream.concat(permissions.stream(), roles.stream().map(SimpleGrantedAuthority::new)).collect(Collectors.toList());
+        return Stream.concat(permissions.stream(), roles.stream()).collect(Collectors.toList());
     }
 
     @NonNull
@@ -88,5 +90,16 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public enum Role implements GrantedAuthority {
+        ADMIN,
+        USER,
+        REPORTER;
+
+        @Override
+        public String getAuthority() {
+            return "ROLE_" + name();
+        }
     }
 }

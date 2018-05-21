@@ -1,8 +1,9 @@
 package com.faendir.acra.sql.data;
 
-import com.faendir.acra.sql.model.App;
-import com.faendir.acra.sql.model.Bug;
-import com.faendir.acra.sql.model.Report;
+import com.faendir.acra.model.App;
+import com.faendir.acra.model.Bug;
+import com.faendir.acra.model.Report;
+import com.faendir.acra.model.base.BaseBug;
 import com.faendir.acra.sql.util.CountResult;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -29,12 +30,12 @@ public interface ReportRepository extends JpaRepository<Report, String> {
     Slice<Report> findAllByBugApp(@NonNull App app, @NonNull Pageable pageable);
 
     @Query("select report from Report report join fetch report.bug bug join fetch bug.app app where app = ?1")
-    Stream<Report> findAllByAppEager(@NonNull App app);
+    Stream<Report> streamAllByAppEager(@NonNull App app);
 
     @Query("select report from Report report join fetch report.bug bug join fetch bug.app app where report.id = ?1")
     Optional<Report> findByIdEager(@NonNull String id);
 
-    int countAllByBugApp(@NonNull App app);
+    int countByBugApp(@NonNull App app);
 
     @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     @Query("select new com.faendir.acra.sql.util.CountResult(function('date', report.date), count(report)) from Report report join Bug bug on report.bug = bug "
@@ -43,14 +44,15 @@ public interface ReportRepository extends JpaRepository<Report, String> {
 
     Slice<Report> findAllByBug(@NonNull Bug bug, @NonNull Pageable pageable);
 
-    int countAllByBug(@NonNull Bug bug);
+    Stream<Report> streamAllByBugIn(@NonNull List<? extends BaseBug> bugs);
+
+    int countByBug(@NonNull Bug bug);
 
     @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     @Query("select new com.faendir.acra.sql.util.CountResult(report.androidVersion, count(report)) from Report report join Bug bug on report.bug = bug "
            + "where bug.app = ?1 group by report.androidVersion")
-    List<CountResult<String>> countAllByAndroidVersion(@NonNull App app);
+    List<CountResult<String>> countByAndroidVersion(@NonNull App app);
 
-    @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
-    @Query("select new com.faendir.acra.sql.util.CountResult(bug.id, count(report)) from Report report group by report.bug")
-    List<CountResult<Integer>> countAllByBug();
+    @Query("select max(report.date) from Report report where report.bug = ?1")
+    Optional<Date> maxDateByBug(@NonNull Bug bug);
 }

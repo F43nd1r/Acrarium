@@ -1,0 +1,1 @@
+CREATE VIEW app_view as (SELECT app.id, app.name, count(report.id) AS report_count FROM report JOIN bug ON report.bug_id = bug.id JOIN app ON bug.app_id = app.id GROUP BY app.id)

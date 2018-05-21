@@ -1,8 +1,8 @@
 package com.faendir.acra.ui.view.app;
 
-import com.faendir.acra.sql.data.AppRepository;
-import com.faendir.acra.sql.model.App;
-import com.faendir.acra.sql.model.Permission;
+import com.faendir.acra.model.App;
+import com.faendir.acra.model.Permission;
+import com.faendir.acra.service.data.DataService;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.navigation.MyNavigator;
 import com.faendir.acra.ui.navigation.SingleParametrizedViewProvider;
@@ -53,12 +53,12 @@ public class AppView extends ParametrizedBaseView<Pair<App, String>> {
     @SpringComponent
     @UIScope
     public static class Provider extends SingleParametrizedViewProvider<Pair<App, String>, AppView> {
-        @NonNull private final AppRepository appRepository;
+        @NonNull private final DataService dataService;
 
         @Autowired
-        public Provider(@NonNull AppRepository appRepository) {
+        public Provider(@NonNull DataService dataService) {
             super(AppView.class);
-            this.appRepository = appRepository;
+            this.dataService = dataService;
         }
 
         @Override
@@ -70,7 +70,7 @@ public class AppView extends ParametrizedBaseView<Pair<App, String>> {
         protected Pair<App, String> parseParameter(String parameter) {
             String[] parameters = parameter.split(MyNavigator.SEPARATOR);
             if (parameters.length > 0) {
-                Optional<App> app = appRepository.findByEncodedId(parameters[0]);
+                Optional<App> app = dataService.findAppById(parameters[0]);
                 if (app.isPresent()) {
                     return Pair.of(app.get(), parameters.length == 1 ? "" : parameters[1]);
                 }

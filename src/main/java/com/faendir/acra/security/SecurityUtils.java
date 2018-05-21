@@ -1,12 +1,10 @@
 package com.faendir.acra.security;
 
-import com.faendir.acra.sql.model.App;
-import com.faendir.acra.sql.model.Permission;
-import com.faendir.acra.sql.model.User;
-import com.faendir.acra.sql.user.UserManager;
+import com.faendir.acra.model.App;
+import com.faendir.acra.model.Permission;
+import com.faendir.acra.model.User;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.function.BooleanSupplier;
@@ -21,9 +19,9 @@ public final class SecurityUtils {
         return authentication != null && authentication.isAuthenticated();
     }
 
-    public static boolean hasRole(@NonNull String role) {
+    public static boolean hasRole(@NonNull User.Role role) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null && authentication.getAuthorities().contains(new SimpleGrantedAuthority(role));
+        return authentication != null && authentication.getAuthorities().contains(role);
     }
 
     @NonNull
@@ -36,11 +34,11 @@ public final class SecurityUtils {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null
                && getPermission(app, authentication.getAuthorities().stream().filter(Permission.class::isInstance).map(Permission.class::cast),
-                () -> hasRole(UserManager.ROLE_ADMIN)).ordinal() >= level.ordinal();
+                () -> hasRole(User.Role.ADMIN)).ordinal() >= level.ordinal();
     }
 
     public static Permission.Level getPermission(@NonNull App app, @NonNull User user) {
-        return getPermission(app, user.getPermissions().stream(), () -> user.getRoles().contains(UserManager.ROLE_ADMIN));
+        return getPermission(app, user.getPermissions().stream(), () -> user.getRoles().contains(User.Role.ADMIN));
     }
 
     @NonNull

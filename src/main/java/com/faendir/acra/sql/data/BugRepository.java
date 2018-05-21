@@ -1,7 +1,8 @@
 package com.faendir.acra.sql.data;
 
-import com.faendir.acra.sql.model.App;
-import com.faendir.acra.sql.model.Bug;
+import com.faendir.acra.model.App;
+import com.faendir.acra.model.base.BaseBug;
+import com.faendir.acra.model.Bug;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,8 +30,9 @@ public interface BugRepository extends JpaRepository<Bug, Integer> {
 
     Optional<Bug> findBugByAppAndStacktraces(@NonNull App app, @NonNull String stacktrace);
 
-    @Query("select bug from Bug bug join fetch bug.stacktraces where bug in ?1")
-    List<Bug> loadStacktraces(Collection<Bug> bugs);
+    @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
+    @Query("select stacktrace from Bug bug join bug.stacktraces stacktrace where bug in ?1")
+    List<String> loadStacktraces(Collection<? extends BaseBug> bugs);
 
     @Query("select bug from Bug bug join fetch bug.app join fetch bug.stacktraces where bug.id = ?1")
     Optional<Bug> findByIdEager(int id);
@@ -39,4 +41,8 @@ public interface BugRepository extends JpaRepository<Bug, Integer> {
     @Modifying
     @Query("delete from Bug bug where bug not in (select report.bug from Report report group by report.bug)")
     void deleteOrphans();
+
+    @Transactional
+    @Modifying
+    void deleteAllByIdIn(@NonNull List<Integer> ids);
 }

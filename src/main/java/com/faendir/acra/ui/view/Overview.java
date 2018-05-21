@@ -1,19 +1,15 @@
 package com.faendir.acra.ui.view;
 
-import com.faendir.acra.dataprovider.BufferedDataProvider;
+import com.faendir.acra.model.User;
+import com.faendir.acra.model.view.VApp;
 import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.sql.data.AppRepository;
-import com.faendir.acra.sql.data.ReportRepository;
-import com.faendir.acra.sql.model.App;
-import com.faendir.acra.sql.model.Permission;
-import com.faendir.acra.sql.model.User;
-import com.faendir.acra.sql.user.UserManager;
+import com.faendir.acra.service.data.DataService;
+import com.faendir.acra.ui.navigation.SingleViewProvider;
 import com.faendir.acra.ui.view.app.AppView;
 import com.faendir.acra.ui.view.base.BaseView;
 import com.faendir.acra.ui.view.base.ConfigurationLabel;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.Popup;
-import com.faendir.acra.ui.navigation.SingleViewProvider;
 import com.faendir.acra.util.Style;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -24,7 +20,6 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
 
 /**
@@ -34,35 +29,24 @@ import org.springframework.lang.NonNull;
 @SpringComponent
 @ViewScope
 public class Overview extends BaseView {
-    @NonNull private final AppRepository appRepository;
-    @NonNull private final ReportRepository reportRepository;
-    @NonNull private final UserManager userManager;
-    @NonNull private final BufferedDataProvider.Factory factory;
-    private MyGrid<App> grid;
+    @NonNull private final DataService dataService;
+    private MyGrid<VApp> grid;
 
     @Autowired
-    public Overview(@NonNull AppRepository appRepository, @NonNull ReportRepository reportRepository, @NonNull UserManager userManager,
-            @NonNull BufferedDataProvider.Factory factory) {
-        this.appRepository = appRepository;
-        this.reportRepository = reportRepository;
-        this.userManager = userManager;
-        this.factory = factory;
+    public Overview(@NonNull DataService dataService) {
+        this.dataService = dataService;
     }
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        grid = new MyGrid<>("Apps", factory.create(SecurityUtils.hasRole(UserManager.ROLE_ADMIN), (admin, pageable) -> admin ?
-                appRepository.findAllByPermissionWithDefaultIncluded(SecurityUtils.getUsername(), Permission.Level.VIEW, pageable) :
-                appRepository.findAllByPermissionWithDefaultExcluded(SecurityUtils.getUsername(), Permission.Level.VIEW, pageable), admin -> admin ?
-                appRepository.countByPermissionWithDefaultIncluded(SecurityUtils.getUsername(), Permission.Level.VIEW) :
-                appRepository.countByPermissionWithDefaultExcluded(SecurityUtils.getUsername(), Permission.Level.VIEW)));
+        grid = new MyGrid<>("Apps", dataService.getAppProvider());
         grid.setSizeToRows();
         grid.setSelectionMode(Grid.SelectionMode.NONE);
-        grid.addColumn(App::getName, "Name");
-        grid.addColumn(reportRepository::countAllByBugApp, "Reports");
+        grid.addColumn(VApp::getName, "name", "Name");
+        grid.addColumn(VApp::getReportCount, "reportCount", "Reports");
         grid.addOnClickNavigation(getNavigationManager(), AppView.class, e -> String.valueOf(e.getItem().getId()));
         VerticalLayout layout = new VerticalLayout(grid);
-        if (SecurityUtils.hasRole(UserManager.ROLE_ADMIN)) {
+        if (SecurityUtils.hasRole(User.Role.ADMIN)) {
             Button add = new Button("New App", e -> addApp());
             layout.addComponent(add);
         }
@@ -73,10 +57,8 @@ public class Overview extends BaseView {
     private void addApp() {
         TextField name = new TextField("Name");
         new Popup().setTitle("New App").addComponent(name).addCreateButton(popup -> {
-            Pair<User, String> userPasswordPair = userManager.createReporterUser();
-            appRepository.save(new App(name.getValue(), userPasswordPair.getFirst()));
+            popup.clear().addComponent(new ConfigurationLabel(dataService.createNewApp(name.getValue()))).addCloseButton().show();
             grid.getDataProvider().refreshAll();
-            popup.clear().addComponent(new ConfigurationLabel(userPasswordPair.getFirst().getUsername(), userPasswordPair.getSecond())).addCloseButton().show();
         }).show();
     }
 

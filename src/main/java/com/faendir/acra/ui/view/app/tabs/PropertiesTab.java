@@ -1,19 +1,13 @@
 package com.faendir.acra.ui.view.app.tabs;
 
-import com.faendir.acra.sql.data.AppRepository;
-import com.faendir.acra.sql.data.BugRepository;
-import com.faendir.acra.sql.data.ReportRepository;
-import com.faendir.acra.sql.model.App;
-import com.faendir.acra.sql.model.Bug;
-import com.faendir.acra.sql.model.Permission;
-import com.faendir.acra.sql.model.User;
-import com.faendir.acra.sql.user.UserManager;
+import com.faendir.acra.model.App;
+import com.faendir.acra.model.Permission;
+import com.faendir.acra.service.data.DataService;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.ConfigurationLabel;
 import com.faendir.acra.ui.view.base.Popup;
 import com.faendir.acra.ui.view.base.ValidatedField;
-import com.faendir.acra.util.Utils;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -25,13 +19,8 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
 import org.vaadin.risto.stepper.IntStepper;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Optional;
 
 /**
  * @author Lukas
@@ -41,46 +30,33 @@ import java.util.Optional;
 @SpringComponent
 @ViewScope
 public class PropertiesTab implements AppTab {
-    public static final String CAPTION = "Properties";
-    @NonNull private final AppRepository appRepository;
-    @NonNull private final BugRepository bugRepository;
-    @NonNull private final ReportRepository reportRepository;
-    @NonNull private final UserManager userManager;
+    @NonNull private final DataService dataService;
 
     @Autowired
-    public PropertiesTab(@NonNull AppRepository appRepository, @NonNull BugRepository bugRepository, @NonNull ReportRepository reportRepository, @NonNull UserManager userManager) {
-        this.appRepository = appRepository;
-        this.bugRepository = bugRepository;
-        this.reportRepository = reportRepository;
-        this.userManager = userManager;
+    public PropertiesTab(@NonNull DataService dataService) {
+        this.dataService = dataService;
     }
 
     @Override
     public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
         VerticalLayout layout = new VerticalLayout();
-        layout.addComponent(new Button("Create new ACRA Configuration", e -> new Popup().setTitle("Confirm")
-                .addComponent(new Label("Are you sure you want to create a new ACRA configuration?<br>The existing configuration will be invalidated", ContentMode.HTML))
-                .addYesNoButtons(popup -> {
-                    Pair<User, String> userPasswordPair = userManager.createReporterUser();
-                    app.setReporter(userPasswordPair.getFirst());
-                    appRepository.save(app);
-                    popup.clear().addComponent(new ConfigurationLabel(userPasswordPair.getFirst().getUsername(), userPasswordPair.getSecond())).addCloseButton().show();
-                })
-                .show()));
+        layout.addComponent(new Button("Create new ACRA Configuration",
+                e -> new Popup().setTitle("Confirm")
+                        .addComponent(new Label("Are you sure you want to create a new ACRA configuration?<br>The existing configuration will be invalidated", ContentMode.HTML))
+                        .addYesNoButtons(popup -> popup.clear().addComponent(new ConfigurationLabel(dataService.recreateReporterUser(app))).addCloseButton().show())
+                        .show()));
         layout.addComponent(new Button("Delete App",
                 e -> new Popup().setTitle("Confirm").addComponent(new Label("Are you sure you want to delete this app and all its associated content?")).addYesNoButtons(popup -> {
-                    appRepository.delete(app);
+                    dataService.delete(app);
                     navigationManager.navigateBack();
                 }, true).show()));
         IntStepper age = new IntStepper();
         age.setValue(30);
         age.setMinValue(0);
-        HorizontalLayout purgeAge = new HorizontalLayout(new Button("Purge", e -> {
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.DAY_OF_MONTH, -age.getValue());
-            Date keepAfter = calendar.getTime();
-            reportRepository.deleteAllByBugAppAndDateBefore(app, keepAfter);
-        }), new Label("Reports older than "), age, new Label("Days"));
+        HorizontalLayout purgeAge = new HorizontalLayout(new Button("Purge", e -> dataService.deleteReportsOlderThanDays(app, age.getValue())),
+                new Label("Reports older than "),
+                age,
+                new Label("Days"));
         purgeAge.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
         layout.addComponent(purgeAge);
         layout.addComponent(new Button("Configure bug matching", e -> {
@@ -93,22 +69,8 @@ public class PropertiesTab implements AppTab {
                     .addValidatedField(ValidatedField.of(ignoreAndroidLineNumbers), true)
                     .addComponent(new Label(
                             "Are you sure you want to save this configuration? All bugs will be recalculated, which may take some time and will reset the 'solved' status"))
-                    .addYesNoButtons(p -> {
-                        app.setConfiguration(new App.Configuration(matchByMessage.getValue(), ignoreInstanceIds.getValue(), ignoreAndroidLineNumbers.getValue()));
-                        App a = appRepository.save(app);
-                        reportRepository.findAllByAppEager(a).forEach(report -> {
-                            String stacktrace = Utils.generifyStacktrace(report.getStacktrace(), a.getConfiguration());
-                            Optional<Bug> bug = bugRepository.findBugByAppAndStacktraces(a, stacktrace);
-                            if (!bug.isPresent()) {
-                                report.setBug(new Bug(a, stacktrace, report.getVersionCode(), report.getDate()));
-                                reportRepository.save(report);
-                            } else if (!report.getBug().equals(bug.get())) {
-                                report.setBug(bug.get());
-                                reportRepository.save(report);
-                            }
-                        });
-                        bugRepository.deleteOrphans();
-                    }, true)
+                    .addYesNoButtons(p -> dataService.changeConfiguration(app,
+                            new App.Configuration(matchByMessage.getValue(), ignoreInstanceIds.getValue(), ignoreAndroidLineNumbers.getValue())), true)
                     .show();
         }));
         layout.setSizeUndefined();
@@ -117,7 +79,7 @@ public class PropertiesTab implements AppTab {
 
     @Override
     public String getCaption() {
-        return CAPTION;
+        return "Properties";
     }
 
     @Override

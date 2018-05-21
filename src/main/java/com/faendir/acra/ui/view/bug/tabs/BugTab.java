@@ -1,6 +1,6 @@
 package com.faendir.acra.ui.view.bug.tabs;
 
-import com.faendir.acra.sql.model.Bug;
+import com.faendir.acra.model.Bug;
 import com.faendir.acra.ui.view.base.MyTabSheet;
 
 /**

@@ -1,4 +1,4 @@
-package com.faendir.acra.sql.model;
+package com.faendir.acra.model;
 
 import com.faendir.acra.util.Utils;
 import org.acra.ReportField;

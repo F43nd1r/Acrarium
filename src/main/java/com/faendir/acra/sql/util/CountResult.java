@@ -5,8 +5,8 @@ package com.faendir.acra.sql.util;
  * @since 19.12.2017
  */
 public class CountResult<T> {
-    private T group;
-    private long count;
+    private final T group;
+    private final long count;
 
     public CountResult(T group, long count) {
         this.group = group;

@@ -1,7 +1,7 @@
 package com.faendir.acra.ui;
 
+import com.faendir.acra.model.User;
 import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.sql.user.UserManager;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.Path;
 import com.faendir.acra.ui.view.user.ChangePasswordView;
@@ -70,7 +70,7 @@ public class BackendUI extends UI {
     private void login(@NonNull String username, @NonNull String password) {
         try {
             Authentication token = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username.toLowerCase(), password));
-            if (token.getAuthorities().stream().noneMatch(auth -> UserManager.ROLE_USER.equals(auth.getAuthority()))) {
+            if (!token.getAuthorities().contains(User.Role.USER)) {
                 throw new InsufficientAuthenticationException("Missing required role");
             }
             VaadinService.reinitializeSession(VaadinService.getCurrentRequest());
@@ -111,7 +111,7 @@ public class BackendUI extends UI {
         MenuBar menuBar = new MenuBar();
         header.addComponent(menuBar);
         MenuBar.MenuItem user = menuBar.addItem("", VaadinIcons.USER, null);
-        if (SecurityUtils.hasRole(UserManager.ROLE_ADMIN)) {
+        if (SecurityUtils.hasRole(User.Role.ADMIN)) {
             user.addItem("User Manager", e -> navigationManager.cleanNavigateTo(UserManagerView.class));
             user.addSeparator();
         }

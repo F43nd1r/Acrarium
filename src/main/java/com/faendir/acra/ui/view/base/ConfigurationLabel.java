@@ -1,5 +1,6 @@
 package com.faendir.acra.ui.view.base;
 
+import com.faendir.acra.util.PlainTextUser;
 import com.faendir.acra.util.Utils;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Label;
@@ -9,12 +10,12 @@ import com.vaadin.ui.Label;
  * @since 18.12.2017
  */
 public class ConfigurationLabel extends Label {
-    public ConfigurationLabel(String username, String password) {
+    public ConfigurationLabel(PlainTextUser user) {
         super(String.format("Take note of the following ACRA configuration. It cannot be viewed later:<br><code>"
                             + "@AcraCore(reportFormat = StringFormat.JSON)<br>"
                             + "@AcraHttpSender(uri = \"%sreport\",<br>"
                             + "basicAuthLogin = \"%s\",<br>"
                             + "basicAuthPassword = \"%s\",<br>"
-                            + "httpMethod = HttpSender.Method.POST)<br></code>", Utils.getUrlWithFragment(null), username, password), ContentMode.HTML);
+                            + "httpMethod = HttpSender.Method.POST)<br></code>", Utils.getUrlWithFragment(null), user.getUsername(), user.getPlaintextPassword()), ContentMode.HTML);
     }
 }

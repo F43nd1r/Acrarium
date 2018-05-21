@@ -1,5 +1,6 @@
-package com.faendir.acra.sql.model;
+package com.faendir.acra.model.base;
 
+import com.faendir.acra.model.App;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
@@ -8,25 +9,21 @@ import org.springframework.lang.NonNull;
 
 import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
- * @author Lukas
- * @since 08.12.2017
+ * @author lukas
+ * @since 17.05.18
  */
-@Entity
-public class Bug {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+@MappedSuperclass
+public abstract class BaseBug {
     @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, optional = false, fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private App app;
@@ -34,21 +31,21 @@ public class Bug {
     @ElementCollection(fetch = FetchType.LAZY)
     @Type(type = "text")
     private List<String> stacktraces;
-    @Type(type = "text") private String title;
-    private Date lastReport;
+    @Type(type = "text") protected String title;
     private int versionCode;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
     @PersistenceConstructor
-    Bug() {
+    protected BaseBug() {
+        stacktraces = new ArrayList<>();
     }
 
-    public Bug(@NonNull App app, @NonNull String stacktrace, int versionCode, @NonNull Date lastReport) {
+    protected BaseBug(App app, int versionCode) {
+        this();
         this.app = app;
-        this.stacktraces = new ArrayList<>();
-        this.stacktraces.add(stacktrace);
-        this.title = stacktrace.split("\n", 2)[0];
         this.versionCode = versionCode;
-        this.lastReport = lastReport;
         this.solved = false;
     }
 
@@ -78,6 +75,10 @@ public class Bug {
         return stacktraces != null ? stacktraces : new ArrayList<>();
     }
 
+    public void setStacktraces(@NonNull List<String> stacktraces) {
+        this.stacktraces = stacktraces;
+    }
+
     @NonNull
     public String getTitle() {
         return title;
@@ -87,20 +88,11 @@ public class Bug {
         this.title = title;
     }
 
-    @NonNull
-    public Date getLastReport() {
-        return lastReport;
-    }
-
-    public void setLastReport(@NonNull Date lastReport) {
-        if (this.lastReport == null || this.lastReport.before(lastReport)) this.lastReport = lastReport;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Bug bug = (Bug) o;
+        BaseBug bug = (BaseBug) o;
         return id == bug.id;
     }
 

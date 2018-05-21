@@ -1,19 +1,17 @@
 package com.faendir.acra.ui.view.user;
 
-import com.faendir.acra.dataprovider.BufferedDataProvider;
+import com.faendir.acra.model.App;
+import com.faendir.acra.model.Permission;
+import com.faendir.acra.model.User;
 import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.sql.data.AppRepository;
-import com.faendir.acra.sql.model.App;
-import com.faendir.acra.sql.model.Permission;
-import com.faendir.acra.sql.model.User;
-import com.faendir.acra.sql.user.UserManager;
-import com.faendir.acra.sql.user.UserRepository;
+import com.faendir.acra.service.data.DataService;
+import com.faendir.acra.service.user.UserService;
 import com.faendir.acra.ui.annotation.RequiresRole;
+import com.faendir.acra.ui.navigation.SingleViewProvider;
 import com.faendir.acra.ui.view.base.BaseView;
 import com.faendir.acra.ui.view.base.MyCheckBox;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.Popup;
-import com.faendir.acra.ui.navigation.SingleViewProvider;
 import com.faendir.acra.ui.view.base.ValidatedField;
 import com.faendir.acra.util.Style;
 import com.vaadin.navigator.ViewChangeListener;
@@ -26,6 +24,7 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.renderers.ComponentRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 
@@ -37,41 +36,38 @@ import java.util.Arrays;
  */
 @SpringComponent
 @ViewScope
-@RequiresRole(UserManager.ROLE_ADMIN)
+@RequiresRole(User.Role.ADMIN)
 public class UserManagerView extends BaseView {
-    @NonNull private final UserManager userManager;
-    @NonNull private final AppRepository appRepository;
-    @NonNull private final UserRepository userRepository;
-    @NonNull private final BufferedDataProvider.Factory factory;
+    @NonNull private final UserService userService;
+    @NonNull private final DataService dataService;
     private MyGrid<User> userGrid;
 
     @Autowired
-    public UserManagerView(@NonNull UserManager userManager, @NonNull AppRepository appRepository, @NonNull UserRepository userRepository,
-            @NonNull BufferedDataProvider.Factory factory) {
-        this.userManager = userManager;
-        this.appRepository = appRepository;
-        this.userRepository = userRepository;
-        this.factory = factory;
+    public UserManagerView(@NonNull UserService userService, @NonNull DataService dataService) {
+        this.userService = userService;
+        this.dataService = dataService;
     }
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        userGrid = new MyGrid<>("Users", factory.create(UserManager.ROLE_USER, userRepository::findAllByRoles, userRepository::countAllByRoles));
+        userGrid = new MyGrid<>("Users", userService.getUserProvider());
         userGrid.setSelectionMode(Grid.SelectionMode.NONE);
         userGrid.setBodyRowHeight(42);
         userGrid.setSizeToRows();
-        userGrid.addColumn(User::getUsername, "Username");
-        userGrid.addComponentColumn(user -> new MyCheckBox(user.getRoles().contains(UserManager.ROLE_ADMIN), !user.getUsername().equals(SecurityUtils.getUsername()),
-                e -> userManager.setAdmin(user, e.getValue()))).setCaption("Admin");
-        for (App app : appRepository.findAll()) {
-            userGrid.addComponentColumn(user -> {
+        userGrid.addColumn(User::getUsername, "username", "Username");
+        userGrid.addColumn(user -> new MyCheckBox(user.getRoles().contains(User.Role.ADMIN), !user.getUsername().equals(SecurityUtils.getUsername()), e -> {
+            userService.setAdmin(user, e.getValue());
+            userGrid.getDataProvider().refreshAll();
+        }), new ComponentRenderer(), "Admin");
+        for (App app : dataService.findAllApps()) {
+            userGrid.addColumn(user -> {
                 Permission.Level permission = SecurityUtils.getPermission(app, user);
                 ComboBox<Permission.Level> levelComboBox = new ComboBox<>(null, Arrays.asList(Permission.Level.values()));
                 levelComboBox.setEmptySelectionAllowed(false);
                 levelComboBox.setValue(permission);
-                levelComboBox.addValueChangeListener(e -> userManager.setPermission(user, app, e.getValue()));
+                levelComboBox.addValueChangeListener(e -> userService.setPermission(user, app, e.getValue()));
                 return levelComboBox;
-            }).setCaption("Access Permission for " + app.getName());
+            }, new ComponentRenderer(), "Access Permission for " + app.getName());
         }
         Button newUser = new Button("New User", e -> newUser());
         VerticalLayout layout = new VerticalLayout(userGrid, newUser);
@@ -88,10 +84,9 @@ public class UserManagerView extends BaseView {
                 .addValidatedField(ValidatedField.of(password).addValidator(s -> !s.isEmpty(), "Password cannot be empty"))
                 .addValidatedField(ValidatedField.of(new PasswordField("Repeat Password")).addValidator(s -> s.equals(password.getValue()), "Passwords do not match"))
                 .addCreateButton(popup -> {
-                    userManager.createUser(name.getValue().toLowerCase(), password.getValue());
+                    userService.createUser(name.getValue().toLowerCase(), password.getValue());
                     userGrid.getDataProvider().refreshAll();
-                    popup.close();
-                })
+                }, true)
                 .show();
     }
 
