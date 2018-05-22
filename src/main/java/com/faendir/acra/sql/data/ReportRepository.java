@@ -1,9 +1,7 @@
 package com.faendir.acra.sql.data;
 
 import com.faendir.acra.model.App;
-import com.faendir.acra.model.Bug;
 import com.faendir.acra.model.Report;
-import com.faendir.acra.model.base.BaseBug;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,12 +34,9 @@ public interface ReportRepository extends JpaRepository<Report, String> {
 
     int countByBugApp(@NonNull App app);
 
-    Slice<Report> findAllByBug(@NonNull Bug bug, @NonNull Pageable pageable);
+    Slice<Report> findAllByBugId(@NonNull int bug, @NonNull Pageable pageable);
 
-    Stream<Report> streamAllByBugIn(@NonNull List<? extends BaseBug> bugs);
+    Stream<Report> streamAllByBugIdIn(@NonNull List<Integer> bugs);
 
-    int countByBug(@NonNull Bug bug);
-
-    @Query("select max(report.date) from Report report where report.bug = ?1")
-    Optional<Date> maxDateByBug(@NonNull Bug bug);
+    int countByBugId(@NonNull int bug);
 }

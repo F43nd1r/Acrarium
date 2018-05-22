@@ -1,8 +1,7 @@
 package com.faendir.acra.ui.view.bug.tabs;
 
-import com.faendir.acra.dataprovider.BufferedDataProvider;
-import com.faendir.acra.sql.data.ReportRepository;
-import com.faendir.acra.model.Bug;
+import com.faendir.acra.model.view.VBug;
+import com.faendir.acra.service.data.DataService;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.ReportList;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -18,19 +17,16 @@ import org.springframework.lang.NonNull;
 @SpringComponent("bugReportTab")
 @ViewScope
 public class ReportTab implements BugTab {
-    @NonNull private final ReportRepository reportRepository;
-    @NonNull private final BufferedDataProvider.Factory factory;
+    @NonNull private final DataService dataService;
 
     @Autowired
-    public ReportTab(@NonNull ReportRepository reportRepository, @NonNull BufferedDataProvider.Factory factory) {
-        this.reportRepository = reportRepository;
-        this.factory = factory;
+    public ReportTab(@NonNull DataService dataService) {
+        this.dataService = dataService;
     }
 
     @Override
-    public Component createContent(@NonNull Bug bug, @NonNull NavigationManager navigationManager) {
-        Component content = new ReportList(bug.getApp(), navigationManager, reportRepository::delete,
-                factory.create(bug, reportRepository::findAllByBug, reportRepository::countByBug));
+    public Component createContent(@NonNull VBug bug, @NonNull NavigationManager navigationManager) {
+        Component content = new ReportList(bug.getApp(), navigationManager, dataService::delete, dataService.getReportProvider(bug));
         content.setSizeFull();
         return content;
     }

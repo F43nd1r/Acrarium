@@ -70,7 +70,7 @@ public class AppView extends ParametrizedBaseView<Pair<App, String>> {
         protected Pair<App, String> parseParameter(String parameter) {
             String[] parameters = parameter.split(MyNavigator.SEPARATOR);
             if (parameters.length > 0) {
-                Optional<App> app = dataService.findAppById(parameters[0]);
+                Optional<App> app = dataService.findApp(parameters[0]);
                 if (app.isPresent()) {
                     return Pair.of(app.get(), parameters.length == 1 ? "" : parameters[1]);
                 }

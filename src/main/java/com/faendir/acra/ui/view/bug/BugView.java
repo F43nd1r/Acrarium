@@ -1,10 +1,9 @@
 package com.faendir.acra.ui.view.bug;
 
 import com.faendir.acra.model.App;
-import com.faendir.acra.model.Bug;
 import com.faendir.acra.model.Permission;
+import com.faendir.acra.model.view.VBug;
 import com.faendir.acra.service.data.DataService;
-import com.faendir.acra.sql.data.BugRepository;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.navigation.MyNavigator;
 import com.faendir.acra.ui.navigation.SingleParametrizedViewProvider;
@@ -37,31 +36,27 @@ import java.util.Optional;
 @SpringComponent
 @ViewScope
 @RequiresAppPermission(Permission.Level.VIEW)
-public class BugView extends ParametrizedBaseView<Pair<Bug, String>> {
+public class BugView extends ParametrizedBaseView<Pair<VBug, String>> {
     private final List<BugTab> tabs;
-    @NonNull private final DataService dataService;
 
     @Autowired
-    public BugView(@NonNull @Lazy List<BugTab> tabs, @NonNull DataService dataService) {
+    public BugView(@NonNull @Lazy List<BugTab> tabs) {
         this.tabs = tabs;
-        this.dataService = dataService;
     }
 
     @Override
-    protected void enter(@NonNull Pair<Bug, String> parameter) {
-        Bug bug = parameter.getFirst();
+    protected void enter(@NonNull Pair<VBug, String> parameter) {
+        VBug bug = parameter.getFirst();
         GridLayout summaryGrid = new GridLayout(2, 1);
         Style.BORDERED_GRIDLAYOUT.apply(summaryGrid);
         summaryGrid.addComponents(new Label("Title", ContentMode.PREFORMATTED), new Label(bug.getTitle(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(String.valueOf(bug.getVersionCode()), ContentMode.PREFORMATTED));
-        dataService.getLatestReportDate(bug)
-                .ifPresent(date -> summaryGrid.addComponents(new Label("Last Report", ContentMode.PREFORMATTED),
-                        new Label(new PrettyTime().format(date), ContentMode.PREFORMATTED)));
+        summaryGrid.addComponents(new Label("Last Report", ContentMode.PREFORMATTED), new Label(new PrettyTime().format(bug.getLastReport()), ContentMode.PREFORMATTED));
         summaryGrid.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
         summaryGrid.setSizeFull();
         Panel summary = new Panel(summaryGrid);
         summary.setCaption("Summary");
-        MyTabSheet<Bug> tabSheet = new MyTabSheet<>(bug, getNavigationManager(), tabs);
+        MyTabSheet<VBug> tabSheet = new MyTabSheet<>(bug, getNavigationManager(), tabs);
         tabSheet.setSizeFull();
         tabSheet.addSelectedTabChangeListener(e -> getNavigationManager().updatePageParameters(bug.getId() + "/" + e.getTabSheet().getSelectedTab().getCaption()));
         if (tabSheet.getCaptions().contains(parameter.getSecond())) tabSheet.setInitialTab(parameter.getSecond());
@@ -79,44 +74,41 @@ public class BugView extends ParametrizedBaseView<Pair<Bug, String>> {
 
     @SpringComponent
     @UIScope
-    public static class Provider extends SingleParametrizedViewProvider<Pair<Bug, String>, BugView> {
-        @NonNull private final BugRepository bugRepository;
+    public static class Provider extends SingleParametrizedViewProvider<Pair<VBug, String>, BugView> {
+        @NonNull private final DataService dataService;
 
         @Autowired
-        public Provider(@NonNull BugRepository bugRepository) {
+        public Provider(@NonNull DataService dataService) {
             super(BugView.class);
-            this.bugRepository = bugRepository;
+            this.dataService = dataService;
         }
 
         @Override
-        protected String getTitle(Pair<Bug, String> parameter) {
+        protected String getTitle(Pair<VBug, String> parameter) {
             String title = parameter.getFirst().getTitle();
             if (title.length() > 100) title = title.substring(0, 95) + " …";
             return title;
         }
 
         @Override
-        protected boolean isValidParameter(Pair<Bug, String> parameter) {
+        protected boolean isValidParameter(Pair<VBug, String> parameter) {
             return parameter != null;
         }
 
         @Override
-        protected Pair<Bug, String> parseParameter(String parameter) {
-            try {
-                String[] parameters = parameter.split(MyNavigator.SEPARATOR);
-                if (parameters.length > 0) {
-                    Optional<Bug> bug = bugRepository.findByIdEager(Integer.parseInt(parameters[0]));
-                    if (bug.isPresent()) {
-                        return Pair.of(bug.get(), parameters.length == 1 ? "" : parameters[1]);
-                    }
+        protected Pair<VBug, String> parseParameter(String parameter) {
+            String[] parameters = parameter.split(MyNavigator.SEPARATOR);
+            if (parameters.length > 0) {
+                Optional<VBug> bug = dataService.findBug(parameters[0]);
+                if (bug.isPresent()) {
+                    return Pair.of(bug.get(), parameters.length == 1 ? "" : parameters[1]);
                 }
-            } catch (IllegalArgumentException ignored) {
             }
             return null;
         }
 
         @Override
-        protected App toApp(Pair<Bug, String> parameter) {
+        protected App toApp(Pair<VBug, String> parameter) {
             return parameter.getFirst().getApp();
         }
 

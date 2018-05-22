@@ -48,7 +48,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -110,6 +109,20 @@ public class DataService implements Serializable {
     }
 
     @NonNull
+    public ObservableDataProvider<Report, Void> getReportProvider(@NonNull BaseBug bug) {
+        return new BufferedDataProvider<>(acraConfiguration.getPaginationSize(),
+                pageable -> reportRepository.findAllByBugId(bug.getId(), pageable),
+                () -> reportRepository.countByBugId(bug.getId()));
+    }
+
+    @NonNull
+    public ObservableDataProvider<Report, Void> getReportProvider(@NonNull App app) {
+        return new BufferedDataProvider<>(acraConfiguration.getPaginationSize(),
+                pageable -> reportRepository.findAllByBugApp(app, pageable),
+                () -> reportRepository.countByBugApp(app));
+    }
+
+    @NonNull
     public ObservableDataProvider<ProguardMapping, Void> getMappingProvider(@NonNull App app) {
         return new BufferedDataProvider<>(acraConfiguration.getPaginationSize(),
                 pageable -> mappingRepository.findAllByApp(app, pageable),
@@ -144,18 +157,13 @@ public class DataService implements Serializable {
         bug.setTitle(title);
         bug.setStacktraces(bugRepository.loadStacktraces(bugs));
         bugRepository.save(bug);
-        try (Stream<Report> stream = reportRepository.streamAllByBugIn(list)) {
+        try (Stream<Report> stream = reportRepository.streamAllByBugIdIn(list.stream().map(BaseBug::getId).collect(Collectors.toList()))) {
             stream.forEach(report -> {
                 report.setBug(bug);
                 reportRepository.save(report);
             });
         }
         bugRepository.deleteAllByIdIn(list.stream().map(BaseBug::getId).collect(Collectors.toList()));
-    }
-
-    @NonNull
-    public Optional<Date> getLatestReportDate(@NonNull Bug bug) {
-        return reportRepository.maxDateByBug(bug);
     }
 
     @Transactional
@@ -166,7 +174,26 @@ public class DataService implements Serializable {
     }
 
     @NonNull
-    public Optional<App> findAppById(@NonNull String encodedId) {
+    public Optional<ProguardMapping> findMapping(@NonNull App app, int versionCode) {
+        return mappingRepository.findById(new ProguardMapping.MetaData(app, versionCode));
+    }
+
+    @NonNull
+    public Optional<Report> findReport(@NonNull String id) {
+        return reportRepository.findByIdEager(id);
+    }
+
+    @NonNull
+    public Optional<VBug> findBug(@NonNull String encodedId) {
+        try {
+            return bugViewRepository.findByIdEager(Integer.parseInt(encodedId));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
+    }
+
+    @NonNull
+    public Optional<App> findApp(@NonNull String encodedId) {
         try {
             return appRepository.findById(Integer.parseInt(encodedId));
         } catch (NumberFormatException e) {
@@ -174,8 +201,14 @@ public class DataService implements Serializable {
         }
     }
 
+    @NonNull
     public List<App> findAllApps() {
         return appRepository.findAll();
+    }
+
+    @NonNull
+    public List<Attachment> findAttachments(@NonNull Report report) {
+        return attachmentRepository.findAllByReport(report);
     }
 
     @Transactional
@@ -206,6 +239,10 @@ public class DataService implements Serializable {
 
     public void delete(@NonNull App app) {
         appRepository.delete(app);
+    }
+
+    public void delete(@NonNull Report report) {
+        reportRepository.delete(report);
     }
 
     public void delete(@NonNull ProguardMapping mapping) {

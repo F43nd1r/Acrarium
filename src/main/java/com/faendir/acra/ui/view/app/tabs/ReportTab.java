@@ -1,8 +1,7 @@
 package com.faendir.acra.ui.view.app.tabs;
 
-import com.faendir.acra.dataprovider.BufferedDataProvider;
-import com.faendir.acra.sql.data.ReportRepository;
 import com.faendir.acra.model.App;
+import com.faendir.acra.service.data.DataService;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.ReportList;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -18,19 +17,16 @@ import org.springframework.lang.NonNull;
 @SpringComponent
 @ViewScope
 public class ReportTab implements AppTab {
-    @NonNull private final ReportRepository reportRepository;
-    @NonNull private final BufferedDataProvider.Factory factory;
+    @NonNull private final DataService dataService;
 
     @Autowired
-    public ReportTab(@NonNull ReportRepository reportRepository, @NonNull BufferedDataProvider.Factory factory) {
-        this.reportRepository = reportRepository;
-        this.factory = factory;
+    public ReportTab(@NonNull DataService dataService) {
+        this.dataService = dataService;
     }
 
     @Override
     public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
-        Component content = new ReportList(app, navigationManager, reportRepository::delete,
-                factory.create(app, reportRepository::findAllByBugApp, reportRepository::countByBugApp));
+        Component content = new ReportList(app, navigationManager, dataService::delete, dataService.getReportProvider(app));
         content.setSizeFull();
         return content;
     }

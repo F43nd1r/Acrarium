@@ -2,17 +2,15 @@ package com.faendir.acra.ui.view.report;
 
 import com.diffplug.common.base.Errors;
 import com.diffplug.common.base.Throwing;
-import com.faendir.acra.sql.data.AttachmentRepository;
-import com.faendir.acra.sql.data.ProguardMappingRepository;
-import com.faendir.acra.sql.data.ReportRepository;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Attachment;
 import com.faendir.acra.model.Permission;
 import com.faendir.acra.model.ProguardMapping;
 import com.faendir.acra.model.Report;
+import com.faendir.acra.service.data.DataService;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
-import com.faendir.acra.ui.view.base.ParametrizedBaseView;
 import com.faendir.acra.ui.navigation.SingleParametrizedViewProvider;
+import com.faendir.acra.ui.view.base.ParametrizedBaseView;
 import com.faendir.acra.util.Style;
 import com.faendir.acra.util.Utils;
 import com.vaadin.server.FileDownloader;
@@ -48,19 +46,17 @@ import java.util.stream.Stream;
 @ViewScope
 @RequiresAppPermission(Permission.Level.VIEW)
 public class ReportView extends ParametrizedBaseView<Report> {
-    @NonNull private final AttachmentRepository attachmentRepository;
-    @NonNull private final ProguardMappingRepository mappingRepository;
+    @NonNull private final DataService dataService;
 
     @Autowired
-    public ReportView(@NonNull AttachmentRepository attachmentRepository, @NonNull ProguardMappingRepository mappingRepository) {
-        this.attachmentRepository = attachmentRepository;
-        this.mappingRepository = mappingRepository;
+    public ReportView(@NonNull DataService dataService) {
+        this.dataService = dataService;
     }
 
     @Override
     protected void enter(@NonNull Report parameter) {
         HorizontalLayout attachments = new HorizontalLayout();
-        for (Attachment file : attachmentRepository.findAllByReport(parameter)) {
+        for (Attachment file : dataService.findAttachments(parameter)) {
             Button button = new Button(file.getFilename());
             new FileDownloader(new StreamResource(new ExceptionAwareStreamSource(file.getContent()::getBinaryStream), file.getFilename())).extend(button);
             attachments.addComponent(button);
@@ -71,7 +67,7 @@ public class ReportView extends ParametrizedBaseView<Report> {
         summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(parameter.getVersionName(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Email", ContentMode.PREFORMATTED), new Label(parameter.getUserEmail(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Comment", ContentMode.PREFORMATTED), new Label(parameter.getUserComment(), ContentMode.PREFORMATTED));
-        Optional<ProguardMapping> mapping = mappingRepository.findById(parameter.getBug().getApp(), parameter.getVersionCode());
+        Optional<ProguardMapping> mapping = dataService.findMapping(parameter.getBug().getApp(), parameter.getVersionCode());
         if (mapping.isPresent()) {
             summaryGrid.addComponents(new Label("De-obfuscated Stacktrace", ContentMode.PREFORMATTED),
                     new Label(Utils.retrace(parameter.getStacktrace(), mapping.get().getMappings()), ContentMode.PREFORMATTED));
@@ -147,12 +143,12 @@ public class ReportView extends ParametrizedBaseView<Report> {
     @SpringComponent
     @UIScope
     public static class Provider extends SingleParametrizedViewProvider<Report, ReportView> {
-        @NonNull private final ReportRepository reportRepository;
+        @NonNull private final DataService dataService;
 
         @Autowired
-        public Provider(@NonNull ReportRepository reportRepository) {
+        public Provider(@NonNull DataService dataService) {
             super(ReportView.class);
-            this.reportRepository = reportRepository;
+            this.dataService = dataService;
         }
 
         @Override
@@ -167,7 +163,7 @@ public class ReportView extends ParametrizedBaseView<Report> {
 
         @Override
         protected Report parseParameter(String parameter) {
-            return reportRepository.findByIdEager(parameter).orElse(null);
+            return dataService.findReport(parameter).orElse(null);
         }
 
         @Override

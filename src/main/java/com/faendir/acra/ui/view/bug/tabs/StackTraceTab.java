@@ -1,8 +1,8 @@
 package com.faendir.acra.ui.view.bug.tabs;
 
-import com.faendir.acra.sql.data.ProguardMappingRepository;
-import com.faendir.acra.model.Bug;
 import com.faendir.acra.model.ProguardMapping;
+import com.faendir.acra.model.view.VBug;
+import com.faendir.acra.service.data.DataService;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.util.Utils;
 import com.vaadin.shared.ui.ContentMode;
@@ -23,16 +23,16 @@ import java.util.Optional;
 @SpringComponent
 @ViewScope
 public class StackTraceTab implements BugTab {
-    @NonNull private final ProguardMappingRepository mappingRepository;
+    @NonNull private final DataService dataService;
 
     @Autowired
-    public StackTraceTab(@NonNull ProguardMappingRepository mappingRepository) {
-        this.mappingRepository = mappingRepository;
+    public StackTraceTab(@NonNull DataService dataService) {
+        this.dataService = dataService;
     }
 
     @Override
-    public Component createContent(@NonNull Bug bug, @NonNull NavigationManager navigationManager) {
-        Optional<ProguardMapping> mapping = mappingRepository.findById(bug.getApp(), bug.getVersionCode());
+    public Component createContent(@NonNull VBug bug, @NonNull NavigationManager navigationManager) {
+        Optional<ProguardMapping> mapping = dataService.findMapping(bug.getApp(), bug.getVersionCode());
         Accordion accordion = new Accordion();
         for (String stacktrace : bug.getStacktraces()) {
             if (mapping.isPresent()) {

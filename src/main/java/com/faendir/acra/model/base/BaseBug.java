@@ -8,11 +8,13 @@ import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.ElementCollection;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import java.util.ArrayList;
@@ -24,14 +26,15 @@ import java.util.List;
  */
 @MappedSuperclass
 public abstract class BaseBug {
+    @Type(type = "text") protected String title;
     @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, optional = false, fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private App app;
     private boolean solved;
     @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "bug_stacktraces", joinColumns = @JoinColumn(name = "bug_id", referencedColumnName = "id"))
     @Type(type = "text")
     private List<String> stacktraces;
-    @Type(type = "text") protected String title;
     private int versionCode;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
