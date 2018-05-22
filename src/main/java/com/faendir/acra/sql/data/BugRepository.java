@@ -1,10 +1,8 @@
 package com.faendir.acra.sql.data;
 
 import com.faendir.acra.model.App;
-import com.faendir.acra.model.base.BaseBug;
 import com.faendir.acra.model.Bug;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
+import com.faendir.acra.model.base.BaseBug;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -20,13 +18,6 @@ import java.util.Optional;
  * @since 11.12.2017
  */
 public interface BugRepository extends JpaRepository<Bug, Integer> {
-    Slice<Bug> findAllByApp(@NonNull App app, @NonNull Pageable pageable);
-
-    Slice<Bug> findAllByAppAndSolvedFalse(@NonNull App app, @NonNull Pageable pageable);
-
-    int countAllByApp(@NonNull App app);
-
-    int countAllByAppAndSolvedFalse(@NonNull App app);
 
     Optional<Bug> findBugByAppAndStacktraces(@NonNull App app, @NonNull String stacktrace);
 

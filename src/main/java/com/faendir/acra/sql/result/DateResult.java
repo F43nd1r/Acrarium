@@ -1,4 +1,4 @@
-package com.faendir.acra.sql.util;
+package com.faendir.acra.sql.result;
 
 import java.util.Date;
 

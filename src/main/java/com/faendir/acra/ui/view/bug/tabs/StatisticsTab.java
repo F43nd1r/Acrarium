@@ -1,6 +1,6 @@
-package com.faendir.acra.ui.view.app.tabs;
+package com.faendir.acra.ui.view.bug.tabs;
 
-import com.faendir.acra.model.App;
+import com.faendir.acra.model.Bug;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.service.data.DataService;
 import com.faendir.acra.ui.navigation.NavigationManager;
@@ -14,12 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 
 /**
- * @author Lukas
- * @since 22.05.2017
+ * @author lukas
+ * @since 21.05.18
  */
-@SpringComponent
+@SpringComponent("bugStatisticsTab")
 @ViewScope
-public class StatisticsTab implements AppTab {
+public class StatisticsTab implements BugTab {
     @NonNull private final DataService dataService;
 
     @Autowired
@@ -28,8 +28,8 @@ public class StatisticsTab implements AppTab {
     }
 
     @Override
-    public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
-        Panel root = new Panel(new Statistics(QReport.report.bug.app.eq(app), dataService));
+    public Component createContent(@NonNull Bug bug, @NonNull NavigationManager navigationManager) {
+        Panel root = new Panel(new Statistics(QReport.report.bug.eq(bug), dataService));
         root.setSizeFull();
         Style.apply(root, Style.NO_BACKGROUND, Style.NO_BORDER);
         return root;

@@ -23,7 +23,8 @@ public enum Style {
     NO_BORDER("no-border"),
     BORDER_TOP("border-top"),
     BUTTON_ROUND("button-round"),
-    BUTTON_BORDERLESS("v-button-borderless");
+    BUTTON_BORDERLESS("v-button-borderless"),
+    BORDERED_GRIDLAYOUT("bordered-gridlayout");
     @NonNull private final String name;
 
     Style(@NonNull String name) {

@@ -3,7 +3,7 @@
 @mixin acratheme {
   @include valo;
 
-  .v-gridlayout-slot {
+  .bordered-gridlayout .v-gridlayout-slot {
     box-shadow: inset -1px -1px 0px 0px black;
     line-height: 1;
     .v-label {
@@ -14,18 +14,18 @@
       }
     }
   }
-  .v-gridlayout-slot:last-child {
+  .bordered-gridlayout .v-gridlayout-slot:last-child {
     box-shadow: inset -1px 0px 0px 0px black;
   }
-  .v-gridlayout-slot:nth-last-child(2) {
+  .bordered-gridlayout .v-gridlayout-slot:nth-last-child(2) {
     box-shadow: inset -1px 0px 0px 0px black;
   }
 
-  .v-panel-content > .v-gridlayout > .v-gridlayout-slot:nth-child(odd) {
+  .bordered-gridlayout .v-panel-content > .v-gridlayout > .v-gridlayout-slot:nth-child(odd) {
     box-shadow: inset 0px -1px 0px 0px black;
   }
 
-  .v-panel-content > .v-gridlayout > .v-gridlayout-slot:last-child {
+  .bordered-gridlayout .v-panel-content > .v-gridlayout > .v-gridlayout-slot:last-child {
     box-shadow: none;
   }
 
@@ -99,5 +99,9 @@
     padding: 0;
     width: $height;
     height: $height;
+  }
+
+  .v-csslayout > * {
+    margin: $margin;
   }
 }

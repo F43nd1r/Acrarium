@@ -67,6 +67,7 @@ public class ReportView extends ParametrizedBaseView<Report> {
         }
         Style.apply(attachments, Style.MARGIN_BOTTOM, Style.MARGIN_TOP, Style.MARGIN_LEFT, Style.MARGIN_RIGHT);
         GridLayout summaryGrid = new GridLayout(2, 1);
+        Style.BORDERED_GRIDLAYOUT.apply(summaryGrid);
         summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(parameter.getVersionName(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Email", ContentMode.PREFORMATTED), new Label(parameter.getUserEmail(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Comment", ContentMode.PREFORMATTED), new Label(parameter.getUserComment(), ContentMode.PREFORMATTED));
@@ -109,6 +110,7 @@ public class ReportView extends ParametrizedBaseView<Report> {
         layout.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
         layout.setSpacing(false);
         layout.setMargin(false);
+        Style.BORDERED_GRIDLAYOUT.apply(layout);
         return layout;
     }
 

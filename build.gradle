@@ -36,6 +36,19 @@ version = '0.3.1-SNAPSHOT'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+ext {
+    javaGeneratedSources = file("$buildDir/generated/java")
+}
+
+compileJava {
+    doFirst {
+        javaGeneratedSources.mkdirs()
+    }
+    options.compilerArgs += [
+            '-parameters', '-s', javaGeneratedSources
+    ]
+}
+
 vaadin {
     version '8.4.2'
     push true
@@ -72,6 +85,9 @@ dependencies {
     compile 'org.flywaydb:flyway-core'
     optional 'org.springframework.boot:spring-boot-configuration-processor'
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+    def queryDslVersion = '4.2.1'
+    compile "com.querydsl:querydsl-jpa:$queryDslVersion"
+    compile "com.querydsl:querydsl-apt:$queryDslVersion:jpa"
     //vaadin
     compile 'com.vaadin:vaadin-spring-boot-starter'
     compile 'com.vaadin:vaadin-push'

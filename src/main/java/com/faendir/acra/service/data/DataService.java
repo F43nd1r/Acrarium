@@ -8,6 +8,7 @@ import com.faendir.acra.model.Attachment;
 import com.faendir.acra.model.Bug;
 import com.faendir.acra.model.Permission;
 import com.faendir.acra.model.ProguardMapping;
+import com.faendir.acra.model.QReport;
 import com.faendir.acra.model.Report;
 import com.faendir.acra.model.User;
 import com.faendir.acra.model.base.BaseBug;
@@ -24,6 +25,10 @@ import com.faendir.acra.sql.data.ProguardMappingRepository;
 import com.faendir.acra.sql.data.ReportRepository;
 import com.faendir.acra.util.PlainTextUser;
 import com.faendir.acra.util.Utils;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.jpa.impl.JPAQuery;
 import org.acra.ReportField;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,6 +50,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -227,5 +233,18 @@ public class DataService implements Serializable {
                 }
             });
         });
+    }
+
+    public <T> Map<T, Long> countReports(Predicate where, Expression<?> groupBy, Expression<T> select) {
+        QReport report = QReport.report;
+        JPAQuery<?> query = new JPAQuery<>(entityManager);
+        List<Tuple> result = query.from(report).where(where).groupBy(groupBy).select(select, report.id.count()).fetch();
+        return result.stream().collect(Collectors.toMap(tuple -> tuple.get(select), tuple -> tuple.get(report.id.count())));
+    }
+
+    public <T> List<T> getFromReports(Predicate where, Expression<T> select) {
+        QReport report = QReport.report;
+        JPAQuery<?> query = new JPAQuery<>(entityManager);
+        return query.from(report).where(where).distinct().select(select).fetch();
     }
 }

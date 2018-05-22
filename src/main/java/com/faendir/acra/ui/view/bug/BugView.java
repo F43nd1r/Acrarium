@@ -23,7 +23,6 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import org.ocpsoft.prettytime.PrettyTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
@@ -52,10 +51,11 @@ public class BugView extends ParametrizedBaseView<Pair<Bug, String>> {
     protected void enter(@NonNull Pair<Bug, String> parameter) {
         Bug bug = parameter.getFirst();
         GridLayout summaryGrid = new GridLayout(2, 1);
+        Style.BORDERED_GRIDLAYOUT.apply(summaryGrid);
         summaryGrid.addComponents(new Label("Title", ContentMode.PREFORMATTED), new Label(bug.getTitle(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(String.valueOf(bug.getVersionCode()), ContentMode.PREFORMATTED));
         dataService.getLatestReportDate(bug)
-                .ifPresent(date -> summaryGrid.addComponents(new Label("Last ReXport", ContentMode.PREFORMATTED),
+                .ifPresent(date -> summaryGrid.addComponents(new Label("Last Report", ContentMode.PREFORMATTED),
                         new Label(new PrettyTime().format(date), ContentMode.PREFORMATTED)));
         summaryGrid.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
         summaryGrid.setSizeFull();
@@ -81,13 +81,11 @@ public class BugView extends ParametrizedBaseView<Pair<Bug, String>> {
     @UIScope
     public static class Provider extends SingleParametrizedViewProvider<Pair<Bug, String>, BugView> {
         @NonNull private final BugRepository bugRepository;
-        @NonNull private final ApplicationContext applicationContext;
 
         @Autowired
-        public Provider(@NonNull BugRepository bugRepository, @NonNull ApplicationContext applicationContext) {
+        public Provider(@NonNull BugRepository bugRepository) {
             super(BugView.class);
             this.bugRepository = bugRepository;
-            this.applicationContext = applicationContext;
         }
 
         @Override
