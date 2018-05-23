@@ -1,0 +1,477 @@
+databaseChangeLog:
+- changeSet:
+    id: 1527006878002-1
+    author: lukas (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+            name: id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: ignore_android_line_numbers
+            type: BIT(1)
+        - column:
+            constraints:
+              nullable: false
+            name: ignore_instance_ids
+            type: BIT(1)
+        - column:
+            constraints:
+              nullable: false
+            name: match_by_message
+            type: BIT(1)
+        - column:
+            name: name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: reporter_username
+            type: VARCHAR(255)
+        tableName: app
+- changeSet:
+    id: 1527006878002-2
+    author: lukas (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: filename
+            type: VARCHAR(255)
+        - column:
+            name: content
+            type: LONGBLOB
+        - column:
+            constraints:
+              nullable: false
+            name: report_id
+            type: VARCHAR(255)
+        tableName: attachment
+- changeSet:
+    id: 1527006878002-3
+    author: lukas (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+            name: id
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: solved
+            type: BIT(1)
+        - column:
+            name: title
+            type: LONGTEXT
+        - column:
+            constraints:
+              nullable: false
+            name: version_code
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: app_id
+            type: INT
+        tableName: bug
+- changeSet:
+    id: 1527006878002-4
+    author: lukas (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: bug_id
+            type: INT
+        - column:
+            name: stacktraces
+            type: LONGTEXT
+        tableName: bug_stacktraces
+- changeSet:
+    id: 1527006878002-6
+    author: lukas (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: version_code
+            type: INT
+        - column:
+            name: mappings
+            type: LONGTEXT
+        - column:
+            constraints:
+              nullable: false
+            name: app_id
+            type: INT
+        tableName: proguard_mapping
+- changeSet:
+    id: 1527006878002-7
+    author: lukas (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: android_version
+            type: VARCHAR(255)
+        - column:
+            name: content
+            type: LONGTEXT
+        - column:
+            name: date
+            type: datetime
+        - column:
+            name: phone_model
+            type: VARCHAR(255)
+        - column:
+            name: stacktrace
+            type: LONGTEXT
+        - column:
+            name: user_comment
+            type: LONGTEXT
+        - column:
+            name: user_email
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: version_code
+            type: INT
+        - column:
+            name: version_name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: bug_id
+            type: INT
+        tableName: report
+- changeSet:
+    id: 1527006878002-8
+    author: lukas (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: username
+            type: VARCHAR(255)
+        - column:
+            name: password
+            type: VARCHAR(255)
+        tableName: user
+- changeSet:
+    id: 1527006878002-9
+    author: lukas (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: user_username
+            type: VARCHAR(255)
+        - column:
+            name: app_id
+            type: INT
+        - column:
+            name: level
+            type: INT
+        tableName: user_permissions
+- changeSet:
+    id: 1527006878002-10
+    author: lukas (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: user_username
+            type: VARCHAR(255)
+        - column:
+            name: roles
+            type: VARCHAR(255)
+        tableName: user_roles
+- changeSet:
+    id: 1527006878002-11
+    author: lukas (generated)
+    changes:
+    - addPrimaryKey:
+        columnNames: filename, report_id
+        constraintName: PRIMARY
+        tableName: attachment
+- changeSet:
+    id: 1527006878002-13
+    author: lukas (generated)
+    changes:
+    - addPrimaryKey:
+        columnNames: app_id, version_code
+        constraintName: PRIMARY
+        tableName: proguard_mapping
+- changeSet:
+    id: 1527006878002-14
+    author: lukas (generated)
+    changes:
+    - addPrimaryKey:
+        columnNames: id
+        constraintName: PRIMARY
+        tableName: report
+- changeSet:
+    id: 1527006878002-15
+    author: lukas (generated)
+    changes:
+    - addPrimaryKey:
+        columnNames: username
+        constraintName: PRIMARY
+        tableName: user
+- changeSet:
+    id: 1527006878002-16
+    author: lukas (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: reporter_username
+        constraintName: Unique_app_reporter
+        tableName: app
+- changeSet:
+    id: 1527006878002-17
+    author: lukas (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: user_username
+        indexName: Index_roles_username
+        tableName: user_roles
+- changeSet:
+    id: 1527006878002-18
+    author: lukas (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: bug_id
+        indexName: Index_report_bug
+        tableName: report
+- changeSet:
+    id: 1527006878002-19
+    author: lukas (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: report_id
+        indexName: Index_attachment_report
+        tableName: attachment
+- changeSet:
+    id: 1527006878002-20
+    author: lukas (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: user_username
+        indexName: Index_permissions_username
+        tableName: user_permissions
+- changeSet:
+    id: 1527006878002-21
+    author: lukas (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: app_id
+        indexName: Index_permissions_app
+        tableName: user_permissions
+- changeSet:
+    id: 1527006878002-22
+    author: lukas (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: bug_id
+        indexName: Index_stacktraces_bug
+        tableName: bug_stacktraces
+- changeSet:
+    id: 1527006878002-23
+    author: lukas (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: app_id
+        indexName: Index_bug_app
+        tableName: bug
+- changeSet:
+    id: 1527006878002-25
+    author: lukas (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: user_username
+        baseTableName: user_roles
+        constraintName: FK_roles_username
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: NO ACTION
+        referencedColumnNames: username
+        referencedTableName: user
+- changeSet:
+    id: 1527006878002-26
+    author: lukas (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: bug_id
+        baseTableName: report
+        constraintName: FK_report_bug
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: bug
+- changeSet:
+    id: 1527006878002-27
+    author: lukas (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: report_id
+        baseTableName: attachment
+        constraintName: FK_attachment_report
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: report
+- changeSet:
+    id: 1527006878002-28
+    author: lukas (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: app_id
+        baseTableName: proguard_mapping
+        constraintName: FK_mapping_app
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: app
+- changeSet:
+    id: 1527006878002-29
+    author: lukas (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: user_username
+        baseTableName: user_permissions
+        constraintName: FK_permissions_username
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: NO ACTION
+        referencedColumnNames: username
+        referencedTableName: user
+- changeSet:
+    id: 1527006878002-30
+    author: lukas (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: app_id
+        baseTableName: user_permissions
+        constraintName: FK_permissions_app
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: app
+- changeSet:
+    id: 1527006878002-31
+    author: lukas (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: bug_id
+        baseTableName: bug_stacktraces
+        constraintName: FK_stacktraces_bug
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: bug
+- changeSet:
+    id: 1527006878002-32
+    author: lukas (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: reporter_username
+        baseTableName: app
+        constraintName: FK_app_reporter
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: NO ACTION
+        referencedColumnNames: username
+        referencedTableName: user
+- changeSet:
+    id: 1527006878002-33
+    author: lukas (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: app_id
+        baseTableName: bug
+        constraintName: FK_bug_app
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: app
+- changeSet:
+    id: 1527006878002-34
+    author: lukas (generated)
+    changes:
+    - createView:
+        fullDefinition: false
+        selectQuery: (select `acra`.`app`.`id` AS `id`,`acra`.`app`.`name` AS `name`,count(`acra`.`report`.`id`)
+          AS `report_count` from ((`acra`.`app` left join `acra`.`bug` on((`acra`.`bug`.`app_id`
+          = `acra`.`app`.`id`))) left join `acra`.`report` on((`acra`.`report`.`bug_id`
+          = `acra`.`bug`.`id`))) group by `acra`.`app`.`id`)
+        viewName: app_view
+- changeSet:
+    id: 1527006878002-35
+    author: lukas (generated)
+    changes:
+    - createView:
+        fullDefinition: false
+        selectQuery: (select `acra`.`bug`.`id` AS `id`,`acra`.`bug`.`solved` AS `solved`,`acra`.`bug`.`version_code`
+          AS `version_code`,`acra`.`bug`.`app_id` AS `app_id`,`acra`.`bug`.`title`
+          AS `title`,count(`acra`.`report`.`id`) AS `report_count`,max(`acra`.`report`.`date`)
+          AS `last_report` from (`acra`.`bug` left join `acra`.`report` on((`acra`.`report`.`bug_id`
+          = `acra`.`bug`.`id`))) group by `acra`.`bug`.`id`)
+        viewName: bug_view
+
