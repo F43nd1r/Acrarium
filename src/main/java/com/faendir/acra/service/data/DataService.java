@@ -28,6 +28,7 @@ import com.faendir.acra.util.Utils;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.ComparableExpressionBase;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.acra.ReportField;
 import org.apache.commons.logging.Log;
@@ -272,16 +273,16 @@ public class DataService implements Serializable {
         });
     }
 
-    public <T> Map<T, Long> countReports(Predicate where, Expression<?> groupBy, Expression<T> select) {
+    public <T> Map<T, Long> countReports(@NonNull Predicate where, Expression<?> groupBy, @NonNull Expression<T> select) {
         QReport report = QReport.report;
         JPAQuery<?> query = new JPAQuery<>(entityManager);
         List<Tuple> result = query.from(report).where(where).groupBy(groupBy).select(select, report.id.count()).fetch();
         return result.stream().collect(Collectors.toMap(tuple -> tuple.get(select), tuple -> tuple.get(report.id.count())));
     }
 
-    public <T> List<T> getFromReports(Predicate where, Expression<T> select) {
+    public <T extends Comparable> List<T> getFromReports(@NonNull Predicate where, @NonNull ComparableExpressionBase<T> select) {
         QReport report = QReport.report;
         JPAQuery<?> query = new JPAQuery<>(entityManager);
-        return query.from(report).where(where).distinct().select(select).fetch();
+        return query.from(report).where(where).select(select).distinct().orderBy(select.asc()).fetch();
     }
 }

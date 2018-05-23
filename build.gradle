@@ -49,6 +49,13 @@ compileJava {
     ]
 }
 
+idea {
+    module {
+        sourceDirs += javaGeneratedSources
+        generatedSourceDirs += javaGeneratedSources
+    }
+}
+
 vaadin {
     version '8.4.2'
     push true
@@ -100,6 +107,7 @@ dependencies {
     compile 'org.jfree:jfreechart:1.5.0'
     compile 'javax.servlet:javax.servlet-api:3.1.0'
     compile 'org.vaadin.addons:stepper:2.4.0'
+    compile 'com.jarektoro:responsive-layout:2.1.1'
     //utility
     compile 'org.codeartisans:org.json:20161124'
     compile 'org.apache.commons:commons-collections4:4.1'

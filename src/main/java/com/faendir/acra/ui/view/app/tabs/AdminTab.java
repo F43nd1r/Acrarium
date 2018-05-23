@@ -29,11 +29,11 @@ import org.vaadin.risto.stepper.IntStepper;
 @RequiresAppPermission(Permission.Level.ADMIN)
 @SpringComponent
 @ViewScope
-public class PropertiesTab implements AppTab {
+public class AdminTab implements AppTab {
     @NonNull private final DataService dataService;
 
     @Autowired
-    public PropertiesTab(@NonNull DataService dataService) {
+    public AdminTab(@NonNull DataService dataService) {
         this.dataService = dataService;
     }
 
@@ -79,7 +79,7 @@ public class PropertiesTab implements AppTab {
 
     @Override
     public String getCaption() {
-        return "Properties";
+        return "Admin";
     }
 
     @Override

@@ -2,6 +2,9 @@ package com.faendir.acra.ui.view.base;
 
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.service.data.DataService;
+import com.faendir.acra.util.Style;
+import com.jarektoro.responsivelayout.ResponsiveLayout;
+import com.jarektoro.responsivelayout.ResponsiveRow;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.vaadin.data.HasValue;
 import com.vaadin.ui.Button;
@@ -9,11 +12,8 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Composite;
-import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.themes.ValoTheme;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberTickUnitSource;
@@ -47,8 +47,8 @@ import java.util.function.Function;
  * @since 21.05.18
  */
 public class Statistics extends Composite {
-    public static final Color BACKGROUND_GRAY = new Color(0xfafafa); //vaadin gray
-    public static final Color BLUE = new Color(0x197de1); //vaadin blue
+    private static final Color BACKGROUND_GRAY = new Color(0xfafafa); //vaadin gray
+    private static final Color BLUE = new Color(0x197de1); //vaadin blue
     private static final int WIDTH = 640;
     private static final int HEIGHT = 360;
     private final BooleanExpression baseExpression;
@@ -64,14 +64,9 @@ public class Statistics extends Composite {
         filters = new ArrayList<>();
         GridLayout filterLayout = new GridLayout(2, 1);
         filterLayout.setSpacing(true);
-        filterLayout.setWidth(WIDTH, Unit.PIXELS);
-        filterLayout.setHeight(HEIGHT, Unit.PIXELS);
+        filterLayout.setSizeFull();
+        Style.apply(filterLayout, Style.PADDING_LEFT, Style.PADDING_TOP, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
         filterLayout.setColumnExpandRatio(1, 1);
-
-        Label title = new Label("Filter");
-        title.addStyleName(ValoTheme.LABEL_H2);
-        filterLayout.space();
-        filterLayout.addComponent(title);
 
         IntStepper dayStepper = new IntStepper();
         dayStepper.setValue(30);
@@ -97,10 +92,23 @@ public class Statistics extends Composite {
         filterLayout.space();
         filterLayout.addComponent(applyButton);
 
+        Panel filterPanel = new Panel(filterLayout);
+        Style.NO_MARGIN.apply(filterPanel);
+        filterPanel.setCaption("Filter");
         timeChart = new TimeChart("Reports over time");
         androidVersionChart = new PieChart("Reports per Android Version");
         appVersionChart = new PieChart("Reports per App Version");
-        CssLayout root = new CssLayout(filterLayout, timeChart, androidVersionChart, appVersionChart);
+        ResponsiveLayout layout = new ResponsiveLayout();//.withScrollable(true);
+        ResponsiveRow row = layout.addRow()
+                .withSpacing(ResponsiveRow.SpacingSize.SMALL, true)
+                .withMargin(ResponsiveRow.MarginSize.SMALL, ResponsiveRow.MarginSize.SMALL, ResponsiveRow.MarginSize.SMALL, ResponsiveRow.MarginSize.SMALL);
+        row.addColumn().withComponent(filterPanel).withDisplayRules(12, 12, 6, 6);
+        row.addColumn().withComponent(timeChart).withDisplayRules(12, 12, 6, 6);
+        row.addColumn().withComponent(androidVersionChart).withDisplayRules(12, 12, 6, 6);
+        row.addColumn().withComponent(appVersionChart).withDisplayRules(12, 12, 6, 6);
+        Panel root = new Panel(layout);
+        root.setSizeFull();
+        Style.apply(root, Style.NO_BACKGROUND, Style.NO_BORDER);
         setCompositionRoot(root);
         update();
     }
@@ -148,14 +156,15 @@ public class Statistics extends Composite {
         BaseChart(@NonNull String caption) {
             panel = new Panel();
             panel.setCaption(caption);
-            panel.setSizeUndefined();
+            panel.setSizeFull();
+            Style.apply(panel, Style.NO_MARGIN, Style.NO_BACKGROUND);
             setCompositionRoot(panel);
         }
 
-        public void setContent(@NonNull Map<T, Long> map){
+        public void setContent(@NonNull Map<T, Long> map) {
             JFreeChartWrapper content = new JFreeChartWrapper(createChart(map));
-            content.setWidth(WIDTH, Unit.PIXELS);
-            content.setHeight(HEIGHT, Unit.PIXELS);
+            content.setWidth(100, Unit.PERCENTAGE);
+            content.setHeight(100, Unit.PERCENTAGE);
             panel.setContent(content);
         }
 
@@ -163,7 +172,6 @@ public class Statistics extends Composite {
     }
 
     private static class TimeChart extends BaseChart<Date> {
-
         TimeChart(@NonNull String caption) {
             super(caption);
         }
@@ -191,7 +199,6 @@ public class Statistics extends Composite {
     }
 
     private static class PieChart extends BaseChart<String> {
-
         PieChart(@NonNull String caption) {
             super(caption);
         }

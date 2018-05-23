@@ -13,6 +13,7 @@ public enum Style {
     PADDING_TOP("padding-top"),
     PADDING_RIGHT("padding-right"),
     PADDING_BOTTOM("padding-bottom"),
+    NO_MARGIN("no-margin"),
     MARGIN_LEFT("margin-left"),
     MARGIN_TOP("margin-top"),
     MARGIN_RIGHT("margin-right"),

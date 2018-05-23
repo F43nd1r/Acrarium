@@ -8,6 +8,7 @@ import com.faendir.acra.ui.view.user.ChangePasswordView;
 import com.faendir.acra.ui.view.user.UserManagerView;
 import com.faendir.acra.util.Style;
 import com.vaadin.annotations.Theme;
+import com.vaadin.annotations.Viewport;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.VaadinRequest;
@@ -42,6 +43,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @SpringUI
 @Theme("acratheme")
 @Widgetset("com.faendir.acra.AppWidgetset")
+@Viewport("width=device-width, initial-scale=1")
 public class BackendUI extends UI {
     @NonNull private final AuthenticationManager authenticationManager;
     @NonNull private final ApplicationContext applicationContext;
