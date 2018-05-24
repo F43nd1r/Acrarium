@@ -98,10 +98,8 @@ public class Statistics extends Composite {
         timeChart = new TimeChart("Reports over time");
         androidVersionChart = new PieChart("Reports per Android Version");
         appVersionChart = new PieChart("Reports per App Version");
-        ResponsiveLayout layout = new ResponsiveLayout();//.withScrollable(true);
-        ResponsiveRow row = layout.addRow()
-                .withSpacing(ResponsiveRow.SpacingSize.SMALL, true)
-                .withMargin(ResponsiveRow.MarginSize.SMALL, ResponsiveRow.MarginSize.SMALL, ResponsiveRow.MarginSize.SMALL, ResponsiveRow.MarginSize.SMALL);
+        ResponsiveLayout layout = new ResponsiveLayout();
+        ResponsiveRow row = layout.addRow().withSpacing(ResponsiveRow.SpacingSize.SMALL, true).withMargin(ResponsiveRow.MarginSize.SMALL);
         row.addColumn().withComponent(filterPanel).withDisplayRules(12, 12, 6, 6);
         row.addColumn().withComponent(timeChart).withDisplayRules(12, 12, 6, 6);
         row.addColumn().withComponent(androidVersionChart).withDisplayRules(12, 12, 6, 6);

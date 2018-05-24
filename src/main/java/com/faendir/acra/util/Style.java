@@ -25,7 +25,8 @@ public enum Style {
     BORDER_TOP("border-top"),
     BUTTON_ROUND("button-round"),
     BUTTON_BORDERLESS("v-button-borderless"),
-    BORDERED_GRIDLAYOUT("bordered-gridlayout");
+    BORDERED_GRIDLAYOUT("bordered-gridlayout"),
+    RED_PANEL_HEADER("red-panel-header");
     @NonNull private final String name;
 
     Style(@NonNull String name) {

@@ -45,11 +45,12 @@ public class Overview extends BaseView {
         grid.addColumn(VApp::getName, "name", "Name");
         grid.addColumn(VApp::getReportCount, "reportCount", "Reports");
         grid.addOnClickNavigation(getNavigationManager(), AppView.class, e -> String.valueOf(e.getItem().getId()));
-        VerticalLayout layout = new VerticalLayout(grid);
+        VerticalLayout layout = new VerticalLayout();
         if (SecurityUtils.hasRole(User.Role.ADMIN)) {
             Button add = new Button("New App", e -> addApp());
             layout.addComponent(add);
         }
+        layout.addComponent(grid);
         Style.apply(layout, Style.NO_PADDING, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
         setCompositionRoot(layout);
     }
@@ -71,7 +72,7 @@ public class Overview extends BaseView {
 
         @Override
         public String getTitle(String parameter) {
-            return "Overview";
+            return "Acrarium";
         }
 
         @Override

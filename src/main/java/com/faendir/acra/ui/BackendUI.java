@@ -17,7 +17,6 @@ import com.vaadin.shared.communication.PushMode;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.LoginForm;
 import com.vaadin.ui.MenuBar;
@@ -102,9 +101,7 @@ public class BackendUI extends UI {
 
     private void showMain() {
         NavigationManager navigationManager = applicationContext.getBean(NavigationManager.class);
-        Button up = new Button(VaadinIcons.ARROW_UP, e -> navigationManager.navigateBack());
-        Style.apply(up, Style.BUTTON_ROUND, Style.NO_PADDING);
-        HorizontalLayout header = new HorizontalLayout(up);
+        HorizontalLayout header = new HorizontalLayout();
         header.setWidth(100, Unit.PERCENTAGE);
 
         header.addComponent(path);
@@ -113,6 +110,8 @@ public class BackendUI extends UI {
         MenuBar menuBar = new MenuBar();
         header.addComponent(menuBar);
         MenuBar.MenuItem user = menuBar.addItem("", VaadinIcons.USER, null);
+        user.addItem(SecurityUtils.getUsername()).setEnabled(false);
+        user.addSeparator();
         if (SecurityUtils.hasRole(User.Role.ADMIN)) {
             user.addItem("User Manager", e -> navigationManager.cleanNavigateTo(UserManagerView.class));
             user.addSeparator();

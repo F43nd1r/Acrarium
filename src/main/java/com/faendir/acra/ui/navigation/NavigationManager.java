@@ -14,6 +14,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
+import java.util.Deque;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,7 +35,16 @@ public class NavigationManager implements Serializable {
         this.path = mainPath;
         this.navigator = navigator;
         this.navigator.init(ui, mainView);
-        this.navigator.addViewActivationListener(e -> path.set(navigator.getHierarchy()));
+        this.navigator.addViewActivationListener(e -> {
+            Deque<MyNavigator.HierarchyElement> hierarchy = navigator.getHierarchy();
+            path.set(hierarchy);
+            SingleViewProvider provider = (SingleViewProvider) hierarchy.getLast().getProvider();
+            String title = provider.getTitle(provider.getParameters(hierarchy.getLast().getNavState()));
+            if (hierarchy.size() > 1) {
+                title += " - Acrarium";
+            }
+            ui.getPage().setTitle(title);
+        });
         navigator.setErrorView(ErrorView.class);
         String target = Optional.ofNullable(ui.getPage().getLocation().getFragment()).orElse("").replace("!", "");
         ui.access(() -> navigateTo(target));
@@ -80,7 +90,9 @@ public class NavigationManager implements Serializable {
         String currentView = navigator.getViewProvider(navigator.getCurrentView().getClass()).map(SingleViewProvider::getId).orElse("");
         Path.Element element = path.goUp();
         String hierarchy = path.asUrlFragment();
-        String target = "!" + (hierarchy.isEmpty() ? "" : hierarchy + MyNavigator.SEPARATOR_CHAR) + currentView + (parameters == null ? "" : MyNavigator.SEPARATOR_CHAR + parameters);
+        String target = "!" + (hierarchy.isEmpty() ? "" : hierarchy + MyNavigator.SEPARATOR_CHAR) + currentView + (parameters == null ?
+                                                                                                                           "" :
+                                                                                                                           MyNavigator.SEPARATOR_CHAR + parameters);
         path.goTo(element.getLabel(), currentView + (parameters == null ? "" : MyNavigator.SEPARATOR_CHAR + parameters));
         navigator.getUI().getPage().setUriFragment(target, false);
     }

@@ -108,4 +108,12 @@
   .v-csslayout > * {
     margin: $margin;
   }
+
+  .v-panel-caption-red-panel-header {
+    @include valo-panel-caption-style($background-color: $v-error-indicator-color);
+  }
+
+  .stepper {
+    width: 185px;
+  }
 }

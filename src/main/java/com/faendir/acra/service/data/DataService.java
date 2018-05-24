@@ -238,6 +238,10 @@ public class DataService implements Serializable {
         reportRepository.deleteAllByBugAppAndDateBefore(app, calendar.getTime());
     }
 
+    public void deleteReportsBeforeVersion(@NonNull App app, int versionCode) {
+        reportRepository.deleteAllByBugAppAndVersionCodeLessThan(app, versionCode);
+    }
+
     public void delete(@NonNull App app) {
         appRepository.delete(app);
     }
@@ -280,9 +284,15 @@ public class DataService implements Serializable {
         return result.stream().collect(Collectors.toMap(tuple -> tuple.get(select), tuple -> tuple.get(report.id.count())));
     }
 
+    @NonNull
     public <T extends Comparable> List<T> getFromReports(@NonNull Predicate where, @NonNull ComparableExpressionBase<T> select) {
+        return getFromReports(where, select, select);
+    }
+
+    @NonNull
+    public <T> List<T> getFromReports(@NonNull Predicate where, @NonNull Expression<T> select, ComparableExpressionBase<?> order) {
         QReport report = QReport.report;
         JPAQuery<?> query = new JPAQuery<>(entityManager);
-        return query.from(report).where(where).select(select).distinct().orderBy(select.asc()).fetch();
+        return query.from(report).where(where).select(select).distinct().orderBy(order.asc()).fetch();
     }
 }

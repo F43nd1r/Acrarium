@@ -24,6 +24,10 @@ public interface ReportRepository extends JpaRepository<Report, String> {
     @Modifying
     void deleteAllByBugAppAndDateBefore(@NonNull App app, @NonNull Date date);
 
+    @Transactional
+    @Modifying
+    void deleteAllByBugAppAndVersionCodeLessThan(@NonNull App app, int versionCode);
+
     Slice<Report> findAllByBugApp(@NonNull App app, @NonNull Pageable pageable);
 
     @Query("select report from Report report join fetch report.bug bug join fetch bug.app app where app = ?1")
