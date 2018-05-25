@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/F43nd1r/acra-backend.svg?branch=master)](https://travis-ci.org/F43nd1r/acra-backend)
 
-# Acra Backend
+# Acrarium (formerly Acra-backend)
 A Backend for ACRA written in Java using Spring Boot, Vaadin and MySQL
 
 # Setup
