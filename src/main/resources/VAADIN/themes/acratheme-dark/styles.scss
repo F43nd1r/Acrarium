@@ -1,0 +1,9 @@
+@import "acratheme-dark.scss";
+@import "addons.scss";
+
+/* This file prefixes all rules with the theme name to avoid causing conflicts with other themes. */
+/* The actual styles should be defined in acratheme-dark.scss */
+.acratheme-dark {
+  @include addons;
+  @include acratheme-dark;
+}

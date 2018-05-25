@@ -14,16 +14,19 @@ import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
 import com.vaadin.shared.communication.PushMode;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.LoginForm;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -35,6 +38,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * @author Lukas
  * @since 22.03.2017
@@ -44,6 +49,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @Widgetset("com.faendir.acra.AppWidgetset")
 @Viewport("width=device-width, initial-scale=1")
 public class BackendUI extends UI {
+    private static final String DARK_THEME = "dark";
     @NonNull private final AuthenticationManager authenticationManager;
     @NonNull private final ApplicationContext applicationContext;
     @NonNull private final Panel content;
@@ -61,6 +67,11 @@ public class BackendUI extends UI {
 
     @Override
     protected void init(VaadinRequest request) {
+        if (URLEncodedUtils.parse(getPage().getLocation(), StandardCharsets.UTF_8)
+                .stream()
+                .anyMatch(pair -> pair.getName().equals(DARK_THEME) && Boolean.parseBoolean(pair.getValue()))) {
+            setTheme("acratheme-dark");
+        }
         if (SecurityUtils.isLoggedIn()) {
             showMain();
         } else {
@@ -101,14 +112,8 @@ public class BackendUI extends UI {
 
     private void showMain() {
         NavigationManager navigationManager = applicationContext.getBean(NavigationManager.class);
-        HorizontalLayout header = new HorizontalLayout();
-        header.setWidth(100, Unit.PERCENTAGE);
-
-        header.addComponent(path);
-        header.setExpandRatio(path, 1);
 
         MenuBar menuBar = new MenuBar();
-        header.addComponent(menuBar);
         MenuBar.MenuItem user = menuBar.addItem("", VaadinIcons.USER, null);
         user.addItem(SecurityUtils.getUsername()).setEnabled(false);
         user.addSeparator();
@@ -119,8 +124,23 @@ public class BackendUI extends UI {
         user.addItem("Change Password", e -> navigationManager.cleanNavigateTo(ChangePasswordView.class));
         user.addItem("Logout", e -> logout());
 
+        HorizontalLayout header = new HorizontalLayout(path, menuBar);
+        header.setExpandRatio(path, 1);
+        header.setWidth(100, Unit.PERCENTAGE);
         Style.apply(header, Style.PADDING_TOP, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM, Style.BACKGROUND_HEADER);
-        VerticalLayout root = new VerticalLayout(header, content);
+
+        HorizontalLayout footer = new HorizontalLayout();
+        footer.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
+        Label footerLabel = new Label("Acrarium is developed by <a href=https://github.com/F43nd1r>F43nd1r</a>."
+                                      + " <a href=https://github.com/F43nd1r/acra-backend>Code</a> is licensed under"
+                                      + " <a href=https://github.com/F43nd1r/acra-backend/blob/master/LICENSE>Apache License v2</a>.", ContentMode.HTML);
+        footerLabel.setWidth(100, Unit.PERCENTAGE);
+        Style.CENTER_TEXT.apply(footerLabel);
+        footer.addComponent(footerLabel);
+        footer.setSpacing(false);
+        footer.setWidth(100, Unit.PERCENTAGE);
+        Style.apply(footer, Style.BACKGROUND_FOOTER, Style.PADDING_LEFT, Style.PADDING_TOP, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
+        VerticalLayout root = new VerticalLayout(header, content, footer);
         root.setExpandRatio(content, 1);
         root.setSpacing(false);
         root.setSizeFull();

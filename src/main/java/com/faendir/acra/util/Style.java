@@ -20,13 +20,16 @@ public enum Style {
     MARGIN_BOTTOM("margin-bottom"),
     BACKGROUND_LIGHT_GRAY("background-light-gray"),
     BACKGROUND_HEADER("background-header"),
+    BACKGROUND_FOOTER("background-footer"),
     NO_BACKGROUND("no-background"),
     NO_BORDER("no-border"),
     BORDER_TOP("border-top"),
     BUTTON_ROUND("button-round"),
     BUTTON_BORDERLESS("v-button-borderless"),
     BORDERED_GRIDLAYOUT("bordered-gridlayout"),
-    RED_PANEL_HEADER("red-panel-header");
+    RED_PANEL_HEADER("red-panel-header"),
+    CENTER_TEXT("center-text"),
+    MAX_WIDTH_728("max-width-728");
     @NonNull private final String name;
 
     Style(@NonNull String name) {

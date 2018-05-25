@@ -15,6 +15,7 @@ import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.TextField;
@@ -40,6 +41,7 @@ public class Overview extends BaseView {
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         grid = new MyGrid<>("Apps", dataService.getAppProvider());
+        grid.setResponsive(true);
         grid.setSizeToRows();
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.addColumn(VApp::getName, "name", "Name");
@@ -51,8 +53,13 @@ public class Overview extends BaseView {
             layout.addComponent(add);
         }
         layout.addComponent(grid);
-        Style.apply(layout, Style.NO_PADDING, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
-        setCompositionRoot(layout);
+        Style.apply(layout, Style.NO_PADDING, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM, Style.MAX_WIDTH_728);
+        VerticalLayout root = new VerticalLayout(layout);
+        root.setSpacing(false);
+        root.setSizeFull();
+        root.setComponentAlignment(layout, Alignment.TOP_CENTER);
+        Style.apply(root, Style.NO_PADDING);
+        setCompositionRoot(root);
     }
 
     private void addApp() {
