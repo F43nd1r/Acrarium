@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/F43nd1r/acra-backend.svg?branch=master)](https://travis-ci.org/F43nd1r/acra-backend)
+[![Build Status](https://travis-ci.org/F43nd1r/Acrarium.svg?branch=master)](https://travis-ci.org/F43nd1r/Acrarium)
 
 # Acrarium (formerly Acra-backend)
 A Backend for ACRA written in Java using Spring Boot, Vaadin and MySQL
