@@ -142,7 +142,8 @@ $v-app-loading-text: "Acrarium is loading...";
   }
 
   .flex-layout {
-    @extend .basic-flex;
+    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     .flex-item {
       margin: $margin;
