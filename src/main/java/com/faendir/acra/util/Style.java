@@ -29,7 +29,11 @@ public enum Style {
     BORDERED_GRIDLAYOUT("bordered-gridlayout"),
     RED_PANEL_HEADER("red-panel-header"),
     CENTER_TEXT("center-text"),
-    MAX_WIDTH_728("max-width-728");
+    MAX_WIDTH_728("max-width-728"),
+    FLEX_LAYOUT("flex-layout"),
+    FLEX_ITEM("flex-item"),
+    BASIC_FLEX("basic-flex"),
+    PATH_ELEMENT("path-element");
     @NonNull private final String name;
 
     Style(@NonNull String name) {

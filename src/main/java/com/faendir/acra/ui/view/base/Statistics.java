@@ -3,8 +3,6 @@ package com.faendir.acra.ui.view.base;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.service.data.DataService;
 import com.faendir.acra.util.Style;
-import com.jarektoro.responsivelayout.ResponsiveLayout;
-import com.jarektoro.responsivelayout.ResponsiveRow;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.vaadin.data.HasValue;
 import com.vaadin.ui.Button;
@@ -93,17 +91,12 @@ public class Statistics extends Composite {
         filterLayout.addComponent(applyButton);
 
         Panel filterPanel = new Panel(filterLayout);
-        Style.NO_MARGIN.apply(filterPanel);
         filterPanel.setCaption("Filter");
         timeChart = new TimeChart("Reports over time");
         androidVersionChart = new PieChart("Reports per Android Version");
         appVersionChart = new PieChart("Reports per App Version");
-        ResponsiveLayout layout = new ResponsiveLayout();
-        ResponsiveRow row = layout.addRow().withSpacing(ResponsiveRow.SpacingSize.SMALL, true).withMargin(ResponsiveRow.MarginSize.SMALL);
-        row.addColumn().withComponent(filterPanel).withDisplayRules(12, 12, 6, 6);
-        row.addColumn().withComponent(timeChart).withDisplayRules(12, 12, 6, 6);
-        row.addColumn().withComponent(androidVersionChart).withDisplayRules(12, 12, 6, 6);
-        row.addColumn().withComponent(appVersionChart).withDisplayRules(12, 12, 6, 6);
+        FlexLayout layout = new FlexLayout(filterPanel, timeChart, androidVersionChart, appVersionChart);
+        layout.setWidth(100, Unit.PERCENTAGE);
         Panel root = new Panel(layout);
         root.setSizeFull();
         Style.apply(root, Style.NO_BACKGROUND, Style.NO_BORDER);
@@ -154,13 +147,13 @@ public class Statistics extends Composite {
         BaseChart(@NonNull String caption) {
             panel = new Panel();
             panel.setCaption(caption);
-            panel.setSizeFull();
-            Style.apply(panel, Style.NO_MARGIN, Style.NO_BACKGROUND);
+            Style.apply(panel, Style.NO_BACKGROUND);
             setCompositionRoot(panel);
         }
 
         public void setContent(@NonNull Map<T, Long> map) {
-            JFreeChartWrapper content = new JFreeChartWrapper(createChart(map));
+            JFreeChart chart = createChart(map);
+            JFreeChartWrapper content = new JFreeChartWrapper(chart);
             content.setWidth(100, Unit.PERCENTAGE);
             content.setHeight(100, Unit.PERCENTAGE);
             panel.setContent(content);

@@ -9,14 +9,13 @@ import com.faendir.acra.service.data.DataService;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.ConfigurationLabel;
+import com.faendir.acra.ui.view.base.FlexLayout;
 import com.faendir.acra.ui.view.base.InMemoryUpload;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.OnDemandFileDownloader;
 import com.faendir.acra.ui.view.base.Popup;
 import com.faendir.acra.ui.view.base.ValidatedField;
 import com.faendir.acra.util.Style;
-import com.jarektoro.responsivelayout.ResponsiveLayout;
-import com.jarektoro.responsivelayout.ResponsiveRow;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Sizeable;
 import com.vaadin.shared.ui.ContentMode;
@@ -60,12 +59,9 @@ public class AdminTab implements AppTab {
 
     @Override
     public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
-        ResponsiveLayout responsiveLayout = new ResponsiveLayout();
-        ResponsiveRow row = responsiveLayout.addRow().withSpacing(ResponsiveRow.SpacingSize.SMALL, true).withMargin(ResponsiveRow.MarginSize.SMALL).withAlignment(Alignment.TOP_CENTER);
-        row.addColumn().withComponent(proguardPanel(app)).withDisplayRules(12, 12, 6, 4);
-        row.addColumn().withComponent(exportPanel(app, navigationManager)).withDisplayRules(12, 12, 6, 4);
-        row.addColumn().withComponent(dangerPanel(app, navigationManager)).withDisplayRules(12, 12, 6, 4);
-        Panel root = new Panel(responsiveLayout);
+        FlexLayout layout = new FlexLayout(proguardPanel(app), exportPanel(app, navigationManager), dangerPanel(app, navigationManager));
+        layout.setWidth(100, Sizeable.Unit.PERCENTAGE);
+        Panel root = new Panel(layout);
         root.setSizeFull();
         Style.apply(root, Style.NO_BACKGROUND, Style.NO_BORDER);
         return root;
@@ -126,10 +122,9 @@ public class AdminTab implements AppTab {
         layout.setSizeFull();
         Style.NO_PADDING.apply(layout);
         Panel danger = new Panel(layout);
-        danger.setSizeFull();
         danger.setCaption("Danger Zone");
         danger.setIcon(VaadinIcons.EXCLAMATION);
-        Style.apply(danger, Style.NO_BACKGROUND, Style.RED_PANEL_HEADER, Style.NO_MARGIN);
+        Style.apply(danger, Style.NO_BACKGROUND, Style.RED_PANEL_HEADER);
         return danger;
     }
 
@@ -166,9 +161,8 @@ public class AdminTab implements AppTab {
             }));
         }
         Panel panel = new Panel(layout);
-        panel.setSizeFull();
         panel.setCaption("De-Obfuscation");
-        Style.apply(panel, Style.NO_BACKGROUND, Style.NO_MARGIN);
+        Style.apply(panel, Style.NO_BACKGROUND);
         return panel;
     }
 
@@ -183,9 +177,8 @@ public class AdminTab implements AppTab {
         download.setSizeFull();
         VerticalLayout layout = new VerticalLayout(mailBox, download);
         Panel panel = new Panel(layout);
-        panel.setSizeFull();
         panel.setCaption("Export");
-        Style.apply(panel, Style.NO_BACKGROUND, Style.NO_MARGIN);
+        Style.apply(panel, Style.NO_BACKGROUND);
         return panel;
     }
 

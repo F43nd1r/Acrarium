@@ -85,9 +85,7 @@ public class BugView extends ParametrizedBaseView<Pair<VBug, String>> {
 
         @Override
         protected String getTitle(Pair<VBug, String> parameter) {
-            String title = parameter.getFirst().getTitle();
-            if (title.length() > 100) title = title.substring(0, 95) + " …";
-            return title;
+            return parameter.getFirst().getTitle();
         }
 
         @Override

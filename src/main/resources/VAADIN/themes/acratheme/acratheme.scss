@@ -112,10 +112,6 @@ $v-app-loading-text: "Acrarium is loading...";
     height: $height;
   }
 
-  .v-csslayout > * {
-    margin: $margin;
-  }
-
   .v-panel-caption-red-panel-header {
     @include valo-panel-caption-style($background-color: $v-error-indicator-color);
   }
@@ -130,5 +126,50 @@ $v-app-loading-text: "Acrarium is loading...";
 
   .max-width-728 {
     max-width: 728px;
+  }
+
+  .path-element {
+    max-width: 100%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .basic-flex {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .flex-layout {
+    @extend .basic-flex;
+    justify-content: center;
+    .flex-item {
+      margin: $margin;
+    }
+  }
+
+  .flex-layout[width-range~="0-727px"] {
+    .flex-item {
+      width: calc(100% - 20px)  !important;
+    }
+  }
+
+  .flex-layout[width-range~="728px-1455px"] {
+    .flex-item {
+      width: calc(50% - 20px) !important;
+    }
+  }
+
+  .flex-layout[width-range~="1456px-2183px"] {
+    .flex-item {
+      width: calc(33.3% - 20px) !important;
+    }
+  }
+
+  .flex-layout[width-range~="2184px-"] {
+    .flex-item {
+      width: calc(25% - 20px) !important;
+    }
   }
 }

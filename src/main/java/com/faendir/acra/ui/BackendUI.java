@@ -37,6 +37,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.nio.charset.StandardCharsets;
 
@@ -116,6 +117,14 @@ public class BackendUI extends UI {
         MenuBar menuBar = new MenuBar();
         MenuBar.MenuItem user = menuBar.addItem("", VaadinIcons.USER, null);
         user.addItem(SecurityUtils.getUsername()).setEnabled(false);
+        user.addSeparator();
+        MenuBar.MenuItem theme = user.addItem("Dark Theme", e -> {
+            getPage().setLocation(UriComponentsBuilder.fromUri(getPage().getLocation()).replaceQueryParam(DARK_THEME, e.isChecked()).build().toUri());
+        });
+        theme.setCheckable(true);
+        theme.setChecked(URLEncodedUtils.parse(getPage().getLocation(), StandardCharsets.UTF_8)
+                .stream()
+                .anyMatch(pair -> pair.getName().equals(DARK_THEME) && Boolean.parseBoolean(pair.getValue())));
         user.addSeparator();
         if (SecurityUtils.hasRole(User.Role.ADMIN)) {
             user.addItem("User Manager", e -> navigationManager.cleanNavigateTo(UserManagerView.class));

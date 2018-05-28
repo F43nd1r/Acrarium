@@ -5,12 +5,10 @@ import com.faendir.acra.ui.navigation.SingleViewProvider;
 import com.faendir.acra.util.Style;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Composite;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -22,12 +20,12 @@ import java.util.stream.Collectors;
  */
 public class Path extends Composite {
     private final Deque<Element> elements;
-    private final HorizontalLayout layout;
+    private final CssLayout layout;
 
     public Path() {
         elements = new ArrayDeque<>();
-        layout = new HorizontalLayout();
-        layout.setSpacing(false);
+        layout = new CssLayout();
+        Style.BASIC_FLEX.apply(layout);
         setCompositionRoot(layout);
     }
 
@@ -53,14 +51,14 @@ public class Path extends Composite {
             if (!elements.isEmpty()) {
                 Label icon = new Label(VaadinIcons.CARET_RIGHT.getHtml(), ContentMode.HTML);
                 layout.addComponent(icon);
-                layout.setComponentAlignment(icon, Alignment.MIDDLE_CENTER);
             }
             Button button = new Button(element.getLabel());
             button.addClickListener(e -> {
                 while (getLast() != element) goUp();
-                UI.getCurrent().getNavigator().navigateTo(asUrlFragment());
+                getUI().getNavigator().navigateTo(asUrlFragment());
             });
             Style.BUTTON_BORDERLESS.apply(button);
+            Style.PATH_ELEMENT.apply(button);
             layout.addComponent(button);
             elements.addLast(element);
         }
