@@ -26,7 +26,6 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -39,7 +38,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 /**
  * @author Lukas
@@ -68,9 +67,7 @@ public class BackendUI extends UI {
 
     @Override
     protected void init(VaadinRequest request) {
-        if (URLEncodedUtils.parse(getPage().getLocation(), StandardCharsets.UTF_8)
-                .stream()
-                .anyMatch(pair -> pair.getName().equals(DARK_THEME) && Boolean.parseBoolean(pair.getValue()))) {
+        if (isDarkTheme()) {
             setTheme("acratheme-dark");
         }
         if (SecurityUtils.isLoggedIn()) {
@@ -122,9 +119,7 @@ public class BackendUI extends UI {
             getPage().setLocation(UriComponentsBuilder.fromUri(getPage().getLocation()).replaceQueryParam(DARK_THEME, e.isChecked()).build().toUri());
         });
         theme.setCheckable(true);
-        theme.setChecked(URLEncodedUtils.parse(getPage().getLocation(), StandardCharsets.UTF_8)
-                .stream()
-                .anyMatch(pair -> pair.getName().equals(DARK_THEME) && Boolean.parseBoolean(pair.getValue())));
+        theme.setChecked(isDarkTheme());
         user.addSeparator();
         if (SecurityUtils.hasRole(User.Role.ADMIN)) {
             user.addItem("User Manager", e -> navigationManager.cleanNavigateTo(UserManagerView.class));
@@ -155,6 +150,10 @@ public class BackendUI extends UI {
         root.setSizeFull();
         Style.NO_PADDING.apply(root);
         setContent(root);
+    }
+
+    private boolean isDarkTheme() {
+        return Optional.ofNullable(UriComponentsBuilder.fromUri(getPage().getLocation()).build().getQueryParams().get(DARK_THEME)).map(list -> list.contains("true")).orElse(false);
     }
 
     @NonNull
