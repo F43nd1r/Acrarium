@@ -156,7 +156,7 @@ public class DataService implements Serializable {
         List<BaseBug> list = new ArrayList<>(bugs);
         Bug bug = bugRepository.getOne(list.remove(0).getId());
         bug.setTitle(title);
-        bug.setStacktraces(bugRepository.loadStacktraces(bugs));
+        bug.setStacktraces(bugRepository.loadStacktraces(bugs.stream().map(BaseBug::getId).collect(Collectors.toList())));
         bugRepository.save(bug);
         try (Stream<Report> stream = reportRepository.streamAllByBugIdIn(list.stream().map(BaseBug::getId).collect(Collectors.toList()))) {
             stream.forEach(report -> {
@@ -236,10 +236,12 @@ public class DataService implements Serializable {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, -days);
         reportRepository.deleteAllByBugAppAndDateBefore(app, calendar.getTime());
+        bugRepository.deleteOrphans();
     }
 
     public void deleteReportsBeforeVersion(@NonNull App app, int versionCode) {
         reportRepository.deleteAllByBugAppAndVersionCodeLessThan(app, versionCode);
+        bugRepository.deleteOrphans();
     }
 
     public void delete(@NonNull App app) {

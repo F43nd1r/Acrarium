@@ -2,7 +2,6 @@ package com.faendir.acra.sql.data;
 
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Bug;
-import com.faendir.acra.model.base.BaseBug;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -23,7 +22,7 @@ public interface BugRepository extends JpaRepository<Bug, Integer> {
 
     @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     @Query("select stacktrace from Bug bug join bug.stacktraces stacktrace where bug in ?1")
-    List<String> loadStacktraces(Collection<? extends BaseBug> bugs);
+    List<String> loadStacktraces(Collection<Integer> ids);
 
     @Query("select bug from Bug bug join fetch bug.app join fetch bug.stacktraces where bug.id = ?1")
     Optional<Bug> findByIdEager(int id);
