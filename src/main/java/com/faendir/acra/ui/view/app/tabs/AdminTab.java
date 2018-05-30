@@ -3,6 +3,7 @@ package com.faendir.acra.ui.view.app.tabs;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Permission;
 import com.faendir.acra.model.ProguardMapping;
+import com.faendir.acra.model.QProguardMapping;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.data.DataService;
@@ -18,6 +19,7 @@ import com.faendir.acra.ui.view.base.ValidatedField;
 import com.faendir.acra.util.Style;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Sizeable;
+import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -132,12 +134,12 @@ public class AdminTab implements AppTab {
         VerticalLayout layout = new VerticalLayout();
         MyGrid<ProguardMapping> grid = new MyGrid<>(null, dataService.getMappingProvider(app));
         grid.setSizeToRows();
-        grid.addColumn(ProguardMapping::getVersionCode, "Version");
+        grid.sort(grid.addColumn(ProguardMapping::getVersionCode, QProguardMapping.proguardMapping.versionCode, "Version"), SortDirection.ASCENDING);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
             grid.addColumn(report -> "Delete",
                     new ButtonRenderer<>(e -> new Popup().setTitle("Confirm")
                             .addComponent(new Label("Are you sure you want to delete the mapping for version " + e.getItem().getVersionCode() + "?"))
-                            .addYesNoButtons(p -> dataService.delete(e.getItem()), true))).setSortable(false);
+                            .addYesNoButtons(p -> dataService.delete(e.getItem()), true)));
         }
         layout.addComponent(grid);
         Style.NO_PADDING.apply(layout);

@@ -2,6 +2,7 @@ package com.faendir.acra.ui.view.user;
 
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Permission;
+import com.faendir.acra.model.QUser;
 import com.faendir.acra.model.User;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.data.DataService;
@@ -54,7 +55,7 @@ public class UserManagerView extends BaseView {
         userGrid.setSelectionMode(Grid.SelectionMode.NONE);
         userGrid.setBodyRowHeight(42);
         userGrid.setSizeToRows();
-        userGrid.addColumn(User::getUsername, "username", "Username");
+        userGrid.addColumn(User::getUsername, QUser.user.username, "Username");
         userGrid.addColumn(user -> new MyCheckBox(user.getRoles().contains(User.Role.ADMIN), !user.getUsername().equals(SecurityUtils.getUsername()), e -> {
             userService.setAdmin(user, e.getValue());
             userGrid.getDataProvider().refreshAll();

@@ -1,6 +1,5 @@
 package com.faendir.acra.service.data;
 
-import com.faendir.acra.dataprovider.ObservableDataProvider;
 import com.faendir.acra.dataprovider.QueryDslDataProvider;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Attachment;
@@ -86,7 +85,7 @@ public class DataService implements Serializable {
     }
 
     @NonNull
-    public ObservableDataProvider<VApp, Void> getAppProvider() {
+    public QueryDslDataProvider<VApp> getAppProvider() {
         boolean isAdmin = SecurityUtils.hasRole(User.Role.ADMIN);
         Function<JPQLQuery<?>, BooleanExpression> existenceFunction = isAdmin ? JPQLQuery::notExists : JPQLQuery::exists;
         BiFunction<EnumPath<Permission.Level>, Permission.Level, BooleanExpression> compareFunction = isAdmin ? EnumPath::lt : EnumPath::goe;
@@ -98,23 +97,23 @@ public class DataService implements Serializable {
     }
 
     @NonNull
-    public ObservableDataProvider<VBug, Void> getBugProvider(@NonNull App app, boolean onlyNonSolved) {
+    public QueryDslDataProvider<VBug> getBugProvider(@NonNull App app, boolean onlyNonSolved) {
         BooleanExpression where = BUG.app.eq(app).and(onlyNonSolved ? BUG.solved.eq(false) : Expressions.TRUE);
         return new QueryDslDataProvider<>(Queries.selectVBug(entityManager).where(where), new JPAQuery<>(entityManager).from(BUG).where(where));
     }
 
     @NonNull
-    public ObservableDataProvider<Report, Void> getReportProvider(@NonNull Bug bug) {
+    public QueryDslDataProvider<Report> getReportProvider(@NonNull Bug bug) {
         return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(REPORT).where(REPORT.bug.eq(bug)).select(REPORT));
     }
 
     @NonNull
-    public ObservableDataProvider<Report, Void> getReportProvider(@NonNull App app) {
+    public QueryDslDataProvider<Report> getReportProvider(@NonNull App app) {
         return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(REPORT).join(REPORT.bug).where(REPORT.bug.app.eq(app)).select(REPORT));
     }
 
     @NonNull
-    public ObservableDataProvider<ProguardMapping, Void> getMappingProvider(@NonNull App app) {
+    public QueryDslDataProvider<ProguardMapping> getMappingProvider(@NonNull App app) {
         return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(MAPPING).where(MAPPING.app.eq(app)).select(MAPPING));
     }
 

@@ -1,14 +1,16 @@
 package com.faendir.acra.ui.view.base;
 
-import com.faendir.acra.dataprovider.ObservableDataProvider;
-import com.faendir.acra.security.SecurityUtils;
+import com.faendir.acra.dataprovider.QueryDslDataProvider;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Permission;
+import com.faendir.acra.model.QReport;
 import com.faendir.acra.model.Report;
+import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.report.ReportView;
 import com.faendir.acra.util.TimeSpanRenderer;
 import com.vaadin.shared.data.sort.SortDirection;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.renderers.ButtonRenderer;
 import org.springframework.lang.NonNull;
@@ -22,15 +24,15 @@ import java.util.function.Consumer;
 public class ReportList extends MyGrid<Report> {
     public static final String CAPTION = "Reports";
 
-    public ReportList(App app, @NonNull NavigationManager navigationManager, @NonNull Consumer<Report> reportDeleter, @NonNull ObservableDataProvider<Report, ?> reportProvider) {
+    public ReportList(App app, @NonNull NavigationManager navigationManager, @NonNull Consumer<Report> reportDeleter, @NonNull QueryDslDataProvider<Report> reportProvider) {
         super(CAPTION, reportProvider);
         setId(CAPTION);
-        setSelectionMode(SelectionMode.NONE);
-        sort(addColumn(Report::getDate, new TimeSpanRenderer(), "date", "Date"), SortDirection.DESCENDING);
-        addColumn(Report::getVersionCode, "versionCode", "App Version");
-        addColumn(Report::getAndroidVersion, "androidVersion", "Android Version");
-        addColumn(Report::getPhoneModel, "phoneModel", "Device");
-        addColumn(report -> report.getStacktrace().split("\n", 2)[0], "stacktrace", "Stacktrace").setExpandRatio(1).setMinimumWidthFromContent(false);
+        setSelectionMode(Grid.SelectionMode.NONE);
+        sort(addColumn(Report::getDate, new TimeSpanRenderer(), QReport.report.date, "Date"), SortDirection.DESCENDING);
+        addColumn(Report::getVersionCode, QReport.report.versionCode, "App Version");
+        addColumn(Report::getAndroidVersion, QReport.report.androidVersion, "Android Version");
+        addColumn(Report::getPhoneModel, QReport.report.phoneModel, "Device");
+        addColumn(report -> report.getStacktrace().split("\n", 2)[0], QReport.report.stacktrace, "Stacktrace").setExpandRatio(1).setMinimumWidthFromContent(false);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
             addColumn(report -> "Delete", new ButtonRenderer<>(e -> new Popup().setTitle("Confirm")
                     .addComponent(new Label("Are you sure you want to delete this report?"))

@@ -1,5 +1,7 @@
 package com.faendir.acra.ui.view;
 
+import com.faendir.acra.model.QApp;
+import com.faendir.acra.model.QReport;
 import com.faendir.acra.model.User;
 import com.faendir.acra.model.view.VApp;
 import com.faendir.acra.security.SecurityUtils;
@@ -44,8 +46,8 @@ public class Overview extends BaseView {
         grid.setResponsive(true);
         grid.setSizeToRows();
         grid.setSelectionMode(Grid.SelectionMode.NONE);
-        grid.addColumn(app -> app.getApp().getName(), "name", "Name");
-        grid.addColumn(VApp::getReportCount, "reportCount", "Reports");
+        grid.addColumn(app -> app.getApp().getName(), QApp.app.name, "Name");
+        grid.addColumn(VApp::getReportCount, QReport.report.count(), "Reports");
         grid.addOnClickNavigation(getNavigationManager(), AppView.class, e -> String.valueOf(e.getItem().getApp().getId()));
         VerticalLayout layout = new VerticalLayout();
         if (SecurityUtils.hasRole(User.Role.ADMIN)) {

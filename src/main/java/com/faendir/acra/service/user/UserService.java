@@ -1,7 +1,6 @@
 package com.faendir.acra.service.user;
 
 import com.faendir.acra.config.AcraConfiguration;
-import com.faendir.acra.dataprovider.ObservableDataProvider;
 import com.faendir.acra.dataprovider.QueryDslDataProvider;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Permission;
@@ -114,7 +113,7 @@ public class UserService implements Serializable {
         return new User(acraConfiguration.getUser().getName(), passwordEncoder.encode(acraConfiguration.getUser().getPassword()), Arrays.asList(User.Role.USER, User.Role.ADMIN));
     }
 
-    public ObservableDataProvider<User, Void> getUserProvider() {
+    public QueryDslDataProvider<User> getUserProvider() {
         return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(USER).where(USER.roles.any().eq(User.Role.USER)).select(USER));
     }
 }
