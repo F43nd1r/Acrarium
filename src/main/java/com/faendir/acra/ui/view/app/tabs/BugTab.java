@@ -63,11 +63,11 @@ public class BugTab implements AppTab {
         layout.addComponent(header);
         layout.setComponentAlignment(header, Alignment.MIDDLE_LEFT);
         CheckBox hideSolved = new CheckBox("Hide solved", true);
-        MyGrid<VBug> bugs = new MyGrid<>(null, dataService.getBugProvider(app, true));
+        MyGrid<VBug> bugs = new MyGrid<>(null, dataService.getBugProvider(app, hideSolved::getValue));
         bugs.setSelectionMode(Grid.SelectionMode.MULTI);
         hideSolved.addValueChangeListener(e -> layout.getUI().access(() -> {
             Set<VBug> selection = bugs.getSelectedItems();
-            bugs.setDataProvider(dataService.getBugProvider(app, e.getValue()));
+            bugs.getDataProvider().refreshAll();
             selection.forEach(bugs::select);
         }));
         Button merge = new Button("Merge bugs", e -> {

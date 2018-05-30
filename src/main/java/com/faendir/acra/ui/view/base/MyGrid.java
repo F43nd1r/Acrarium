@@ -25,7 +25,7 @@ import java.util.function.Function;
  */
 public class MyGrid<T> extends Composite {
     private final ExposingGrid<T> grid;
-    private QueryDslDataProvider<T> dataProvider;
+    private final QueryDslDataProvider<T> dataProvider;
 
     public MyGrid(String caption, QueryDslDataProvider<T> dataProvider) {
         this.dataProvider = dataProvider;
@@ -104,11 +104,6 @@ public class MyGrid<T> extends Composite {
 
     public QueryDslDataProvider<T> getDataProvider() {
         return dataProvider;
-    }
-
-    public void setDataProvider(QueryDslDataProvider<T> dataProvider) {
-        this.dataProvider = dataProvider;
-        grid.setDataProvider(dataProvider);
     }
 
     public static class MiddleClickExtension<T> extends Grid.AbstractGridExtension<T> {

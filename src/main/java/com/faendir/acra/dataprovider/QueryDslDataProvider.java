@@ -13,16 +13,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
  * @author lukas
  * @since 30.05.18
  */
-public class QueryDslDataProvider<T> extends AbstractBackEndDataProvider<T, Void> implements ObservableDataProvider<T, Void> {
+public class QueryDslDataProvider<T> extends AbstractBackEndDataProvider<T, Void> {
     private final List<SizeListener> sizeListeners;
-    private final JPAQuery<T> fetchBase;
-    private final JPAQuery<?> countBase;
+    private final Supplier<JPAQuery<T>> fetchProvider;
+    private final Supplier<JPAQuery<?>> countProvider;
     private final Map<String, Expression<? extends Comparable>> sortOptions;
 
     public QueryDslDataProvider(JPAQuery<T> base) {
@@ -30,20 +31,18 @@ public class QueryDslDataProvider<T> extends AbstractBackEndDataProvider<T, Void
     }
 
     public QueryDslDataProvider(JPAQuery<T> fetchBase, JPAQuery<?> countBase) {
-        this.fetchBase = fetchBase;
-        this.countBase = countBase;
+        this(fetchBase::clone, countBase::clone);
+    }
+
+    public QueryDslDataProvider(Supplier<JPAQuery<T>> fetchProvider, Supplier<JPAQuery<?>> countProvider){
+        this.fetchProvider = fetchProvider;
+        this.countProvider = countProvider;
         sizeListeners = new ArrayList<>();
         sortOptions = new HashMap<>();
     }
 
-    @Override
     public void addSizeListener(SizeListener listener) {
         sizeListeners.add(listener);
-    }
-
-    @Override
-    public void removeSizeListener(SizeListener listener) {
-        sizeListeners.remove(listener);
     }
 
     public String addSortable(Expression<? extends Comparable> expression) {
@@ -54,7 +53,7 @@ public class QueryDslDataProvider<T> extends AbstractBackEndDataProvider<T, Void
 
     @Override
     protected Stream<T> fetchFromBackEnd(Query<T, Void> query) {
-        JPAQuery<T> q = fetchBase.clone().offset(query.getOffset()).limit(query.getLimit());
+        JPAQuery<T> q = fetchProvider.get().offset(query.getOffset()).limit(query.getLimit());
         for (QuerySortOrder order : query.getSortOrders()) {
             Expression<? extends Comparable> sort = sortOptions.get(order.getSorted());
             if (sort != null) {
@@ -66,8 +65,13 @@ public class QueryDslDataProvider<T> extends AbstractBackEndDataProvider<T, Void
 
     @Override
     protected int sizeInBackEnd(Query<T, Void> query) {
-        int result = Math.toIntExact(countBase.fetchCount());
+        int result = Math.toIntExact(countProvider.get().fetchCount());
         sizeListeners.forEach(listener -> listener.sizeChanged(result));
         return result;
+    }
+
+    @FunctionalInterface
+    public interface SizeListener {
+        void sizeChanged(int size);
     }
 }
