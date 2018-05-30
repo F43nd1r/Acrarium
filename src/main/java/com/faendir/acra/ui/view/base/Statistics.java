@@ -55,6 +55,7 @@ public class Statistics extends Composite {
     private final TimeChart timeChart;
     private final PieChart androidVersionChart;
     private final PieChart appVersionChart;
+    private final PieChart phoneChart;
 
     public Statistics(BooleanExpression baseExpression, DataService dataService) {
         this.baseExpression = baseExpression;
@@ -83,6 +84,10 @@ public class Statistics extends Composite {
         appVersionBox.setEmptySelectionAllowed(false);
         filters.add(new Filter<>("App Version", appVersionBox, QReport.report.versionCode::eq));
 
+        ComboBox<String> phoneBox = new ComboBox<>(null, dataService.getFromReports(baseExpression, QReport.report.phoneModel));
+        phoneBox.setEmptySelectionAllowed(false);
+        filters.add(new Filter<>("Phone Model", phoneBox, QReport.report.phoneModel::eq));
+
         filterLayout.addComponents(filters.stream().flatMap(filter -> filter.getComponents().stream()).toArray(Component[]::new));
 
         Button applyButton = new Button("Apply", e -> update());
@@ -95,7 +100,8 @@ public class Statistics extends Composite {
         timeChart = new TimeChart("Reports over time");
         androidVersionChart = new PieChart("Reports per Android Version");
         appVersionChart = new PieChart("Reports per App Version");
-        FlexLayout layout = new FlexLayout(filterPanel, timeChart, androidVersionChart, appVersionChart);
+        phoneChart = new PieChart("Reports per Phone Model");
+        FlexLayout layout = new FlexLayout(filterPanel, timeChart, androidVersionChart, appVersionChart, phoneChart);
         layout.setWidth(100, Unit.PERCENTAGE);
         Panel root = new Panel(layout);
         root.setSizeFull();
@@ -112,6 +118,7 @@ public class Statistics extends Composite {
         timeChart.setContent(dataService.countReports(expression, QReport.report.date.year().multiply(512).add(QReport.report.date.dayOfYear()), QReport.report.date));
         androidVersionChart.setContent(dataService.countReports(expression, QReport.report.androidVersion, QReport.report.androidVersion));
         appVersionChart.setContent(dataService.countReports(expression, QReport.report.versionName, QReport.report.versionName));
+        phoneChart.setContent(dataService.countReports(expression, QReport.report.phoneModel, QReport.report.phoneModel));
     }
 
     private static class Filter<T, C extends Component & HasValue<T>> {
