@@ -1,13 +1,14 @@
 package com.faendir.acra.service.user;
 
 import com.faendir.acra.config.AcraConfiguration;
-import com.faendir.acra.dataprovider.BufferedDataProvider;
 import com.faendir.acra.dataprovider.ObservableDataProvider;
+import com.faendir.acra.dataprovider.QueryDslDataProvider;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Permission;
+import com.faendir.acra.model.QUser;
 import com.faendir.acra.model.User;
-import com.faendir.acra.sql.user.UserRepository;
 import com.faendir.acra.util.PlainTextUser;
+import com.querydsl.jpa.impl.JPAQuery;
 import org.apache.commons.text.RandomStringGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
@@ -15,7 +16,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,42 +30,44 @@ import java.util.Optional;
  */
 @Service
 public class UserService implements Serializable {
-    @NonNull private final UserRepository userRepository;
+    private static final QUser USER = QUser.user;
     @NonNull private final AcraConfiguration acraConfiguration;
     @NonNull private final PasswordEncoder passwordEncoder;
     @NonNull private final RandomStringGenerator randomStringGenerator;
+    @NonNull private final EntityManager entityManager;
 
     @Autowired
-    public UserService(@NonNull UserRepository userRepository, @NonNull PasswordEncoder passwordEncoder, @NonNull AcraConfiguration acraConfiguration,
-            @NonNull RandomStringGenerator randomStringGenerator) {
-        this.userRepository = userRepository;
+    public UserService(@NonNull PasswordEncoder passwordEncoder, @NonNull AcraConfiguration acraConfiguration, @NonNull RandomStringGenerator randomStringGenerator,
+            @NonNull EntityManager entityManager) {
         this.passwordEncoder = passwordEncoder;
         this.acraConfiguration = acraConfiguration;
         this.randomStringGenerator = randomStringGenerator;
+        this.entityManager = entityManager;
     }
 
     @Nullable
     public User getUser(@NonNull String username) {
-        Optional<User> user = userRepository.findById(username);
-        if (!user.isPresent() && acraConfiguration.getUser().getName().equals(username)) {
-            user = Optional.of(getDefaultUser());
+        User user = new JPAQuery<>(entityManager).from(USER).where(USER.username.eq(username)).select(USER).fetchOne();
+        if (user != null && acraConfiguration.getUser().getName().equals(username)) {
+            user = getDefaultUser();
         }
-        return user.orElse(null);
+        return user;
     }
 
+    @Transactional
     @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
     public void createUser(@NonNull String username, @NonNull String password) {
-        if (userRepository.existsById(username)) {
+        if (new JPAQuery<>(entityManager).from(USER).where(USER.username.eq(username)).fetchFirst() != null) {
             throw new IllegalArgumentException("Username already exists");
         }
-        userRepository.save(new User(username, passwordEncoder.encode(password), Collections.singleton(User.Role.USER)));
+        entityManager.persist(new User(username, passwordEncoder.encode(password), Collections.singleton(User.Role.USER)));
     }
 
     public PlainTextUser createReporterUser() {
         String username;
         do {
             username = randomStringGenerator.generate(16);
-        } while (userRepository.existsById(username));
+        } while (new JPAQuery<>(entityManager).from(USER).where(USER.username.eq(username)).fetchFirst() != null);
         String password = randomStringGenerator.generate(16);
         return new PlainTextUser(username, password, passwordEncoder.encode(password), Collections.singleton(User.Role.REPORTER));
     }
@@ -71,15 +76,17 @@ public class UserService implements Serializable {
         return user != null && passwordEncoder.matches(password, user.getPassword());
     }
 
+    @Transactional
     public boolean changePassword(@NonNull User user, @NonNull String oldPassword, @NonNull String newPassword) {
         if (checkPassword(user, oldPassword)) {
             user.setPassword(newPassword);
-            userRepository.save(user);
+            entityManager.merge(user);
             return true;
         }
         return false;
     }
 
+    @Transactional
     @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
     public void setAdmin(@NonNull User user, boolean admin) {
         if (admin) {
@@ -87,9 +94,10 @@ public class UserService implements Serializable {
         } else {
             user.getRoles().remove(User.Role.ADMIN);
         }
-        userRepository.save(user);
+        entityManager.merge(user);
     }
 
+    @Transactional
     @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
     public void setPermission(@NonNull User user, @NonNull App app, @NonNull Permission.Level level) {
         Optional<Permission> permission = user.getPermissions().stream().filter(p -> p.getApp().equals(app)).findAny();
@@ -98,7 +106,7 @@ public class UserService implements Serializable {
         } else {
             user.getPermissions().add(new Permission(app, level));
         }
-        userRepository.save(user);
+        entityManager.merge(user);
     }
 
     @NonNull
@@ -107,8 +115,6 @@ public class UserService implements Serializable {
     }
 
     public ObservableDataProvider<User, Void> getUserProvider() {
-        return new BufferedDataProvider<>(acraConfiguration.getPaginationSize(),
-                pageable -> userRepository.findAllByRoles(User.Role.USER, pageable),
-                () -> userRepository.countAllByRoles(User.Role.USER));
+        return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(USER).where(USER.roles.any().eq(User.Role.USER)).select(USER));
     }
 }

@@ -71,10 +71,10 @@ public class BugTab implements AppTab {
         Button merge = new Button("Merge bugs", e -> {
             List<VBug> selectedItems = new ArrayList<>(bugs.getSelectedItems());
             if (selectedItems.size() > 1) {
-                RadioButtonGroup<String> titles = new RadioButtonGroup<>("", selectedItems.stream().map(VBug::getTitle).collect(Collectors.toList()));
-                titles.setSelectedItem(selectedItems.get(0).getTitle());
+                RadioButtonGroup<String> titles = new RadioButtonGroup<>("", selectedItems.stream().map(bug -> bug.getBug().getTitle()).collect(Collectors.toList()));
+                titles.setSelectedItem(selectedItems.get(0).getBug().getTitle());
                 new Popup().setTitle("Choose title for bug group").addComponent(titles).addCreateButton(p -> {
-                    dataService.mergeBugs(selectedItems, titles.getSelectedItem().orElseThrow(IllegalStateException::new));
+                    dataService.mergeBugs(selectedItems.stream().map(VBug::getBug).collect(Collectors.toList()), titles.getSelectedItem().orElseThrow(IllegalStateException::new));
                     bugs.getDataProvider().refreshAll();
                 }, true).show();
             } else {
@@ -86,10 +86,10 @@ public class BugTab implements AppTab {
         header.setComponentAlignment(hideSolved, Alignment.MIDDLE_RIGHT);
         bugs.addColumn(VBug::getReportCount,"reportCount", "Reports");
         bugs.sort(bugs.addColumn(VBug::getLastReport, new TimeSpanRenderer(), "lastReport", "Latest Report"), SortDirection.DESCENDING);
-        bugs.addColumn(VBug::getVersionCode, "versionCode", "Version");
-        bugs.addColumn(VBug::getTitle, "title", "Title").setExpandRatio(1).setMinimumWidthFromContent(false);
-        bugs.addOnClickNavigation(navigationManager, com.faendir.acra.ui.view.bug.BugView.class, bugItemClick -> String.valueOf(bugItemClick.getItem().getId()));
-        bugs.addColumn(bug -> new MyCheckBox(bug.isSolved(), SecurityUtils.hasPermission(app, Permission.Level.EDIT), e -> dataService.setBugSolved(bug, e.getValue())),
+        bugs.addColumn(bug -> bug.getBug().getVersionCode(), "versionCode", "Version");
+        bugs.addColumn(bug -> bug.getBug().getTitle(), "title", "Title").setExpandRatio(1).setMinimumWidthFromContent(false);
+        bugs.addOnClickNavigation(navigationManager, com.faendir.acra.ui.view.bug.BugView.class, bugItemClick -> String.valueOf(bugItemClick.getItem().getBug().getId()));
+        bugs.addColumn(bug -> new MyCheckBox(bug.getBug().isSolved(), SecurityUtils.hasPermission(app, Permission.Level.EDIT), e -> dataService.setBugSolved(bug.getBug(), e.getValue())),
                 new ComponentRenderer(), "solved", "Solved");
         layout.addComponent(bugs);
         layout.setExpandRatio(bugs, 1);

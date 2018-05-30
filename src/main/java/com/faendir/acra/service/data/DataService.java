@@ -1,34 +1,40 @@
 package com.faendir.acra.service.data;
 
-import com.faendir.acra.config.AcraConfiguration;
-import com.faendir.acra.dataprovider.BufferedDataProvider;
 import com.faendir.acra.dataprovider.ObservableDataProvider;
+import com.faendir.acra.dataprovider.QueryDslDataProvider;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Attachment;
 import com.faendir.acra.model.Bug;
 import com.faendir.acra.model.Permission;
 import com.faendir.acra.model.ProguardMapping;
+import com.faendir.acra.model.QApp;
+import com.faendir.acra.model.QAttachment;
+import com.faendir.acra.model.QBug;
+import com.faendir.acra.model.QPermission;
+import com.faendir.acra.model.QProguardMapping;
 import com.faendir.acra.model.QReport;
+import com.faendir.acra.model.QUser;
 import com.faendir.acra.model.Report;
 import com.faendir.acra.model.User;
-import com.faendir.acra.model.base.BaseBug;
+import com.faendir.acra.model.view.Queries;
 import com.faendir.acra.model.view.VApp;
 import com.faendir.acra.model.view.VBug;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.user.UserService;
-import com.faendir.acra.sql.data.AppRepository;
-import com.faendir.acra.sql.data.AppViewRepository;
-import com.faendir.acra.sql.data.AttachmentRepository;
-import com.faendir.acra.sql.data.BugRepository;
-import com.faendir.acra.sql.data.BugViewRepository;
-import com.faendir.acra.sql.data.ProguardMappingRepository;
-import com.faendir.acra.sql.data.ReportRepository;
 import com.faendir.acra.util.PlainTextUser;
 import com.faendir.acra.util.Utils;
+import com.mysema.commons.lang.CloseableIterator;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
+import com.querydsl.core.types.dsl.EnumPath;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringPath;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.impl.JPADeleteClause;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.acra.ReportField;
 import org.apache.commons.logging.Log;
@@ -52,8 +58,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author lukas
@@ -61,31 +68,19 @@ import java.util.stream.Stream;
  */
 @Service
 public class DataService implements Serializable {
+    private static final QUser USER = QUser.user;
+    private static final QPermission PERMISSION = QPermission.permission;
+    private static final QApp APP = QApp.app;
+    private static final QReport REPORT = QReport.report;
+    private static final QBug BUG = QBug.bug;
+    private static final QProguardMapping MAPPING = QProguardMapping.proguardMapping;
+    private static final QAttachment ATTACHMENT = QAttachment.attachment;
     @NonNull private final Log log = LogFactory.getLog(getClass());
-    @NonNull private final AcraConfiguration acraConfiguration;
-    @NonNull private final AppRepository appRepository;
-    @NonNull private final AppViewRepository appViewRepository;
-    @NonNull private final BugRepository bugRepository;
-    @NonNull private final BugViewRepository bugViewRepository;
-    @NonNull private final ReportRepository reportRepository;
-    @NonNull private final AttachmentRepository attachmentRepository;
-    @NonNull private final ProguardMappingRepository mappingRepository;
     @NonNull private final UserService userService;
     @NonNull private final EntityManager entityManager;
 
     @Autowired
-    public DataService(@NonNull AcraConfiguration acraConfiguration, @NonNull AppRepository appRepository, @NonNull AppViewRepository appViewRepository,
-            @NonNull BugRepository bugRepository, @NonNull BugViewRepository bugViewRepository, @NonNull ReportRepository reportRepository,
-            @NonNull AttachmentRepository attachmentRepository, @NonNull ProguardMappingRepository mappingRepository, @NonNull UserService userService,
-            @NonNull EntityManager entityManager) {
-        this.acraConfiguration = acraConfiguration;
-        this.appRepository = appRepository;
-        this.appViewRepository = appViewRepository;
-        this.bugRepository = bugRepository;
-        this.bugViewRepository = bugViewRepository;
-        this.reportRepository = reportRepository;
-        this.attachmentRepository = attachmentRepository;
-        this.mappingRepository = mappingRepository;
+    public DataService(@NonNull UserService userService, @NonNull EntityManager entityManager) {
         this.userService = userService;
         this.entityManager = entityManager;
     }
@@ -93,41 +88,44 @@ public class DataService implements Serializable {
     @NonNull
     public ObservableDataProvider<VApp, Void> getAppProvider() {
         boolean isAdmin = SecurityUtils.hasRole(User.Role.ADMIN);
-        return new BufferedDataProvider<>(acraConfiguration.getPaginationSize(),
-                isAdmin ?
-                        pageable -> appViewRepository.findAllByPermissionWithDefaultIncluded(SecurityUtils.getUsername(), Permission.Level.VIEW, pageable) :
-                        pageable -> appViewRepository.findAllByPermissionWithDefaultExcluded(SecurityUtils.getUsername(), Permission.Level.VIEW, pageable),
-                isAdmin ?
-                        () -> appViewRepository.countByPermissionWithDefaultIncluded(SecurityUtils.getUsername(), Permission.Level.VIEW) :
-                        () -> appViewRepository.countByPermissionWithDefaultExcluded(SecurityUtils.getUsername(), Permission.Level.VIEW));
+        Function<JPQLQuery<?>, BooleanExpression> existenceFunction = isAdmin ? JPQLQuery::notExists : JPQLQuery::exists;
+        BiFunction<EnumPath<Permission.Level>, Permission.Level, BooleanExpression> compareFunction = isAdmin ? EnumPath::lt : EnumPath::goe;
+        BooleanExpression where = existenceFunction.apply(JPAExpressions.select(PERMISSION)
+                .from(USER)
+                .join(USER.permissions, PERMISSION)
+                .where(USER.username.eq(SecurityUtils.getUsername()).and(PERMISSION.app.eq(APP)).and(compareFunction.apply(PERMISSION.level, Permission.Level.VIEW))));
+        return new QueryDslDataProvider<>(Queries.selectVApp(entityManager).where(where), new JPAQuery<>(entityManager).from(APP).where(where));
     }
 
     @NonNull
     public ObservableDataProvider<VBug, Void> getBugProvider(@NonNull App app, boolean onlyNonSolved) {
-        return new BufferedDataProvider<>(acraConfiguration.getPaginationSize(),
-                onlyNonSolved ? pageable -> bugViewRepository.findAllByAppAndSolvedFalse(app, pageable) : pageable -> bugViewRepository.findAllByApp(app, pageable),
-                onlyNonSolved ? () -> bugViewRepository.countAllByAppAndSolvedFalse(app) : () -> bugViewRepository.countAllByApp(app));
+        BooleanExpression where = BUG.app.eq(app).and(onlyNonSolved ? BUG.solved.eq(false) : Expressions.TRUE);
+        return new QueryDslDataProvider<>(Queries.selectVBug(entityManager).where(where), new JPAQuery<>(entityManager).from(BUG).where(where));
     }
 
     @NonNull
-    public ObservableDataProvider<Report, Void> getReportProvider(@NonNull BaseBug bug) {
-        return new BufferedDataProvider<>(acraConfiguration.getPaginationSize(),
-                pageable -> reportRepository.findAllByBugId(bug.getId(), pageable),
-                () -> reportRepository.countByBugId(bug.getId()));
+    public ObservableDataProvider<Report, Void> getReportProvider(@NonNull Bug bug) {
+        return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(REPORT).where(REPORT.bug.eq(bug)).select(REPORT));
     }
 
     @NonNull
     public ObservableDataProvider<Report, Void> getReportProvider(@NonNull App app) {
-        return new BufferedDataProvider<>(acraConfiguration.getPaginationSize(),
-                pageable -> reportRepository.findAllByBugApp(app, pageable),
-                () -> reportRepository.countByBugApp(app));
+        return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(REPORT).join(REPORT.bug).where(REPORT.bug.app.eq(app)).select(REPORT));
     }
 
     @NonNull
     public ObservableDataProvider<ProguardMapping, Void> getMappingProvider(@NonNull App app) {
-        return new BufferedDataProvider<>(acraConfiguration.getPaginationSize(),
-                pageable -> mappingRepository.findAllByApp(app, pageable),
-                () -> mappingRepository.countAllByApp(app));
+        return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(MAPPING).where(MAPPING.app.eq(app)).select(MAPPING));
+    }
+
+    @Transactional
+    public <T> T store(T entity) {
+        return entityManager.merge(entity);
+    }
+
+    @Transactional
+    public void delete(Object entity) {
+        entityManager.remove(entityManager.contains(entity) ? entity : entityManager.merge(entity));
     }
 
     /**
@@ -139,7 +137,7 @@ public class DataService implements Serializable {
     @NonNull
     public PlainTextUser createNewApp(@NonNull String name) {
         PlainTextUser user = userService.createReporterUser();
-        appRepository.save(new App(name, user));
+        store(new App(name, user));
         return user;
     }
 
@@ -147,47 +145,55 @@ public class DataService implements Serializable {
     public PlainTextUser recreateReporterUser(@NonNull App app) {
         PlainTextUser user = userService.createReporterUser();
         app.setReporter(user);
-        appRepository.save(app);
+        store(app);
         return user;
     }
 
     @Transactional
-    public void mergeBugs(@NonNull @Size(min = 2) Collection<? extends BaseBug> bugs, @NonNull String title) {
-        List<BaseBug> list = new ArrayList<>(bugs);
-        Bug bug = bugRepository.getOne(list.remove(0).getId());
+    public void mergeBugs(@NonNull @Size(min = 2) Collection<Bug> bugs, @NonNull String title) {
+        List<Bug> list = new ArrayList<>(bugs);
+        Bug bug = list.remove(0);
         bug.setTitle(title);
-        bug.setStacktraces(bugRepository.loadStacktraces(bugs.stream().map(BaseBug::getId).collect(Collectors.toList())));
-        bugRepository.save(bug);
-        try (Stream<Report> stream = reportRepository.streamAllByBugIdIn(list.stream().map(BaseBug::getId).collect(Collectors.toList()))) {
-            stream.forEach(report -> {
-                report.setBug(bug);
-                reportRepository.save(report);
-            });
+        StringPath stringPath = Expressions.stringPath("trace");
+        bug.setStacktraces(new JPAQuery<>(entityManager).from(BUG).join(BUG.stacktraces, stringPath).where(BUG.in(bugs)).select(stringPath).fetch());
+        bug = store(bug);
+        CloseableIterator<Report> iterator = new JPAQuery<>(entityManager).from(REPORT).where(REPORT.bug.in(list)).select(REPORT).iterate();
+        while (iterator.hasNext()) {
+            Report report = iterator.next();
+            report.setBug(bug);
+            store(report);
         }
-        bugRepository.deleteAllByIdIn(list.stream().map(BaseBug::getId).collect(Collectors.toList()));
+        iterator.close();
+        list.forEach(this::delete);
     }
 
     @Transactional
-    public void setBugSolved(@NonNull BaseBug bug, boolean solved) {
-        Bug b = bugRepository.getOne(bug.getId());
-        b.setSolved(solved);
-        bugRepository.save(b);
+    public void setBugSolved(@NonNull Bug bug, boolean solved) {
+        bug.setSolved(solved);
+        store(bug);
     }
 
     @NonNull
     public Optional<ProguardMapping> findMapping(@NonNull App app, int versionCode) {
-        return mappingRepository.findById(new ProguardMapping.MetaData(app, versionCode));
+        return Optional.ofNullable(new JPAQuery<>(entityManager).from(MAPPING).where(MAPPING.app.eq(app).and(MAPPING.versionCode.eq(versionCode))).select(MAPPING).fetchOne());
     }
 
     @NonNull
     public Optional<Report> findReport(@NonNull String id) {
-        return reportRepository.findByIdEager(id);
+        return Optional.ofNullable(new JPAQuery<>(entityManager).from(REPORT)
+                .join(REPORT.bug, BUG)
+                .fetchJoin()
+                .join(BUG.app, APP)
+                .fetchJoin()
+                .where(REPORT.id.eq(id))
+                .select(REPORT)
+                .fetchOne());
     }
 
     @NonNull
     public Optional<VBug> findBug(@NonNull String encodedId) {
         try {
-            return bugViewRepository.findByIdEager(Integer.parseInt(encodedId));
+            return Optional.ofNullable(Queries.selectVBug(entityManager).where(BUG.id.eq(Integer.parseInt(encodedId))).fetchOne());
         } catch (NumberFormatException e) {
             return Optional.empty();
         }
@@ -196,7 +202,7 @@ public class DataService implements Serializable {
     @NonNull
     public Optional<App> findApp(@NonNull String encodedId) {
         try {
-            return appRepository.findById(Integer.parseInt(encodedId));
+            return Optional.ofNullable(new JPAQuery<>(entityManager).from(APP).where(APP.id.eq(Integer.parseInt(encodedId))).select(APP).fetchOne());
         } catch (NumberFormatException e) {
             return Optional.empty();
         }
@@ -204,86 +210,80 @@ public class DataService implements Serializable {
 
     @NonNull
     public List<App> findAllApps() {
-        return appRepository.findAll();
+        return new JPAQuery<>(entityManager).from(APP).select(APP).fetch();
     }
 
     @NonNull
     public List<Attachment> findAttachments(@NonNull Report report) {
-        return attachmentRepository.findAllByReport(report);
+        return new JPAQuery<>(entityManager).from(ATTACHMENT).where(ATTACHMENT.report.eq(report)).select(ATTACHMENT).fetch();
+    }
+
+    private void deleteOrphanBugs() {
+        new JPADeleteClause(entityManager, BUG).where(JPAExpressions.selectFrom(REPORT).where(REPORT.bug.eq(BUG)).notExists()).execute();
+    }
+
+    private Optional<Bug> findBug(@NonNull App app, @NonNull String stacktrace) {
+        return Optional.ofNullable(new JPAQuery<>(entityManager).from(BUG).where(BUG.app.eq(app).and(BUG.stacktraces.any().eq(stacktrace))).select(BUG).fetchFirst());
     }
 
     @Transactional
     public void changeConfiguration(@NonNull App app, @NonNull App.Configuration configuration) {
         app.setConfiguration(configuration);
-        App a = appRepository.save(app);
-        try (Stream<Report> stream = reportRepository.streamAllByAppEager(a)) {
-            stream.forEach(report -> {
-                String stacktrace = Utils.generifyStacktrace(report.getStacktrace(), a.getConfiguration());
-                Optional<Bug> bug = bugRepository.findBugByAppAndStacktraces(a, stacktrace);
-                if (!bug.isPresent()) {
-                    report.setBug(new Bug(a, stacktrace, report.getVersionCode()));
-                    reportRepository.save(report);
-                } else if (!report.getBug().equals(bug.get())) {
-                    report.setBug(bug.get());
-                    reportRepository.save(report);
-                }
-            });
+        app = store(app);
+        CloseableIterator<Report> iterator = new JPAQuery<>(entityManager).from(REPORT).join(REPORT.bug, BUG).where(BUG.app.eq(app)).select(REPORT).iterate();
+        while (iterator.hasNext()) {
+            Report report = iterator.next();
+            String stacktrace = Utils.generifyStacktrace(report.getStacktrace(), app.getConfiguration());
+            Optional<Bug> bug = findBug(app, stacktrace);
+            if (!bug.isPresent()) {
+                report.setBug(new Bug(app, stacktrace, report.getVersionCode()));
+                store(report);
+            } else if (!bug.get().equals(report.getBug())) {
+                report.setBug(bug.get());
+                store(report);
+            }
         }
-        bugRepository.deleteOrphans();
+        iterator.close();
+        deleteOrphanBugs();
     }
 
+    @Transactional
     public void deleteReportsOlderThanDays(@NonNull App app, @NonNull int days) {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, -days);
-        reportRepository.deleteAllByBugAppAndDateBefore(app, calendar.getTime());
-        bugRepository.deleteOrphans();
+        new JPADeleteClause(entityManager, REPORT).where(REPORT.bug.app.eq(app).and(REPORT.date.before(calendar.getTime())));
+        deleteOrphanBugs();
     }
 
+    @Transactional
     public void deleteReportsBeforeVersion(@NonNull App app, int versionCode) {
-        reportRepository.deleteAllByBugAppAndVersionCodeLessThan(app, versionCode);
-        bugRepository.deleteOrphans();
+        new JPADeleteClause(entityManager, REPORT).where(REPORT.bug.app.eq(app).and(REPORT.versionCode.lt(versionCode)));
+        deleteOrphanBugs();
     }
 
-    public void delete(@NonNull App app) {
-        appRepository.delete(app);
-    }
-
-    public void delete(@NonNull Report report) {
-        reportRepository.delete(report);
-    }
-
-    public void delete(@NonNull ProguardMapping mapping) {
-        mappingRepository.delete(mapping);
-    }
-
-    public ProguardMapping save(@NonNull ProguardMapping entity) {
-        return mappingRepository.save(entity);
-    }
-
+    @Transactional
     public void createNewReport(@NonNull String reporterUserName, @NonNull String content, @NonNull List<MultipartFile> attachments) {
-        appRepository.findByReporterUsername(reporterUserName).ifPresent(app -> {
-
+        App app = new JPAQuery<>(entityManager).from(APP).where(APP.reporter.username.eq(reporterUserName)).select(APP).fetchOne();
+        if (app != null) {
             JSONObject jsonObject = new JSONObject(content);
             String stacktrace = Utils.generifyStacktrace(jsonObject.optString(ReportField.STACK_TRACE.name()), app.getConfiguration());
-            Bug bug = bugRepository.findBugByAppAndStacktraces(app, stacktrace).orElseGet(() -> new Bug(app, stacktrace, jsonObject.optInt(ReportField.APP_VERSION_CODE.name())));
-            Report report = reportRepository.save(new Report(bug, content));
+            Bug bug = findBug(app, stacktrace).orElseGet(() -> new Bug(app, stacktrace, jsonObject.optInt(ReportField.APP_VERSION_CODE.name())));
+            Report report = store(new Report(bug, content));
             attachments.forEach(multipartFile -> {
                 try {
-                    attachmentRepository.save(new Attachment(report,
+                    store(new Attachment(report,
                             multipartFile.getName(),
                             Hibernate.getLobCreator(entityManager.unwrap(Session.class)).createBlob(multipartFile.getInputStream(), multipartFile.getSize())));
                 } catch (IOException e) {
                     log.warn("Failed to load attachment with name " + multipartFile.getName(), e);
                 }
             });
-        });
+        }
     }
 
     public <T> Map<T, Long> countReports(@NonNull Predicate where, Expression<?> groupBy, @NonNull Expression<T> select) {
-        QReport report = QReport.report;
-        JPAQuery<?> query = new JPAQuery<>(entityManager);
-        List<Tuple> result = query.from(report).where(where).groupBy(groupBy).select(select, report.id.count()).fetch();
-        return result.stream().collect(Collectors.toMap(tuple -> tuple.get(select), tuple -> tuple.get(report.id.count())));
+        List<Tuple> result = ((JPAQuery<?>) new JPAQuery<>(entityManager)).from(REPORT).where(where).groupBy(groupBy).select(select, REPORT.id.count()).fetch();
+        return result.stream().collect(Collectors.toMap(tuple -> tuple.get(select), tuple -> tuple.get(REPORT.id.count())));
     }
 
     @NonNull
@@ -293,8 +293,6 @@ public class DataService implements Serializable {
 
     @NonNull
     public <T> List<T> getFromReports(@NonNull Predicate where, @NonNull Expression<T> select, ComparableExpressionBase<?> order) {
-        QReport report = QReport.report;
-        JPAQuery<?> query = new JPAQuery<>(entityManager);
-        return query.from(report).where(where).select(select).distinct().orderBy(order.asc()).fetch();
+        return ((JPAQuery<?>) new JPAQuery<>(entityManager)).from(REPORT).where(where).select(select).distinct().orderBy(order.asc()).fetch();
     }
 }

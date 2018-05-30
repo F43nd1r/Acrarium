@@ -1,6 +1,5 @@
 package com.faendir.acra.model;
 
-import com.faendir.acra.model.base.BaseApp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.PersistenceConstructor;
@@ -10,6 +9,9 @@ import javax.persistence.CascadeType;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
 /**
@@ -17,18 +19,22 @@ import javax.persistence.OneToOne;
  * @since 08.12.2017
  */
 @Entity
-public class App extends BaseApp {
+public class App {
     @OneToOne(cascade = CascadeType.ALL, optional = false, orphanRemoval = true, fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User reporter;
     private Configuration configuration;
+    private String name;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
     @PersistenceConstructor
     App() {
     }
 
     public App(@NonNull String name, @NonNull User reporter) {
-        super(name);
+        this.name = name;
         this.reporter = reporter;
         this.configuration = new Configuration();
     }
@@ -48,6 +54,28 @@ public class App extends BaseApp {
 
     public void setConfiguration(Configuration configuration) {
         this.configuration = configuration;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    @NonNull
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        App app = (App) o;
+        return id == app.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
     }
 
     @Embeddable

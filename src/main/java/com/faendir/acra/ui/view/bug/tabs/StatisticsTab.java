@@ -1,7 +1,7 @@
 package com.faendir.acra.ui.view.bug.tabs;
 
+import com.faendir.acra.model.Bug;
 import com.faendir.acra.model.QReport;
-import com.faendir.acra.model.view.VBug;
 import com.faendir.acra.service.data.DataService;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.Statistics;
@@ -28,7 +28,7 @@ public class StatisticsTab implements BugTab {
     }
 
     @Override
-    public Component createContent(@NonNull VBug bug, @NonNull NavigationManager navigationManager) {
+    public Component createContent(@NonNull Bug bug, @NonNull NavigationManager navigationManager) {
         Panel root = new Panel(new Statistics(QReport.report.bug.id.eq(bug.getId()), dataService));
         root.setSizeFull();
         Style.apply(root, Style.NO_BACKGROUND, Style.NO_BORDER);

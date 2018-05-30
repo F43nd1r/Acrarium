@@ -154,7 +154,7 @@ public class AdminTab implements AppTab {
                                 .addValidator(InMemoryUpload::isUploaded, "Upload failed"))
                         .addComponent(progressBar)
                         .addCreateButton(popup -> {
-                            dataService.save(new ProguardMapping(app, version.getValue(), upload.getUploadedString()));
+                            dataService.store(new ProguardMapping(app, version.getValue(), upload.getUploadedString()));
                             grid.getDataProvider().refreshAll();
                         }, true)
                         .show();

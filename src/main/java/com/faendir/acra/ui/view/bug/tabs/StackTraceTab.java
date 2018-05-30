@@ -1,7 +1,7 @@
 package com.faendir.acra.ui.view.bug.tabs;
 
+import com.faendir.acra.model.Bug;
 import com.faendir.acra.model.ProguardMapping;
-import com.faendir.acra.model.view.VBug;
 import com.faendir.acra.service.data.DataService;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.util.Utils;
@@ -31,7 +31,7 @@ public class StackTraceTab implements BugTab {
     }
 
     @Override
-    public Component createContent(@NonNull VBug bug, @NonNull NavigationManager navigationManager) {
+    public Component createContent(@NonNull Bug bug, @NonNull NavigationManager navigationManager) {
         Optional<ProguardMapping> mapping = dataService.findMapping(bug.getApp(), bug.getVersionCode());
         Accordion accordion = new Accordion();
         for (String stacktrace : bug.getStacktraces()) {

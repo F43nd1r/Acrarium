@@ -1,6 +1,6 @@
 package com.faendir.acra.ui.view.bug.tabs;
 
-import com.faendir.acra.model.view.VBug;
+import com.faendir.acra.model.Bug;
 import com.faendir.acra.service.data.DataService;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.ReportList;
@@ -25,7 +25,7 @@ public class ReportTab implements BugTab {
     }
 
     @Override
-    public Component createContent(@NonNull VBug bug, @NonNull NavigationManager navigationManager) {
+    public Component createContent(@NonNull Bug bug, @NonNull NavigationManager navigationManager) {
         Component content = new ReportList(bug.getApp(), navigationManager, dataService::delete, dataService.getReportProvider(bug));
         content.setSizeFull();
         return content;

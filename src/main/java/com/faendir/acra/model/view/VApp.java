@@ -1,27 +1,27 @@
 package com.faendir.acra.model.view;
 
-import com.faendir.acra.model.base.BaseApp;
-import org.hibernate.annotations.Immutable;
-import org.springframework.data.annotation.PersistenceConstructor;
-
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import com.faendir.acra.model.App;
+import com.querydsl.core.annotations.QueryProjection;
 
 /**
  * @author lukas
- * @since 20.05.18
+ * @since 29.05.18
  */
-@Table(name = "app_view")
-@Immutable
-@Entity
-public class VApp extends BaseApp {
-    private int reportCount;
+public class VApp {
+    private final App app;
+    private final long reportCount;
 
-    @PersistenceConstructor
-    VApp() {
+    @QueryProjection
+    public VApp(App app, long reportCount) {
+        this.app = app;
+        this.reportCount = reportCount;
     }
 
-    public int getReportCount() {
+    public App getApp() {
+        return app;
+    }
+
+    public long getReportCount() {
         return reportCount;
     }
 }

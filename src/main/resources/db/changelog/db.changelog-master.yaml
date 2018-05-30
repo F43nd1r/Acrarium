@@ -474,4 +474,11 @@ databaseChangeLog:
           AS `last_report` from (`acra`.`bug` left join `acra`.`report` on((`acra`.`report`.`bug_id`
           = `acra`.`bug`.`id`))) group by `acra`.`bug`.`id`)
         viewName: bug_view
-
+- changeSet:
+    id: 2018-05-30-drop-views
+    author: luaks
+    changes:
+    - dropView:
+         viewName: app_view
+    - dropView:
+        viewName: bug_view

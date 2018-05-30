@@ -1,6 +1,7 @@
 package com.faendir.acra.ui.view.bug;
 
 import com.faendir.acra.model.App;
+import com.faendir.acra.model.Bug;
 import com.faendir.acra.model.Permission;
 import com.faendir.acra.model.view.VBug;
 import com.faendir.acra.service.data.DataService;
@@ -49,16 +50,16 @@ public class BugView extends ParametrizedBaseView<Pair<VBug, String>> {
         VBug bug = parameter.getFirst();
         GridLayout summaryGrid = new GridLayout(2, 1);
         Style.BORDERED_GRIDLAYOUT.apply(summaryGrid);
-        summaryGrid.addComponents(new Label("Title", ContentMode.PREFORMATTED), new Label(bug.getTitle(), ContentMode.PREFORMATTED));
-        summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(String.valueOf(bug.getVersionCode()), ContentMode.PREFORMATTED));
+        summaryGrid.addComponents(new Label("Title", ContentMode.PREFORMATTED), new Label(bug.getBug().getTitle(), ContentMode.PREFORMATTED));
+        summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(String.valueOf(bug.getBug().getVersionCode()), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Last Report", ContentMode.PREFORMATTED), new Label(new PrettyTime().format(bug.getLastReport()), ContentMode.PREFORMATTED));
         summaryGrid.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
         summaryGrid.setSizeFull();
         Panel summary = new Panel(summaryGrid);
         summary.setCaption("Summary");
-        MyTabSheet<VBug> tabSheet = new MyTabSheet<>(bug, getNavigationManager(), tabs);
+        MyTabSheet<Bug> tabSheet = new MyTabSheet<>(bug.getBug(), getNavigationManager(), tabs);
         tabSheet.setSizeFull();
-        tabSheet.addSelectedTabChangeListener(e -> getNavigationManager().updatePageParameters(bug.getId() + "/" + e.getTabSheet().getSelectedTab().getCaption()));
+        tabSheet.addSelectedTabChangeListener(e -> getNavigationManager().updatePageParameters(bug.getBug().getId() + "/" + e.getTabSheet().getSelectedTab().getCaption()));
         if (tabSheet.getCaptions().contains(parameter.getSecond())) tabSheet.setInitialTab(parameter.getSecond());
         else tabSheet.setFirstTabAsInitialTab();
         VerticalLayout layout = new VerticalLayout(summary, tabSheet);
@@ -85,7 +86,7 @@ public class BugView extends ParametrizedBaseView<Pair<VBug, String>> {
 
         @Override
         protected String getTitle(Pair<VBug, String> parameter) {
-            return parameter.getFirst().getTitle();
+            return parameter.getFirst().getBug().getTitle();
         }
 
         @Override
@@ -107,7 +108,7 @@ public class BugView extends ParametrizedBaseView<Pair<VBug, String>> {
 
         @Override
         protected App toApp(Pair<VBug, String> parameter) {
-            return parameter.getFirst().getApp();
+            return parameter.getFirst().getBug().getApp();
         }
 
         @Override

@@ -1,29 +1,32 @@
 package com.faendir.acra.model.view;
 
-import com.faendir.acra.model.base.BaseBug;
-import org.hibernate.annotations.Immutable;
-import org.springframework.data.annotation.PersistenceConstructor;
+import com.faendir.acra.model.Bug;
+import com.querydsl.core.annotations.QueryProjection;
+import com.querydsl.jpa.impl.JPAQuery;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
  * @author lukas
- * @since 17.05.18
+ * @since 30.05.18
  */
-@Table(name = "bug_view")
-@Immutable
-@Entity
-public class VBug extends BaseBug {
-    private Date lastReport;
-    private int reportCount;
+public class VBug {
+    private final Bug bug;
+    private final Date lastReport;
+    private final long reportCount;
 
-    @PersistenceConstructor
-    VBug() {
+    @QueryProjection
+    public VBug(Bug bug, Date lastReport, long reportCount) {
+        this.bug = bug;
+        this.lastReport = lastReport;
+        this.reportCount = reportCount;
     }
 
-    public int getReportCount() {
+    public Bug getBug() {
+        return bug;
+    }
+
+    public long getReportCount() {
         return reportCount;
     }
 

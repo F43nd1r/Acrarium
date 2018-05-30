@@ -44,9 +44,9 @@ public class Overview extends BaseView {
         grid.setResponsive(true);
         grid.setSizeToRows();
         grid.setSelectionMode(Grid.SelectionMode.NONE);
-        grid.addColumn(VApp::getName, "name", "Name");
+        grid.addColumn(app -> app.getApp().getName(), "name", "Name");
         grid.addColumn(VApp::getReportCount, "reportCount", "Reports");
-        grid.addOnClickNavigation(getNavigationManager(), AppView.class, e -> String.valueOf(e.getItem().getId()));
+        grid.addOnClickNavigation(getNavigationManager(), AppView.class, e -> String.valueOf(e.getItem().getApp().getId()));
         VerticalLayout layout = new VerticalLayout();
         if (SecurityUtils.hasRole(User.Role.ADMIN)) {
             Button add = new Button("New App", e -> addApp());
