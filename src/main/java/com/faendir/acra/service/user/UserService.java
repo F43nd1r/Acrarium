@@ -48,7 +48,7 @@ public class UserService implements Serializable {
     @Nullable
     public User getUser(@NonNull String username) {
         User user = new JPAQuery<>(entityManager).from(USER).where(USER.username.eq(username)).select(USER).fetchOne();
-        if (user != null && acraConfiguration.getUser().getName().equals(username)) {
+        if (user == null && acraConfiguration.getUser().getName().equals(username)) {
             user = getDefaultUser();
         }
         return user;
