@@ -12,9 +12,11 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Composite;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.UI;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberTickUnitSource;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.PieLabelLinkStyle;
 import org.jfree.chart.plot.PiePlot;
@@ -45,10 +47,9 @@ import java.util.function.Function;
  * @since 21.05.18
  */
 public class Statistics extends Composite {
-    private static final Color BACKGROUND_GRAY = new Color(0xfafafa); //vaadin gray
     private static final Color BLUE = new Color(0x197de1); //vaadin blue
-    private static final int WIDTH = 640;
-    private static final int HEIGHT = 360;
+    private static final Color FOREGROUND_DARK = new Color(0xcacecf);
+    private static final Color FOREGROUND_LIGHT = new Color(0x464646);
     private final BooleanExpression baseExpression;
     private final DataService dataService;
     private final List<Filter<?, ?>> filters;
@@ -96,6 +97,7 @@ public class Statistics extends Composite {
         filterLayout.addComponent(applyButton);
 
         Panel filterPanel = new Panel(filterLayout);
+        Style.NO_BACKGROUND.apply(filterPanel);
         filterPanel.setCaption("Filter");
         timeChart = new TimeChart("Reports over time");
         androidVersionChart = new PieChart("Reports per Android Version");
@@ -166,6 +168,10 @@ public class Statistics extends Composite {
             panel.setContent(content);
         }
 
+        Paint getForegroundColor() {
+            return UI.getCurrent().getTheme().toLowerCase().contains("dark") ? FOREGROUND_DARK : FOREGROUND_LIGHT;
+        }
+
         protected abstract JFreeChart createChart(@NonNull Map<T, Long> map);
     }
 
@@ -180,13 +186,24 @@ public class Statistics extends Composite {
             series.add(new Day(new Date()), 0);
             map.forEach((date, count) -> series.addOrUpdate(new Day(date), count));
             JFreeChart chart = ChartFactory.createXYBarChart("", "Date", true, "Reports", new TimeSeriesCollection(series), PlotOrientation.VERTICAL, false, false, false);
+            chart.setBackgroundPaint(null);
             XYPlot plot = chart.getXYPlot();
             plot.getRangeAxis().setStandardTickUnits(new NumberTickUnitSource(true));
-            plot.setBackgroundPaint(BACKGROUND_GRAY);
-            chart.setBackgroundPaint(BACKGROUND_GRAY);
+            plot.setBackgroundAlpha(0);
             plot.setDomainGridlinesVisible(false);
-            plot.setRangeGridlinePaint(Color.BLACK);
             plot.setOutlineVisible(false);
+            Paint foregroundColor = getForegroundColor();
+            plot.setRangeGridlinePaint(foregroundColor);
+            ValueAxis domainAxis = plot.getDomainAxis();
+            domainAxis.setLabelPaint(foregroundColor);
+            domainAxis.setTickLabelPaint(foregroundColor);
+            domainAxis.setAxisLinePaint(foregroundColor);
+            domainAxis.setTickMarkPaint(foregroundColor);
+            ValueAxis rangeAxis = plot.getRangeAxis();
+            rangeAxis.setLabelPaint(foregroundColor);
+            rangeAxis.setTickLabelPaint(foregroundColor);
+            rangeAxis.setAxisLinePaint(foregroundColor);
+            rangeAxis.setTickMarkPaint(foregroundColor);
             XYBarRenderer barRenderer = (XYBarRenderer) plot.getRenderer();
             barRenderer.setBarPainter(new StandardXYBarPainter());
             barRenderer.setSeriesPaint(0, BLUE);
@@ -207,14 +224,17 @@ public class Statistics extends Composite {
             map.forEach((label, count) -> dataset.insertValue(0, label, count));
             dataset.sortByKeys(SortOrder.ASCENDING);
             JFreeChart chart = ChartFactory.createPieChart("", dataset, false, false, false);
+            chart.setBackgroundPaint(null);
             PiePlot plot = (PiePlot) chart.getPlot();
             plot.setShadowPaint(null);
-            plot.setBackgroundPaint(BACKGROUND_GRAY);
-            chart.setBackgroundPaint(BACKGROUND_GRAY);
+            plot.setBackgroundAlpha(0);
             plot.setOutlineVisible(false);
-            plot.setLabelBackgroundPaint(BACKGROUND_GRAY);
+            plot.setLabelBackgroundPaint(null);
             plot.setLabelOutlinePaint(null);
             plot.setLabelShadowPaint(null);
+            Paint foregroundColor = getForegroundColor();
+            plot.setLabelPaint(foregroundColor);
+            plot.setLabelLinkPaint(foregroundColor);
             plot.setLabelLinkStyle(PieLabelLinkStyle.QUAD_CURVE);
             plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0} ({2})"));
             //noinspection unchecked
