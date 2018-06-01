@@ -452,37 +452,6 @@ databaseChangeLog:
         referencedColumnNames: id
         referencedTableName: app
 - changeSet:
-    id: 1527006878002-34
-    author: lukas (generated)
-    changes:
-    - createView:
-        fullDefinition: false
-        selectQuery: (select `acra`.`app`.`id` AS `id`,`acra`.`app`.`name` AS `name`,count(`acra`.`report`.`id`)
-          AS `report_count` from ((`acra`.`app` left join `acra`.`bug` on((`acra`.`bug`.`app_id`
-          = `acra`.`app`.`id`))) left join `acra`.`report` on((`acra`.`report`.`bug_id`
-          = `acra`.`bug`.`id`))) group by `acra`.`app`.`id`)
-        viewName: app_view
-- changeSet:
-    id: 1527006878002-35
-    author: lukas (generated)
-    changes:
-    - createView:
-        fullDefinition: false
-        selectQuery: (select `acra`.`bug`.`id` AS `id`,`acra`.`bug`.`solved` AS `solved`,`acra`.`bug`.`version_code`
-          AS `version_code`,`acra`.`bug`.`app_id` AS `app_id`,`acra`.`bug`.`title`
-          AS `title`,count(`acra`.`report`.`id`) AS `report_count`,max(`acra`.`report`.`date`)
-          AS `last_report` from (`acra`.`bug` left join `acra`.`report` on((`acra`.`report`.`bug_id`
-          = `acra`.`bug`.`id`))) group by `acra`.`bug`.`id`)
-        viewName: bug_view
-- changeSet:
-    id: 2018-05-30-drop-views
-    author: luaks
-    changes:
-    - dropView:
-         viewName: app_view
-    - dropView:
-        viewName: bug_view
-- changeSet:
     id: 2018-06-01-add-report-columns
     author: lukas
     changes:
