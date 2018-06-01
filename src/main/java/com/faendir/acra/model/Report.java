@@ -15,6 +15,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -29,7 +30,7 @@ public class Report {
     private Bug bug;
     @Type(type = "text") private String content;
     @Transient private JSONObject jsonObject;
-    private Date date;
+    private LocalDateTime date;
     @Type(type = "text") private String stacktrace;
     private int versionCode;
     private String versionName;
@@ -87,7 +88,7 @@ public class Report {
     }
 
     @NonNull
-    public Date getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 

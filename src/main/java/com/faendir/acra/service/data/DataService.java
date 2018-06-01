@@ -46,8 +46,9 @@ import javax.persistence.EntityManager;
 import javax.validation.constraints.Size;
 import java.io.IOException;
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -251,9 +252,7 @@ public class DataService implements Serializable {
 
     @Transactional
     public void deleteReportsOlderThanDays(@NonNull App app, @NonNull int days) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH, -days);
-        new JPADeleteClause(entityManager, report).where(report.bug.app.eq(app).and(report.date.before(calendar.getTime())));
+        new JPADeleteClause(entityManager, report).where(report.bug.app.eq(app).and(report.date.before(LocalDateTime.now().minus(days, ChronoUnit.DAYS))));
         deleteOrphanBugs();
     }
 

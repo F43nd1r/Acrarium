@@ -12,12 +12,11 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -27,15 +26,15 @@ import java.util.stream.Collectors;
  * @since 13.05.2017
  */
 public final class Utils {
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.ENGLISH);
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
     private static final Log log = LogFactory.getLog(Utils.class);
 
     @NonNull
-    public static Date getDateFromString(@NonNull String s) {
+    public static LocalDateTime getDateFromString(@NonNull String s) {
         try {
-            return dateFormat.parse(s);
-        } catch (ParseException e) {
-            return new Date();
+            return LocalDateTime.parse(s, formatter);
+        } catch (DateTimeParseException e) {
+            return LocalDateTime.now();
         }
     }
 

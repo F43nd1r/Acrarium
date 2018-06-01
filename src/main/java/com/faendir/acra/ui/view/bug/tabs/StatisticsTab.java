@@ -4,7 +4,7 @@ import com.faendir.acra.model.Bug;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.service.data.DataService;
 import com.faendir.acra.ui.navigation.NavigationManager;
-import com.faendir.acra.ui.view.base.Statistics;
+import com.faendir.acra.ui.view.base.statistics.Statistics;
 import com.faendir.acra.util.Style;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
