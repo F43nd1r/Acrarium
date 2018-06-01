@@ -7,6 +7,26 @@ A Backend for ACRA written in Java using Spring Boot, Vaadin and MySQL
 
 See [Wiki Setup guide](https://github.com/F43nd1r/acra-backend/wiki/Setup-guide)
 
+# Screenshots
+
+###### Listing reports
+![report list](https://imgur.com/0b9yPxD)
+
+###### Statistics
+![statistics](https://imgur.com/oxwgP1E)
+
+###### Proguard and Export Support
+![admin tab](https://imgur.com/5ysg8I1)
+
+###### Report Summary and Attachment Support
+![report summary](https://imgur.com/0z9eTEd)
+
+###### Full Report content
+![report content](https://imgur.com/L2nFGC5)
+
+###### Dark Theme
+![dark theme](https://imgur.com/Em1oiWs)
+
 # License
 
 All source code in this repository is licensed under the Apache License 2.0 (see [LICENSE](LICENSE))
