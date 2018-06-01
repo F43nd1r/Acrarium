@@ -10,22 +10,22 @@ See [Wiki Setup guide](https://github.com/F43nd1r/acra-backend/wiki/Setup-guide)
 # Screenshots
 
 ###### Listing reports
-![report list](https://imgur.com/0b9yPxD)
+![report list](https://i.imgur.com/0b9yPxD.png)
 
 ###### Statistics
-![statistics](https://imgur.com/oxwgP1E)
+![statistics](https://i.imgur.com/oxwgP1E.png)
 
 ###### Proguard and Export Support
-![admin tab](https://imgur.com/5ysg8I1)
+![admin tab](https://i.imgur.com/5ysg8I1.png)
 
 ###### Report Summary and Attachment Support
-![report summary](https://imgur.com/0z9eTEd)
+![report summary](https://i.imgur.com/0z9eTEd.png)
 
 ###### Full Report content
-![report content](https://imgur.com/L2nFGC5)
+![report content](https://i.imgur.com/L2nFGC5.png)
 
 ###### Dark Theme
-![dark theme](https://imgur.com/Em1oiWs)
+![dark theme](https://i.imgur.com/Em1oiWs.png)
 
 # License
 
