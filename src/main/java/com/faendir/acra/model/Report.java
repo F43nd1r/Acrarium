@@ -37,6 +37,8 @@ public class Report {
     @Type(type = "text") private String userComment;
     private String androidVersion;
     private String phoneModel;
+    private String brand;
+    private String installationId;
 
     @PersistenceConstructor
     Report() {
@@ -45,7 +47,11 @@ public class Report {
     public Report(@NonNull Bug bug, @NonNull String content) {
         this.bug = bug;
         this.content = content;
-        this.id = getJsonObject().optString(ReportField.REPORT_ID.name());
+        initFields();
+    }
+
+    public final void initFields() {
+        this.id = getJsonObject().getString(ReportField.REPORT_ID.name());
         this.date = Utils.getDateFromString(getJsonObject().optString(ReportField.USER_CRASH_DATE.name()));
         this.stacktrace = getJsonObject().optString(ReportField.STACK_TRACE.name());
         this.versionCode = getJsonObject().optInt(ReportField.APP_VERSION_CODE.name());
@@ -54,6 +60,8 @@ public class Report {
         this.userComment = getJsonObject().optString(ReportField.USER_COMMENT.name());
         this.androidVersion = getJsonObject().optString(ReportField.ANDROID_VERSION.name());
         this.phoneModel = getJsonObject().optString(ReportField.PHONE_MODEL.name());
+        this.brand = getJsonObject().optString(ReportField.BRAND.name());
+        this.installationId = getJsonObject().optString(ReportField.INSTALLATION_ID.name());
     }
 
     @NonNull
@@ -115,5 +123,15 @@ public class Report {
     @NonNull
     public String getPhoneModel() {
         return phoneModel;
+    }
+
+    @NonNull
+    public String getBrand() {
+        return brand;
+    }
+
+    @NonNull
+    public String getInstallationId() {
+        return installationId;
     }
 }

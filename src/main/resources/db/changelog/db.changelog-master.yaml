@@ -482,3 +482,17 @@ databaseChangeLog:
          viewName: app_view
     - dropView:
         viewName: bug_view
+- changeSet:
+    id: 2018-06-01-add-report-columns
+    author: lukas
+    changes:
+    - addColumn:
+        tableName: report
+        columns:
+        - column:
+            name: brand
+            type: varchar(255)
+        - column:
+            name: installation_id
+            type: varchar(255)
+
