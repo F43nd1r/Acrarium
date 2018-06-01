@@ -32,7 +32,6 @@ import org.springframework.lang.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -66,9 +65,8 @@ public class BugTab implements AppTab {
         MyGrid<VBug> bugs = new MyGrid<>(null, dataService.getBugProvider(app, hideSolved::getValue));
         bugs.setSelectionMode(Grid.SelectionMode.MULTI);
         hideSolved.addValueChangeListener(e -> layout.getUI().access(() -> {
-            Set<VBug> selection = bugs.getSelectedItems();
+            bugs.deselectAll();
             bugs.getDataProvider().refreshAll();
-            selection.forEach(bugs::select);
         }));
         Button merge = new Button("Merge bugs", e -> {
             List<VBug> selectedItems = new ArrayList<>(bugs.getSelectedItems());
@@ -77,6 +75,7 @@ public class BugTab implements AppTab {
                 titles.setSelectedItem(selectedItems.get(0).getBug().getTitle());
                 new Popup().setTitle("Choose title for bug group").addComponent(titles).addCreateButton(p -> {
                     dataService.mergeBugs(selectedItems.stream().map(VBug::getBug).collect(Collectors.toList()), titles.getSelectedItem().orElseThrow(IllegalStateException::new));
+                    bugs.deselectAll();
                     bugs.getDataProvider().refreshAll();
                 }, true).show();
             } else {

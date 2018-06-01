@@ -94,6 +94,10 @@ public class MyGrid<T> extends Composite {
         grid.select(item);
     }
 
+    public void deselectAll() {
+        grid.deselectAll();
+    }
+
     public void addOnClickNavigation(@NonNull NavigationManager navigationManager, Class<? extends BaseView> namedView,
             Function<Grid.ItemClick<T>, String> parameterGetter) {
         grid.addItemClickListener(e -> {
