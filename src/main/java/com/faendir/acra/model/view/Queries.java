@@ -15,14 +15,14 @@ import static com.faendir.acra.model.QReport.report;
  */
 public abstract class Queries {
     private static final JPAQuery<VBug> V_BUG = new JPAQuery<>().from(bug)
-            .join(report)
+            .leftJoin(report)
             .on(report.bug.eq(bug))
             .select(new QVBug(bug, report.date.max(), report.count()))
             .groupBy(bug);
     private static final JPAQuery<VApp> V_APP = new JPAQuery<>().from(app)
-            .join(bug)
+            .leftJoin(bug)
             .on(bug.app.eq(app))
-            .join(report)
+            .leftJoin(report)
             .on(report.bug.eq(bug))
             .select(new QVApp(app, bug.countDistinct(), report.count()))
             .groupBy(app);

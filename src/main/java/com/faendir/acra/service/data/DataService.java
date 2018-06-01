@@ -222,7 +222,7 @@ public class DataService implements Serializable {
     }
 
     private void deleteOrphanBugs() {
-        new JPADeleteClause(entityManager, bug).where(JPAExpressions.selectFrom(report).where(report.bug.eq(bug)).notExists()).execute();
+        new JPADeleteClause(entityManager, bug).where(bug.notIn(JPAExpressions.select(report.bug).from(report).distinct())).execute();
     }
 
     private Optional<Bug> findBug(@NonNull App app, @NonNull String stacktrace) {
@@ -241,24 +241,28 @@ public class DataService implements Serializable {
             if (!bug.isPresent()) {
                 report.setBug(new Bug(app, stacktrace, report.getVersionCode()));
                 store(report);
+                entityManager.flush();
             } else if (!bug.get().equals(report.getBug())) {
                 report.setBug(bug.get());
                 store(report);
             }
         }
         iterator.close();
+        entityManager.flush();
         deleteOrphanBugs();
     }
 
     @Transactional
     public void deleteReportsOlderThanDays(@NonNull App app, @NonNull int days) {
         new JPADeleteClause(entityManager, report).where(report.bug.app.eq(app).and(report.date.before(LocalDateTime.now().minus(days, ChronoUnit.DAYS))));
+        entityManager.flush();
         deleteOrphanBugs();
     }
 
     @Transactional
     public void deleteReportsBeforeVersion(@NonNull App app, int versionCode) {
         new JPADeleteClause(entityManager, report).where(report.bug.app.eq(app).and(report.versionCode.lt(versionCode)));
+        entityManager.flush();
         deleteOrphanBugs();
     }
 
