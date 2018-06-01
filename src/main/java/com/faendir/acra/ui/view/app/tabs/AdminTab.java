@@ -139,7 +139,11 @@ public class AdminTab implements AppTab {
             grid.addColumn(report -> "Delete",
                     new ButtonRenderer<>(e -> new Popup().setTitle("Confirm")
                             .addComponent(new Label("Are you sure you want to delete the mapping for version " + e.getItem().getVersionCode() + "?"))
-                            .addYesNoButtons(p -> dataService.delete(e.getItem()), true)));
+                            .addYesNoButtons(p -> {
+                                dataService.delete(e.getItem());
+                                grid.getDataProvider().refreshAll();
+                            }, true)
+                            .show()));
         }
         layout.addComponent(grid);
         Style.NO_PADDING.apply(layout);

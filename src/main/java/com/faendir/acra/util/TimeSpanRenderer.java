@@ -7,6 +7,7 @@ import org.springframework.lang.Nullable;
 import org.xbib.time.pretty.PrettyTime;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 
 /**
  * @author Lukas
@@ -16,7 +17,7 @@ public class TimeSpanRenderer extends TextRenderer {
     @Override
     public JsonValue encode(@Nullable Object value) {
         if (value instanceof LocalDateTime) {
-            return Json.create(new PrettyTime().formatUnrounded((LocalDateTime) value));
+            return Json.create(new PrettyTime(Locale.US).formatUnrounded((LocalDateTime) value));
         }
         return super.encode(value);
     }

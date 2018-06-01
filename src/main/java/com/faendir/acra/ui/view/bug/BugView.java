@@ -28,6 +28,7 @@ import org.springframework.lang.NonNull;
 import org.xbib.time.pretty.PrettyTime;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -52,7 +53,7 @@ public class BugView extends ParametrizedBaseView<Pair<VBug, String>> {
         Style.BORDERED_GRIDLAYOUT.apply(summaryGrid);
         summaryGrid.addComponents(new Label("Title", ContentMode.PREFORMATTED), new Label(bug.getBug().getTitle(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(String.valueOf(bug.getBug().getVersionCode()), ContentMode.PREFORMATTED));
-        summaryGrid.addComponents(new Label("Last Report", ContentMode.PREFORMATTED), new Label(new PrettyTime().format(bug.getLastReport()), ContentMode.PREFORMATTED));
+        summaryGrid.addComponents(new Label("Last Report", ContentMode.PREFORMATTED), new Label(new PrettyTime(Locale.US).format(bug.getLastReport()), ContentMode.PREFORMATTED));
         summaryGrid.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
         summaryGrid.setSizeFull();
         Panel summary = new Panel(summaryGrid);
