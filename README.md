@@ -7,6 +7,13 @@ A Backend for ACRA written in Java using Spring Boot, Vaadin and MySQL
 
 See [Wiki Setup guide](https://github.com/F43nd1r/acra-backend/wiki/Setup-guide)
 
+# Maturity
+
+This project is in an early development stage, which means
+ - bug reports and feature request are very welcome
+ - frequent database backups are recommended
+ - future versions might not be compatible with current releases
+
 # Screenshots
 
 ###### Listing reports
