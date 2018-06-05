@@ -35,20 +35,21 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 ext {
-    javaGeneratedSources = file("$buildDir/generated/java")
+    generated = file("$buildDir/generated")
+    queryDslOutput = file("$generated/querydsl/java")
 }
 
 compileJava {
     doFirst {
-        javaGeneratedSources.mkdirs()
+        queryDslOutput.mkdirs()
     }
-    options.compilerArgs += ['-parameters', '-s', javaGeneratedSources]
+    options.compilerArgs += ['-parameters', '-s', queryDslOutput]
 }
 
 idea {
     module {
-        sourceDirs += javaGeneratedSources
-        generatedSourceDirs += javaGeneratedSources
+        sourceDirs += queryDslOutput
+        generatedSourceDirs += queryDslOutput
     }
 }
 
@@ -126,7 +127,7 @@ war {
 
 task generateThemeClasses(type: com.faendir.acra.gradle.ThemeClassGenerator) {
     themesDirectory file('src/main/resources/VAADIN/themes')
-    outputDirectory javaGeneratedSources
+    outputDirectory file("$generated/faendir/java")
 }
 
 compileJava.dependsOn(generateThemeClasses)

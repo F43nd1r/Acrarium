@@ -20,7 +20,12 @@ import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.TypeSpec
 import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
+import org.gradle.plugins.ide.idea.IdeaPlugin
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -30,40 +35,26 @@ import static javax.lang.model.element.Modifier.*
  * @author lukas
  * @since 05.06.18
  */
-public class ThemeClassGenerator extends DefaultTask {
-    private File themesDirectory
-    private File outputDirectory
+@CacheableTask
+@SuppressWarnings("GroovyUnusedDeclaration")
+class ThemeClassGenerator extends DefaultTask {
+    @SkipWhenEmpty
+    @InputDirectory
+    File themesDirectory
+    @OutputDirectory
+    File outputDirectory
 
-    public ThemeClassGenerator() {
-        themesDirectory = null
+    ThemeClassGenerator() {
         project.afterEvaluate {
-            inputs.dir themesDirectory
-            inputs.files(project.fileTree(dir: themesDirectory, include: '**/*.scss', exclude: "**/styles.scss").collect())
-            outputs.dir "$outputDirectory/com/vaadin/ui/themes/"
             project.sourceSets.main.java.srcDirs outputs.files
+            project.plugins.withType(IdeaPlugin.class, { IdeaPlugin idea -> idea.model.module.generatedSourceDirs += outputs.files })
         }
-    }
-
-    public File getThemesDirectory() {
-        return themesDirectory
-    }
-
-    public void setThemesDirectory(File themesDirectory) {
-        this.themesDirectory = themesDirectory
-    }
-
-    File getOutputDirectory() {
-        return outputDirectory
-    }
-
-    void setOutputDirectory(File outputDirectory) {
-        this.outputDirectory = outputDirectory
     }
 
     @TaskAction
     void exec() {
         Pattern pattern = Pattern.compile("\\.(-?[_a-zA-Z]+[_a-zA-Z0-9-]*)")
-        getThemesDirectory().eachDir {
+        themesDirectory.eachDir {
             Set<String> cssClasses = new LinkedHashSet<>();
             project.fileTree(dir: it, include: "*.scss", exclude: "styles.scss").forEach {
                 Matcher matcher = pattern.matcher(it.text.replaceAll("//.*\\n", "").replaceAll("/\\*.*\\*/", "").replaceAll("\".*\"", ""))
