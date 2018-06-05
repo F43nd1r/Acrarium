@@ -16,10 +16,10 @@
 
 package com.faendir.acra.ui.view.base.statistics;
 
-import com.faendir.acra.util.Style;
 import com.vaadin.ui.Composite;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.themes.AcraTheme;
 import org.jfree.chart.JFreeChart;
 import org.springframework.lang.NonNull;
 import org.vaadin.addon.JFreeChartWrapper;
@@ -37,7 +37,7 @@ abstract class Chart<T> extends Composite {
     Chart(@NonNull String caption) {
         panel = new Panel();
         panel.setCaption(caption);
-        Style.NO_BACKGROUND.apply(panel);
+        panel.addStyleName(AcraTheme.NO_BACKGROUND);
         setCompositionRoot(panel);
     }
 

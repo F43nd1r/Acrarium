@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.ui;
 
 import com.faendir.acra.model.User;
@@ -22,7 +21,6 @@ import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.Path;
 import com.faendir.acra.ui.view.user.ChangePasswordView;
 import com.faendir.acra.ui.view.user.UserManagerView;
-import com.faendir.acra.util.Style;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Viewport;
 import com.vaadin.annotations.Widgetset;
@@ -42,6 +40,8 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.AcraTheme;
+import com.vaadin.ui.themes.DarkAcraTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -61,7 +61,7 @@ import java.util.Optional;
  * @since 22.03.2017
  */
 @SpringUI
-@Theme("acratheme")
+@Theme(AcraTheme.THEME_NAME)
 @Widgetset("com.faendir.acra.AppWidgetset")
 @Viewport("width=device-width, initial-scale=1")
 public class BackendUI extends UI {
@@ -77,14 +77,14 @@ public class BackendUI extends UI {
         this.applicationContext = applicationContext;
         content = new Panel();
         content.setSizeFull();
-        Style.apply(content, Style.NO_PADDING, Style.NO_BACKGROUND, Style.NO_BORDER);
+        content.addStyleNames(AcraTheme.NO_PADDING, AcraTheme.NO_BACKGROUND, AcraTheme.NO_BORDER);
         path = new Path();
     }
 
     @Override
     protected void init(VaadinRequest request) {
         if (isDarkTheme()) {
-            setTheme("acratheme-dark");
+            setTheme(DarkAcraTheme.THEME_NAME);
         }
         if (SecurityUtils.isLoggedIn()) {
             showMain();
@@ -147,7 +147,7 @@ public class BackendUI extends UI {
         HorizontalLayout header = new HorizontalLayout(path, menuBar);
         header.setExpandRatio(path, 1);
         header.setWidth(100, Unit.PERCENTAGE);
-        Style.apply(header, Style.PADDING_TOP, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM, Style.BACKGROUND_HEADER);
+        header.addStyleNames(AcraTheme.PADDING_TOP, AcraTheme.PADDING_LEFT, AcraTheme.PADDING_RIGHT, AcraTheme.PADDING_BOTTOM, AcraTheme.BACKGROUND_HEADER);
 
         HorizontalLayout footer = new HorizontalLayout();
         footer.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
@@ -155,16 +155,16 @@ public class BackendUI extends UI {
                                       + " <a href=https://github.com/F43nd1r/acra-backend>Code</a> is licensed under"
                                       + " <a href=https://github.com/F43nd1r/acra-backend/blob/master/LICENSE>Apache License v2</a>.", ContentMode.HTML);
         footerLabel.setWidth(100, Unit.PERCENTAGE);
-        Style.CENTER_TEXT.apply(footerLabel);
+        footerLabel.addStyleName(AcraTheme.CENTER_TEXT);
         footer.addComponent(footerLabel);
         footer.setSpacing(false);
         footer.setWidth(100, Unit.PERCENTAGE);
-        Style.apply(footer, Style.BACKGROUND_FOOTER, Style.PADDING_LEFT, Style.PADDING_TOP, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
+        footer.addStyleNames(AcraTheme.BACKGROUND_FOOTER, AcraTheme.PADDING_LEFT, AcraTheme.PADDING_TOP, AcraTheme.PADDING_RIGHT, AcraTheme.PADDING_BOTTOM);
         VerticalLayout root = new VerticalLayout(header, content, footer);
         root.setExpandRatio(content, 1);
         root.setSpacing(false);
         root.setSizeFull();
-        Style.NO_PADDING.apply(root);
+        root.addStyleName(AcraTheme.NO_PADDING);
         setContent(root);
     }
 

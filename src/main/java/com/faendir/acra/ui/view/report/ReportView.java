@@ -27,7 +27,6 @@ import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.navigation.SingleParametrizedViewProvider;
 import com.faendir.acra.ui.view.base.ParametrizedBaseView;
-import com.faendir.acra.util.Style;
 import com.faendir.acra.util.Utils;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.StreamResource;
@@ -43,6 +42,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.AcraTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 
@@ -77,9 +77,9 @@ public class ReportView extends ParametrizedBaseView<Report> {
             new FileDownloader(new StreamResource(new ExceptionAwareStreamSource(file.getContent()::getBinaryStream), file.getFilename())).extend(button);
             attachments.addComponent(button);
         }
-        Style.apply(attachments, Style.MARGIN_BOTTOM, Style.MARGIN_TOP, Style.MARGIN_LEFT, Style.MARGIN_RIGHT);
+        attachments.addStyleNames(AcraTheme.MARGIN_BOTTOM, AcraTheme.MARGIN_TOP, AcraTheme.MARGIN_LEFT, AcraTheme.MARGIN_RIGHT);
         GridLayout summaryGrid = new GridLayout(2, 1);
-        Style.BORDERED_GRIDLAYOUT.apply(summaryGrid);
+        summaryGrid.addStyleName(AcraTheme.BORDERED_GRIDLAYOUT);
         summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(parameter.getStacktrace().getVersionName(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Email", ContentMode.PREFORMATTED), new Label(parameter.getUserEmail(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Comment", ContentMode.PREFORMATTED), new Label(parameter.getUserComment(), ContentMode.PREFORMATTED));
@@ -100,10 +100,10 @@ public class ReportView extends ParametrizedBaseView<Report> {
         VerticalLayout layout = new VerticalLayout(summary, details);
         layout.setSizeUndefined();
         layout.setExpandRatio(details, 1);
-        Style.apply(layout, Style.NO_PADDING, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
+        layout.addStyleNames(AcraTheme.NO_PADDING, AcraTheme.PADDING_LEFT, AcraTheme.PADDING_RIGHT, AcraTheme.PADDING_BOTTOM);
         Panel root = new Panel(layout);
         root.setSizeFull();
-        Style.apply(root, Style.NO_BACKGROUND, Style.NO_BORDER);
+        root.addStyleNames(AcraTheme.NO_BACKGROUND, AcraTheme.NO_BORDER);
         setCompositionRoot(root);
     }
 
@@ -122,7 +122,7 @@ public class ReportView extends ParametrizedBaseView<Report> {
         layout.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
         layout.setSpacing(false);
         layout.setMargin(false);
-        Style.BORDERED_GRIDLAYOUT.apply(layout);
+        layout.addStyleName(AcraTheme.BORDERED_GRIDLAYOUT);
         return layout;
     }
 

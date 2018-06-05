@@ -29,7 +29,6 @@ import com.faendir.acra.ui.view.base.BaseView;
 import com.faendir.acra.ui.view.base.ConfigurationLabel;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.Popup;
-import com.faendir.acra.util.Style;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
@@ -39,6 +38,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.AcraTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 
@@ -73,12 +73,12 @@ public class Overview extends BaseView {
             layout.addComponent(add);
         }
         layout.addComponent(grid);
-        Style.apply(layout, Style.NO_PADDING, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM, Style.MAX_WIDTH_728);
+        layout.addStyleNames(AcraTheme.NO_PADDING, AcraTheme.PADDING_LEFT, AcraTheme.PADDING_RIGHT, AcraTheme.PADDING_BOTTOM, AcraTheme.MAX_WIDTH_728);
         VerticalLayout root = new VerticalLayout(layout);
         root.setSpacing(false);
         root.setSizeFull();
         root.setComponentAlignment(layout, Alignment.TOP_CENTER);
-        Style.apply(root, Style.NO_PADDING);
+        root.addStyleName(AcraTheme.NO_PADDING);
         setCompositionRoot(root);
     }
 

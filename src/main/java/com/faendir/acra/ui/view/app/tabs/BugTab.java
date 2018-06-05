@@ -27,7 +27,6 @@ import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.MyCheckBox;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.Popup;
-import com.faendir.acra.util.Style;
 import com.faendir.acra.util.TimeSpanRenderer;
 import com.vaadin.server.Sizeable;
 import com.vaadin.shared.data.sort.SortDirection;
@@ -43,6 +42,7 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.RadioButtonGroup;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.ComponentRenderer;
+import com.vaadin.ui.themes.AcraTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 
@@ -74,7 +74,7 @@ public class BugTab implements AppTab {
         VerticalLayout layout = new VerticalLayout();
         HorizontalLayout header = new HorizontalLayout();
         header.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        Style.PADDING_TOP.apply(header);
+        header.addStyleName(AcraTheme.PADDING_TOP);
         layout.addComponent(header);
         layout.setComponentAlignment(header, Alignment.MIDDLE_LEFT);
         CheckBox hideSolved = new CheckBox("Hide solved", true);
@@ -110,7 +110,7 @@ public class BugTab implements AppTab {
         layout.addComponent(bugs);
         layout.setExpandRatio(bugs, 1);
         layout.setSizeFull();
-        Style.NO_PADDING.apply(layout);
+        layout.addStyleName(AcraTheme.NO_PADDING);
         return layout;
     }
 

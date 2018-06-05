@@ -30,7 +30,6 @@ import com.faendir.acra.ui.view.base.MyCheckBox;
 import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.Popup;
 import com.faendir.acra.ui.view.base.ValidatedField;
-import com.faendir.acra.util.Style;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
@@ -42,6 +41,7 @@ import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.ComponentRenderer;
+import com.vaadin.ui.themes.AcraTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 
@@ -88,9 +88,9 @@ public class UserManagerView extends BaseView {
         }
         Button newUser = new Button("New User", e -> newUser());
         VerticalLayout layout = new VerticalLayout(userGrid, newUser);
-        Style.NO_PADDING.apply(layout);
+        layout.addStyleName(AcraTheme.NO_PADDING);
         setCompositionRoot(layout);
-        Style.apply(this, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
+        addStyleNames(AcraTheme.PADDING_LEFT, AcraTheme.PADDING_RIGHT, AcraTheme.PADDING_BOTTOM);
     }
 
     private void newUser() {

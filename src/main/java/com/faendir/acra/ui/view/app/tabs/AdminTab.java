@@ -32,7 +32,6 @@ import com.faendir.acra.ui.view.base.MyGrid;
 import com.faendir.acra.ui.view.base.OnDemandFileDownloader;
 import com.faendir.acra.ui.view.base.Popup;
 import com.faendir.acra.ui.view.base.ValidatedField;
-import com.faendir.acra.util.Style;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Sizeable;
 import com.vaadin.shared.data.sort.SortDirection;
@@ -50,6 +49,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.ButtonRenderer;
+import com.vaadin.ui.themes.AcraTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
@@ -81,7 +81,7 @@ public class AdminTab implements AppTab {
         layout.setWidth(100, Sizeable.Unit.PERCENTAGE);
         Panel root = new Panel(layout);
         root.setSizeFull();
-        Style.apply(root, Style.NO_BACKGROUND, Style.NO_BORDER);
+        root.addStyleNames(AcraTheme.NO_BACKGROUND, AcraTheme.NO_BORDER);
         return root;
     }
 
@@ -114,7 +114,7 @@ public class AdminTab implements AppTab {
         HorizontalLayout purgeAge = new HorizontalLayout();
         purgeAge.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
         purgeAge.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        Style.NO_MARGIN.apply(purgeAge);
+        purgeAge.addStyleName(AcraTheme.NO_MARGIN);
         purgeAge.addComponents(new Button("Purge", e -> dataService.deleteReportsOlderThanDays(app, age.getValue())), new Label(" Reports older than "), age, new Label(" Days"));
         purgeAge.setExpandRatio(age, 1);
         ComboBox<Integer> versionBox = new ComboBox<>(null, dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app), QReport.report.stacktrace.versionCode));
@@ -123,7 +123,7 @@ public class AdminTab implements AppTab {
         HorizontalLayout purgeVersion = new HorizontalLayout();
         purgeVersion.setWidth(100, Sizeable.Unit.PERCENTAGE);
         purgeVersion.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
-        Style.NO_MARGIN.apply(purgeVersion);
+        purgeVersion.addStyleName(AcraTheme.NO_MARGIN);
         purgeVersion.addComponents(new Button("Purge", e -> {
             if (versionBox.getValue() != null) {
                 dataService.deleteReportsBeforeVersion(app, versionBox.getValue());
@@ -138,11 +138,11 @@ public class AdminTab implements AppTab {
         VerticalLayout layout = new VerticalLayout(configButton, matchingButton, purgeAge, purgeVersion, deleteButton);
         deleteButton.setWidth(100, Sizeable.Unit.PERCENTAGE);
         layout.setSizeFull();
-        Style.NO_PADDING.apply(layout);
+        layout.addStyleName(AcraTheme.NO_PADDING);
         Panel danger = new Panel(layout);
         danger.setCaption("Danger Zone");
         danger.setIcon(VaadinIcons.EXCLAMATION);
-        Style.apply(danger, Style.NO_BACKGROUND, Style.RED_PANEL_HEADER);
+        danger.addStyleNames(AcraTheme.NO_BACKGROUND, AcraTheme.RED_PANEL_HEADER);
         return danger;
     }
 
@@ -162,7 +162,7 @@ public class AdminTab implements AppTab {
                             .show()));
         }
         layout.addComponent(grid);
-        Style.NO_PADDING.apply(layout);
+        layout.addStyleName(AcraTheme.NO_PADDING);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
             layout.addComponent(new Button("Add File", e -> {
                 IntStepper version = new IntStepper("Version code");
@@ -184,7 +184,7 @@ public class AdminTab implements AppTab {
         }
         Panel panel = new Panel(layout);
         panel.setCaption("De-Obfuscation");
-        Style.apply(panel, Style.NO_BACKGROUND);
+        panel.addStyleName(AcraTheme.NO_BACKGROUND);
         return panel;
     }
 
@@ -200,7 +200,7 @@ public class AdminTab implements AppTab {
         VerticalLayout layout = new VerticalLayout(mailBox, download);
         Panel panel = new Panel(layout);
         panel.setCaption("Export");
-        Style.apply(panel, Style.NO_BACKGROUND);
+        panel.addStyleName(AcraTheme.NO_BACKGROUND);
         return panel;
     }
 

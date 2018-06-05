@@ -32,9 +32,9 @@ $v-overlay-shadow: 0 0 0 3px (v-shade 8), 0 5px 10px (v-shade 4);
 $v-component-group-spacing: 6px;
 
 @import "../valo/valo.scss";
-@import "../acratheme/acratheme.scss";
+@import "../AcraTheme/acratheme.scss";
 
-@mixin acratheme-dark {
-  @include valo;
-  @include acratheme;
+@mixin darkacratheme {
+	@include valo;
+	@include acratheme;
 }

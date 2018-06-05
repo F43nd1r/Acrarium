@@ -26,11 +26,11 @@ import com.faendir.acra.ui.navigation.SingleParametrizedViewProvider;
 import com.faendir.acra.ui.view.base.MyTabSheet;
 import com.faendir.acra.ui.view.base.ParametrizedBaseView;
 import com.faendir.acra.ui.view.bug.tabs.BugTab;
-import com.faendir.acra.util.Style;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.themes.AcraTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.util.Pair;
@@ -64,7 +64,7 @@ public class BugView extends ParametrizedBaseView<Pair<Bug, String>> {
         else tabSheet.setFirstTabAsInitialTab();
         Panel root = new Panel(tabSheet);
         root.setSizeFull();
-        Style.apply(root, Style.NO_BORDER, Style.NO_BACKGROUND, Style.NO_PADDING, Style.PADDING_LEFT, Style.PADDING_RIGHT);
+        root.addStyleNames( AcraTheme.NO_BORDER, AcraTheme.NO_BACKGROUND, AcraTheme.NO_PADDING, AcraTheme.PADDING_LEFT, AcraTheme.PADDING_RIGHT);
         setCompositionRoot(root);
     }
 

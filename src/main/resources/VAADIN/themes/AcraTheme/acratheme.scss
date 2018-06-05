@@ -19,7 +19,7 @@ $v-app-loading-text: "Acrarium is loading...";
 @import "../valo/valo.scss";
 
 @mixin acratheme {
-  @include valo;
+	@include valo;
 
   .bordered-gridlayout .v-gridlayout-slot {
     box-shadow: inset -1px -1px 0px 0px black;
@@ -128,7 +128,7 @@ $v-app-loading-text: "Acrarium is loading...";
     height: $height;
   }
 
-  .v-panel-caption-red-panel-header {
+  .red-panel-header .v-panel-caption  {
     @include valo-panel-caption-style($background-color: $v-error-indicator-color);
   }
 

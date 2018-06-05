@@ -21,7 +21,6 @@ import com.faendir.acra.model.Permission;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.navigation.NavigationManager;
-import com.faendir.acra.util.Style;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
@@ -30,6 +29,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.AcraTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 
@@ -62,12 +62,12 @@ public class AdminTab implements BugTab{
         titleLayout.setExpandRatio(title, 1);
         titleLayout.setSizeFull();
         VerticalLayout layout = new VerticalLayout(titleLayout);
-        Style.apply(layout, Style.NO_PADDING, Style.MAX_WIDTH_728);
+        layout.addStyleNames(AcraTheme.NO_PADDING, AcraTheme.MAX_WIDTH_728);
         VerticalLayout root = new VerticalLayout(layout);
         root.setSpacing(false);
         root.setSizeFull();
         root.setComponentAlignment(layout, Alignment.TOP_CENTER);
-        Style.apply(root, Style.NO_PADDING);
+        root.addStyleName(AcraTheme.NO_PADDING);
         return root;
     }
 

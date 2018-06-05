@@ -19,13 +19,13 @@ package com.faendir.acra.ui.view.base.statistics;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.view.base.FlexLayout;
-import com.faendir.acra.util.Style;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Composite;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.themes.AcraTheme;
 import org.vaadin.risto.stepper.IntStepper;
 
 import java.awt.*;
@@ -50,7 +50,7 @@ public class Statistics extends Composite {
         filterLayout.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
         filterLayout.setSpacing(true);
         filterLayout.setSizeFull();
-        Style.apply(filterLayout, Style.PADDING_LEFT, Style.PADDING_TOP, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
+        filterLayout.addStyleNames(AcraTheme.PADDING_LEFT, AcraTheme.PADDING_TOP, AcraTheme.PADDING_RIGHT, AcraTheme.PADDING_BOTTOM);
         filterLayout.setColumnExpandRatio(1, 1);
 
         IntStepper dayStepper = new IntStepper();
@@ -64,7 +64,7 @@ public class Statistics extends Composite {
         properties.add(factory.createStringProperty("Phone Brand", "Reports per Brand", QReport.report.brand));
 
         Panel filterPanel = new Panel(filterLayout);
-        Style.NO_BACKGROUND.apply(filterPanel);
+        filterPanel.addStyleName(AcraTheme.NO_BACKGROUND);
         filterPanel.setCaption("Filter");
         FlexLayout layout = new FlexLayout(filterPanel);
         layout.setWidth(100, Unit.PERCENTAGE);
@@ -79,7 +79,7 @@ public class Statistics extends Composite {
 
         Panel root = new Panel(layout);
         root.setSizeFull();
-        Style.apply(root, Style.NO_BACKGROUND, Style.NO_BORDER);
+        root.addStyleNames(AcraTheme.NO_BACKGROUND, AcraTheme.NO_BORDER);
         setCompositionRoot(root);
         update();
     }

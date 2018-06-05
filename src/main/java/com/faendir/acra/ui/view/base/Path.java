@@ -18,13 +18,14 @@ package com.faendir.acra.ui.view.base;
 
 import com.faendir.acra.ui.navigation.MyNavigator;
 import com.faendir.acra.ui.navigation.SingleViewProvider;
-import com.faendir.acra.util.Style;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Composite;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.themes.AcraTheme;
+import com.vaadin.ui.themes.ValoTheme;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -41,7 +42,7 @@ public class Path extends Composite {
     public Path() {
         elements = new ArrayDeque<>();
         layout = new CssLayout();
-        Style.BASIC_FLEX.apply(layout);
+        layout.addStyleName(AcraTheme.BASIC_FLEX);
         setCompositionRoot(layout);
     }
 
@@ -73,8 +74,7 @@ public class Path extends Composite {
                 while (getLast() != element) goUp();
                 getUI().getNavigator().navigateTo(asUrlFragment());
             });
-            Style.BUTTON_BORDERLESS.apply(button);
-            Style.PATH_ELEMENT.apply(button);
+            button.addStyleNames(ValoTheme.BUTTON_BORDERLESS, AcraTheme.PATH_ELEMENT);
             layout.addComponent(button);
             elements.addLast(element);
         }

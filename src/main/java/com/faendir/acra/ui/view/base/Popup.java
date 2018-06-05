@@ -16,13 +16,13 @@
 
 package com.faendir.acra.ui.view.base;
 
-import com.faendir.acra.util.Style;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.AcraTheme;
 import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
 
@@ -135,7 +135,7 @@ public class Popup extends Window {
         FormLayout layout = new FormLayout();
         components.forEach(layout::addComponent);
         checkValid();
-        Style.apply(layout, Style.PADDING_LEFT, Style.PADDING_RIGHT);
+        layout.addStyleNames(AcraTheme.PADDING_LEFT, AcraTheme.PADDING_RIGHT);
         setContent(layout);
         center();
         if (!isAttached()) {

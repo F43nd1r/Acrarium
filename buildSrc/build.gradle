@@ -14,26 +14,11 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.view.base;
+repositories {
+    jcenter()
+}
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.themes.AcraTheme;
-
-/**
- * @author lukas
- * @since 28.05.18
- */
-public class FlexLayout extends CssLayout {
-    public FlexLayout(Component... children) {
-        super(children);
-        setResponsive(true);
-        addStyleName(AcraTheme.FLEX_LAYOUT);
-    }
-
-    @Override
-    public void addComponent(Component c) {
-        super.addComponent(c);
-        c.addStyleName(AcraTheme.FLEX_ITEM);
-    }
+dependencies {
+    gradleApi()
+    compile 'com.squareup:javapoet:1.11.1'
 }
