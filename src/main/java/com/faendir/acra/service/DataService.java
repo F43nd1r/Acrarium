@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.faendir.acra.service.data;
+package com.faendir.acra.service;
 
 import com.faendir.acra.dataprovider.QueryDslDataProvider;
 import com.faendir.acra.model.App;
@@ -23,14 +22,13 @@ import com.faendir.acra.model.Bug;
 import com.faendir.acra.model.Permission;
 import com.faendir.acra.model.ProguardMapping;
 import com.faendir.acra.model.QApp;
-import com.faendir.acra.model.QBug;
 import com.faendir.acra.model.Report;
+import com.faendir.acra.model.Stacktrace;
 import com.faendir.acra.model.User;
 import com.faendir.acra.model.view.Queries;
 import com.faendir.acra.model.view.VApp;
 import com.faendir.acra.model.view.VBug;
 import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.service.user.UserService;
 import com.faendir.acra.util.PlainTextUser;
 import com.faendir.acra.util.Utils;
 import com.mysema.commons.lang.CloseableIterator;
@@ -40,12 +38,11 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
 import com.querydsl.core.types.dsl.EnumPath;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPADeleteClause;
 import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAUpdateClause;
 import org.acra.ReportField;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,6 +79,7 @@ import static com.faendir.acra.model.QBug.bug;
 import static com.faendir.acra.model.QPermission.permission;
 import static com.faendir.acra.model.QProguardMapping.proguardMapping;
 import static com.faendir.acra.model.QReport.report;
+import static com.faendir.acra.model.QStacktrace.stacktrace1;
 import static com.faendir.acra.model.QUser.user;
 
 /**
@@ -121,12 +119,16 @@ public class DataService implements Serializable {
 
     @NonNull
     public QueryDslDataProvider<Report> getReportProvider(@NonNull Bug bug) {
-        return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(report).where(report.bug.eq(bug)).select(report));
+        return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(report).join(report.stacktrace, stacktrace1).where(stacktrace1.bug.eq(bug)).select(report));
     }
 
     @NonNull
     public QueryDslDataProvider<Report> getReportProvider(@NonNull App app) {
-        return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(report).join(report.bug).where(report.bug.app.eq(app)).select(report));
+        return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(report)
+                .join(report.stacktrace, stacktrace1)
+                .join(stacktrace1.bug, bug)
+                .where(bug.app.eq(app))
+                .select(report));
     }
 
     @NonNull
@@ -170,16 +172,8 @@ public class DataService implements Serializable {
         List<Bug> list = new ArrayList<>(bugs);
         Bug bug = list.remove(0);
         bug.setTitle(title);
-        StringPath stringPath = Expressions.stringPath("trace");
-        bug.setStacktraces(new JPAQuery<>(entityManager).from(QBug.bug).join(QBug.bug.stacktraces, stringPath).where(QBug.bug.in(bugs)).select(stringPath).fetch());
         bug = store(bug);
-        CloseableIterator<Report> iterator = new JPAQuery<>(entityManager).from(report).where(report.bug.in(list)).select(report).iterate();
-        while (iterator.hasNext()) {
-            Report report = iterator.next();
-            report.setBug(bug);
-            store(report);
-        }
-        iterator.close();
+        new JPAUpdateClause(entityManager, stacktrace1).set(stacktrace1.bug, bug).where(stacktrace1.bug.in(list)).execute();
         list.forEach(this::delete);
     }
 
@@ -200,7 +194,9 @@ public class DataService implements Serializable {
     @NonNull
     public Optional<Report> findReport(@NonNull String id) {
         return Optional.ofNullable(new JPAQuery<>(entityManager).from(report)
-                .join(report.bug, bug)
+                .join(report.stacktrace, stacktrace1)
+                .fetchJoin()
+                .join(stacktrace1.bug, bug)
                 .fetchJoin()
                 .join(bug.app, app)
                 .fetchJoin()
@@ -210,12 +206,17 @@ public class DataService implements Serializable {
     }
 
     @NonNull
-    public Optional<VBug> findBug(@NonNull String encodedId) {
+    public Optional<Bug> findBug(@NonNull String encodedId) {
         try {
-            return Optional.ofNullable(Queries.selectVBug(entityManager).where(bug.id.eq(Integer.parseInt(encodedId))).fetchOne());
+            return Optional.ofNullable(new JPAQuery<>(entityManager).from(bug).join(bug.app).fetchJoin().where(bug.id.eq(Integer.parseInt(encodedId))).select(bug).fetchOne());
         } catch (NumberFormatException e) {
             return Optional.empty();
         }
+    }
+
+    @NonNull
+    public Optional<Bug> findBug(int id) {
+        return Optional.ofNullable(new JPAQuery<>(entityManager).from(bug).where(bug.id.eq(id)).select(bug).fetchOne());
     }
 
     @NonNull
@@ -237,30 +238,38 @@ public class DataService implements Serializable {
         return new JPAQuery<>(entityManager).from(attachment).where(attachment.report.eq(report)).select(attachment).fetch();
     }
 
+    public Optional<Stacktrace> findStacktrace(@NonNull String stacktrace) {
+        return Optional.ofNullable(new JPAQuery<>(entityManager).from(stacktrace1).where(stacktrace1.stacktrace.eq(stacktrace)).select(stacktrace1).fetchOne());
+    }
+
     private void deleteOrphanBugs() {
-        new JPADeleteClause(entityManager, bug).where(bug.notIn(JPAExpressions.select(report.bug).from(report).distinct())).execute();
+        new JPADeleteClause(entityManager, bug).where(bug.notIn(JPAExpressions.select(stacktrace1.bug).from(stacktrace1).distinct())).execute();
     }
 
     private Optional<Bug> findBug(@NonNull App app, @NonNull String stacktrace) {
-        return Optional.ofNullable(new JPAQuery<>(entityManager).from(bug).where(bug.app.eq(app).and(bug.stacktraces.any().eq(stacktrace))).select(bug).fetchFirst());
+        return Optional.ofNullable(new JPAQuery<>(entityManager).from(stacktrace1)
+                .join(stacktrace1.bug, bug)
+                .where(bug.app.eq(app).and(stacktrace1.stacktrace.like(stacktrace)))
+                .select(bug)
+                .fetchFirst());
     }
 
     @Transactional
     public void changeConfiguration(@NonNull App app, @NonNull App.Configuration configuration) {
         app.setConfiguration(configuration);
         app = store(app);
-        CloseableIterator<Report> iterator = new JPAQuery<>(entityManager).from(report).join(report.bug, bug).where(bug.app.eq(app)).select(report).iterate();
+        CloseableIterator<Stacktrace> iterator = new JPAQuery<>(entityManager).from(stacktrace1).join(stacktrace1.bug, bug).where(bug.app.eq(app)).select(stacktrace1).iterate();
         while (iterator.hasNext()) {
-            Report report = iterator.next();
-            String stacktrace = Utils.generifyStacktrace(report.getStacktrace(), app.getConfiguration());
-            Optional<Bug> bug = findBug(app, stacktrace);
+            Stacktrace stacktrace = iterator.next();
+            String generifiedStacktrace = Utils.generifyStacktrace(stacktrace.getStacktrace(), app.getConfiguration());
+            Optional<Bug> bug = findBug(app, generifiedStacktrace);
             if (!bug.isPresent()) {
-                report.setBug(new Bug(app, stacktrace, report.getVersionCode()));
-                store(report);
+                stacktrace.setBug(new Bug(app, generifiedStacktrace));
+                store(generifiedStacktrace);
                 entityManager.flush();
-            } else if (!bug.get().equals(report.getBug())) {
-                report.setBug(bug.get());
-                store(report);
+            } else if (!bug.get().equals(stacktrace.getBug())) {
+                stacktrace.setBug(bug.get());
+                store(generifiedStacktrace);
             }
         }
         iterator.close();
@@ -270,14 +279,14 @@ public class DataService implements Serializable {
 
     @Transactional
     public void deleteReportsOlderThanDays(@NonNull App app, @NonNull int days) {
-        new JPADeleteClause(entityManager, report).where(report.bug.app.eq(app).and(report.date.before(LocalDateTime.now().minus(days, ChronoUnit.DAYS))));
+        new JPADeleteClause(entityManager, report).where(report.stacktrace.bug.app.eq(app).and(report.date.before(LocalDateTime.now().minus(days, ChronoUnit.DAYS))));
         entityManager.flush();
         deleteOrphanBugs();
     }
 
     @Transactional
     public void deleteReportsBeforeVersion(@NonNull App app, int versionCode) {
-        new JPADeleteClause(entityManager, report).where(report.bug.app.eq(app).and(report.versionCode.lt(versionCode)));
+        new JPADeleteClause(entityManager, report).where(report.stacktrace.bug.app.eq(app).and(report.stacktrace.versionCode.lt(versionCode)));
         entityManager.flush();
         deleteOrphanBugs();
     }
@@ -287,9 +296,13 @@ public class DataService implements Serializable {
         App app = new JPAQuery<>(entityManager).from(QApp.app).where(QApp.app.reporter.username.eq(reporterUserName)).select(QApp.app).fetchOne();
         if (app != null) {
             JSONObject jsonObject = new JSONObject(content);
-            String stacktrace = Utils.generifyStacktrace(jsonObject.optString(ReportField.STACK_TRACE.name()), app.getConfiguration());
-            Bug bug = findBug(app, stacktrace).orElseGet(() -> new Bug(app, stacktrace, jsonObject.optInt(ReportField.APP_VERSION_CODE.name())));
-            Report report = store(new Report(bug, content));
+            String generifiedStacktrace = Utils.generifyStacktrace(jsonObject.optString(ReportField.STACK_TRACE.name()), app.getConfiguration());
+            Stacktrace stacktrace = findStacktrace(generifiedStacktrace).orElseGet(() -> new Stacktrace(findBug(app, generifiedStacktrace).orElseGet(() -> new Bug(app,
+                    generifiedStacktrace)),
+                    generifiedStacktrace,
+                    jsonObject.optInt(ReportField.APP_VERSION_CODE.name()),
+                    jsonObject.optString(ReportField.APP_VERSION_NAME.name())));
+            Report report = store(new Report(stacktrace, content));
             attachments.forEach(multipartFile -> {
                 try {
                     store(new Attachment(report,
@@ -326,5 +339,9 @@ public class DataService implements Serializable {
             store(report);
         }
         iterator.close();
+    }
+
+    public List<Stacktrace> getStacktraces(@NonNull Bug bug) {
+        return new JPAQuery<>(entityManager).from(stacktrace1).where(stacktrace1.bug.eq(bug)).select(stacktrace1).fetch();
     }
 }

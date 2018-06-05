@@ -22,7 +22,7 @@ import com.faendir.acra.model.ProguardMapping;
 import com.faendir.acra.model.QProguardMapping;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.service.data.DataService;
+import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.ConfigurationLabel;
@@ -117,7 +117,7 @@ public class AdminTab implements AppTab {
         Style.NO_MARGIN.apply(purgeAge);
         purgeAge.addComponents(new Button("Purge", e -> dataService.deleteReportsOlderThanDays(app, age.getValue())), new Label(" Reports older than "), age, new Label(" Days"));
         purgeAge.setExpandRatio(age, 1);
-        ComboBox<Integer> versionBox = new ComboBox<>(null, dataService.getFromReports(QReport.report.bug.app.eq(app), QReport.report.versionCode));
+        ComboBox<Integer> versionBox = new ComboBox<>(null, dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app), QReport.report.stacktrace.versionCode));
         versionBox.setEmptySelectionAllowed(false);
         versionBox.setWidth(100, Sizeable.Unit.PERCENTAGE);
         HorizontalLayout purgeVersion = new HorizontalLayout();
@@ -189,11 +189,11 @@ public class AdminTab implements AppTab {
     }
 
     private Panel exportPanel(@NonNull App app, @NonNull NavigationManager navigationManager) {
-        ComboBox<String> mailBox = new ComboBox<>("By Email Address", dataService.getFromReports(QReport.report.bug.app.eq(app), QReport.report.userEmail));
+        ComboBox<String> mailBox = new ComboBox<>("By Email Address", dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app), QReport.report.userEmail));
         mailBox.setEmptySelectionAllowed(false);
         mailBox.setSizeFull();
         Button download = new Button("Download");
-        new OnDemandFileDownloader(() -> Pair.of(new ByteArrayInputStream(dataService.getFromReports(QReport.report.bug.app.eq(app)
+        new OnDemandFileDownloader(() -> Pair.of(new ByteArrayInputStream(dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app)
                         .and(QReport.report.userEmail.eq(mailBox.getValue())), QReport.report.content, QReport.report.id).stream().collect(Collectors.joining(", ", "[", "]")).getBytes()),
                 "reports-" + UriUtils.encode(mailBox.getValue(), StandardCharsets.UTF_8) + ".json")).extend(download);
         download.setSizeFull();

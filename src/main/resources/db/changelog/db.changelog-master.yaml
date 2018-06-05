@@ -464,4 +464,90 @@ databaseChangeLog:
         - column:
             name: installation_id
             type: varchar(255)
-
+- changeSet:
+    id: 2018-06-04-drop-bug-version-code
+    author: lukas
+    changes:
+    - dropColumn:
+        columnName: version_code
+        tableName: bug
+- changeSet:
+    id: 2018-06-04-add-stacktrace-table
+    author: lukas
+    changes:
+    - createTable:
+        tableName: stacktrace
+        columns:
+        - column:
+            name: id
+            type: INT
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+        - column:
+            name: bug_id
+            type: INT
+            constraints:
+              nullable: false
+              references: bug(id)
+              foreignKeyName: FK_stacktrace_bug
+              deleteCascade: true
+              deferrable: false
+              initiallyDeferred: false
+        - column:
+            name: stacktrace
+            type: LONGTEXT
+            constraints:
+              nullable: false
+        - column:
+            name: version_code
+            type: INT
+            constraints:
+              nullable: false
+        - column:
+            name: version_name
+            type: VARCHAR(255)
+            constraints:
+              nullable: false
+    - addColumn:
+        tableName: report
+        columns:
+        - column:
+            name: stacktrace_id
+            type: INT
+- changeSet:
+    id: 2018-06-04-constrain-report-stacktrace
+    author: lukas
+    changes:
+    - addNotNullConstrain:
+        columnName: stacktrace_id
+        tableName: report
+    - addForeignKeyConstraint:
+        baseColumnNames: stacktrace_id
+        baseTableName: report
+        constraintName: FK_report_stacktrace
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: CASCADE
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: stacktrace
+- changeSet:
+    id: 2018-06-04-remove-old-stacktrace-structure
+    author: lukas
+    changes:
+    - dropTable:
+        tableName: bug_stacktraces
+    - dropColumn:
+        tableName: report
+        columnName: stacktrace
+    - dropColumn:
+        tableName: report
+        columnName: version_code
+    - dropForeignKeyConstraint:
+        baseTableName: report
+        constraintName: FK_report_bug
+    - dropColumn:
+        tableName: report
+        columnName: bug_id

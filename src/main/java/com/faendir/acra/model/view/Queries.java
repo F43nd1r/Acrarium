@@ -24,6 +24,7 @@ import javax.persistence.EntityManager;
 import static com.faendir.acra.model.QApp.app;
 import static com.faendir.acra.model.QBug.bug;
 import static com.faendir.acra.model.QReport.report;
+import static com.faendir.acra.model.QStacktrace.stacktrace1;
 
 /**
  * @author lukas
@@ -31,15 +32,19 @@ import static com.faendir.acra.model.QReport.report;
  */
 public abstract class Queries {
     private static final JPAQuery<VBug> V_BUG = new JPAQuery<>().from(bug)
+            .leftJoin(stacktrace1)
+            .on(stacktrace1.bug.eq(bug))
             .leftJoin(report)
-            .on(report.bug.eq(bug))
+            .on(report.stacktrace.eq(stacktrace1))
             .select(new QVBug(bug, report.date.max(), report.count()))
             .groupBy(bug);
     private static final JPAQuery<VApp> V_APP = new JPAQuery<>().from(app)
             .leftJoin(bug)
             .on(bug.app.eq(app))
+            .leftJoin(stacktrace1)
+            .on(stacktrace1.bug.eq(bug))
             .leftJoin(report)
-            .on(report.bug.eq(bug))
+            .on(report.stacktrace.eq(stacktrace1))
             .select(new QVApp(app, bug.countDistinct(), report.count()))
             .groupBy(app);
 

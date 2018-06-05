@@ -18,7 +18,7 @@ package com.faendir.acra.ui.view.app;
 
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Permission;
-import com.faendir.acra.service.data.DataService;
+import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.navigation.MyNavigator;
 import com.faendir.acra.ui.navigation.SingleParametrizedViewProvider;
@@ -62,7 +62,7 @@ public class AppView extends ParametrizedBaseView<Pair<App, String>> {
         else tabSheet.setFirstTabAsInitialTab();
         Panel panel = new Panel(tabSheet);
         panel.setSizeFull();
-        Style.apply(panel, Style.NO_BORDER, Style.NO_BACKGROUND, Style.NO_PADDING, Style.PADDING_LEFT, Style.PADDING_RIGHT, Style.PADDING_BOTTOM);
+        Style.apply(panel, Style.NO_BORDER, Style.NO_BACKGROUND, Style.NO_PADDING, Style.PADDING_LEFT, Style.PADDING_RIGHT);
         setCompositionRoot(panel);
     }
 

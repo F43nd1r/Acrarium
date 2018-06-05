@@ -22,7 +22,7 @@ import com.faendir.acra.model.QBug;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.model.view.VBug;
 import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.service.data.DataService;
+import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.MyCheckBox;
 import com.faendir.acra.ui.view.base.MyGrid;
@@ -103,7 +103,6 @@ public class BugTab implements AppTab {
         header.setComponentAlignment(hideSolved, Alignment.MIDDLE_RIGHT);
         bugs.addColumn(VBug::getReportCount,QReport.report.count(), "Reports");
         bugs.sort(bugs.addColumn(VBug::getLastReport, new TimeSpanRenderer(), QReport.report.date.max(), "Latest Report"), SortDirection.DESCENDING);
-        bugs.addColumn(bug -> bug.getBug().getVersionCode(), QBug.bug.versionCode, "Version");
         bugs.addColumn(bug -> bug.getBug().getTitle(), QBug.bug.title, "Title").setExpandRatio(1).setMinimumWidthFromContent(false);
         bugs.addOnClickNavigation(navigationManager, com.faendir.acra.ui.view.bug.BugView.class, bugItemClick -> String.valueOf(bugItemClick.getItem().getBug().getId()));
         bugs.addColumn(bug -> new MyCheckBox(bug.getBug().isSolved(), SecurityUtils.hasPermission(app, Permission.Level.EDIT), e -> dataService.setBugSolved(bug.getBug(), e.getValue())),

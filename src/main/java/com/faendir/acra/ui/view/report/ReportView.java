@@ -23,7 +23,7 @@ import com.faendir.acra.model.Attachment;
 import com.faendir.acra.model.Permission;
 import com.faendir.acra.model.ProguardMapping;
 import com.faendir.acra.model.Report;
-import com.faendir.acra.service.data.DataService;
+import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.navigation.SingleParametrizedViewProvider;
 import com.faendir.acra.ui.view.base.ParametrizedBaseView;
@@ -80,15 +80,15 @@ public class ReportView extends ParametrizedBaseView<Report> {
         Style.apply(attachments, Style.MARGIN_BOTTOM, Style.MARGIN_TOP, Style.MARGIN_LEFT, Style.MARGIN_RIGHT);
         GridLayout summaryGrid = new GridLayout(2, 1);
         Style.BORDERED_GRIDLAYOUT.apply(summaryGrid);
-        summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(parameter.getVersionName(), ContentMode.PREFORMATTED));
+        summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(parameter.getStacktrace().getVersionName(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Email", ContentMode.PREFORMATTED), new Label(parameter.getUserEmail(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Comment", ContentMode.PREFORMATTED), new Label(parameter.getUserComment(), ContentMode.PREFORMATTED));
-        Optional<ProguardMapping> mapping = dataService.findMapping(parameter.getBug().getApp(), parameter.getVersionCode());
+        Optional<ProguardMapping> mapping = dataService.findMapping(parameter.getStacktrace().getBug().getApp(), parameter.getStacktrace().getVersionCode());
         if (mapping.isPresent()) {
             summaryGrid.addComponents(new Label("De-obfuscated Stacktrace", ContentMode.PREFORMATTED),
-                    new Label(Utils.retrace(parameter.getStacktrace(), mapping.get().getMappings()), ContentMode.PREFORMATTED));
+                    new Label(Utils.retrace(parameter.getStacktrace().getStacktrace(), mapping.get().getMappings()), ContentMode.PREFORMATTED));
         } else {
-            summaryGrid.addComponents(new Label("Stacktrace (No mapping found)", ContentMode.PREFORMATTED), new Label(parameter.getStacktrace(), ContentMode.PREFORMATTED));
+            summaryGrid.addComponents(new Label("Stacktrace (No mapping found)", ContentMode.PREFORMATTED), new Label(parameter.getStacktrace().getStacktrace(), ContentMode.PREFORMATTED));
         }
         summaryGrid.addComponents(new Label("Attachments", ContentMode.PREFORMATTED), attachments);
         summaryGrid.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
@@ -184,7 +184,7 @@ public class ReportView extends ParametrizedBaseView<Report> {
 
         @Override
         protected App toApp(Report parameter) {
-            return parameter.getBug().getApp();
+            return parameter.getStacktrace().getBug().getApp();
         }
 
         @Override

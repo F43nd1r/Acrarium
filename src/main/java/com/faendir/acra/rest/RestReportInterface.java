@@ -16,7 +16,7 @@
 
 package com.faendir.acra.rest;
 
-import com.faendir.acra.service.data.DataService;
+import com.faendir.acra.service.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

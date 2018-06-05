@@ -17,6 +17,7 @@
 package com.faendir.acra.model;
 
 import com.faendir.acra.util.Utils;
+import com.querydsl.core.annotations.QueryInit;
 import org.acra.ReportField;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -32,7 +33,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 /**
  * @author Lukas
@@ -41,15 +41,13 @@ import java.util.Date;
 @Entity
 public class Report {
     @Id private String id;
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, optional = false, fetch = FetchType.LAZY)
+    @QueryInit("*.*")
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, optional = false, fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Bug bug;
+    private Stacktrace stacktrace;
     @Type(type = "text") private String content;
     @Transient private JSONObject jsonObject;
     private LocalDateTime date;
-    @Type(type = "text") private String stacktrace;
-    private int versionCode;
-    private String versionName;
     private String userEmail;
     @Type(type = "text") private String userComment;
     private String androidVersion;
@@ -61,8 +59,8 @@ public class Report {
     Report() {
     }
 
-    public Report(@NonNull Bug bug, @NonNull String content) {
-        this.bug = bug;
+    public Report(@NonNull Stacktrace stacktrace, @NonNull String content) {
+        this.stacktrace = stacktrace;
         this.content = content;
         initFields();
     }
@@ -70,9 +68,6 @@ public class Report {
     public final void initFields() {
         this.id = getJsonObject().getString(ReportField.REPORT_ID.name());
         this.date = Utils.getDateFromString(getJsonObject().optString(ReportField.USER_CRASH_DATE.name()));
-        this.stacktrace = getJsonObject().optString(ReportField.STACK_TRACE.name());
-        this.versionCode = getJsonObject().optInt(ReportField.APP_VERSION_CODE.name());
-        this.versionName = getJsonObject().optString(ReportField.APP_VERSION_NAME.name());
         this.userEmail = getJsonObject().optString(ReportField.USER_EMAIL.name());
         this.userComment = getJsonObject().optString(ReportField.USER_COMMENT.name());
         this.androidVersion = getJsonObject().optString(ReportField.ANDROID_VERSION.name());
@@ -90,15 +85,6 @@ public class Report {
     }
 
     @NonNull
-    public Bug getBug() {
-        return bug;
-    }
-
-    public void setBug(Bug bug) {
-        this.bug = bug;
-    }
-
-    @NonNull
     public String getId() {
         return id;
     }
@@ -106,20 +92,6 @@ public class Report {
     @NonNull
     public LocalDateTime getDate() {
         return date;
-    }
-
-    @NonNull
-    public String getStacktrace() {
-        return stacktrace;
-    }
-
-    public int getVersionCode() {
-        return versionCode;
-    }
-
-    @NonNull
-    public String getVersionName() {
-        return versionName;
     }
 
     @NonNull
@@ -150,5 +122,13 @@ public class Report {
     @NonNull
     public String getInstallationId() {
         return installationId;
+    }
+
+    public Stacktrace getStacktrace() {
+        return stacktrace;
+    }
+
+    public void setStacktrace(Stacktrace stacktrace) {
+        this.stacktrace = stacktrace;
     }
 }

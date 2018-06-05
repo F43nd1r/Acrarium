@@ -17,47 +17,67 @@
 package com.faendir.acra.ui.view.bug.tabs;
 
 import com.faendir.acra.model.Bug;
-import com.faendir.acra.model.QReport;
+import com.faendir.acra.model.Permission;
 import com.faendir.acra.service.DataService;
+import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.navigation.NavigationManager;
-import com.faendir.acra.ui.view.base.statistics.Statistics;
 import com.faendir.acra.util.Style;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Panel;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.VerticalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 
 /**
  * @author lukas
- * @since 21.05.18
+ * @since 04.06.18
  */
-@SpringComponent("bugStatisticsTab")
+@RequiresAppPermission(Permission.Level.ADMIN)
+@SpringComponent("bugAdminTab")
 @ViewScope
-public class StatisticsTab implements BugTab {
+public class AdminTab implements BugTab{
     @NonNull private final DataService dataService;
 
     @Autowired
-    public StatisticsTab(@NonNull DataService dataService) {
+    public AdminTab(@NonNull DataService dataService) {
         this.dataService = dataService;
     }
 
     @Override
     public Component createContent(@NonNull Bug bug, @NonNull NavigationManager navigationManager) {
-        Panel root = new Panel(new Statistics(QReport.report.stacktrace.bug.id.eq(bug.getId()), dataService));
+        TextArea title = new TextArea("Title");
+        title.setValue(bug.getTitle());
+        title.setSizeFull();
+        HorizontalLayout titleLayout = new HorizontalLayout();
+        titleLayout.setDefaultComponentAlignment(Alignment.BOTTOM_CENTER);
+        titleLayout.addComponents(title, new Button("Save", e-> {
+            bug.setTitle(title.getValue());
+            dataService.store(bug);
+        }));
+        titleLayout.setExpandRatio(title, 1);
+        titleLayout.setSizeFull();
+        VerticalLayout layout = new VerticalLayout(titleLayout);
+        Style.apply(layout, Style.NO_PADDING, Style.MAX_WIDTH_728);
+        VerticalLayout root = new VerticalLayout(layout);
+        root.setSpacing(false);
         root.setSizeFull();
-        Style.apply(root, Style.NO_BACKGROUND, Style.NO_BORDER);
+        root.setComponentAlignment(layout, Alignment.TOP_CENTER);
+        Style.apply(root, Style.NO_PADDING);
         return root;
     }
 
     @Override
     public String getCaption() {
-        return "Statistics";
+        return "Admin";
     }
 
     @Override
     public int getOrder() {
-        return 2;
+        return 3;
     }
 }

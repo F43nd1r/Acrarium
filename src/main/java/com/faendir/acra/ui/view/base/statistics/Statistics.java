@@ -17,7 +17,7 @@
 package com.faendir.acra.ui.view.base.statistics;
 
 import com.faendir.acra.model.QReport;
-import com.faendir.acra.service.data.DataService;
+import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.view.base.FlexLayout;
 import com.faendir.acra.util.Style;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -59,7 +59,7 @@ public class Statistics extends Composite {
         Property.Factory factory = new Property.Factory(dataService, baseExpression);
         properties.add(factory.createAgeProperty("Last X days", "Reports over time", QReport.report.date));
         properties.add(factory.createStringProperty("Android Version", "Reports per Android Version", QReport.report.androidVersion));
-        properties.add(factory.createStringProperty("App Version", "Reports per App Version", QReport.report.versionName));
+        properties.add(factory.createStringProperty("App Version", "Reports per App Version", QReport.report.stacktrace.versionName));
         properties.add(factory.createStringProperty("Phone Model", "Reports per Phone Model", QReport.report.phoneModel));
         properties.add(factory.createStringProperty("Phone Brand", "Reports per Brand", QReport.report.brand));
 

@@ -18,7 +18,7 @@ package com.faendir.acra.liquibase.change;
 
 import com.faendir.acra.liquibase.LiquibaseChangePostProcessor;
 import com.faendir.acra.model.Report;
-import com.faendir.acra.service.data.DataService;
+import com.faendir.acra.service.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;

@@ -17,7 +17,7 @@
 package com.faendir.acra.security;
 
 import com.faendir.acra.model.User;
-import com.faendir.acra.service.user.UserService;
+import com.faendir.acra.service.UserService;
 import org.apache.commons.text.RandomStringGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

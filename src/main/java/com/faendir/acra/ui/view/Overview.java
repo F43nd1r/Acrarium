@@ -22,7 +22,7 @@ import com.faendir.acra.model.QReport;
 import com.faendir.acra.model.User;
 import com.faendir.acra.model.view.VApp;
 import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.service.data.DataService;
+import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.navigation.SingleViewProvider;
 import com.faendir.acra.ui.view.app.AppView;
 import com.faendir.acra.ui.view.base.BaseView;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.service.user;
+package com.faendir.acra.service;
 
 import com.faendir.acra.config.AcraConfiguration;
 import com.faendir.acra.dataprovider.QueryDslDataProvider;

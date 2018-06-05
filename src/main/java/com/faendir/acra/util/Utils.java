@@ -78,16 +78,16 @@ public final class Utils {
         Pattern sourcePattern = Pattern.compile("^((android|java)\\..*:)(\\d+)$");
         Pattern instancePattern = Pattern.compile("(([a-z_$][a-z0-9_$]*\\.)+[a-zA-Z_$][a-zA-Z0-9_$]*@)([a-fA-F0-9]+)");
         while (lines.size() > 0) {
-            String line;
-            Matcher headLineMatcher = headLinePattern.matcher(line = lines.remove(0));
+            String line = lines.remove(0);
+            Matcher headLineMatcher = headLinePattern.matcher(line);
             if (!headLineMatcher.find()) {
                 output.append(line);
             } else if (!configuration.matchByMessage()) {
-                output.append(headLineMatcher.group(1)).append(":<message>");
+                output.append(headLineMatcher.group(1)).append("%");
             } else if (configuration.ignoreInstanceIds()) {
                 String message = headLineMatcher.group(2);
                 if (message != null) {
-                    output.append(headLineMatcher.group(1)).append(instancePattern.matcher(message).replaceAll("$1<instance>"));
+                    output.append(headLineMatcher.group(1)).append(instancePattern.matcher(message).replaceAll("$1%"));
                 } else {
                     output.append(headLineMatcher.group(1));
                 }
@@ -97,7 +97,7 @@ public final class Utils {
                 output.append('\n');
                 Matcher sourceMatcher;
                 if (configuration.ignoreAndroidLineNumbers() && (sourceMatcher = sourcePattern.matcher(lineMatcher.group(3))).find()) {
-                    output.append(sourceMatcher.group(1)).append("<line>");
+                    output.append(sourceMatcher.group(1)).append("%");
                 } else {
                     output.append(line);
                 }

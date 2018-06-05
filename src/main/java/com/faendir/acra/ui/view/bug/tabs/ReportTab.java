@@ -17,7 +17,7 @@
 package com.faendir.acra.ui.view.bug.tabs;
 
 import com.faendir.acra.model.Bug;
-import com.faendir.acra.service.data.DataService;
+import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.ReportList;
 import com.vaadin.spring.annotation.SpringComponent;

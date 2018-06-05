@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.ui.view.bug.tabs;
 
 import com.faendir.acra.model.Bug;
 import com.faendir.acra.model.ProguardMapping;
-import com.faendir.acra.service.data.DataService;
+import com.faendir.acra.model.Stacktrace;
+import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.util.Utils;
 import com.vaadin.shared.ui.ContentMode;
@@ -48,13 +48,14 @@ public class StackTraceTab implements BugTab {
 
     @Override
     public Component createContent(@NonNull Bug bug, @NonNull NavigationManager navigationManager) {
-        Optional<ProguardMapping> mapping = dataService.findMapping(bug.getApp(), bug.getVersionCode());
         Accordion accordion = new Accordion();
-        for (String stacktrace : bug.getStacktraces()) {
+        for (Stacktrace stacktrace : dataService.getStacktraces(bug)) {
+            Optional<ProguardMapping> mapping = dataService.findMapping(bug.getApp(), stacktrace.getVersionCode());
+            String trace = stacktrace.getStacktrace();
             if (mapping.isPresent()) {
-                stacktrace = Utils.retrace(stacktrace, mapping.get().getMappings());
+                trace = Utils.retrace(trace, mapping.get().getMappings());
             }
-            accordion.addTab(new Label(stacktrace, ContentMode.PREFORMATTED)).setCaption(stacktrace.split("\n", 2)[0]);
+            accordion.addTab(new Label(trace, ContentMode.PREFORMATTED)).setCaption("Version \"" + stacktrace.getVersionName() + "\": " + trace.split("\n", 2)[0]);
         }
         accordion.setSizeFull();
         return accordion;

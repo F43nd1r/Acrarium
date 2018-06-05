@@ -16,7 +16,7 @@
 
 package com.faendir.acra.ui.view.base.statistics;
 
-import com.faendir.acra.service.data.DataService;
+import com.faendir.acra.service.DataService;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;

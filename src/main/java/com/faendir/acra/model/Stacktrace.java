@@ -31,65 +31,54 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 /**
- * @author Lukas
- * @since 08.12.2017
+ * @author lukas
+ * @since 04.06.18
  */
 @Entity
-public class Bug {
-    @Type(type = "text") protected String title;
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, optional = false, fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private App app;
-    private boolean solved;
+public class Stacktrace {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, optional = false, fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Bug bug;
+    @Type(type = "text") private String stacktrace;
+    private int versionCode;
+    private String versionName;
 
     @PersistenceConstructor
-    Bug() {
+    Stacktrace(){
     }
 
-    public Bug(@NonNull App app, @NonNull String stacktrace) {
-        this.app = app;
-        this.title = stacktrace.split("\n", 2)[0];
+    public Stacktrace(@NonNull Bug bug, @NonNull String stacktrace, int versionCode, String versionName) {
+
+        this.bug = bug;
+        this.stacktrace = stacktrace;
+        this.versionCode = versionCode;
+        this.versionName = versionName;
     }
 
     public int getId() {
         return id;
     }
 
-    @NonNull
-    public App getApp() {
-        return app;
+    public Bug getBug() {
+        return bug;
     }
 
-    public boolean isSolved() {
-        return solved;
+    public void setBug(Bug bug) {
+        this.bug = bug;
     }
 
-    public void setSolved(boolean solved) {
-        this.solved = solved;
+    public String getStacktrace() {
+        return stacktrace;
     }
 
-    @NonNull
-    public String getTitle() {
-        return title;
+    public int getVersionCode() {
+        return versionCode;
     }
 
-    public void setTitle(@NonNull String title) {
-        this.title = title;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Bug bug = (Bug) o;
-        return id == bug.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return id;
+    public String getVersionName() {
+        return versionName;
     }
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.ui.view.base;
 
 import com.faendir.acra.dataprovider.QueryDslDataProvider;
@@ -45,14 +44,17 @@ public class ReportList extends MyGrid<Report> {
         setId(CAPTION);
         setSelectionMode(Grid.SelectionMode.NONE);
         sort(addColumn(Report::getDate, new TimeSpanRenderer(), QReport.report.date, "Date"), SortDirection.DESCENDING);
-        addColumn(Report::getVersionCode, QReport.report.versionCode, "App Version");
+        addColumn(report -> report.getStacktrace().getVersionCode(), QReport.report.stacktrace.versionCode, "App Version");
         addColumn(Report::getAndroidVersion, QReport.report.androidVersion, "Android Version");
         addColumn(Report::getPhoneModel, QReport.report.phoneModel, "Device");
-        addColumn(report -> report.getStacktrace().split("\n", 2)[0], QReport.report.stacktrace, "Stacktrace").setExpandRatio(1).setMinimumWidthFromContent(false);
+        addColumn(report -> report.getStacktrace().getStacktrace().split("\n", 2)[0], QReport.report.stacktrace.stacktrace, "Stacktrace").setExpandRatio(1)
+                .setMinimumWidthFromContent(false);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-            addColumn(report -> "Delete", new ButtonRenderer<>(e -> new Popup().setTitle("Confirm")
-                    .addComponent(new Label("Are you sure you want to delete this report?"))
-                    .addYesNoButtons(p -> reportDeleter.accept(e.getItem()), true))).setSortable(false);
+            addColumn(report -> "Delete",
+                    new ButtonRenderer<>(e -> new Popup().setTitle("Confirm")
+                            .addComponent(new Label("Are you sure you want to delete this report?"))
+                            .addYesNoButtons(p -> reportDeleter.accept(e.getItem()), true)
+                            .show())).setSortable(false);
         }
         addOnClickNavigation(navigationManager, ReportView.class, e -> e.getItem().getId());
     }

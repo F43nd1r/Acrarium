@@ -18,7 +18,7 @@ package com.faendir.acra.ui.view.user;
 
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.model.User;
-import com.faendir.acra.service.user.UserService;
+import com.faendir.acra.service.UserService;
 import com.faendir.acra.ui.BackendUI;
 import com.faendir.acra.ui.view.base.BaseView;
 import com.faendir.acra.ui.navigation.SingleViewProvider;
