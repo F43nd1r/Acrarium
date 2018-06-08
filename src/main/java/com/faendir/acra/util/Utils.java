@@ -25,6 +25,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import proguard.retrace.ReTrace;
 
 import java.io.IOException;
+import java.io.LineNumberReader;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -56,9 +58,9 @@ public final class Utils {
 
     public static String retrace(@NonNull String stacktrace, @NonNull String mappings) {
         try (Reader mappingsReader = new StringReader(mappings);
-             Reader stacktraceReader = new StringReader(stacktrace);
+             LineNumberReader stacktraceReader = new LineNumberReader(new StringReader(stacktrace));
              StringWriter output = new StringWriter()) {
-            new ReTrace(ReTrace.STACK_TRACE_EXPRESSION, false, mappingsReader, stacktraceReader, output).execute();
+            new ReTrace(ReTrace.STACK_TRACE_EXPRESSION, false, mappingsReader).retrace(stacktraceReader, new PrintWriter(output));
             return output.toString();
         } catch (IOException e) {
             log.error("Failed to retrace stacktrace", e);
