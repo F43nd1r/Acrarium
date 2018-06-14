@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.security;
 
 import com.faendir.acra.model.User;
+import com.faendir.acra.rest.RestReportInterface;
 import com.faendir.acra.service.UserService;
 import org.apache.commons.text.RandomStringGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +41,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 
 import java.security.SecureRandom;
 import java.util.stream.Collectors;
@@ -119,7 +120,17 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(@NonNull HttpSecurity http) throws Exception {
-        http.csrf().disable().headers().disable().anonymous().disable().httpBasic();
+        // @formatter:off
+        http
+                .csrf().disable()
+                .headers().disable()
+                .anonymous().disable()
+                .exceptionHandling().authenticationEntryPoint(new Http403ForbiddenEntryPoint())
+                .and()
+                .sessionManagement()
+                .and()
+                .antMatcher("/"+RestReportInterface.REPORT_PATH).httpBasic();
+        // @formatter:on
     }
 
     @NonNull

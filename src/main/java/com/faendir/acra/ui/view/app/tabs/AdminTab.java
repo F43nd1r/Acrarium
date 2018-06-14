@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.ui.view.app.tabs;
 
 import com.faendir.acra.model.App;
@@ -21,6 +20,7 @@ import com.faendir.acra.model.Permission;
 import com.faendir.acra.model.ProguardMapping;
 import com.faendir.acra.model.QProguardMapping;
 import com.faendir.acra.model.QReport;
+import com.faendir.acra.rest.RestReportInterface;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
@@ -29,10 +29,10 @@ import com.faendir.acra.ui.view.base.ConfigurationLabel;
 import com.faendir.acra.ui.view.base.FlexLayout;
 import com.faendir.acra.ui.view.base.InMemoryUpload;
 import com.faendir.acra.ui.view.base.MyGrid;
-import com.faendir.acra.ui.view.base.OnDemandFileDownloader;
 import com.faendir.acra.ui.view.base.Popup;
 import com.faendir.acra.ui.view.base.ValidatedField;
 import com.vaadin.icons.VaadinIcons;
+import com.vaadin.server.Page;
 import com.vaadin.server.Sizeable;
 import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.shared.ui.ContentMode;
@@ -45,20 +45,17 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.ProgressBar;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.themes.AcraTheme;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
-import org.springframework.web.util.UriUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.vaadin.risto.stepper.IntStepper;
-
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
 
 /**
  * @author Lukas
@@ -77,7 +74,7 @@ public class AdminTab implements AppTab {
 
     @Override
     public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
-        FlexLayout layout = new FlexLayout(proguardPanel(app), exportPanel(app, navigationManager), dangerPanel(app, navigationManager));
+        FlexLayout layout = new FlexLayout(proguardPanel(app), exportPanel(app), dangerPanel(app, navigationManager));
         layout.setWidth(100, Sizeable.Unit.PERCENTAGE);
         Panel root = new Panel(layout);
         root.setSizeFull();
@@ -188,16 +185,30 @@ public class AdminTab implements AppTab {
         return panel;
     }
 
-    private Panel exportPanel(@NonNull App app, @NonNull NavigationManager navigationManager) {
+    private Panel exportPanel(@NonNull App app) {
         ComboBox<String> mailBox = new ComboBox<>("By Email Address", dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app), QReport.report.userEmail));
-        mailBox.setEmptySelectionAllowed(false);
+        mailBox.setEmptySelectionAllowed(true);
         mailBox.setSizeFull();
-        Button download = new Button("Download");
-        new OnDemandFileDownloader(() -> Pair.of(new ByteArrayInputStream(dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app)
-                        .and(QReport.report.userEmail.eq(mailBox.getValue())), QReport.report.content, QReport.report.id).stream().collect(Collectors.joining(", ", "[", "]")).getBytes()),
-                "reports-" + UriUtils.encode(mailBox.getValue(), StandardCharsets.UTF_8) + ".json")).extend(download);
+        ComboBox<String> idBox = new ComboBox<>("By Installation ID", dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app), QReport.report.installationId));
+        idBox.setEmptySelectionAllowed(true);
+        idBox.setSizeFull();
+        Button download = new Button("Download", e -> {
+            if (idBox.getValue() == null && mailBox.getValue() == null) {
+                Notification.show("Nothing selected", Notification.Type.WARNING_MESSAGE);
+            } else {
+                Page page = UI.getCurrent().getPage();
+                page.open(UriComponentsBuilder.fromUri(page.getLocation())
+                        .fragment(null)
+                        .pathSegment(RestReportInterface.EXPORT_PATH)
+                        .queryParam(RestReportInterface.PARAM_APP, app.getId())
+                        .queryParam(RestReportInterface.PARAM_ID, idBox.getValue())
+                        .queryParam(RestReportInterface.PARAM_MAIL, mailBox.getValue())
+                        .build()
+                        .toUriString(), null);
+            }
+        });
         download.setSizeFull();
-        VerticalLayout layout = new VerticalLayout(mailBox, download);
+        VerticalLayout layout = new VerticalLayout(mailBox, idBox, download);
         Panel panel = new Panel(layout);
         panel.setCaption("Export");
         panel.addStyleName(AcraTheme.NO_BACKGROUND);

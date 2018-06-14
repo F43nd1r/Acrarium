@@ -152,6 +152,7 @@ public class DataService implements Serializable {
      * @param name the name of the new app
      * @return the name of the reporter user and its password (plaintext)
      */
+    @Transactional
     @NonNull
     public PlainTextUser createNewApp(@NonNull String name) {
         PlainTextUser user = userService.createReporterUser();
@@ -159,6 +160,7 @@ public class DataService implements Serializable {
         return user;
     }
 
+    @Transactional
     @NonNull
     public PlainTextUser recreateReporterUser(@NonNull App app) {
         PlainTextUser user = userService.createReporterUser();
