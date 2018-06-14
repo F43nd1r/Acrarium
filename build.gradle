@@ -115,6 +115,7 @@ dependencies {
     compile 'com.diffplug.durian:durian:3.4.0'
     compile 'com.faendir.proguard:retrace:1.3'
     compile 'javax.xml.bind:jaxb-api:2.3.0'
+    compile 'com.github.ziplet:ziplet:2.3.0'
 }
 
 compileJava.dependsOn(processResources)
