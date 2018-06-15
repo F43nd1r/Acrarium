@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.ui.view.base.statistics;
 
 import com.faendir.acra.service.DataService;
@@ -44,17 +43,14 @@ class Property<F, C extends Component & HasValue<F>, T> {
     private final C filterComponent;
     private final Function<F, BooleanExpression> filter;
     private final Chart<T> chart;
-    private final Expression<?> groupBy;
     private final Expression<T> select;
 
-    private Property(String filterText, C filterComponent, Function<F, BooleanExpression> filter, Chart<T> chart, DataService dataService, Expression<?> groupBy,
-            Expression<T> select) {
+    private Property(String filterText, C filterComponent, Function<F, BooleanExpression> filter, Chart<T> chart, DataService dataService, Expression<T> select) {
         this.dataService = dataService;
         this.checkBox = new CheckBox(filterText);
         this.filterComponent = filterComponent;
         this.filter = filter;
         this.chart = chart;
-        this.groupBy = groupBy;
         this.select = select;
         filterComponent.setEnabled(false);
         filterComponent.setWidth(100, Sizeable.Unit.PERCENTAGE);
@@ -76,7 +72,7 @@ class Property<F, C extends Component & HasValue<F>, T> {
     }
 
     void update(BooleanExpression expression) {
-        chart.setContent(dataService.countReports(expression, groupBy, select));
+        chart.setContent(dataService.countReports(expression, select));
     }
 
     static class Factory {
@@ -91,7 +87,7 @@ class Property<F, C extends Component & HasValue<F>, T> {
         Property<?, ?, ?> createStringProperty(String filterText, String chartTitle, ComparableExpressionBase<String> stringExpression) {
             ComboBox<String> comboBox = new ComboBox<>(null, dataService.getFromReports(expression, stringExpression));
             comboBox.setEmptySelectionAllowed(false);
-            return new Property<>(filterText, comboBox, stringExpression::eq, new PieChart(chartTitle), dataService, stringExpression, stringExpression);
+            return new Property<>(filterText, comboBox, stringExpression::eq, new PieChart(chartTitle), dataService, stringExpression);
         }
 
         Property<?, ?, ?> createAgeProperty(String filterText, String chartTitle, DateTimeExpression<LocalDateTime> dateTimeExpression) {
@@ -103,8 +99,7 @@ class Property<F, C extends Component & HasValue<F>, T> {
                     days -> dateTimeExpression.after(LocalDateTime.now().minus(days, ChronoUnit.DAYS)),
                     new TimeChart(chartTitle),
                     dataService,
-                    SQLExpressions.date(dateTimeExpression),
-                    dateTimeExpression);
+                    SQLExpressions.date(dateTimeExpression));
         }
     }
 }
