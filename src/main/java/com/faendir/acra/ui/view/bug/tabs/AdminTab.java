@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.ui.view.bug.tabs;
 
 import com.faendir.acra.model.Bug;
@@ -21,15 +20,19 @@ import com.faendir.acra.model.Permission;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.navigation.NavigationManager;
+import com.faendir.acra.ui.view.base.Popup;
+import com.vaadin.server.Sizeable;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.AcraTheme;
+import com.vaadin.ui.themes.ValoTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 
@@ -40,7 +43,7 @@ import org.springframework.lang.NonNull;
 @RequiresAppPermission(Permission.Level.ADMIN)
 @SpringComponent("bugAdminTab")
 @ViewScope
-public class AdminTab implements BugTab{
+public class AdminTab implements BugTab {
     @NonNull private final DataService dataService;
 
     @Autowired
@@ -55,13 +58,25 @@ public class AdminTab implements BugTab{
         title.setSizeFull();
         HorizontalLayout titleLayout = new HorizontalLayout();
         titleLayout.setDefaultComponentAlignment(Alignment.BOTTOM_CENTER);
-        titleLayout.addComponents(title, new Button("Save", e-> {
+        titleLayout.addComponents(title, new Button("Save", e -> {
             bug.setTitle(title.getValue());
             dataService.store(bug);
         }));
         titleLayout.setExpandRatio(title, 1);
         titleLayout.setSizeFull();
-        VerticalLayout layout = new VerticalLayout(titleLayout);
+        Button unmerge = new Button("Unmerge Bug", e -> {
+            dataService.unmergeBug(bug);
+            navigationManager.navigateBack();
+        });
+        unmerge.setWidth(100, Sizeable.Unit.PERCENTAGE);
+        Button delete = new Button("Delete Bug",
+                e -> new Popup().setTitle("Confirm").addComponent(new Label("Are you sure you want to delete this bug and all its reports?")).addYesNoButtons(p -> {
+                    dataService.delete(bug);
+                    navigationManager.navigateBack();
+                }, true).show());
+        delete.addStyleName(ValoTheme.BUTTON_DANGER);
+        delete.setWidth(100, Sizeable.Unit.PERCENTAGE);
+        VerticalLayout layout = new VerticalLayout(titleLayout, delete);
         layout.addStyleNames(AcraTheme.NO_PADDING, AcraTheme.MAX_WIDTH_728);
         VerticalLayout root = new VerticalLayout(layout);
         root.setSpacing(false);

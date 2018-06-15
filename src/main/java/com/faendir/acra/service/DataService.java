@@ -180,6 +180,12 @@ public class DataService implements Serializable {
     }
 
     @Transactional
+    public void unmergeBug(@NonNull Bug bug) {
+        getStacktraces(bug).forEach(stacktrace -> stacktrace.setBug(new Bug(bug.getApp(), stacktrace.getStacktrace())));
+        delete(bug);
+    }
+
+    @Transactional
     public void setBugSolved(@NonNull Bug bug, boolean solved) {
         bug.setSolved(solved);
         store(bug);
@@ -343,7 +349,13 @@ public class DataService implements Serializable {
         iterator.close();
     }
 
+    @NonNull
     public List<Stacktrace> getStacktraces(@NonNull Bug bug) {
         return new JPAQuery<>(entityManager).from(stacktrace1).where(stacktrace1.bug.eq(bug)).select(stacktrace1).fetch();
+    }
+
+    @NonNull
+    public Optional<Integer> getMaximumMappingVersion(@NonNull App app) {
+        return Optional.ofNullable(new JPAQuery<>(entityManager).from(proguardMapping).where(proguardMapping.app.eq(app)).select(proguardMapping.versionCode.max()).fetchOne());
     }
 }
