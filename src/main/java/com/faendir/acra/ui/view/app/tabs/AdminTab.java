@@ -163,7 +163,7 @@ public class AdminTab implements AppTab {
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
             layout.addComponent(new Button("Add File", e -> {
                 IntStepper version = new IntStepper("Version code");
-                version.setValue(1);
+                version.setValue(dataService.getMaximumMappingVersion(app).map(i -> i + 1).orElse(1));
                 InMemoryUpload upload = new InMemoryUpload("Mapping file:");
                 ProgressBar progressBar = new ProgressBar();
                 upload.addProgressListener((readBytes, contentLength) -> layout.getUI().access(() -> progressBar.setValue((float) readBytes / contentLength)));
