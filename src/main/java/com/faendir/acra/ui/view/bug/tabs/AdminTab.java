@@ -76,7 +76,7 @@ public class AdminTab implements BugTab {
                 }, true).show());
         delete.addStyleName(ValoTheme.BUTTON_DANGER);
         delete.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        VerticalLayout layout = new VerticalLayout(titleLayout, delete);
+        VerticalLayout layout = new VerticalLayout(titleLayout, unmerge, delete);
         layout.addStyleNames(AcraTheme.NO_PADDING, AcraTheme.MAX_WIDTH_728);
         VerticalLayout root = new VerticalLayout(layout);
         root.setSpacing(false);
