@@ -30,7 +30,6 @@ import org.jfree.data.time.TimeSeriesCollection;
 import org.springframework.lang.NonNull;
 
 import java.awt.*;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Map;
 
@@ -38,16 +37,16 @@ import java.util.Map;
  * @author lukas
  * @since 01.06.18
  */
-class TimeChart extends Chart<LocalDateTime> {
+class TimeChart extends Chart<Date> {
     TimeChart(@NonNull String caption) {
         super(caption);
     }
 
     @Override
-    public JFreeChart createChart(@NonNull Map<LocalDateTime, Long> map) {
+    public JFreeChart createChart(@NonNull Map<Date, Long> map) {
         TimeSeries series = new TimeSeries("Date");
         series.add(new Day(new Date()), 0);
-        map.forEach((date, count) -> series.addOrUpdate(new Day(date.getDayOfMonth(), date.getMonthValue(), date.getYear()), count));
+        map.forEach((date, count) -> series.addOrUpdate(new Day(date), count));
         JFreeChart chart = ChartFactory.createXYBarChart("", "Date", true, "Reports", new TimeSeriesCollection(series), PlotOrientation.VERTICAL, false, false, false);
         chart.setBackgroundPaint(null);
         XYPlot plot = chart.getXYPlot();

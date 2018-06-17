@@ -19,7 +19,7 @@ import com.faendir.acra.service.DataService;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
-import com.querydsl.core.types.dsl.DateTimeExpression;
+import com.querydsl.core.types.dsl.DateTimePath;
 import com.querydsl.sql.SQLExpressions;
 import com.vaadin.data.HasValue;
 import com.vaadin.server.Sizeable;
@@ -31,6 +31,7 @@ import org.vaadin.risto.stepper.IntStepper;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.function.Function;
 
 /**
@@ -90,7 +91,7 @@ class Property<F, C extends Component & HasValue<F>, T> {
             return new Property<>(filterText, comboBox, stringExpression::eq, new PieChart(chartTitle), dataService, stringExpression);
         }
 
-        Property<?, ?, ?> createAgeProperty(String filterText, String chartTitle, DateTimeExpression<LocalDateTime> dateTimeExpression) {
+        Property<?, ?, ?> createAgeProperty(String filterText, String chartTitle, DateTimePath<LocalDateTime> dateTimeExpression) {
             IntStepper stepper = new IntStepper();
             stepper.setValue(30);
             stepper.setMinValue(1);
@@ -99,7 +100,7 @@ class Property<F, C extends Component & HasValue<F>, T> {
                     days -> dateTimeExpression.after(LocalDateTime.now().minus(days, ChronoUnit.DAYS)),
                     new TimeChart(chartTitle),
                     dataService,
-                    SQLExpressions.date(dateTimeExpression));
+                    SQLExpressions.date(Date.class, dateTimeExpression));
         }
     }
 }
