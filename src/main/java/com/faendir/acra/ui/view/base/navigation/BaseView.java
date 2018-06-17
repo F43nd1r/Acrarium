@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.view.base;
+package com.faendir.acra.ui.view.base.navigation;
 
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.vaadin.navigator.View;

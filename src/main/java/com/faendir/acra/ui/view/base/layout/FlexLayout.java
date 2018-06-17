@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.view.base;
+package com.faendir.acra.ui.view.base.layout;
 
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;

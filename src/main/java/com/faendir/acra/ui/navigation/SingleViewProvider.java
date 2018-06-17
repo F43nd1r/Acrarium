@@ -18,7 +18,7 @@ package com.faendir.acra.ui.navigation;
 
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.ui.annotation.RequiresRole;
-import com.faendir.acra.ui.view.base.BaseView;
+import com.faendir.acra.ui.view.base.navigation.BaseView;
 import com.vaadin.navigator.ViewProvider;
 import com.vaadin.spring.internal.ViewCache;
 import com.vaadin.spring.internal.ViewScopeImpl;

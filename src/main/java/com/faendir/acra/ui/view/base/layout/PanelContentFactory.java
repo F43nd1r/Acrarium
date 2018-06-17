@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.view.app.tabs;
+package com.faendir.acra.ui.view.base.layout;
 
-import com.faendir.acra.model.App;
-import com.faendir.acra.ui.view.base.layout.ComponentFactory;
-
-import java.io.Serializable;
+import com.vaadin.server.Resource;
 
 /**
- * @author Lukas
- * @since 27.03.2018
+ * @author lukas
+ * @since 17.06.18
  */
-public interface AppTab extends ComponentFactory<App>, Serializable {
+public interface PanelContentFactory<T> extends ComponentFactory<T> {
+    default Resource getIcon() {
+        return null;
+    }
+
+    default String getStyleName() {
+        return null;
+    }
 }

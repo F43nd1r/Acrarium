@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.view.base;
+package com.faendir.acra.ui.view.base.layout;
 
 import com.faendir.acra.client.mygrid.MiddleClickGridExtensionConnector;
 import com.faendir.acra.dataprovider.QueryDslDataProvider;
 import com.faendir.acra.ui.navigation.NavigationManager;
+import com.faendir.acra.ui.view.base.navigation.BaseView;
 import com.querydsl.core.types.Expression;
 import com.vaadin.data.ValueProvider;
 import com.vaadin.data.provider.DataProvider;

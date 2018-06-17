@@ -18,7 +18,7 @@ package com.faendir.acra.ui;
 import com.faendir.acra.model.User;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.ui.navigation.NavigationManager;
-import com.faendir.acra.ui.view.base.Path;
+import com.faendir.acra.ui.view.base.navigation.Path;
 import com.faendir.acra.ui.view.user.ChangePasswordView;
 import com.faendir.acra.ui.view.user.UserManagerView;
 import com.vaadin.annotations.Theme;

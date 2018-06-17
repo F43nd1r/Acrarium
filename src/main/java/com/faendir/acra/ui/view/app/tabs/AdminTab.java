@@ -17,45 +17,15 @@ package com.faendir.acra.ui.view.app.tabs;
 
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Permission;
-import com.faendir.acra.model.ProguardMapping;
-import com.faendir.acra.model.QProguardMapping;
-import com.faendir.acra.model.QReport;
-import com.faendir.acra.rest.RestReportInterface;
-import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
-import com.faendir.acra.ui.navigation.NavigationManager;
-import com.faendir.acra.ui.view.base.ConfigurationLabel;
-import com.faendir.acra.ui.view.base.FlexLayout;
-import com.faendir.acra.ui.view.base.InMemoryUpload;
-import com.faendir.acra.ui.view.base.MyGrid;
-import com.faendir.acra.ui.view.base.Popup;
-import com.faendir.acra.ui.view.base.ValidatedField;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable;
-import com.vaadin.shared.data.sort.SortDirection;
-import com.vaadin.shared.ui.ContentMode;
+import com.faendir.acra.ui.view.app.tabs.panels.AdminPanel;
+import com.faendir.acra.ui.view.base.layout.PanelFlexTab;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.ProgressBar;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.renderers.ButtonRenderer;
-import com.vaadin.ui.themes.AcraTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
-import org.springframework.web.util.UriComponentsBuilder;
-import org.vaadin.risto.stepper.IntStepper;
+
+import java.util.List;
 
 /**
  * @author Lukas
@@ -64,155 +34,10 @@ import org.vaadin.risto.stepper.IntStepper;
 @RequiresAppPermission(Permission.Level.ADMIN)
 @SpringComponent
 @ViewScope
-public class AdminTab implements AppTab {
-    @NonNull private final DataService dataService;
-
+public class AdminTab extends PanelFlexTab<App> implements AppTab {
     @Autowired
-    public AdminTab(@NonNull DataService dataService) {
-        this.dataService = dataService;
-    }
-
-    @Override
-    public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
-        FlexLayout layout = new FlexLayout(proguardPanel(app), exportPanel(app), dangerPanel(app, navigationManager));
-        layout.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        Panel root = new Panel(layout);
-        root.setSizeFull();
-        root.addStyleNames(AcraTheme.NO_BACKGROUND, AcraTheme.NO_BORDER);
-        return root;
-    }
-
-    private Panel dangerPanel(@NonNull App app, @NonNull NavigationManager navigationManager) {
-        Button configButton = new Button("Create new ACRA Configuration",
-                e -> new Popup().setTitle("Confirm")
-                        .addComponent(new Label("Are you sure you want to create a new ACRA configuration?<br>The existing configuration will be invalidated", ContentMode.HTML))
-                        .addYesNoButtons(popup -> popup.clear().addComponent(new ConfigurationLabel(dataService.recreateReporterUser(app))).addCloseButton().show())
-                        .show());
-        configButton.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        Button matchingButton = new Button("Configure bug matching", e -> {
-            App.Configuration configuration = app.getConfiguration();
-            CheckBox matchByMessage = new CheckBox("Match by exception message", configuration.matchByMessage());
-            CheckBox ignoreInstanceIds = new CheckBox("Ignore instance ids", configuration.ignoreInstanceIds());
-            CheckBox ignoreAndroidLineNumbers = new CheckBox("Ignore android SDK line numbers", configuration.ignoreAndroidLineNumbers());
-            new Popup().addValidatedField(ValidatedField.of(matchByMessage), true)
-                    .addValidatedField(ValidatedField.of(ignoreInstanceIds), true)
-                    .addValidatedField(ValidatedField.of(ignoreAndroidLineNumbers), true)
-                    .addComponent(new Label(
-                            "Are you sure you want to save this configuration? All bugs will be recalculated, which may take some time and will reset the 'solved' status"))
-                    .addYesNoButtons(p -> dataService.changeConfiguration(app,
-                            new App.Configuration(matchByMessage.getValue(), ignoreInstanceIds.getValue(), ignoreAndroidLineNumbers.getValue())), true)
-                    .show();
-        });
-        matchingButton.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        IntStepper age = new IntStepper();
-        age.setValue(30);
-        age.setMinValue(0);
-        age.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        HorizontalLayout purgeAge = new HorizontalLayout();
-        purgeAge.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
-        purgeAge.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        purgeAge.addStyleName(AcraTheme.NO_MARGIN);
-        purgeAge.addComponents(new Button("Purge", e -> dataService.deleteReportsOlderThanDays(app, age.getValue())), new Label(" Reports older than "), age, new Label(" Days"));
-        purgeAge.setExpandRatio(age, 1);
-        ComboBox<Integer> versionBox = new ComboBox<>(null, dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app), QReport.report.stacktrace.versionCode));
-        versionBox.setEmptySelectionAllowed(false);
-        versionBox.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        HorizontalLayout purgeVersion = new HorizontalLayout();
-        purgeVersion.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        purgeVersion.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
-        purgeVersion.addStyleName(AcraTheme.NO_MARGIN);
-        purgeVersion.addComponents(new Button("Purge", e -> {
-            if (versionBox.getValue() != null) {
-                dataService.deleteReportsBeforeVersion(app, versionBox.getValue());
-            }
-        }), new Label(" Reports before Version "), versionBox);
-        purgeVersion.setExpandRatio(versionBox, 1);
-        Button deleteButton = new Button("Delete App",
-                e -> new Popup().setTitle("Confirm").addComponent(new Label("Are you sure you want to delete this app and all its associated content?")).addYesNoButtons(popup -> {
-                    dataService.delete(app);
-                    navigationManager.navigateBack();
-                }, true).show());
-        VerticalLayout layout = new VerticalLayout(configButton, matchingButton, purgeAge, purgeVersion, deleteButton);
-        deleteButton.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        layout.setSizeFull();
-        layout.addStyleName(AcraTheme.NO_PADDING);
-        Panel danger = new Panel(layout);
-        danger.setCaption("Danger Zone");
-        danger.setIcon(VaadinIcons.EXCLAMATION);
-        danger.addStyleNames(AcraTheme.NO_BACKGROUND, AcraTheme.RED_PANEL_HEADER);
-        return danger;
-    }
-
-    private Panel proguardPanel(@NonNull App app) {
-        VerticalLayout layout = new VerticalLayout();
-        MyGrid<ProguardMapping> grid = new MyGrid<>(null, dataService.getMappingProvider(app));
-        grid.setSizeToRows();
-        grid.sort(grid.addColumn(ProguardMapping::getVersionCode, QProguardMapping.proguardMapping.versionCode, "Version"), SortDirection.ASCENDING);
-        if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-            grid.addColumn(report -> "Delete",
-                    new ButtonRenderer<>(e -> new Popup().setTitle("Confirm")
-                            .addComponent(new Label("Are you sure you want to delete the mapping for version " + e.getItem().getVersionCode() + "?"))
-                            .addYesNoButtons(p -> {
-                                dataService.delete(e.getItem());
-                                grid.getDataProvider().refreshAll();
-                            }, true)
-                            .show()));
-        }
-        layout.addComponent(grid);
-        layout.addStyleName(AcraTheme.NO_PADDING);
-        if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-            layout.addComponent(new Button("Add File", e -> {
-                IntStepper version = new IntStepper("Version code");
-                version.setValue(dataService.getMaximumMappingVersion(app).map(i -> i + 1).orElse(1));
-                InMemoryUpload upload = new InMemoryUpload("Mapping file:");
-                ProgressBar progressBar = new ProgressBar();
-                upload.addProgressListener((readBytes, contentLength) -> layout.getUI().access(() -> progressBar.setValue((float) readBytes / contentLength)));
-                new Popup().setTitle("New Mapping Configuration")
-                        .addComponent(version)
-                        .addValidatedField(ValidatedField.of(upload, () -> upload, consumer -> upload.addFinishedListener(event -> consumer.accept(upload)))
-                                .addValidator(InMemoryUpload::isUploaded, "Upload failed"))
-                        .addComponent(progressBar)
-                        .addCreateButton(popup -> {
-                            dataService.store(new ProguardMapping(app, version.getValue(), upload.getUploadedString()));
-                            grid.getDataProvider().refreshAll();
-                        }, true)
-                        .show();
-            }));
-        }
-        Panel panel = new Panel(layout);
-        panel.setCaption("De-Obfuscation");
-        panel.addStyleName(AcraTheme.NO_BACKGROUND);
-        return panel;
-    }
-
-    private Panel exportPanel(@NonNull App app) {
-        ComboBox<String> mailBox = new ComboBox<>("By Email Address", dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app), QReport.report.userEmail));
-        mailBox.setEmptySelectionAllowed(true);
-        mailBox.setSizeFull();
-        ComboBox<String> idBox = new ComboBox<>("By Installation ID", dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app), QReport.report.installationId));
-        idBox.setEmptySelectionAllowed(true);
-        idBox.setSizeFull();
-        Button download = new Button("Download", e -> {
-            if (idBox.getValue() == null && mailBox.getValue() == null) {
-                Notification.show("Nothing selected", Notification.Type.WARNING_MESSAGE);
-            } else {
-                Page page = UI.getCurrent().getPage();
-                page.open(UriComponentsBuilder.fromUri(page.getLocation())
-                        .fragment(null)
-                        .pathSegment(RestReportInterface.EXPORT_PATH)
-                        .queryParam(RestReportInterface.PARAM_APP, app.getId())
-                        .queryParam(RestReportInterface.PARAM_ID, idBox.getValue())
-                        .queryParam(RestReportInterface.PARAM_MAIL, mailBox.getValue())
-                        .build()
-                        .toUriString(), null);
-            }
-        });
-        download.setSizeFull();
-        VerticalLayout layout = new VerticalLayout(mailBox, idBox, download);
-        Panel panel = new Panel(layout);
-        panel.setCaption("Export");
-        panel.addStyleName(AcraTheme.NO_BACKGROUND);
-        return panel;
+    public AdminTab(@NonNull List<AdminPanel> panels) {
+        super(panels);
     }
 
     @Override

@@ -14,28 +14,19 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.view.base;
+package com.faendir.acra.ui.view.base.layout;
 
-import com.vaadin.navigator.ViewChangeListener;
+import com.faendir.acra.ui.navigation.NavigationManager;
+import com.vaadin.ui.Component;
+import org.springframework.core.Ordered;
 import org.springframework.lang.NonNull;
 
-import java.util.function.Function;
-
 /**
- * @author Lukas
- * @since 12.12.2017
+ * @author lukas
+ * @since 17.06.18
  */
-public abstract class ParametrizedBaseView<T> extends BaseView {
-    private Function<ViewChangeListener.ViewChangeEvent, T> parameterParser;
+public interface ComponentFactory<T> extends Ordered {
+    Component createContent(@NonNull T t, @NonNull NavigationManager navigationManager);
 
-    @Override
-    public final void enter(ViewChangeListener.ViewChangeEvent event) {
-        enter(parameterParser.apply(event));
-    }
-
-    protected abstract void enter(@NonNull T parameter);
-
-    public void setParameterParser(Function<ViewChangeListener.ViewChangeEvent, T> parameterParser) {
-        this.parameterParser = parameterParser;
-    }
+    String getCaption();
 }

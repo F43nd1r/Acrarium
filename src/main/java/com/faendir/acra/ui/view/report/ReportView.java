@@ -26,7 +26,7 @@ import com.faendir.acra.model.Report;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.navigation.SingleParametrizedViewProvider;
-import com.faendir.acra.ui.view.base.ParametrizedBaseView;
+import com.faendir.acra.ui.view.base.navigation.ParametrizedBaseView;
 import com.faendir.acra.util.Utils;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.StreamResource;

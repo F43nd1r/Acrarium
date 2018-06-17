@@ -20,7 +20,7 @@ import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.model.User;
 import com.faendir.acra.service.UserService;
 import com.faendir.acra.ui.BackendUI;
-import com.faendir.acra.ui.view.base.BaseView;
+import com.faendir.acra.ui.view.base.navigation.BaseView;
 import com.faendir.acra.ui.navigation.SingleViewProvider;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.UserError;

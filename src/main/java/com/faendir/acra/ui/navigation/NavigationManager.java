@@ -17,8 +17,8 @@
 package com.faendir.acra.ui.navigation;
 
 import com.faendir.acra.ui.view.ErrorView;
-import com.faendir.acra.ui.view.base.BaseView;
-import com.faendir.acra.ui.view.base.Path;
+import com.faendir.acra.ui.view.base.navigation.BaseView;
+import com.faendir.acra.ui.view.base.navigation.Path;
 import com.faendir.acra.util.Utils;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Panel;

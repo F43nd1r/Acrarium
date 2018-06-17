@@ -19,7 +19,7 @@ package com.faendir.acra.ui.navigation;
 import com.faendir.acra.model.App;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
-import com.faendir.acra.ui.view.base.ParametrizedBaseView;
+import com.faendir.acra.ui.view.base.navigation.ParametrizedBaseView;
 
 /**
  * @author Lukas

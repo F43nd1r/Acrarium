@@ -18,7 +18,7 @@ package com.faendir.acra.ui.view.base.statistics;
 
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.view.base.FlexLayout;
+import com.faendir.acra.ui.view.base.layout.FlexLayout;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;

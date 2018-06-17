@@ -93,7 +93,7 @@ dependencies {
     def queryDslVersion = '4.2.1'
     compile "com.querydsl:querydsl-jpa:$queryDslVersion"
     compile "com.querydsl:querydsl-sql:$queryDslVersion"
-    compile "com.querydsl:querydsl-apt:$queryDslVersion:hibernate"
+    compile "com.querydsl:querydsl-apt:$queryDslVersion:jpa"
     //vaadin
     compile 'com.vaadin:vaadin-spring-boot-starter'
     compile 'com.vaadin:vaadin-push'

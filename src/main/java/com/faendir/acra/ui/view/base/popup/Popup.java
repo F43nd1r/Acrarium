@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.view.base;
+package com.faendir.acra.ui.view.base.popup;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;

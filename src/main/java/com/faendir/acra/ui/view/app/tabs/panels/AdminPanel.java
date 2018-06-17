@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.view.app.tabs;
+package com.faendir.acra.ui.view.app.tabs.panels;
 
 import com.faendir.acra.model.App;
-import com.faendir.acra.ui.view.base.layout.ComponentFactory;
-
-import java.io.Serializable;
+import com.faendir.acra.ui.view.base.layout.PanelContentFactory;
 
 /**
- * @author Lukas
- * @since 27.03.2018
+ * @author lukas
+ * @since 17.06.18
  */
-public interface AppTab extends ComponentFactory<App>, Serializable {
+public interface AdminPanel extends PanelContentFactory<App> {
 }

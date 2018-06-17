@@ -20,7 +20,7 @@ import com.faendir.acra.model.Permission;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.navigation.NavigationManager;
-import com.faendir.acra.ui.view.base.Popup;
+import com.faendir.acra.ui.view.base.popup.Popup;
 import com.vaadin.server.Sizeable;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;

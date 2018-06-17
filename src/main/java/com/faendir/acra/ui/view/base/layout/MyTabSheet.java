@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.view.base;
+package com.faendir.acra.ui.view.base.layout;
 
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.TabSheet;
-import org.springframework.core.Ordered;
 import org.springframework.lang.NonNull;
 
 import java.util.Arrays;
@@ -40,14 +39,14 @@ public class MyTabSheet<T> extends TabSheet {
     private final NavigationManager navigationManager;
 
     @SafeVarargs
-    public MyTabSheet(@NonNull T t, @NonNull NavigationManager navigationManager, Tab<T>... tabs) {
+    public MyTabSheet(@NonNull T t, @NonNull NavigationManager navigationManager, ComponentFactory<T>... tabs) {
         this(t, navigationManager, Arrays.asList(tabs));
     }
 
-    public MyTabSheet(@NonNull T t, @NonNull NavigationManager navigationManager, Collection<? extends Tab<T>> tabs) {
+    public MyTabSheet(@NonNull T t, @NonNull NavigationManager navigationManager, Collection<? extends ComponentFactory<T>> tabs) {
         this.t = t;
         this.navigationManager = navigationManager;
-        for (Tab<T> tab : tabs) {
+        for (ComponentFactory<T> tab : tabs) {
             addTab(tab);
         }
     }
@@ -56,7 +55,7 @@ public class MyTabSheet<T> extends TabSheet {
         return StreamSupport.stream(Spliterators.spliterator(iterator(), getComponentCount(), Spliterator.ORDERED), false).map(Component::getCaption).collect(Collectors.toList());
     }
 
-    public void addTab(Tab<T> tab) {
+    public void addTab(ComponentFactory<T> tab) {
         TabWrapper<T> wrapper = new TabWrapper<>(t, navigationManager, tab);
         addComponent(wrapper);
         addSelectedTabChangeListener(wrapper);
@@ -79,18 +78,12 @@ public class MyTabSheet<T> extends TabSheet {
         setSelectedTab(component);
     }
 
-    public interface Tab<T> extends Ordered {
-        Component createContent(@NonNull T t, @NonNull NavigationManager navigationManager);
-
-        String getCaption();
-    }
-
     private static class TabWrapper<T> extends CustomComponent implements SelectedTabChangeListener {
         private final T t;
         private final NavigationManager navigationManager;
-        private final Tab<T> tab;
+        private final ComponentFactory<T> tab;
 
-        private TabWrapper(@NonNull T t, @NonNull NavigationManager navigationManager, @NonNull Tab<T> tab) {
+        private TabWrapper(@NonNull T t, @NonNull NavigationManager navigationManager, @NonNull ComponentFactory<T> tab) {
             this.t = t;
             this.navigationManager = navigationManager;
             this.tab = tab;

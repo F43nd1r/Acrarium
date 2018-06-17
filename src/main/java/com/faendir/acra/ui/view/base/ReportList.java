@@ -22,6 +22,8 @@ import com.faendir.acra.model.QReport;
 import com.faendir.acra.model.Report;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.ui.navigation.NavigationManager;
+import com.faendir.acra.ui.view.base.layout.MyGrid;
+import com.faendir.acra.ui.view.base.popup.Popup;
 import com.faendir.acra.ui.view.report.ReportView;
 import com.faendir.acra.util.TimeSpanRenderer;
 import com.vaadin.shared.data.sort.SortDirection;

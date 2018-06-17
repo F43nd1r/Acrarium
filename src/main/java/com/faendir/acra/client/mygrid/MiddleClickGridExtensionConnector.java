@@ -16,7 +16,7 @@
 
 package com.faendir.acra.client.mygrid;
 
-import com.faendir.acra.ui.view.base.MyGrid;
+import com.faendir.acra.ui.view.base.layout.MyGrid;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.vaadin.client.MouseEventDetailsBuilder;
