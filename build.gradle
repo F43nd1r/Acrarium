@@ -124,6 +124,7 @@ war {
     archiveName = 'acra.war'
     version = version
     enabled = true
+    dependsOn vaadinThemeCompile, vaadinCompile
 }
 
 task generateThemeClasses(type: com.faendir.acra.gradle.ThemeClassGenerator) {
