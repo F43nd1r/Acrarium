@@ -36,7 +36,7 @@ public abstract class Queries {
             .on(stacktrace1.bug.eq(bug))
             .leftJoin(report)
             .on(report.stacktrace.eq(stacktrace1))
-            .select(new QVBug(bug, report.date.max(), report.count()))
+            .select(new QVBug(bug, report.date.max(), report.count(), stacktrace1.versionCode.max(), report.installationId.countDistinct()))
             .groupBy(bug);
     private static final JPAQuery<VApp> V_APP = new JPAQuery<>().from(app)
             .leftJoin(bug)

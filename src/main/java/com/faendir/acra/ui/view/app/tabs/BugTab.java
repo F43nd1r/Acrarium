@@ -103,6 +103,8 @@ public class BugTab implements AppTab {
         header.setComponentAlignment(hideSolved, Alignment.MIDDLE_RIGHT);
         bugs.addColumn(VBug::getReportCount,QReport.report.count(), "Reports");
         bugs.sort(bugs.addColumn(VBug::getLastReport, new TimeSpanRenderer(), QReport.report.date.max(), "Latest Report"), SortDirection.DESCENDING);
+        bugs.addColumn(VBug::getHighestVersionCode, QReport.report.stacktrace.versionCode.max(), "Latest Version");
+        bugs.addColumn(VBug::getUserCount, QReport.report.installationId.countDistinct(), "Affected Users");
         bugs.addColumn(bug -> bug.getBug().getTitle(), QBug.bug.title, "Title").setExpandRatio(1).setMinimumWidthFromContent(false);
         bugs.addOnClickNavigation(navigationManager, com.faendir.acra.ui.view.bug.BugView.class, bugItemClick -> String.valueOf(bugItemClick.getItem().getBug().getId()));
         bugs.addColumn(bug -> new MyCheckBox(bug.getBug().isSolved(), SecurityUtils.hasPermission(app, Permission.Level.EDIT), e -> dataService.setBugSolved(bug.getBug(), e.getValue())),

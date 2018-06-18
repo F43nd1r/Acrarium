@@ -29,12 +29,16 @@ public class VBug {
     private final Bug bug;
     private final LocalDateTime lastReport;
     private final long reportCount;
+    private final int highestVersionCode;
+    private final long userCount;
 
     @QueryProjection
-    public VBug(Bug bug, LocalDateTime lastReport, long reportCount) {
+    public VBug(Bug bug, LocalDateTime lastReport, long reportCount, int highestVersionCode, long userCount) {
         this.bug = bug;
         this.lastReport = lastReport;
         this.reportCount = reportCount;
+        this.highestVersionCode = highestVersionCode;
+        this.userCount = userCount;
     }
 
     public Bug getBug() {
@@ -47,5 +51,13 @@ public class VBug {
 
     public LocalDateTime getLastReport() {
         return lastReport;
+    }
+
+    public int getHighestVersionCode() {
+        return highestVersionCode;
+    }
+
+    public long getUserCount() {
+        return userCount;
     }
 }
