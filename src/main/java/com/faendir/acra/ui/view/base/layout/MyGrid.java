@@ -16,7 +16,7 @@
 
 package com.faendir.acra.ui.view.base.layout;
 
-import com.faendir.acra.client.mygrid.MiddleClickGridExtensionConnector;
+import com.faendir.acra.client.mygrid.GridMiddleClickExtensionConnector;
 import com.faendir.acra.dataprovider.QueryDslDataProvider;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.navigation.BaseView;
@@ -33,6 +33,7 @@ import elemental.json.JsonObject;
 import org.springframework.lang.NonNull;
 
 import java.util.Collection;
+import java.util.EventObject;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -131,11 +132,11 @@ public class MyGrid<T> extends Composite {
         private MiddleClickExtension(MyGrid<T> myGrid) {
             ExposingGrid<T> grid = myGrid.grid;
             super.extend(grid);
-            registerRpc((rowIndex, rowKey, columnInternalId, details) -> myGrid.fireEvent(new Grid.ItemClick<>(grid,
+            registerRpc((rowIndex, rowKey, columnInternalId, details) -> grid.fireEvent(new Grid.ItemClick<>(grid,
                     grid.getColumnByInternalId(columnInternalId),
                     grid.getDataCommunicator().getKeyMapper().get(rowKey),
                     details,
-                    rowIndex)), MiddleClickGridExtensionConnector.Rpc.class);
+                    rowIndex)), GridMiddleClickExtensionConnector.Rpc.class);
         }
 
         public static void extend(MyGrid<?> grid) {
@@ -165,8 +166,13 @@ public class MyGrid<T> extends Composite {
         }
 
         @Override
-        public Column<T, ?> getColumnByInternalId(String columnId) {
+        protected Column<T, ?> getColumnByInternalId(String columnId) {
             return super.getColumnByInternalId(columnId);
+        }
+
+        @Override
+        protected void fireEvent(EventObject event) {
+            super.fireEvent(event);
         }
     }
 }

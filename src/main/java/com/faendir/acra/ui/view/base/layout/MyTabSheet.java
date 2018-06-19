@@ -13,16 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.ui.view.base.layout;
 
+import com.faendir.acra.client.mytabsheet.TabSheetMiddleClickExtensionConnector;
 import com.faendir.acra.ui.navigation.NavigationManager;
+import com.vaadin.event.ConnectorEventListener;
+import com.vaadin.event.MouseEvents;
+import com.vaadin.server.AbstractExtension;
+import com.vaadin.shared.MouseEventDetails;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.TabSheet;
+import com.vaadin.util.ReflectTools;
 import org.springframework.lang.NonNull;
 
-import java.util.Arrays;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Spliterator;
@@ -38,17 +43,13 @@ public class MyTabSheet<T> extends TabSheet {
     private final T t;
     private final NavigationManager navigationManager;
 
-    @SafeVarargs
-    public MyTabSheet(@NonNull T t, @NonNull NavigationManager navigationManager, ComponentFactory<T>... tabs) {
-        this(t, navigationManager, Arrays.asList(tabs));
-    }
-
     public MyTabSheet(@NonNull T t, @NonNull NavigationManager navigationManager, Collection<? extends ComponentFactory<T>> tabs) {
         this.t = t;
         this.navigationManager = navigationManager;
         for (ComponentFactory<T> tab : tabs) {
             addTab(tab);
         }
+        MiddleClickExtension.extend(this);
     }
 
     public List<String> getCaptions() {
@@ -78,6 +79,17 @@ public class MyTabSheet<T> extends TabSheet {
         setSelectedTab(component);
     }
 
+    public void addMiddleClickListener(ClickListener listener) {
+        addListener(ClickEvent.class, listener, ClickListener.clickMethod);
+    }
+
+    @FunctionalInterface
+    public interface ClickListener extends ConnectorEventListener {
+        Method clickMethod = ReflectTools.findMethod(ClickListener.class, "click", ClickEvent.class);
+
+        void click(ClickEvent event);
+    }
+
     private static class TabWrapper<T> extends CustomComponent implements SelectedTabChangeListener {
         private final T t;
         private final NavigationManager navigationManager;
@@ -102,6 +114,31 @@ public class MyTabSheet<T> extends TabSheet {
         @Override
         public String getCaption() {
             return tab.getCaption();
+        }
+    }
+
+    public static class MiddleClickExtension extends AbstractExtension {
+        private MiddleClickExtension(MyTabSheet component) {
+            super(component);
+            registerRpc((tabIndex, details) -> component.fireEvent(new ClickEvent(component, ((TabWrapper) component.getTab(tabIndex).getComponent()).tab, details)),
+                    TabSheetMiddleClickExtensionConnector.Rpc.class);
+        }
+
+        public static void extend(MyTabSheet component) {
+            new MiddleClickExtension(component);
+        }
+    }
+
+    public static class ClickEvent extends MouseEvents.ClickEvent {
+        private final ComponentFactory tab;
+
+        public ClickEvent(MyTabSheet source, ComponentFactory tab, MouseEventDetails mouseEventDetails) {
+            super(source, mouseEventDetails);
+            this.tab = tab;
+        }
+
+        public ComponentFactory getTab() {
+            return tab;
         }
     }
 }

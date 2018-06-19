@@ -112,4 +112,15 @@ public class NavigationManager implements Serializable {
         path.goTo(element.getLabel(), currentView + (parameters == null ? "" : MyNavigator.SEPARATOR_CHAR + parameters));
         navigator.getUI().getPage().setUriFragment(target, false);
     }
+
+    public void openInNewTab(@Nullable String parameters) {
+        String currentView = navigator.getViewProvider(navigator.getCurrentView().getClass()).map(SingleViewProvider::getId).orElse("");
+        Path.Element element = path.goUp();
+        String hierarchy = path.asUrlFragment();
+        path.goTo(element);
+        String target = "!" + (hierarchy.isEmpty() ? "" : hierarchy + MyNavigator.SEPARATOR_CHAR) + currentView + (parameters == null ?
+                                                                                                                           "" :
+                                                                                                                           MyNavigator.SEPARATOR_CHAR + parameters);
+        navigator.getUI().getPage().open(Utils.getUrlWithFragment(target), "_blank", false);
+    }
 }

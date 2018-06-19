@@ -57,6 +57,7 @@ public class AppView extends ParametrizedBaseView<Pair<App, String>> {
         MyTabSheet<App> tabSheet = new MyTabSheet<>(parameter.getFirst(), getNavigationManager(), tabs);
         tabSheet.setSizeFull();
         tabSheet.addSelectedTabChangeListener(e -> getNavigationManager().updatePageParameters(parameter.getFirst().getId() + "/" + e.getTabSheet().getSelectedTab().getCaption()));
+        tabSheet.addMiddleClickListener(e -> getNavigationManager().openInNewTab(parameter.getFirst().getId() + "/" + e.getTab().getCaption()));
         if (tabSheet.getCaptions().contains(parameter.getSecond())) tabSheet.setInitialTab(parameter.getSecond());
         else tabSheet.setFirstTabAsInitialTab();
         Panel panel = new Panel(tabSheet);

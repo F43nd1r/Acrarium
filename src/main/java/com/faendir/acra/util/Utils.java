@@ -69,6 +69,7 @@ public final class Utils {
     }
 
     public static String getUrlWithFragment(String fragment) {
+        if(fragment!= null && fragment.isEmpty()) fragment = null;
         return UriComponentsBuilder.fromUri(UI.getCurrent().getPage().getLocation()).fragment(fragment).build().encode().toUri().toASCIIString();
     }
 

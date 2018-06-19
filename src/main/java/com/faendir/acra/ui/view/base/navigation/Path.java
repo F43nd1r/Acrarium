@@ -18,6 +18,8 @@ package com.faendir.acra.ui.view.base.navigation;
 
 import com.faendir.acra.ui.navigation.MyNavigator;
 import com.faendir.acra.ui.navigation.SingleViewProvider;
+import com.faendir.acra.ui.view.base.MiddleClickExtension;
+import com.faendir.acra.util.Utils;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Button;
@@ -73,6 +75,10 @@ public class Path extends Composite {
             button.addClickListener(e -> {
                 while (getLast() != element) goUp();
                 getUI().getNavigator().navigateTo(asUrlFragment());
+            });
+            MiddleClickExtension.extend(button, e -> {
+                while (getLast() != element) goUp();
+                getUI().getPage().open(Utils.getUrlWithFragment(asUrlFragment()), "_blank", false);
             });
             button.addStyleNames(ValoTheme.BUTTON_BORDERLESS, AcraTheme.PATH_ELEMENT);
             layout.addComponent(button);

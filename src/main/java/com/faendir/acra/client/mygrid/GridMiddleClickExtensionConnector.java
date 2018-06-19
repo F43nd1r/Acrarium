@@ -16,13 +16,11 @@
 
 package com.faendir.acra.client.mygrid;
 
+import com.faendir.acra.client.MiddleClickExtensionConnector;
 import com.faendir.acra.ui.view.base.layout.MyGrid;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.vaadin.client.MouseEventDetailsBuilder;
-import com.vaadin.client.ServerConnector;
 import com.vaadin.client.connectors.grid.GridConnector;
-import com.vaadin.client.extensions.AbstractExtensionConnector;
 import com.vaadin.client.widget.grid.CellReference;
 import com.vaadin.shared.MouseEventDetails;
 import com.vaadin.shared.communication.ServerRpc;
@@ -35,17 +33,15 @@ import elemental.json.JsonObject;
  * @since 15.01.2018
  */
 @Connect(MyGrid.MiddleClickExtension.class)
-public class MiddleClickGridExtensionConnector extends AbstractExtensionConnector {
+public class GridMiddleClickExtensionConnector extends MiddleClickExtensionConnector {
+
     @Override
-    protected void extend(ServerConnector target) {
-        getParent().getWidget().addDomHandler(event -> {
-            if (event.getNativeButton() == NativeEvent.BUTTON_MIDDLE) {
-                event.preventDefault();
-                CellReference<JsonObject> cell = getParent().getWidget().getEventCell();
-                getRpcProxy(Rpc.class).middleClick(cell.getRowIndex(), cell.getRow().getString(DataCommunicatorConstants.KEY), getParent().getColumnId(cell.getColumn()),
-                        MouseEventDetailsBuilder.buildMouseEventDetails(event.getNativeEvent(), event.getRelativeElement()));
-            }
-        }, MouseDownEvent.getType());
+    protected void middleClick(MouseDownEvent event) {
+        CellReference<JsonObject> cell = getParent().getWidget().getEventCell();
+        if(cell != null) {
+            getRpcProxy(Rpc.class).middleClick(cell.getRowIndex(), cell.getRow().getString(DataCommunicatorConstants.KEY), getParent().getColumnId(cell.getColumn()),
+                    MouseEventDetailsBuilder.buildMouseEventDetails(event.getNativeEvent(), event.getRelativeElement()));
+        }
     }
 
     @Override
