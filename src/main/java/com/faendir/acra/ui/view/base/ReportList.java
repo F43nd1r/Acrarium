@@ -26,6 +26,7 @@ import com.faendir.acra.ui.view.base.layout.MyGrid;
 import com.faendir.acra.ui.view.base.popup.Popup;
 import com.faendir.acra.ui.view.report.ReportView;
 import com.faendir.acra.util.TimeSpanRenderer;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Label;
@@ -52,11 +53,13 @@ public class ReportList extends MyGrid<Report> {
         addColumn(report -> report.getStacktrace().getStacktrace().split("\n", 2)[0], QReport.report.stacktrace.stacktrace, "Stacktrace").setExpandRatio(1)
                 .setMinimumWidthFromContent(false);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-            addColumn(report -> "Delete",
-                    new ButtonRenderer<>(e -> new Popup().setTitle("Confirm")
-                            .addComponent(new Label("Are you sure you want to delete this report?"))
-                            .addYesNoButtons(p -> reportDeleter.accept(e.getItem()), true)
-                            .show())).setSortable(false);
+            ButtonRenderer<Report> renderer = new ButtonRenderer<>(e -> new Popup().setTitle("Confirm")
+                    .addComponent(new Label("Are you sure you want to delete this report?"))
+                    .addYesNoButtons(p -> reportDeleter.accept(e.getItem()), true)
+                    .show());
+            renderer.setHtmlContentAllowed(true);
+            addColumn(report -> VaadinIcons.TRASH.getHtml(),
+                    renderer).setSortable(false);
         }
         addOnClickNavigation(navigationManager, ReportView.class, e -> e.getItem().getId());
     }

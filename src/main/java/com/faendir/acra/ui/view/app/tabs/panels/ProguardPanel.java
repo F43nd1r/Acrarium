@@ -27,6 +27,7 @@ import com.faendir.acra.ui.view.base.InMemoryUpload;
 import com.faendir.acra.ui.view.base.layout.MyGrid;
 import com.faendir.acra.ui.view.base.popup.Popup;
 import com.faendir.acra.ui.view.base.popup.ValidatedField;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
@@ -61,14 +62,16 @@ public class ProguardPanel implements AdminPanel{
         grid.setSizeToRows();
         grid.sort(grid.addColumn(ProguardMapping::getVersionCode, QProguardMapping.proguardMapping.versionCode, "Version"), SortDirection.ASCENDING);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-            grid.addColumn(report -> "Delete",
-                    new ButtonRenderer<>(e -> new Popup().setTitle("Confirm")
-                            .addComponent(new Label("Are you sure you want to delete the mapping for version " + e.getItem().getVersionCode() + "?"))
-                            .addYesNoButtons(p -> {
-                                dataService.delete(e.getItem());
-                                grid.getDataProvider().refreshAll();
-                            }, true)
-                            .show()));
+            ButtonRenderer<ProguardMapping> renderer = new ButtonRenderer<>(e -> new Popup().setTitle("Confirm")
+                    .addComponent(new Label("Are you sure you want to delete the mapping for version " + e.getItem().getVersionCode() + "?"))
+                    .addYesNoButtons(p -> {
+                        dataService.delete(e.getItem());
+                        grid.getDataProvider().refreshAll();
+                    }, true)
+                    .show());
+            renderer.setHtmlContentAllowed(true);
+            grid.addColumn(report -> VaadinIcons.TRASH.getHtml(),
+                    renderer);
         }
         layout.addComponent(grid);
         layout.addStyleName(AcraTheme.NO_PADDING);

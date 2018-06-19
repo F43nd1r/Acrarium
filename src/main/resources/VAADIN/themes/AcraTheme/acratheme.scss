@@ -189,4 +189,9 @@ $v-app-loading-text: "Acrarium is loading...";
       width: calc(25% - 20px) !important;
     }
   }
+
+  .v-nativebutton {
+    border: none !important;
+    background: none !important;
+  }
 }
