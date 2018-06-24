@@ -41,13 +41,13 @@ public class ReportColumnsChange extends LiquibaseChangePostProcessor {
 
     @Override
     protected void afterChange() {
-        iterate(() -> entityManager.createNativeQuery("SELECT content FROM report"), o -> {
+        iterate(() -> entityManager.createNativeQuery("SELECT \"content\" FROM \"report\""), o -> {
             String content = (String) o;
             JSONObject json = new JSONObject(content);
             String id = json.getString(ReportField.REPORT_ID.name());
             String brand = json.optString(ReportField.BRAND.name());
             String installationId = json.optString(ReportField.INSTALLATION_ID.name());
-            entityManager.createNativeQuery("UPDATE report SET brand = ?1, installation_id = ?2 WHERE id = ?3")
+            entityManager.createNativeQuery("UPDATE \"report\" SET \"brand\" = ?1, \"installation_id\" = ?2 WHERE \"id\" = ?3")
                     .setParameter(1, brand)
                     .setParameter(2, installationId)
                     .setParameter(3, id)

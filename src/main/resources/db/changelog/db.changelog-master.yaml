@@ -1,4 +1,5 @@
 databaseChangeLog:
+- objectQuotingStrategy: QUOTE_ALL_OBJECTS
 - changeSet:
     id: 1527006878002-1
     author: lukas (generated)
@@ -218,34 +219,42 @@ databaseChangeLog:
 - changeSet:
     id: 1527006878002-11
     author: lukas (generated)
+    validCheckSum:
+    - 7:3084464ee78084639e3f49dc95522a48
     changes:
     - addPrimaryKey:
         columnNames: filename, report_id
-        constraintName: PRIMARY
+        constraintName: attachment_PRIMARY
         tableName: attachment
 - changeSet:
     id: 1527006878002-13
     author: lukas (generated)
+    validCheckSum:
+    - 7:7423037e497ed0b02690b218c1b92cc7
     changes:
     - addPrimaryKey:
         columnNames: app_id, version_code
-        constraintName: PRIMARY
+        constraintName: proguard_mapping_PRIMARY
         tableName: proguard_mapping
 - changeSet:
     id: 1527006878002-14
     author: lukas (generated)
+    validCheckSum:
+    - 7:163acbeaa53e254fabf067bb7a63ea73
     changes:
     - addPrimaryKey:
         columnNames: id
-        constraintName: PRIMARY
+        constraintName: report_PRIMARY
         tableName: report
 - changeSet:
     id: 1527006878002-15
     author: lukas (generated)
+    validCheckSum:
+    - 7:3af4ce0ef202d0968260892ffa973c61
     changes:
     - addPrimaryKey:
         columnNames: username
-        constraintName: PRIMARY
+        constraintName: user_PRIMARY
         tableName: user
 - changeSet:
     id: 1527006878002-16
@@ -474,6 +483,8 @@ databaseChangeLog:
 - changeSet:
     id: 2018-06-04-add-stacktrace-table
     author: lukas
+    validCheckSum:
+    - 7:d4d705882f587123182e03aeae66f7b7
     changes:
     - createTable:
         tableName: stacktrace
@@ -490,7 +501,8 @@ databaseChangeLog:
             type: INT
             constraints:
               nullable: false
-              references: bug(id)
+              referencedTablename: bug
+              referencedColumnName: id
               foreignKeyName: FK_stacktrace_bug
               deleteCascade: true
               deferrable: false

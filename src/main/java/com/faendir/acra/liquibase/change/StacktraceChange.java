@@ -40,28 +40,28 @@ public class StacktraceChange extends LiquibaseChangePostProcessor {
     @Override
     protected void afterChange() {
         iterate(() -> entityManager.createNativeQuery(
-                "SELECT stacktrace, version_code, version_name, bug_id, id FROM report"), o -> {
+                "SELECT \"stacktrace\", \"version_code\", \"version_name\", \"bug_id\", \"id\" FROM \"report\""), o -> {
             Object[] result = (Object[]) o;
             String trace = (String) result[0];
             int versionCode = (int) result[1];
             String versionName = (String) result[2];
             int bugId = (int) result[3];
             int reportId = (int) result[4];
-            Long stacktraceId = (Long) entityManager.createNativeQuery("SELECT id FROM stacktrace WHERE stacktrace = ?1 AND version_code = ?2")
+            Long stacktraceId = (Long) entityManager.createNativeQuery("SELECT \"id\" FROM \"stacktrace\" WHERE \"stacktrace\" = ?1 AND \"version_code\" = ?2")
                     .setParameter(1, trace)
                     .setParameter(2, versionCode)
                     .setMaxResults(1)
                     .getSingleResult();
             if(stacktraceId == null) {
-                entityManager.createNativeQuery("INSERT INTO stacktrace (bug_id, stacktrace, version_code, version_name) VALUES(?1, ?2, ?3, ?4)")
+                entityManager.createNativeQuery("INSERT INTO \"stacktrace\" (\"bug_id\", \"stacktrace\", \"version_code\", \"version_name\") VALUES(?1, ?2, ?3, ?4)")
                         .setParameter(1, bugId)
                         .setParameter(2, trace)
                         .setParameter(3, versionCode)
                         .setParameter(4, versionName)
                         .executeUpdate();
-                stacktraceId = (Long) entityManager.createNativeQuery("SELECT id FROM stacktrace ORDER BY id DESC").setMaxResults(1).getSingleResult();
+                stacktraceId = (Long) entityManager.createNativeQuery("SELECT \"id\" FROM \"stacktrace\" ORDER BY \"id\" DESC").setMaxResults(1).getSingleResult();
             }
-            entityManager.createNativeQuery("UPDATE report SET stacktrace_id = ?1 WHERE id = ?2")
+            entityManager.createNativeQuery("UPDATE \"report\" SET \"stacktrace_id\" = ?1 WHERE \"id\" = ?2")
                     .setParameter(1, stacktraceId)
                     .setParameter(2, reportId)
                     .executeUpdate();
