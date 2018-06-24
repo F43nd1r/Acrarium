@@ -56,6 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.validation.constraints.Size;
 import java.io.IOException;
 import java.io.Serializable;
@@ -336,17 +337,6 @@ public class DataService implements Serializable {
     @NonNull
     public <T> List<T> getFromReports(@NonNull Predicate where, @NonNull Expression<T> select, ComparableExpressionBase<?> order) {
         return ((JPAQuery<?>) new JPAQuery<>(entityManager)).from(report).where(where).select(select).distinct().orderBy(order.asc()).fetch();
-    }
-
-    @Transactional
-    public void transformAllReports(Consumer<Report> consumer) {
-        CloseableIterator<Report> iterator = new JPAQuery<>(entityManager).from(report).select(report).iterate();
-        while (iterator.hasNext()) {
-            Report report = iterator.next();
-            consumer.accept(report);
-            store(report);
-        }
-        iterator.close();
     }
 
     @NonNull

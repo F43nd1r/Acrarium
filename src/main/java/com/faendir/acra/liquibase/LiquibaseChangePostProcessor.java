@@ -13,10 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.liquibase;
 
 import liquibase.changelog.ChangeSet;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.Query;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * @author lukas
@@ -27,6 +32,16 @@ public abstract class LiquibaseChangePostProcessor {
 
     protected LiquibaseChangePostProcessor(String changeId) {
         this.changeId = changeId;
+    }
+
+    @Transactional
+    protected void iterate(Supplier<Query> supplier, Consumer<Object> consumer) {
+        int offset = 0;
+        List<?> list;
+        while (!(list = supplier.get().setFirstResult(offset).setMaxResults(64).getResultList()).isEmpty()) {
+            list.forEach(consumer::accept);
+            offset += list.size();
+        }
     }
 
     void handle(ChangeSet changeSet) {

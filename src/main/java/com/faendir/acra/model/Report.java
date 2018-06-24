@@ -62,10 +62,6 @@ public class Report {
     public Report(@NonNull Stacktrace stacktrace, @NonNull String content) {
         this.stacktrace = stacktrace;
         this.content = content;
-        initFields();
-    }
-
-    public final void initFields() {
         this.id = getJsonObject().getString(ReportField.REPORT_ID.name());
         this.date = Utils.getDateFromString(getJsonObject().optString(ReportField.USER_CRASH_DATE.name()));
         this.userEmail = getJsonObject().optString(ReportField.USER_EMAIL.name());
