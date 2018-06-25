@@ -28,6 +28,7 @@ import org.springframework.lang.NonNull;
 
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 @PropertySource("classpath:default.properties")
+@PropertySource(value = "file:${user.home}/.config/acrarium/application.properties", ignoreResourceNotFound = true)
 @PropertySource(value = "file:${user.home}/.acra/application.properties", ignoreResourceNotFound = true)
 @EnableConfigurationProperties(AcraConfiguration.class)
 public class BackendApplication extends SpringBootServletInitializer {
