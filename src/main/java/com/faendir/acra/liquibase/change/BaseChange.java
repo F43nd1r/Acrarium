@@ -60,7 +60,7 @@ public abstract class BaseChange implements LiquibaseChangePostProcessor {
 
     @Nullable
     protected String quote(@Nullable String s) {
-        return getDialect().quote(s);
+        return getDialect().openQuote() + s + getDialect().closeQuote();
     }
 
     @Transactional

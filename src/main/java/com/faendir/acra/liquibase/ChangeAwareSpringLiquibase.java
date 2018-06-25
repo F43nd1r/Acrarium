@@ -23,8 +23,6 @@ import liquibase.changelog.visitor.AbstractChangeExecListener;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -67,7 +65,6 @@ public class ChangeAwareSpringLiquibase extends SpringLiquibase {
                 processors.forEach(processor -> processor.handle(changeSet));
             }
         });
-        LogFactory.getInstance().getLog().setLogLevel(LogLevel.DEBUG);
         return liquibase;
     }
 }
