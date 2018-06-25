@@ -15,7 +15,6 @@
  */
 package com.faendir.acra.liquibase.change;
 
-import com.faendir.acra.liquibase.LiquibaseChangePostProcessor;
 import org.acra.ReportField;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,24 +29,22 @@ import javax.persistence.EntityManager;
  * @since 01.06.18
  */
 @Component
-public class ReportColumnsChange extends LiquibaseChangePostProcessor {
-    @NonNull private final EntityManager entityManager;
-
+public class ReportColumnsChange extends BaseChange {
     @Autowired
     public ReportColumnsChange(@NonNull @Lazy EntityManager entityManager) {
-        super("2018-06-01-add-report-columns");
-        this.entityManager = entityManager;
+        super("2018-06-01-add-report-columns", entityManager);
     }
 
     @Override
     protected void afterChange() {
-        iterate(() -> entityManager.createNativeQuery("SELECT \"content\" FROM \"report\""), o -> {
+        iterate(() -> getEntityManager().createNativeQuery("SELECT " + quote("content") + " FROM " + quote("report")), o -> {
             String content = (String) o;
             JSONObject json = new JSONObject(content);
             String id = json.getString(ReportField.REPORT_ID.name());
             String brand = json.optString(ReportField.BRAND.name());
             String installationId = json.optString(ReportField.INSTALLATION_ID.name());
-            entityManager.createNativeQuery("UPDATE \"report\" SET \"brand\" = ?1, \"installation_id\" = ?2 WHERE \"id\" = ?3")
+            getEntityManager().createNativeQuery(
+                    "UPDATE " + quote("report") + " SET " + quote("brand") + " = ?1, " + quote("installation_id") + " = ?2 WHERE " + quote("id") + " = ?3")
                     .setParameter(1, brand)
                     .setParameter(2, installationId)
                     .setParameter(3, id)
