@@ -118,6 +118,7 @@ dependencies {
     compile 'com.github.ziplet:ziplet:2.3.0'
     //testing
     testCompile 'org.springframework.boot:spring-boot-starter-test'
+    testCompile 'org.springframework.security:spring-security-test'
     testCompile 'com.h2database:h2'
     testCompile files('libs/ojdbc6.jar')
 }

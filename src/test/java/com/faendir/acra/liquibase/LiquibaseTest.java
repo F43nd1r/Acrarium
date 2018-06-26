@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra;
+package com.faendir.acra.liquibase;
 
+import com.faendir.acra.BackendApplication;
 import com.faendir.acra.liquibase.ChangeAwareSpringLiquibase;
 import com.faendir.acra.liquibase.LiquibaseChangePostProcessor;
 import liquibase.exception.LiquibaseException;

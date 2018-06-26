@@ -40,7 +40,7 @@ public class RestConfiguration {
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
-    public Filter gzipFilter() {
+    public static Filter gzipFilter() {
         return new CompressingFilter();
     }
 }

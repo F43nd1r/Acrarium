@@ -55,6 +55,7 @@ public class RestReportInterface {
     public static final String PARAM_ID = "id";
     public static final String PARAM_MAIL = "mail";
     public static final String REPORT_PATH = "report";
+    public static final String MULTIPART_MIXED = "multipart/mixed";
     @NonNull private final DataService dataService;
 
     @Autowired
@@ -71,7 +72,7 @@ public class RestReportInterface {
     }
 
     @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).REPORTER)")
-    @RequestMapping(value = REPORT_PATH, consumes = "multipart/mixed", method = RequestMethod.POST)
+    @RequestMapping(value = REPORT_PATH, consumes = MULTIPART_MIXED, method = RequestMethod.POST)
     public ResponseEntity report(@NonNull MultipartHttpServletRequest request, @NonNull Principal principal) throws IOException {
         String content = null;
         List<MultipartFile> attachments = new ArrayList<>();
@@ -94,12 +95,11 @@ public class RestReportInterface {
     @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).USER)")
     @RequestMapping(value = EXPORT_PATH, produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     public ResponseEntity<String> export(@RequestParam(name = PARAM_APP) String appId, @RequestParam(name = PARAM_ID, required = false) String id,
-            @RequestParam(name = PARAM_MAIL, required = false) String mail, @NonNull Principal principal) {
+            @RequestParam(name = PARAM_MAIL, required = false) String mail) {
         Optional<App> app = dataService.findApp(appId);
         if (!app.isPresent()) {
             return ResponseEntity.notFound().build();
         }
-        principal.getName();
         BooleanExpression where = report.stacktrace.bug.app.eq(app.get());
         String name = "";
         if (mail != null && !mail.isEmpty()) {

@@ -13,21 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.security;
 
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinSession;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.core.context.SecurityContextImpl;
 
 /**
  * A custom {@link SecurityContextHolderStrategy} that stores the {@link SecurityContext} in the Vaadin Session.
  */
+@Configuration
 @SuppressWarnings("WeakerAccess")
 public class VaadinSessionSecurityContextHolderStrategy implements SecurityContextHolderStrategy {
+    static {
+        SecurityContextHolder.setStrategyName(VaadinSessionSecurityContextHolderStrategy.class.getName());
+    }
+
+    private static VaadinSession getSession() {
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session == null) {
+            session = new VaadinSession(VaadinService.getCurrent());
+            VaadinSession.setCurrent(session);
+        }
+        return session;
+    }
+
     @Override
     public void clearContext() {
         getSession().setAttribute(SecurityContext.class, null);
@@ -53,14 +68,5 @@ public class VaadinSessionSecurityContextHolderStrategy implements SecurityConte
     @Override
     public SecurityContext createEmptyContext() {
         return new SecurityContextImpl();
-    }
-
-    private static VaadinSession getSession() {
-        VaadinSession session = VaadinSession.getCurrent();
-        if (session == null) {
-            session = new VaadinSession(VaadinService.getCurrent());
-            VaadinSession.setCurrent(session);
-        }
-        return session;
     }
 }
