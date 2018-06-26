@@ -16,6 +16,7 @@
 package com.faendir.acra.rest;
 
 import com.faendir.acra.model.App;
+import com.faendir.acra.security.VaadinSessionSecurityContextHolderStrategy;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.service.UserService;
 import junit.framework.AssertionFailedError;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -51,7 +53,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @since 26.06.18
  */
 @RunWith(SpringRunner.class)
-@WebMvcTest(controllers = RestReportInterface.class, includeFilters = @ComponentScan.Filter(classes = EnableWebSecurity.class))
+@WebMvcTest(controllers = RestReportInterface.class, includeFilters = @ComponentScan.Filter(classes = EnableWebSecurity.class), excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = VaadinSessionSecurityContextHolderStrategy.class))
 @WithMockUser(roles = {"REPORTER", "USER"})
 public class RestReportInterfaceTest {
     @MockBean UserService userService;

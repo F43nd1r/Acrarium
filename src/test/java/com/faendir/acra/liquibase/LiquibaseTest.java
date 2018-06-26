@@ -16,8 +16,7 @@
 package com.faendir.acra.liquibase;
 
 import com.faendir.acra.BackendApplication;
-import com.faendir.acra.liquibase.ChangeAwareSpringLiquibase;
-import com.faendir.acra.liquibase.LiquibaseChangePostProcessor;
+import com.faendir.acra.security.VaadinSessionSecurityContextHolderStrategy;
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
 import org.junit.Test;
@@ -47,7 +46,7 @@ import java.util.List;
 @RunWith(SpringRunner.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ComponentScan(basePackageClasses = BackendApplication.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = SpringLiquibase.class))
+@ComponentScan(basePackageClasses = BackendApplication.class, excludeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = SpringLiquibase.class), @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = VaadinSessionSecurityContextHolderStrategy.class)})
 @ImportAutoConfiguration(exclude = {LiquibaseAutoConfiguration.class, EmbeddedDataSourceConfiguration.class})
 public abstract class LiquibaseTest {
     @Autowired ResourceLoader resourceLoader;
