@@ -30,7 +30,7 @@ repositories {
 }
 
 group 'com.faendir'
-version = '0.4.2-SNAPSHOT'
+version = '0.5.0-SNAPSHOT'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -138,4 +138,11 @@ task generateThemeClasses(type: com.faendir.acra.gradle.ThemeClassGenerator) {
 }
 
 compileJava.dependsOn(generateThemeClasses)
+
+test {
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+    }
+}
 
