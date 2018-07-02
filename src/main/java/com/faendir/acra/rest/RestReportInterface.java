@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,7 +37,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -56,6 +56,8 @@ public class RestReportInterface {
     public static final String PARAM_MAIL = "mail";
     public static final String REPORT_PATH = "report";
     public static final String MULTIPART_MIXED = "multipart/mixed";
+    private static final String REPORT = "ACRA_REPORT";
+    private static final String ATTACHMENT = "ACRA_ATTACHMENT";
     @NonNull private final DataService dataService;
 
     @Autowired
@@ -72,24 +74,19 @@ public class RestReportInterface {
     }
 
     @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).REPORTER)")
-    @RequestMapping(value = REPORT_PATH, consumes = MULTIPART_MIXED, method = RequestMethod.POST)
+    @RequestMapping(value = REPORT_PATH, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
     public ResponseEntity report(@NonNull MultipartHttpServletRequest request, @NonNull Principal principal) throws IOException {
-        String content = null;
-        List<MultipartFile> attachments = new ArrayList<>();
-        for (MultipartFile file : request.getMultiFileMap().get(null)) {
-            String filename = file.getName();
-            if (filename.isEmpty()) {
-                content = StreamUtils.copyToString(file.getInputStream(), StandardCharsets.UTF_8);
-            } else {
-                attachments.add(file);
-            }
-        }
-        if (content != null) {
-            dataService.createNewReport(principal.getName(), content, attachments);
-            return ResponseEntity.ok().build();
-        } else {
+        MultiValueMap<String, MultipartFile> fileMap = request.getMultiFileMap();
+        if (!fileMap.containsKey(REPORT) || fileMap.get(REPORT).isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
+        String content = StreamUtils.copyToString(fileMap.get(REPORT).get(0).getInputStream(), StandardCharsets.UTF_8);
+        List<MultipartFile> attachments = fileMap.get(ATTACHMENT);
+        if(attachments == null) {
+            attachments = Collections.emptyList();
+        }
+        dataService.createNewReport(principal.getName(), content, attachments);
+        return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).USER)")
