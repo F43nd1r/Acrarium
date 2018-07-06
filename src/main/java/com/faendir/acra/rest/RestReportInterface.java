@@ -55,9 +55,8 @@ public class RestReportInterface {
     public static final String PARAM_ID = "id";
     public static final String PARAM_MAIL = "mail";
     public static final String REPORT_PATH = "report";
-    public static final String MULTIPART_MIXED = "multipart/mixed";
-    private static final String REPORT = "ACRA_REPORT";
-    private static final String ATTACHMENT = "ACRA_ATTACHMENT";
+    public static final String REPORT = "ACRA_REPORT";
+    public static final String ATTACHMENT = "ACRA_ATTACHMENT";
     @NonNull private final DataService dataService;
 
     @Autowired

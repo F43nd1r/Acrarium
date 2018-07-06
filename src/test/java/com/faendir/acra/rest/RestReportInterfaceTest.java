@@ -41,8 +41,14 @@ import java.util.Optional;
 
 import static com.faendir.acra.rest.RestReportInterface.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -56,11 +62,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = RestReportInterface.class, includeFilters = @ComponentScan.Filter(classes = EnableWebSecurity.class), excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = VaadinSessionSecurityContextHolderStrategy.class))
 @WithMockUser(roles = {"REPORTER", "USER"})
 public class RestReportInterfaceTest {
+    private final String TEST_STRING = "TEST";
     @MockBean UserService userService;
     @MockBean DataService dataService;
     @Autowired RestReportInterface restReportInterface;
     @Autowired MockMvc mvc;
-    private final String TEST_STRING = "TEST";
 
     @Before
     public void setUp() throws Exception {
@@ -77,9 +83,9 @@ public class RestReportInterfaceTest {
 
     @Test
     public void report2() throws Exception {
-        MockMultipartFile file = spy(new MockMultipartFile(TEST_STRING, TEST_STRING.getBytes()));
-        when(file.getName()).thenReturn(null).thenReturn("");
-        mvc.perform(multipart("/" + REPORT_PATH).file(file).contentType(MULTIPART_MIXED)).andExpect(status().isOk());
+        mvc.perform(multipart("/" + REPORT_PATH).file(new MockMultipartFile(REPORT, TEST_STRING, APPLICATION_JSON_VALUE, new byte[0]))
+                .file(new MockMultipartFile(ATTACHMENT, TEST_STRING, APPLICATION_OCTET_STREAM_VALUE, new byte[0]))
+                .contentType(MULTIPART_FORM_DATA)).andExpect(status().isOk());
         verify(dataService, times(1)).createNewReport(any(), any(), any());
     }
 
