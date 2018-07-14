@@ -17,11 +17,9 @@
 package com.faendir.acra.util;
 
 import com.faendir.acra.model.App;
-import com.vaadin.ui.UI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.NonNull;
-import org.springframework.web.util.UriComponentsBuilder;
 import proguard.retrace.ReTrace;
 
 import java.io.IOException;
@@ -66,11 +64,6 @@ public final class Utils {
             log.error("Failed to retrace stacktrace", e);
             return stacktrace;
         }
-    }
-
-    public static String getUrlWithFragment(String fragment) {
-        if(fragment!= null && fragment.isEmpty()) fragment = null;
-        return UriComponentsBuilder.fromUri(UI.getCurrent().getPage().getLocation()).fragment(fragment).build().encode().toUri().toASCIIString();
     }
 
     public static String generifyStacktrace(String stacktrace, App.Configuration configuration) {

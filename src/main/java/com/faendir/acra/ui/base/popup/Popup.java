@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.view.base.popup;
+package com.faendir.acra.ui.base.popup;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.AcraTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
 
@@ -36,7 +36,7 @@ import java.util.function.Consumer;
  * @author Lukas
  * @since 19.12.2017
  */
-public class Popup extends Window {
+public class Popup extends Dialog {
     private final List<Component> components;
     private final Map<ValidatedField<?, ?>, Pair<Boolean, ValidatedField.Listener>> fields;
     private final List<Button> buttons;
@@ -49,7 +49,7 @@ public class Popup extends Window {
 
     @NonNull
     public Popup setTitle(@NonNull String title) {
-        super.setCaption(title);
+        components.add(0, new Text(title));
         return this;
     }
 
@@ -128,18 +128,21 @@ public class Popup extends Window {
         } else if (buttons.size() > 1) {
             HorizontalLayout buttonLayout = new HorizontalLayout();
             components.add(buttonLayout);
-            buttons.forEach(buttonLayout::addComponent);
-            buttons.forEach(button -> button.setWidth(100, Unit.PERCENTAGE));
+            buttons.forEach(buttonLayout::add);
+            buttons.forEach(button -> button.setWidth("100%"));
         }
-        components.forEach(component -> component.setWidth(100, Unit.PERCENTAGE));
+        components.forEach(component -> {
+            if(component instanceof HasSize) {
+                ((HasSize)component).setWidth("100%");
+            }
+        });
         FormLayout layout = new FormLayout();
-        components.forEach(layout::addComponent);
+        components.forEach(c -> layout.addFormItem(c, ""));
         checkValid();
-        layout.addStyleNames(AcraTheme.PADDING_LEFT, AcraTheme.PADDING_RIGHT);
-        setContent(layout);
-        center();
-        if (!isAttached()) {
-            UI.getCurrent().addWindow(this);
+        removeAll();
+        add(layout);
+        if (!isOpened()) {
+            open();
         }
     }
 

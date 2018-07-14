@@ -19,7 +19,7 @@ plugins {
     id 'idea'
     id 'war'
     id 'org.springframework.boot' version '2.0.2.RELEASE'
-    id 'com.devsoap.plugin.vaadin' version '1.3.1'
+    id 'com.devsoap.vaadin-flow' version '1.0.0.M3'
     id 'io.spring.dependency-management' version '1.0.5.RELEASE'
     id 'cn.bestwu.propdeps' version '0.0.10'
 }
@@ -28,6 +28,15 @@ repositories {
     maven { url 'https://maven.google.com' }
     maven { url 'https://maven.vaadin.com/vaadin-addons' }
 }
+
+vaadin {
+    version '10.0.1'
+}
+
+
+// Automatically configure repositories and dependencies. For a more fine-grained example see
+// https://github.com/devsoap/gradle-vaadin-flow/wiki/Dependency-management
+vaadin.autoconfigure()
 
 group 'com.faendir'
 version = '0.5.0'
@@ -53,33 +62,6 @@ idea {
     }
 }
 
-vaadin {
-    version '8.4.2'
-    push true
-}
-
-vaadinCompile {
-    style 'PRETTY'
-    outputDirectory 'src/main/resources'
-    strict true
-    widgetset 'com.faendir.acra.AppWidgetset'
-}
-
-vaadinThemeCompile {
-    themesDirectory 'src/main/resources/VAADIN/themes'
-}
-
-vaadinSuperDevMode {
-    noserver false
-    extraArgs ""
-}
-
-dependencyManagement {
-    imports {
-        mavenBom "com.vaadin:vaadin-bom:${vaadin.version}"
-    }
-}
-
 dependencies {
     //spring
     compile 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -95,12 +77,8 @@ dependencies {
     compile "com.querydsl:querydsl-sql:$queryDslVersion"
     compile "com.querydsl:querydsl-apt:$queryDslVersion:jpa"
     //vaadin
-    compile 'com.vaadin:vaadin-spring-boot-starter'
-    compile 'com.vaadin:vaadin-push'
-    compile('org.vaadin.addon:jfreechartwrapper:4.0.0') {
-        exclude group: 'javax.servlet', module: 'servlet-api'
-        exclude group: 'jfree'
-    }
+    compile "com.vaadin:vaadin-spring-boot-starter:${vaadin.version}"
+    compile "com.vaadin:flow:1.0.1"
     compile 'com.vaadin:vaadin-icons:3.0.1'
     compile 'org.jfree:jfreechart:1.5.0'
     compile 'javax.servlet:javax.servlet-api:3.1.0'
@@ -129,15 +107,7 @@ war {
     archiveName = 'acra.war'
     version = version
     enabled = true
-    dependsOn vaadinThemeCompile, vaadinCompile
 }
-
-task generateThemeClasses(type: com.faendir.acra.gradle.ThemeClassGenerator) {
-    themesDirectory file('src/main/resources/VAADIN/themes')
-    outputDirectory file("$generated/faendir/java")
-}
-
-compileJava.dependsOn(generateThemeClasses)
 
 test {
     testLogging {
@@ -145,4 +115,3 @@ test {
         exceptionFormat "full"
     }
 }
-

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.view.base.popup;
+package com.faendir.acra.ui.base.popup;
 
-import com.vaadin.server.UserError;
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.AbstractField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.HasValue;
 import org.springframework.lang.NonNull;
 
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ import java.util.function.Supplier;
  * @author Lukas
  * @since 22.06.2017
  */
-public class ValidatedField<V, T extends AbstractComponent> {
+public class ValidatedField<V, T extends Component & HasValue<?,V> & HasValidation> {
     private final T field;
     private final Supplier<V> valueSupplier;
     private final Map<Function<V, Boolean>, String> validators;
@@ -49,11 +49,11 @@ public class ValidatedField<V, T extends AbstractComponent> {
         listenerRegistration.accept(this::validate);
     }
 
-    public static <V, T extends AbstractField<V>> ValidatedField<V, T> of(T field) {
+    public static <V, T extends Component & HasValue<?,V> & HasValidation> ValidatedField<V, T> of(T field) {
         return new ValidatedField<>(field, field::getValue, vConsumer -> field.addValueChangeListener(event -> vConsumer.accept(event.getValue())));
     }
 
-    public static <V, T extends AbstractComponent> ValidatedField<V, T> of(T field, Supplier<V> valueSupplier, Consumer<Consumer<V>> listenerRegistration) {
+    public static <V, T extends Component & HasValue<?,V> & HasValidation> ValidatedField<V, T> of(T field, Supplier<V> valueSupplier, Consumer<Consumer<V>> listenerRegistration) {
         return new ValidatedField<>(field, valueSupplier, listenerRegistration);
     }
 
@@ -73,10 +73,10 @@ public class ValidatedField<V, T extends AbstractComponent> {
     private boolean validate(V value) {
         boolean valid = validators.entrySet().stream().allMatch(entry -> {
             if (entry.getKey().apply(value)) {
-                field.setComponentError(null);
+                field.setErrorMessage(null);
                 return true;
             } else {
-                field.setComponentError(new UserError(entry.getValue()));
+                field.setErrorMessage(entry.getValue());
                 return false;
             }
         });

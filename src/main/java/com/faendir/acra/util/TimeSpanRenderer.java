@@ -16,10 +16,8 @@
 
 package com.faendir.acra.util;
 
-import com.vaadin.ui.renderers.TextRenderer;
-import elemental.json.Json;
-import elemental.json.JsonValue;
-import org.springframework.lang.Nullable;
+import com.vaadin.flow.data.renderer.BasicRenderer;
+import com.vaadin.flow.function.ValueProvider;
 import org.xbib.time.pretty.PrettyTime;
 
 import java.time.LocalDateTime;
@@ -29,12 +27,13 @@ import java.util.Locale;
  * @author Lukas
  * @since 26.05.2017
  */
-public class TimeSpanRenderer extends TextRenderer {
+public class TimeSpanRenderer<T> extends BasicRenderer<T, LocalDateTime> {
+    public TimeSpanRenderer(ValueProvider<T, LocalDateTime> valueProvider) {
+        super(valueProvider);
+    }
+
     @Override
-    public JsonValue encode(@Nullable Object value) {
-        if (value instanceof LocalDateTime) {
-            return Json.create(new PrettyTime(Locale.US).formatUnrounded((LocalDateTime) value));
-        }
-        return super.encode(value);
+    protected String getFormattedValue(LocalDateTime object) {
+        return new PrettyTime(Locale.US).formatUnrounded(object);
     }
 }

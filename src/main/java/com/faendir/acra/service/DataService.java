@@ -56,7 +56,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import javax.validation.constraints.Size;
 import java.io.IOException;
 import java.io.Serializable;
@@ -69,7 +68,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -231,10 +229,14 @@ public class DataService implements Serializable {
     @NonNull
     public Optional<App> findApp(@NonNull String encodedId) {
         try {
-            return Optional.ofNullable(new JPAQuery<>(entityManager).from(app).where(app.id.eq(Integer.parseInt(encodedId))).select(app).fetchOne());
+            return findApp(Integer.parseInt(encodedId));
         } catch (NumberFormatException e) {
             return Optional.empty();
         }
+    }
+
+    public Optional<App> findApp(int id) {
+        return Optional.ofNullable(new JPAQuery<>(entityManager).from(app).where(app.id.eq(id)).select(app).fetchOne());
     }
 
     @NonNull
