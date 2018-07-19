@@ -55,7 +55,10 @@ public class ReportList extends MyGrid<Report> {
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
             ButtonRenderer<Report> renderer = new ButtonRenderer<>(e -> new Popup().setTitle("Confirm")
                     .addComponent(new Label("Are you sure you want to delete this report?"))
-                    .addYesNoButtons(p -> reportDeleter.accept(e.getItem()), true)
+                    .addYesNoButtons(p -> {
+                        reportDeleter.accept(e.getItem());
+                        getDataProvider().refreshAll();
+                    }, true)
                     .show());
             renderer.setHtmlContentAllowed(true);
             addColumn(report -> VaadinIcons.TRASH.getHtml(),
