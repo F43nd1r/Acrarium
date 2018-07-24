@@ -94,7 +94,7 @@ public class UserService implements Serializable {
     @Transactional
     public boolean changePassword(@NonNull User user, @NonNull String oldPassword, @NonNull String newPassword) {
         if (checkPassword(user, oldPassword)) {
-            user.setPassword(newPassword);
+            user.setPassword(passwordEncoder.encode(newPassword));
             entityManager.merge(user);
             return true;
         }
