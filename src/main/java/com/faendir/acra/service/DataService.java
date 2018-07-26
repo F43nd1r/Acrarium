@@ -119,13 +119,18 @@ public class DataService implements Serializable {
 
     @NonNull
     public QueryDslDataProvider<Report> getReportProvider(@NonNull Bug bug) {
-        return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(report).join(report.stacktrace, stacktrace1).where(stacktrace1.bug.eq(bug)).select(report));
+        return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(report)
+                .join(report.stacktrace, stacktrace1)
+                .fetchJoin()
+                .where(stacktrace1.bug.eq(bug))
+                .select(report));
     }
 
     @NonNull
     public QueryDslDataProvider<Report> getReportProvider(@NonNull App app) {
         return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(report)
                 .join(report.stacktrace, stacktrace1)
+                .fetchJoin()
                 .join(stacktrace1.bug, bug)
                 .where(bug.app.eq(app))
                 .select(report));
@@ -309,8 +314,8 @@ public class DataService implements Serializable {
             JSONObject jsonObject = new JSONObject(content);
             String generifiedStacktrace = Utils.generifyStacktrace(jsonObject.optString(ReportField.STACK_TRACE.name()), app.getConfiguration());
             Version version = getVersion(jsonObject);
-            Stacktrace stacktrace = findStacktrace(generifiedStacktrace, version.getCode()).orElseGet(() -> new Stacktrace(findBug(app, generifiedStacktrace).orElseGet(() -> new Bug(app,
-                    generifiedStacktrace)), generifiedStacktrace, version));
+            Stacktrace stacktrace = findStacktrace(generifiedStacktrace, version.getCode()).orElseGet(() -> new Stacktrace(findBug(app,
+                    generifiedStacktrace).orElseGet(() -> new Bug(app, generifiedStacktrace)), generifiedStacktrace, version));
             Report report = store(new Report(stacktrace, content));
             attachments.forEach(multipartFile -> {
                 try {
@@ -335,13 +340,13 @@ public class DataService implements Serializable {
             }
             try {
                 versionName = buildConfig.getString("VERSION_NAME");
-            } catch (Exception ignored){
+            } catch (Exception ignored) {
             }
         }
-        if(versionCode == null) {
+        if (versionCode == null) {
             versionCode = jsonObject.optInt(ReportField.APP_VERSION_CODE.name());
         }
-        if(versionName == null) {
+        if (versionName == null) {
             versionName = jsonObject.optString(ReportField.APP_VERSION_NAME.name(), "N/A");
         }
         return new Version(versionCode, versionName);
