@@ -30,7 +30,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -48,11 +48,11 @@ public final class Utils {
     private static final Log log = LogFactory.getLog(Utils.class);
 
     @NonNull
-    public static LocalDateTime getDateFromString(@NonNull String s) {
+    public static ZonedDateTime getDateFromString(@NonNull String s) {
         try {
-            return LocalDateTime.parse(s, formatter);
+            return ZonedDateTime.parse(s, formatter);
         } catch (DateTimeParseException e) {
-            return LocalDateTime.now();
+            return ZonedDateTime.now();
         }
     }
 

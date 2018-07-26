@@ -32,7 +32,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * @author Lukas
@@ -47,7 +47,7 @@ public class Report {
     private Stacktrace stacktrace;
     @Type(type = "text") private String content;
     @Transient private JSONObject jsonObject;
-    private LocalDateTime date;
+    private ZonedDateTime date;
     private String userEmail;
     @Type(type = "text") private String userComment;
     private String androidVersion;
@@ -86,7 +86,7 @@ public class Report {
     }
 
     @NonNull
-    public LocalDateTime getDate() {
+    public ZonedDateTime getDate() {
         return date;
     }
 

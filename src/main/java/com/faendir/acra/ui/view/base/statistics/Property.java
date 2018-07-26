@@ -29,7 +29,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.ComponentContainer;
 import org.vaadin.risto.stepper.IntStepper;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.function.Function;
@@ -91,13 +91,13 @@ class Property<F, C extends Component & HasValue<F>, T> {
             return new Property<>(filterText, comboBox, stringExpression::eq, new PieChart(chartTitle), dataService, stringExpression);
         }
 
-        Property<?, ?, ?> createAgeProperty(String filterText, String chartTitle, DateTimePath<LocalDateTime> dateTimeExpression) {
+        Property<?, ?, ?> createAgeProperty(String filterText, String chartTitle, DateTimePath<ZonedDateTime> dateTimeExpression) {
             IntStepper stepper = new IntStepper();
             stepper.setValue(30);
             stepper.setMinValue(1);
             return new Property<>(filterText,
                     stepper,
-                    days -> dateTimeExpression.after(LocalDateTime.now().minus(days, ChronoUnit.DAYS)),
+                    days -> dateTimeExpression.after(ZonedDateTime.now().minus(days, ChronoUnit.DAYS)),
                     new TimeChart(chartTitle),
                     dataService,
                     SQLExpressions.date(Date.class, dateTimeExpression));
