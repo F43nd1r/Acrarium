@@ -59,7 +59,7 @@ public class Statistics extends Composite {
         Property.Factory factory = new Property.Factory(dataService, baseExpression);
         properties.add(factory.createAgeProperty("Last X days", "Reports over time", QReport.report.date));
         properties.add(factory.createStringProperty("Android Version", "Reports per Android Version", QReport.report.androidVersion));
-        properties.add(factory.createStringProperty("App Version", "Reports per App Version", QReport.report.stacktrace.versionName));
+        properties.add(factory.createStringProperty("App Version", "Reports per App Version", QReport.report.stacktrace.version.name));
         properties.add(factory.createStringProperty("Phone Model", "Reports per Phone Model", QReport.report.phoneModel));
         properties.add(factory.createStringProperty("Phone Brand", "Reports per Brand", QReport.report.brand));
 

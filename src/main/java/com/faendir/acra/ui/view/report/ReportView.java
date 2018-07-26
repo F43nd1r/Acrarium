@@ -80,10 +80,10 @@ public class ReportView extends ParametrizedBaseView<Report> {
         attachments.addStyleNames(AcraTheme.MARGIN_BOTTOM, AcraTheme.MARGIN_TOP, AcraTheme.MARGIN_LEFT, AcraTheme.MARGIN_RIGHT);
         GridLayout summaryGrid = new GridLayout(2, 1);
         summaryGrid.addStyleName(AcraTheme.BORDERED_GRIDLAYOUT);
-        summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(parameter.getStacktrace().getVersionName(), ContentMode.PREFORMATTED));
+        summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(parameter.getStacktrace().getVersion().getName(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Email", ContentMode.PREFORMATTED), new Label(parameter.getUserEmail(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Comment", ContentMode.PREFORMATTED), new Label(parameter.getUserComment(), ContentMode.PREFORMATTED));
-        Optional<ProguardMapping> mapping = dataService.findMapping(parameter.getStacktrace().getBug().getApp(), parameter.getStacktrace().getVersionCode());
+        Optional<ProguardMapping> mapping = dataService.findMapping(parameter.getStacktrace().getBug().getApp(), parameter.getStacktrace().getVersion().getCode());
         if (mapping.isPresent()) {
             summaryGrid.addComponents(new Label("De-obfuscated Stacktrace", ContentMode.PREFORMATTED),
                     new Label(Utils.retrace(parameter.getStacktrace().getStacktrace(), mapping.get().getMappings()), ContentMode.PREFORMATTED));

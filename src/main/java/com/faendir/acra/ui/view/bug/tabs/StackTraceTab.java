@@ -50,12 +50,12 @@ public class StackTraceTab implements BugTab {
     public Component createContent(@NonNull Bug bug, @NonNull NavigationManager navigationManager) {
         Accordion accordion = new Accordion();
         for (Stacktrace stacktrace : dataService.getStacktraces(bug)) {
-            Optional<ProguardMapping> mapping = dataService.findMapping(bug.getApp(), stacktrace.getVersionCode());
+            Optional<ProguardMapping> mapping = dataService.findMapping(bug.getApp(), stacktrace.getVersion().getCode());
             String trace = stacktrace.getStacktrace();
             if (mapping.isPresent()) {
                 trace = Utils.retrace(trace, mapping.get().getMappings());
             }
-            accordion.addTab(new Label(trace, ContentMode.PREFORMATTED)).setCaption("Version \"" + stacktrace.getVersionName() + "\": " + trace.split("\n", 2)[0]);
+            accordion.addTab(new Label(trace, ContentMode.PREFORMATTED)).setCaption("Version \"" + stacktrace.getVersion().getName() + "\": " + trace.split("\n", 2)[0]);
         }
         accordion.setSizeFull();
         return accordion;

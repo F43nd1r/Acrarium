@@ -88,7 +88,7 @@ public class DangerPanel implements AdminPanel {
         purgeAge.addStyleName(AcraTheme.NO_MARGIN);
         purgeAge.addComponents(new Button("Purge", e -> dataService.deleteReportsOlderThanDays(app, age.getValue())), new Label(" Reports older than "), age, new Label(" Days"));
         purgeAge.setExpandRatio(age, 1);
-        ComboBox<Integer> versionBox = new ComboBox<>(null, dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app), QReport.report.stacktrace.versionCode));
+        ComboBox<Integer> versionBox = new ComboBox<>(null, dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app), QReport.report.stacktrace.version.code));
         versionBox.setEmptySelectionAllowed(false);
         versionBox.setWidth(100, Sizeable.Unit.PERCENTAGE);
         HorizontalLayout purgeVersion = new HorizontalLayout();

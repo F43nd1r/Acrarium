@@ -25,6 +25,7 @@ import com.faendir.acra.model.QApp;
 import com.faendir.acra.model.Report;
 import com.faendir.acra.model.Stacktrace;
 import com.faendir.acra.model.User;
+import com.faendir.acra.model.Version;
 import com.faendir.acra.model.view.Queries;
 import com.faendir.acra.model.view.VApp;
 import com.faendir.acra.model.view.VBug;
@@ -245,8 +246,11 @@ public class DataService implements Serializable {
         return new JPAQuery<>(entityManager).from(attachment).where(attachment.report.eq(report)).select(attachment).fetch();
     }
 
-    public Optional<Stacktrace> findStacktrace(@NonNull String stacktrace) {
-        return Optional.ofNullable(new JPAQuery<>(entityManager).from(stacktrace1).where(stacktrace1.stacktrace.eq(stacktrace)).select(stacktrace1).fetchOne());
+    public Optional<Stacktrace> findStacktrace(@NonNull String stacktrace, int versionCode) {
+        return Optional.ofNullable(new JPAQuery<>(entityManager).from(stacktrace1)
+                .where(stacktrace1.stacktrace.eq(stacktrace).and(stacktrace1.version.code.eq(versionCode)))
+                .select(stacktrace1)
+                .fetchOne());
     }
 
     private void deleteOrphanBugs() {
@@ -293,7 +297,7 @@ public class DataService implements Serializable {
 
     @Transactional
     public void deleteReportsBeforeVersion(@NonNull App app, int versionCode) {
-        new JPADeleteClause(entityManager, report).where(report.stacktrace.bug.app.eq(app).and(report.stacktrace.versionCode.lt(versionCode)));
+        new JPADeleteClause(entityManager, report).where(report.stacktrace.bug.app.eq(app).and(report.stacktrace.version.code.lt(versionCode)));
         entityManager.flush();
         deleteOrphanBugs();
     }
@@ -304,11 +308,9 @@ public class DataService implements Serializable {
         if (app != null) {
             JSONObject jsonObject = new JSONObject(content);
             String generifiedStacktrace = Utils.generifyStacktrace(jsonObject.optString(ReportField.STACK_TRACE.name()), app.getConfiguration());
-            Stacktrace stacktrace = findStacktrace(generifiedStacktrace).orElseGet(() -> new Stacktrace(findBug(app, generifiedStacktrace).orElseGet(() -> new Bug(app,
-                    generifiedStacktrace)),
-                    generifiedStacktrace,
-                    jsonObject.optInt(ReportField.APP_VERSION_CODE.name()),
-                    jsonObject.optString(ReportField.APP_VERSION_NAME.name())));
+            Version version = getVersion(jsonObject);
+            Stacktrace stacktrace = findStacktrace(generifiedStacktrace, version.getCode()).orElseGet(() -> new Stacktrace(findBug(app, generifiedStacktrace).orElseGet(() -> new Bug(app,
+                    generifiedStacktrace)), generifiedStacktrace, version));
             Report report = store(new Report(stacktrace, content));
             attachments.forEach(multipartFile -> {
                 try {
@@ -320,6 +322,29 @@ public class DataService implements Serializable {
                 }
             });
         }
+    }
+
+    private Version getVersion(JSONObject jsonObject) {
+        JSONObject buildConfig = jsonObject.optJSONObject(ReportField.BUILD_CONFIG.name());
+        Integer versionCode = null;
+        String versionName = null;
+        if (buildConfig != null) {
+            try {
+                versionCode = buildConfig.getInt("VERSION_CODE");
+            } catch (Exception ignored) {
+            }
+            try {
+                versionName = buildConfig.getString("VERSION_NAME");
+            } catch (Exception ignored){
+            }
+        }
+        if(versionCode == null) {
+            versionCode = jsonObject.optInt(ReportField.APP_VERSION_CODE.name());
+        }
+        if(versionName == null) {
+            versionName = jsonObject.optString(ReportField.APP_VERSION_NAME.name(), "N/A");
+        }
+        return new Version(versionCode, versionName);
     }
 
     public <T> Map<T, Long> countReports(@NonNull Predicate where, @NonNull Expression<T> select) {

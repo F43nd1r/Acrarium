@@ -47,7 +47,7 @@ public class ReportList extends MyGrid<Report> {
         setId(CAPTION);
         setSelectionMode(Grid.SelectionMode.NONE);
         sort(addColumn(Report::getDate, new TimeSpanRenderer(), QReport.report.date, "Date"), SortDirection.DESCENDING);
-        addColumn(report -> report.getStacktrace().getVersionCode(), QReport.report.stacktrace.versionCode, "App Version");
+        addColumn(report -> report.getStacktrace().getVersion().getCode(), QReport.report.stacktrace.version.code, "App Version");
         addColumn(Report::getAndroidVersion, QReport.report.androidVersion, "Android Version");
         addColumn(Report::getPhoneModel, QReport.report.phoneModel, "Device");
         addColumn(report -> report.getStacktrace().getStacktrace().split("\n", 2)[0], QReport.report.stacktrace.stacktrace, "Stacktrace").setExpandRatio(1)

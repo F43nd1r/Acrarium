@@ -43,19 +43,16 @@ public class Stacktrace {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Bug bug;
     @Type(type = "text") private String stacktrace;
-    private int versionCode;
-    private String versionName;
+    private Version version;
 
     @PersistenceConstructor
     Stacktrace(){
     }
 
-    public Stacktrace(@NonNull Bug bug, @NonNull String stacktrace, int versionCode, String versionName) {
-
+    public Stacktrace(@NonNull Bug bug, @NonNull String stacktrace, Version version) {
         this.bug = bug;
         this.stacktrace = stacktrace;
-        this.versionCode = versionCode;
-        this.versionName = versionName;
+        this.version = version;
     }
 
     public int getId() {
@@ -74,11 +71,7 @@ public class Stacktrace {
         return stacktrace;
     }
 
-    public int getVersionCode() {
-        return versionCode;
-    }
-
-    public String getVersionName() {
-        return versionName;
+    public Version getVersion() {
+        return version;
     }
 }
