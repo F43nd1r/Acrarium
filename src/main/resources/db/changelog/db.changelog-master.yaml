@@ -485,6 +485,7 @@ databaseChangeLog:
     author: lukas
     validCheckSum:
     - 7:d4d705882f587123182e03aeae66f7b7
+    - 7:5becb08fe98c36e5642e91a6492aac92
     changes:
     - createTable:
         tableName: stacktrace
