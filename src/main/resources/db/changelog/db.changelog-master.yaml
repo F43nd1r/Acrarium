@@ -501,8 +501,8 @@ databaseChangeLog:
             type: INT
             constraints:
               nullable: false
-              referencedTablename: bug
-              referencedColumnName: id
+              referencedTableName: bug
+              referencedColumnNames: id
               foreignKeyName: FK_stacktrace_bug
               deleteCascade: true
               deferrable: false
