@@ -30,11 +30,11 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Slider;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.AcraTheme;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,16 +65,13 @@ public class DangerPanel implements AdminPanel {
         configButton.setWidth(100, Sizeable.Unit.PERCENTAGE);
         Button matchingButton = new Button("Configure bug matching", e -> {
             App.Configuration configuration = app.getConfiguration();
-            CheckBox matchByMessage = new CheckBox("Match by exception message", configuration.matchByMessage());
-            CheckBox ignoreInstanceIds = new CheckBox("Ignore instance ids", configuration.ignoreInstanceIds());
-            CheckBox ignoreAndroidLineNumbers = new CheckBox("Ignore android SDK line numbers", configuration.ignoreAndroidLineNumbers());
-            new Popup().addValidatedField(ValidatedField.of(matchByMessage), true)
-                    .addValidatedField(ValidatedField.of(ignoreInstanceIds), true)
-                    .addValidatedField(ValidatedField.of(ignoreAndroidLineNumbers), true)
-                    .addComponent(new Label(
-                            "Are you sure you want to save this configuration? All bugs will be recalculated, which may take some time and will reset the 'solved' status"))
+            Slider score = new Slider("Minimum score", 0, 100);
+            score.setValue((double) configuration.getMinScore());
+            new Popup().addValidatedField(ValidatedField.of(score), true)
+                    .addComponent(new Label("Are you sure you want to save this configuration? " + "All bugs will be checked for merging, which may take some time. "
+                                            + "Note that a higher minimum score does not unmerge already merged bugs."))
                     .addYesNoButtons(p -> dataService.changeConfiguration(app,
-                            new App.Configuration(matchByMessage.getValue(), ignoreInstanceIds.getValue(), ignoreAndroidLineNumbers.getValue())), true)
+                            new App.Configuration(score.getValue().intValue())), true)
                     .show();
         });
         matchingButton.setWidth(100, Sizeable.Unit.PERCENTAGE);

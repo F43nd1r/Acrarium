@@ -564,3 +564,56 @@ databaseChangeLog:
     - dropColumn:
         tableName: report
         columnName: bug_id
+- changeSet:
+    id: 2018-07-28-switch-to-fuzzy-bug-auto-merge
+    author: lukas
+    changes:
+    - dropColumn:
+        tableName: app
+        columnName: ignore_android_line_numbers
+    - dropColumn:
+        tableName: app
+        columnName: ignore_instance_ids
+    - dropColumn:
+        tableName: app
+        columnName: match_by_message
+    - addColumn:
+        tableName: app
+        columns:
+        - column:
+            name: min_score
+            type: INT
+            defaultValueNumeric: 95
+            constraints:
+              nullable: false
+    - createTable:
+        tableName: stacktrace_match
+        columns:
+        - column:
+            name: left_id
+            type: INT
+            constraints:
+              nullable: false
+              referencedTableName: stacktrace
+              referencedColumnNames: id
+              foreignKeyName: FK_match_left_stacktrace
+              deleteCascade: true
+              deferrable: false
+              initiallyDeferred: false
+        - column:
+            name: right_id
+            type: INT
+            constraints:
+              nullable: false
+              referencedTableName: stacktrace
+              referencedColumnNames: id
+              foreignKeyName: FK_match_right_stacktrace
+              deleteCascade: true
+              deferrable: false
+              initiallyDeferred: false
+        - column:
+            name: score
+            type: INT
+            constraints:
+              nullable: false
+

@@ -31,8 +31,6 @@ import com.faendir.acra.model.view.VApp;
 import com.faendir.acra.model.view.VBug;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.util.PlainTextUser;
-import com.faendir.acra.util.Utils;
-import com.mysema.commons.lang.CloseableIterator;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Predicate;
@@ -43,7 +41,6 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPADeleteClause;
 import com.querydsl.jpa.impl.JPAQuery;
-import com.querydsl.jpa.impl.JPAUpdateClause;
 import org.acra.ReportField;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,7 +59,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -91,11 +87,13 @@ public class DataService implements Serializable {
     @NonNull private final Log log = LogFactory.getLog(getClass());
     @NonNull private final UserService userService;
     @NonNull private final EntityManager entityManager;
+    @NonNull private final BugMerger bugMerger;
 
     @Autowired
-    public DataService(@NonNull UserService userService, @NonNull EntityManager entityManager) {
+    public DataService(@NonNull UserService userService, @NonNull EntityManager entityManager, @NonNull BugMerger bugMerger) {
         this.userService = userService;
         this.entityManager = entityManager;
+        this.bugMerger = bugMerger;
     }
 
     @NonNull
@@ -174,14 +172,8 @@ public class DataService implements Serializable {
         return user;
     }
 
-    @Transactional
     public void mergeBugs(@NonNull @Size(min = 2) Collection<Bug> bugs, @NonNull String title) {
-        List<Bug> list = new ArrayList<>(bugs);
-        Bug bug = list.remove(0);
-        bug.setTitle(title);
-        bug = store(bug);
-        new JPAUpdateClause(entityManager, stacktrace1).set(stacktrace1.bug, bug).where(stacktrace1.bug.in(list)).execute();
-        list.forEach(this::delete);
+        bugMerger.mergeBugs(bugs, title);
     }
 
     @Transactional
@@ -228,11 +220,6 @@ public class DataService implements Serializable {
     }
 
     @NonNull
-    public Optional<Bug> findBug(int id) {
-        return Optional.ofNullable(new JPAQuery<>(entityManager).from(bug).where(bug.id.eq(id)).select(bug).fetchOne());
-    }
-
-    @NonNull
     public Optional<App> findApp(@NonNull String encodedId) {
         try {
             return Optional.ofNullable(new JPAQuery<>(entityManager).from(app).where(app.id.eq(Integer.parseInt(encodedId))).select(app).fetchOne());
@@ -258,10 +245,6 @@ public class DataService implements Serializable {
                 .fetchOne());
     }
 
-    private void deleteOrphanBugs() {
-        new JPADeleteClause(entityManager, bug).where(bug.notIn(JPAExpressions.select(stacktrace1.bug).from(stacktrace1).distinct())).execute();
-    }
-
     private Optional<Bug> findBug(@NonNull App app, @NonNull String stacktrace) {
         return Optional.ofNullable(new JPAQuery<>(entityManager).from(stacktrace1)
                 .join(stacktrace1.bug, bug)
@@ -272,39 +255,21 @@ public class DataService implements Serializable {
 
     @Transactional
     public void changeConfiguration(@NonNull App app, @NonNull App.Configuration configuration) {
-        app.setConfiguration(configuration);
-        app = store(app);
-        CloseableIterator<Stacktrace> iterator = new JPAQuery<>(entityManager).from(stacktrace1).join(stacktrace1.bug, bug).where(bug.app.eq(app)).select(stacktrace1).iterate();
-        while (iterator.hasNext()) {
-            Stacktrace stacktrace = iterator.next();
-            String generifiedStacktrace = Utils.generifyStacktrace(stacktrace.getStacktrace(), app.getConfiguration());
-            Optional<Bug> bug = findBug(app, generifiedStacktrace);
-            if (!bug.isPresent()) {
-                stacktrace.setBug(new Bug(app, generifiedStacktrace));
-                store(generifiedStacktrace);
-                entityManager.flush();
-            } else if (!bug.get().equals(stacktrace.getBug())) {
-                stacktrace.setBug(bug.get());
-                store(generifiedStacktrace);
-            }
-        }
-        iterator.close();
-        entityManager.flush();
-        deleteOrphanBugs();
+        bugMerger.changeConfiguration(app, configuration);
     }
 
     @Transactional
     public void deleteReportsOlderThanDays(@NonNull App app, @NonNull int days) {
         new JPADeleteClause(entityManager, report).where(report.stacktrace.bug.app.eq(app).and(report.date.before(ZonedDateTime.now().minus(days, ChronoUnit.DAYS))));
         entityManager.flush();
-        deleteOrphanBugs();
+        bugMerger.deleteOrphanBugs();
     }
 
     @Transactional
     public void deleteReportsBeforeVersion(@NonNull App app, int versionCode) {
         new JPADeleteClause(entityManager, report).where(report.stacktrace.bug.app.eq(app).and(report.stacktrace.version.code.lt(versionCode)));
         entityManager.flush();
-        deleteOrphanBugs();
+        bugMerger.deleteOrphanBugs();
     }
 
     @Transactional
@@ -312,10 +277,10 @@ public class DataService implements Serializable {
         App app = new JPAQuery<>(entityManager).from(QApp.app).where(QApp.app.reporter.username.eq(reporterUserName)).select(QApp.app).fetchOne();
         if (app != null) {
             JSONObject jsonObject = new JSONObject(content);
-            String generifiedStacktrace = Utils.generifyStacktrace(jsonObject.optString(ReportField.STACK_TRACE.name()), app.getConfiguration());
+            String trace = jsonObject.optString(ReportField.STACK_TRACE.name());
             Version version = getVersion(jsonObject);
-            Stacktrace stacktrace = findStacktrace(generifiedStacktrace, version.getCode()).orElseGet(() -> new Stacktrace(findBug(app,
-                    generifiedStacktrace).orElseGet(() -> new Bug(app, generifiedStacktrace)), generifiedStacktrace, version));
+            Stacktrace stacktrace = findStacktrace(trace, version.getCode()).orElseGet(() -> new Stacktrace(findBug(app,
+                    trace).orElseGet(() -> new Bug(app, trace)), trace, version));
             Report report = store(new Report(stacktrace, content));
             attachments.forEach(multipartFile -> {
                 try {
@@ -326,6 +291,7 @@ public class DataService implements Serializable {
                     log.warn("Failed to load attachment with name " + multipartFile.getName(), e);
                 }
             });
+            bugMerger.checkAutoMerge(report.getStacktrace());
         }
     }
 

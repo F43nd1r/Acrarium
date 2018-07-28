@@ -96,33 +96,19 @@ public class App {
 
     @Embeddable
     public static class Configuration {
-        private boolean matchByMessage;
-        private boolean ignoreInstanceIds;
-        private boolean ignoreAndroidLineNumbers;
+        private int minScore;
 
         @PersistenceConstructor
         Configuration() {
-            matchByMessage = true;
-            ignoreInstanceIds = true;
-            ignoreAndroidLineNumbers = true;
+            minScore = 95;
         }
 
-        public Configuration(boolean matchByMessage, boolean ignoreInstanceIds, boolean ignoreAndroidLineNumbers) {
-            this.matchByMessage = matchByMessage;
-            this.ignoreInstanceIds = ignoreInstanceIds;
-            this.ignoreAndroidLineNumbers = ignoreAndroidLineNumbers;
+        public Configuration(int minScore) {
+            this.minScore = minScore;
         }
 
-        public boolean matchByMessage() {
-            return matchByMessage;
-        }
-
-        public boolean ignoreInstanceIds() {
-            return ignoreInstanceIds;
-        }
-
-        public boolean ignoreAndroidLineNumbers() {
-            return ignoreAndroidLineNumbers;
+        public int getMinScore() {
+            return minScore;
         }
     }
 }
