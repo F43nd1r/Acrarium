@@ -354,7 +354,7 @@ public class DataService implements Serializable {
 
     public <T> Map<T, Long> countReports(@NonNull Predicate where, @NonNull Expression<T> select) {
         List<Tuple> result = ((JPAQuery<?>) new JPAQuery<>(entityManager)).from(report).where(where).groupBy(select).select(select, report.id.count()).fetch();
-        return result.stream().collect(Collectors.toMap(tuple -> tuple.get(select), tuple -> tuple.get(report.id.count())));
+        return result.stream().collect(Collectors.toMap(tuple -> tuple.get(select), tuple -> Optional.ofNullable(tuple.get(report.id.count())).orElse(0L)));
     }
 
     @NonNull

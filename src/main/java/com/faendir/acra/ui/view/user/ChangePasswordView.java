@@ -81,10 +81,6 @@ public class ChangePasswordView extends BaseView {
         setCompositionRoot(root);
     }
 
-    public boolean validate(@Nullable String fragment) {
-        return true;
-    }
-
     @SpringComponent
     @UIScope
     public static class Provider extends SingleViewProvider<ChangePasswordView> {

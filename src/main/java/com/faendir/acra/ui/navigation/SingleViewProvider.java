@@ -83,9 +83,8 @@ public abstract class SingleViewProvider<V extends BaseView> implements ViewProv
             if (params.isEmpty() || params.charAt(0) == MyNavigator.SEPARATOR_CHAR && isValidParameter(params.substring(1))) {
                 RequiresRole annotation = getClazz().getAnnotation(RequiresRole.class);
                 if (annotation == null || SecurityUtils.hasRole(annotation.value())) {
-                    if (((BeanDefinitionRegistry) applicationContext.getAutowireCapableBeanFactory()).getBeanDefinition(applicationContext.getBeanNamesForType(getClazz())[0])
-                            .getScope()
-                            .equals(ViewScopeImpl.VAADIN_VIEW_SCOPE_NAME)) {
+                    if (ViewScopeImpl.VAADIN_VIEW_SCOPE_NAME.equals(((BeanDefinitionRegistry) applicationContext.getAutowireCapableBeanFactory()).getBeanDefinition(
+                            applicationContext.getBeanNamesForType(getClazz())[0]).getScope())) {
                         final ViewCache viewCache = ViewScopeImpl.getViewCacheRetrievalStrategy().getViewCache(applicationContext);
                         viewCache.creatingView(viewName);
                         try {

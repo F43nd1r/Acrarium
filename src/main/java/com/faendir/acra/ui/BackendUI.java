@@ -131,9 +131,8 @@ public class BackendUI extends UI {
         MenuBar.MenuItem user = menuBar.addItem("", VaadinIcons.USER, null);
         user.addItem(SecurityUtils.getUsername()).setEnabled(false);
         user.addSeparator();
-        MenuBar.MenuItem theme = user.addItem("Dark Theme", e -> {
-            getPage().setLocation(UriComponentsBuilder.fromUri(getPage().getLocation()).replaceQueryParam(DARK_THEME, e.isChecked()).build().toUri());
-        });
+        MenuBar.MenuItem theme = user.addItem("Dark Theme",
+                e -> getPage().setLocation(UriComponentsBuilder.fromUri(getPage().getLocation()).replaceQueryParam(DARK_THEME, e.isChecked()).build().toUri()));
         theme.setCheckable(true);
         theme.setChecked(isDarkTheme());
         user.addSeparator();
@@ -151,9 +150,9 @@ public class BackendUI extends UI {
 
         HorizontalLayout footer = new HorizontalLayout();
         footer.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
-        Label footerLabel = new Label("Acrarium is developed by <a href=https://github.com/F43nd1r>F43nd1r</a>."
-                                      + " <a href=https://github.com/F43nd1r/acra-backend>Code</a> is licensed under"
-                                      + " <a href=https://github.com/F43nd1r/acra-backend/blob/master/LICENSE>Apache License v2</a>.", ContentMode.HTML);
+        Label footerLabel = new Label(
+                "Acrarium is developed by <a href=https://github.com/F43nd1r>F43nd1r</a>." + " <a href=https://github.com/F43nd1r/acra-backend>Code</a> is licensed under"
+                + " <a href=https://github.com/F43nd1r/acra-backend/blob/master/LICENSE>Apache License v2</a>.", ContentMode.HTML);
         footerLabel.setWidth(100, Unit.PERCENTAGE);
         footerLabel.addStyleName(AcraTheme.CENTER_TEXT);
         footer.addComponent(footerLabel);

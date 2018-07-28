@@ -34,7 +34,6 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * @author Lukas
@@ -108,7 +107,7 @@ public class MyNavigator extends SpringNavigator {
         fragmentIndex = size;
         do {
             fragmentIndex--;
-            newNavState = fragments.subList(fragmentIndex, size).stream().collect(Collectors.joining(SEPARATOR));
+            newNavState = String.join(SEPARATOR, fragments.subList(fragmentIndex, size));
             viewProvider = getViewProvider(newNavState);
         } while (fragmentIndex > 0 && viewProvider == null);
         if (viewProvider != null) return new HierarchyElement(newNavState, viewProvider);
