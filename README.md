@@ -17,7 +17,7 @@ This project is in an early development stage, which means
 # Screenshots
 
 ###### Listing reports
-![report list](https://i.imgur.com/0b9yPxD.png)
+![report list](https://i.imgur.com/T2UC8B6.png)
 
 ###### Statistics
 ![statistics](https://i.imgur.com/oxwgP1E.png)
@@ -26,7 +26,7 @@ This project is in an early development stage, which means
 ![admin tab](https://i.imgur.com/5ysg8I1.png)
 
 ###### Report Summary and Attachment Support
-![report summary](https://i.imgur.com/0z9eTEd.png)
+![report summary](https://i.imgur.com/za6Z6v3.png)
 
 ###### Full Report content
 ![report content](https://i.imgur.com/L2nFGC5.png)
