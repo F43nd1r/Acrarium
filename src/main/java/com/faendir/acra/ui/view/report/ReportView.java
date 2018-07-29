@@ -23,6 +23,7 @@ import com.faendir.acra.model.Attachment;
 import com.faendir.acra.model.Permission;
 import com.faendir.acra.model.ProguardMapping;
 import com.faendir.acra.model.Report;
+import com.faendir.acra.service.AvatarService;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.navigation.SingleParametrizedViewProvider;
@@ -39,6 +40,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
@@ -63,10 +65,12 @@ import java.util.stream.Stream;
 @RequiresAppPermission(Permission.Level.VIEW)
 public class ReportView extends ParametrizedBaseView<Report> {
     @NonNull private final DataService dataService;
+    @NonNull private final AvatarService avatarService;
 
     @Autowired
-    public ReportView(@NonNull DataService dataService) {
+    public ReportView(@NonNull DataService dataService, @NonNull AvatarService avatarService) {
         this.dataService = dataService;
+        this.avatarService = avatarService;
     }
 
     @Override
@@ -81,6 +85,7 @@ public class ReportView extends ParametrizedBaseView<Report> {
         GridLayout summaryGrid = new GridLayout(2, 1);
         summaryGrid.addStyleName(AcraTheme.BORDERED_GRIDLAYOUT);
         summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(parameter.getStacktrace().getVersion().getName(), ContentMode.PREFORMATTED));
+        summaryGrid.addComponents(new Label("User", ContentMode.PREFORMATTED), new HorizontalLayout(new Image(null, avatarService.getAvatar(parameter)), new Label(parameter.getInstallationId(), ContentMode.PREFORMATTED)));
         summaryGrid.addComponents(new Label("Email", ContentMode.PREFORMATTED), new Label(parameter.getUserEmail(), ContentMode.PREFORMATTED));
         summaryGrid.addComponents(new Label("Comment", ContentMode.PREFORMATTED), new Label(parameter.getUserComment(), ContentMode.PREFORMATTED));
         Optional<ProguardMapping> mapping = dataService.findMapping(parameter.getStacktrace().getBug().getApp(), parameter.getStacktrace().getVersion().getCode());

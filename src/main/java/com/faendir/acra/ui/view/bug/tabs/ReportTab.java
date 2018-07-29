@@ -17,6 +17,7 @@
 package com.faendir.acra.ui.view.bug.tabs;
 
 import com.faendir.acra.model.Bug;
+import com.faendir.acra.service.AvatarService;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.ReportList;
@@ -34,15 +35,17 @@ import org.springframework.lang.NonNull;
 @ViewScope
 public class ReportTab implements BugTab {
     @NonNull private final DataService dataService;
+    @NonNull private final AvatarService avatarService;
 
     @Autowired
-    public ReportTab(@NonNull DataService dataService) {
+    public ReportTab(@NonNull DataService dataService, @NonNull AvatarService avatarService) {
         this.dataService = dataService;
+        this.avatarService = avatarService;
     }
 
     @Override
     public Component createContent(@NonNull Bug bug, @NonNull NavigationManager navigationManager) {
-        Component content = new ReportList(bug.getApp(), navigationManager, dataService::delete, dataService.getReportProvider(bug));
+        Component content = new ReportList(bug.getApp(), navigationManager, avatarService, dataService::delete, dataService.getReportProvider(bug));
         content.setSizeFull();
         return content;
     }

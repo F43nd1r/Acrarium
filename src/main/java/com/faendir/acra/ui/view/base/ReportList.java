@@ -21,6 +21,7 @@ import com.faendir.acra.model.Permission;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.model.Report;
 import com.faendir.acra.security.SecurityUtils;
+import com.faendir.acra.service.AvatarService;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.layout.MyGrid;
 import com.faendir.acra.ui.view.base.popup.Popup;
@@ -31,6 +32,7 @@ import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.renderers.ButtonRenderer;
+import com.vaadin.ui.renderers.ImageRenderer;
 import org.springframework.lang.NonNull;
 
 import java.util.function.Consumer;
@@ -42,10 +44,11 @@ import java.util.function.Consumer;
 public class ReportList extends MyGrid<Report> {
     public static final String CAPTION = "Reports";
 
-    public ReportList(App app, @NonNull NavigationManager navigationManager, @NonNull Consumer<Report> reportDeleter, @NonNull QueryDslDataProvider<Report> reportProvider) {
+    public ReportList(@NonNull App app, @NonNull NavigationManager navigationManager, @NonNull AvatarService avatarService, @NonNull Consumer<Report> reportDeleter, @NonNull QueryDslDataProvider<Report> reportProvider) {
         super(CAPTION, reportProvider);
         setId(CAPTION);
         setSelectionMode(Grid.SelectionMode.NONE);
+        addColumn(avatarService::getAvatar, new ImageRenderer<>(), QReport.report.installationId, "User");
         sort(addColumn(Report::getDate, new TimeSpanRenderer(), QReport.report.date, "Date"), SortDirection.DESCENDING);
         addColumn(report -> report.getStacktrace().getVersion().getCode(), QReport.report.stacktrace.version.code, "App Version");
         addColumn(Report::getAndroidVersion, QReport.report.androidVersion, "Android Version");
