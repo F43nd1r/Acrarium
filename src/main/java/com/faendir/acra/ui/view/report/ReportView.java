@@ -16,8 +16,6 @@
 
 package com.faendir.acra.ui.view.report;
 
-import com.diffplug.common.base.Errors;
-import com.diffplug.common.base.Throwing;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Attachment;
 import com.faendir.acra.model.Permission;
@@ -149,16 +147,26 @@ public class ReportView extends ParametrizedBaseView<Report> {
     }
 
     private static class ExceptionAwareStreamSource implements StreamResource.StreamSource {
-        private final Throwing.Supplier<InputStream> supplier;
+        private final ThrowingSupplier<InputStream> supplier;
 
-        ExceptionAwareStreamSource(Throwing.Supplier<InputStream> supplier) {
+        ExceptionAwareStreamSource(ThrowingSupplier<InputStream> supplier) {
             this.supplier = supplier;
         }
 
         @Override
         public InputStream getStream() {
-            return Errors.log().getWithDefault(supplier, null);
+            try{
+                return supplier.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
         }
+    }
+
+    @FunctionalInterface
+    private interface ThrowingSupplier<T> {
+        T get() throws Exception;
     }
 
     @SpringComponent
