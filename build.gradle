@@ -23,7 +23,6 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.5.RELEASE'
     id 'cn.bestwu.propdeps' version '0.0.10'
     id 'net.researchgate.release' version '2.6.0'
-    id 'co.riiid.gradle' version '0.4.2'
 }
 repositories {
     jcenter()
@@ -153,15 +152,4 @@ release {
     failOnUnversionedFiles = false
     tagTemplate = 'v$version'
 }
-
-github {
-    owner = 'F43nd1r'
-    repo = 'Acrarium'
-    token = project.hasProperty('githubKey') ? project.githubKey : '';
-    tagName = 'v'+ (project.version.endsWith('-SNAPSHOT') ? project.version - '-SNAPSHOT' : project.version)
-    prerelease = true
-    assets = "$buildDir/libs/acra.war"
-}
-
-githubRelease.dependsOn(war, 'release')
 
