@@ -22,6 +22,8 @@ plugins {
     id 'com.devsoap.plugin.vaadin' version '1.3.1'
     id 'io.spring.dependency-management' version '1.0.5.RELEASE'
     id 'cn.bestwu.propdeps' version '0.0.10'
+    id 'net.researchgate.release' version '2.6.0'
+    id 'com.github.breadmoirai.github-release' version '2.0.1'
 }
 repositories {
     jcenter()
@@ -30,7 +32,6 @@ repositories {
 }
 
 group 'com.faendir'
-version = '0.5.0'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -147,4 +148,20 @@ test {
         exceptionFormat "full"
     }
 }
+
+release {
+    failOnUnversionedFiles = false
+    tagTemplate = 'v$version'
+}
+
+githubRelease {
+    token = githubKey
+    owner = 'F43nd1r'
+    repo = 'Acrarium'
+    prerelease = true
+    releaseAssets = war.destinationDir.listFiles()
+}
+
+
+afterReleaseBuild.dependsOn(war, 'githubRelease')
 
