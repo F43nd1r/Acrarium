@@ -114,6 +114,7 @@ dependencies {
     compile 'com.github.ziplet:ziplet:2.3.0'
     compile 'me.xdrop:fuzzywuzzy:1.1.10'
     compile 'com.talanlabs:avatar-generator:1.1.0'
+    compile 'org.ektorp:org.ektorp.spring:1.5.0'
     //testing
     testCompile 'org.springframework.boot:spring-boot-starter-test'
     testCompile 'org.springframework.security:spring-security-test'

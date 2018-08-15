@@ -30,6 +30,7 @@ import com.faendir.acra.model.view.Queries;
 import com.faendir.acra.model.view.VApp;
 import com.faendir.acra.model.view.VBug;
 import com.faendir.acra.security.SecurityUtils;
+import com.faendir.acra.util.ImportResult;
 import com.faendir.acra.util.PlainTextUser;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
@@ -42,8 +43,14 @@ import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPADeleteClause;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.acra.ReportField;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ektorp.CouchDbConnector;
+import org.ektorp.http.HttpClient;
+import org.ektorp.http.StdHttpClient;
+import org.ektorp.impl.StdCouchDbConnector;
+import org.ektorp.impl.StdCouchDbInstance;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.json.JSONObject;
@@ -60,6 +67,7 @@ import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -68,6 +76,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static com.faendir.acra.model.QApp.app;
 import static com.faendir.acra.model.QAttachment.attachment;
@@ -279,8 +288,9 @@ public class DataService implements Serializable {
             JSONObject jsonObject = new JSONObject(content);
             String trace = jsonObject.optString(ReportField.STACK_TRACE.name());
             Version version = getVersion(jsonObject);
-            Stacktrace stacktrace = findStacktrace(trace, version.getCode()).orElseGet(() -> new Stacktrace(findBug(app,
-                    trace).orElseGet(() -> new Bug(app, trace)), trace, version));
+            Stacktrace stacktrace = findStacktrace(trace, version.getCode()).orElseGet(() -> new Stacktrace(findBug(app, trace).orElseGet(() -> new Bug(app, trace)),
+                    trace,
+                    version));
             Report report = store(new Report(stacktrace, content));
             attachments.forEach(multipartFile -> {
                 try {
@@ -341,5 +351,35 @@ public class DataService implements Serializable {
     @NonNull
     public Optional<Integer> getMaximumMappingVersion(@NonNull App app) {
         return Optional.ofNullable(new JPAQuery<>(entityManager).from(proguardMapping).where(proguardMapping.app.eq(app)).select(proguardMapping.versionCode.max()).fetchOne());
+    }
+
+    @Transactional
+    public ImportResult importFromAcraStorage(String host, int port, boolean ssl, String database) {
+        HttpClient httpClient = new StdHttpClient.Builder().host(host).port(port).enableSSL(ssl).build();
+        CouchDbConnector db = new StdCouchDbConnector(database, new StdCouchDbInstance(httpClient));
+        PlainTextUser user = createNewApp(database.replaceFirst("acra-", ""));
+        int total = 0;
+        int success = 0;
+        for (String id : db.getAllDocIds()) {
+            if (!id.startsWith("_design")) {
+                total++;
+                try {
+                    JSONObject report = new JSONObject(IOUtils.toString(db.getAsStream(id)));
+                    fixStringIsArray(report, ReportField.STACK_TRACE);
+                    fixStringIsArray(report, ReportField.LOGCAT);
+                    createNewReport(user.getUsername(), report.toString(), Collections.emptyList());
+                    success++;
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        httpClient.shutdown();
+        return new ImportResult(user, total, success);
+    }
+
+    private void fixStringIsArray(JSONObject report, ReportField reportField) {
+        Optional.ofNullable(report.optJSONArray(reportField.name()))
+                .ifPresent(array -> report.put(reportField.name(),
+                        StreamSupport.stream(array.spliterator(), false).filter(String.class::isInstance).map(String.class::cast).collect(Collectors.joining("\n"))));
     }
 }
