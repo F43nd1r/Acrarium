@@ -87,9 +87,11 @@ class TimeChart extends Chart<Date> {
     @Override
     public void updateMessageStrings(Locale locale) {
         super.updateMessageStrings(locale);
-        XYPlot plot = getChart().getXYPlot();
-        plot.getDomainAxis().setLabel(getI18n().get(Messages.DATE));
-        plot.getRangeAxis().setLabel(getI18n().get(Messages.REPORTS));
-        markAsDirtyRecursive();
+        if(getChart() != null) {
+            XYPlot plot = getChart().getXYPlot();
+            plot.getDomainAxis().setLabel(getI18n().get(Messages.DATE));
+            plot.getRangeAxis().setLabel(getI18n().get(Messages.REPORTS));
+            markAsDirtyRecursive();
+        }
     }
 }

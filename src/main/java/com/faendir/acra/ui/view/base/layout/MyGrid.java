@@ -17,6 +17,8 @@ package com.faendir.acra.ui.view.base.layout;
 
 import com.faendir.acra.client.mygrid.GridMiddleClickExtensionConnector;
 import com.faendir.acra.dataprovider.QueryDslDataProvider;
+import com.faendir.acra.i18n.HasI18n;
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.navigation.BaseView;
 import com.querydsl.core.types.Expression;
@@ -34,9 +36,11 @@ import org.springframework.lang.NonNull;
 import org.vaadin.spring.i18n.I18N;
 import org.vaadin.spring.i18n.support.Translatable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EventObject;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -46,16 +50,17 @@ import java.util.function.Function;
  * @author Lukas
  * @since 14.05.2017
  */
-public class MyGrid<T> extends Composite implements Translatable {
+public class MyGrid<T> extends Composite implements Translatable, HasI18n {
     private final I18N i18n;
     private final String captionId;
     private final Object[] params;
     private final Map<Grid.Column<T, ?>, Pair<String, Object[]>> columnCaptions;
+    private final List<Translatable> translatables;
     private final ExposingGrid<T> grid;
     private final QueryDslDataProvider<T> dataProvider;
 
-    public MyGrid(QueryDslDataProvider<T> dataProvider) {
-        this(dataProvider, null, null);
+    public MyGrid(QueryDslDataProvider<T> dataProvider, I18N i18n) {
+        this(dataProvider, i18n, Messages.BLANK);
     }
 
     public MyGrid(QueryDslDataProvider<T> dataProvider, I18N i18n, String captionId, Object... params) {
@@ -67,10 +72,9 @@ public class MyGrid<T> extends Composite implements Translatable {
         this.i18n = i18n;
         this.captionId = captionId;
         columnCaptions = new HashMap<>();
+        translatables = new ArrayList<>();
         this.params = params;
-        if (i18n != null) {
-            updateMessageStrings(i18n.getLocale());
-        }
+        updateMessageStrings(i18n.getLocale());
     }
 
     @NonNull
@@ -81,27 +85,33 @@ public class MyGrid<T> extends Composite implements Translatable {
     }
 
     @NonNull
-    public <R> Grid.Column<T, R> addColumn(@NonNull ValueProvider<T, R> valueProvider, @NonNull AbstractRenderer<? super T, ? super R> renderer, @NonNull String captionId, Object... params) {
+    public <R> Grid.Column<T, R> addColumn(@NonNull ValueProvider<T, R> valueProvider, @NonNull AbstractRenderer<? super T, ? super R> renderer, @NonNull String captionId,
+            Object... params) {
         Grid.Column<T, R> column = addColumn(valueProvider, renderer).setCaption(i18n.get(captionId, params));
         columnCaptions.put(column, Pair.of(captionId, params));
         return column;
     }
 
     @NonNull
-    public <R> Grid.Column<T, R> addColumn(@NonNull ValueProvider<T, R> valueProvider, @NonNull Expression<? extends Comparable> sort, @NonNull String captionId, Object... params) {
+    public <R> Grid.Column<T, R> addColumn(@NonNull ValueProvider<T, R> valueProvider, @NonNull Expression<? extends Comparable> sort, @NonNull String captionId,
+            Object... params) {
         return addColumn(valueProvider, new TextRenderer(), sort, captionId, params);
     }
 
     @NonNull
     public <R> Grid.Column<T, R> addColumn(@NonNull ValueProvider<T, R> valueProvider, @NonNull AbstractRenderer<? super T, ? super R> renderer,
             @NonNull Expression<? extends Comparable> sort, @NonNull String captionId, Object... params) {
-        Grid.Column<T, R> column = grid.addColumn(valueProvider, renderer).setId(dataProvider.addSortable(sort)).setCaption(i18n.get(captionId, params));
+        Grid.Column<T, R> column = addColumn(valueProvider, renderer).setId(dataProvider.addSortable(sort)).setCaption(i18n.get(captionId, params)).setSortable(true);
         columnCaptions.put(column, Pair.of(captionId, params));
         return column;
     }
 
     @NonNull
     public <R> Grid.Column<T, R> addColumn(@NonNull ValueProvider<T, R> valueProvider, @NonNull AbstractRenderer<? super T, ? super R> renderer) {
+        if(renderer instanceof Translatable) {
+            ((Translatable) renderer).updateMessageStrings(i18n.getLocale());
+            translatables.add((Translatable) renderer);
+        }
         return grid.addColumn(valueProvider, renderer).setSortable(false);
     }
 
@@ -157,6 +167,12 @@ public class MyGrid<T> extends Composite implements Translatable {
     public void updateMessageStrings(Locale locale) {
         setCaption(i18n.get(captionId, locale, params));
         columnCaptions.forEach((column, caption) -> column.setCaption(i18n.get(caption.getFirst(), locale, caption.getSecond())));
+        translatables.forEach(translatable -> translatable.updateMessageStrings(locale));
+    }
+
+    @Override
+    public I18N getI18n() {
+        return i18n;
     }
 
     public static class MiddleClickExtension<T> extends Grid.AbstractGridExtension<T> {

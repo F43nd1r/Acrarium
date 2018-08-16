@@ -16,6 +16,7 @@
 package com.faendir.acra.ui;
 
 import com.faendir.acra.i18n.I18nLabel;
+import com.faendir.acra.i18n.I18nLoginForm;
 import com.faendir.acra.i18n.I18nMenuBar;
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.User;
@@ -96,6 +97,7 @@ public class BackendUI extends TranslatableUI {
         } else {
             showLogin();
         }
+        setLocale(request.getLocale());
     }
 
     private void login(@NonNull String username, @NonNull String password) {
@@ -121,7 +123,7 @@ public class BackendUI extends TranslatableUI {
     }
 
     private void showLogin() {
-        LoginForm loginForm = new LoginForm();
+        LoginForm loginForm = new I18nLoginForm(i18n, Messages.USERNAME, Messages.PASSWORD, Messages.LOGIN);
         loginForm.addLoginListener(event -> login(event.getLoginParameter("username"), event.getLoginParameter("password")));
         VerticalLayout layout = new VerticalLayout(loginForm);
         layout.setSizeFull();

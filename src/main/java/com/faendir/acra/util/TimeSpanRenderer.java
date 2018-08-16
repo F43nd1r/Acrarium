@@ -16,10 +16,12 @@
 
 package com.faendir.acra.util;
 
+import com.vaadin.ui.UI;
 import com.vaadin.ui.renderers.TextRenderer;
 import elemental.json.Json;
 import elemental.json.JsonValue;
 import org.springframework.lang.Nullable;
+import org.vaadin.spring.i18n.support.Translatable;
 import org.xbib.time.pretty.PrettyTime;
 
 import java.time.ZonedDateTime;
@@ -29,12 +31,24 @@ import java.util.Locale;
  * @author Lukas
  * @since 26.05.2017
  */
-public class TimeSpanRenderer extends TextRenderer {
+public class TimeSpanRenderer extends TextRenderer implements Translatable {
+    private Locale locale;
+
+    public TimeSpanRenderer() {
+        locale = UI.getCurrent().getLocale();
+    }
+
     @Override
     public JsonValue encode(@Nullable Object value) {
         if (value instanceof ZonedDateTime) {
-            return Json.create(new PrettyTime(Locale.US).formatUnrounded(((ZonedDateTime) value).toLocalDateTime()));
+            return Json.create(new PrettyTime(locale).formatUnrounded(((ZonedDateTime) value).toLocalDateTime()));
         }
         return super.encode(value);
+    }
+
+    @Override
+    public void updateMessageStrings(Locale locale) {
+        this.locale = locale;
+        markAsDirty();
     }
 }

@@ -16,8 +16,7 @@
 
 package com.faendir.acra.i18n;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
+import com.vaadin.ui.LoginForm;
 import org.vaadin.spring.i18n.I18N;
 import org.vaadin.spring.i18n.support.Translatable;
 
@@ -25,27 +24,26 @@ import java.util.Locale;
 
 /**
  * @author lukas
- * @since 15.08.18
+ * @since 16.08.18
  */
-public class I18nLabel extends Label implements Translatable {
+public class I18nLoginForm extends LoginForm implements Translatable {
     private final I18N i18n;
-    private final String captionId;
-    private final Object[] params;
+    private final String usernameId;
+    private final String passwordId;
+    private final String loginId;
 
-    public I18nLabel(ContentMode contentMode, I18N i18n, String captionId, Object... params) {
+    public I18nLoginForm(I18N i18n, String usernameId, String passwordId, String loginId) {
         this.i18n = i18n;
-        this.captionId = captionId;
-        this.params = params;
-        setContentMode(contentMode);
+        this.usernameId = usernameId;
+        this.passwordId = passwordId;
+        this.loginId = loginId;
         updateMessageStrings(i18n.getLocale());
-    }
-
-    public I18nLabel(I18N i18n, String captionId, Object... params) {
-        this(ContentMode.TEXT, i18n, captionId, params);
     }
 
     @Override
     public void updateMessageStrings(Locale locale) {
-        setValue(i18n.get(captionId, locale, params));
+        setUsernameCaption(i18n.get(usernameId));
+        setPasswordCaption(i18n.get(passwordId));
+        setLoginButtonCaption(i18n.get(loginId));
     }
 }

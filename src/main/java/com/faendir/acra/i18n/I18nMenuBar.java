@@ -61,14 +61,16 @@ public class I18nMenuBar extends MenuBar implements Translatable {
 
         public I18nMenuItem addItem(Command command, String captionId, Object... params) {
             I18nMenuItem item = new I18nMenuItem(null, command, i18n, captionId, params);
-            getItems().add(item);
+            getChildren().add(item);
             return item;
         }
 
         @Override
         public void updateMessageStrings(Locale locale) {
             setText(i18n.get(captionId, params));
-            getItems().stream().filter(Translatable.class::isInstance).map(Translatable.class::cast).forEach(translatable -> translatable.updateMessageStrings(locale));
+            if(getChildren() != null) {
+                getChildren().stream().filter(Translatable.class::isInstance).map(Translatable.class::cast).forEach(translatable -> translatable.updateMessageStrings(locale));
+            }
         }
     }
 }

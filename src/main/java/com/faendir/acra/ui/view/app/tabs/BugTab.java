@@ -76,7 +76,7 @@ public class BugTab implements AppTab {
 
     @Override
     public String getId() {
-        return "bug";
+        return "bugs";
     }
 
     @Override
@@ -88,7 +88,7 @@ public class BugTab implements AppTab {
         layout.addComponent(header);
         layout.setComponentAlignment(header, Alignment.MIDDLE_LEFT);
         CheckBox hideSolved = new I18nCheckBox(true, i18n, Messages.HIDE_SOLVED);
-        MyGrid<VBug> bugs = new MyGrid<>(dataService.getBugProvider(app, hideSolved::getValue));
+        MyGrid<VBug> bugs = new MyGrid<>(dataService.getBugProvider(app, hideSolved::getValue), i18n);
         bugs.setSelectionMode(Grid.SelectionMode.MULTI);
         hideSolved.addValueChangeListener(e -> layout.getUI().access(() -> {
             bugs.deselectAll();

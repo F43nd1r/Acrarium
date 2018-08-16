@@ -61,7 +61,7 @@ public class ReportTab implements AppTab {
 
     @Override
     public String getId() {
-        return "report";
+        return "reports";
     }
 
     @Override

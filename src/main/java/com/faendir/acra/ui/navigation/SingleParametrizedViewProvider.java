@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.ui.navigation;
 
 import com.faendir.acra.model.App;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
 import com.faendir.acra.ui.view.base.navigation.ParametrizedBaseView;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Lukas
@@ -45,9 +47,11 @@ public abstract class SingleParametrizedViewProvider<T, V extends ParametrizedBa
         V view = super.getView(viewName);
         if (view != null) {
             view.setParameterParser(e -> {
-                String parameters = getParameters(e.getViewName().substring(e.getViewName().indexOf(getId())) + (e.getParameters().isEmpty() ?
-                                                                                                                         "" :
-                                                                                                                         MyNavigator.SEPARATOR_CHAR + e.getParameters()));
+                String parameters = null;
+                Matcher matcher = Pattern.compile("(^|/)(" + getId() + ")($|/)").matcher(e.getViewName());
+                if (matcher.find()) {
+                    parameters = getParameters(e.getViewName().substring(matcher.start(2)) + (e.getParameters().isEmpty() ? "" : MyNavigator.SEPARATOR_CHAR + e.getParameters()));
+                }
                 return parameters != null ? parseParameterInternal(parameters) : null;
             });
         }

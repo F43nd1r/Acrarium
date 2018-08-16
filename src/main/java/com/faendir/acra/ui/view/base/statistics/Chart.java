@@ -22,6 +22,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.AcraTheme;
 import org.jfree.chart.JFreeChart;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.vaadin.addon.JFreeChartWrapper;
 import org.vaadin.spring.i18n.I18N;
 import org.vaadin.spring.i18n.support.Translatable;
@@ -70,7 +71,8 @@ abstract class Chart<T> extends Composite implements Translatable, HasI18n {
 
     protected abstract JFreeChart createChart(@NonNull Map<T, Long> map);
 
-    protected JFreeChart getChart() {
+    @Nullable
+    JFreeChart getChart() {
         return chart;
     }
 

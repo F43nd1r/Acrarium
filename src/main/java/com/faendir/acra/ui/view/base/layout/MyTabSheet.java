@@ -98,6 +98,11 @@ public class MyTabSheet<T> extends TabSheet {
         public String getCaption() {
             return tab.getCaption();
         }
+
+        @Override
+        public String getId() {
+            return tab.getId();
+        }
     }
 
     public static class MiddleClickExtension extends AbstractExtension {

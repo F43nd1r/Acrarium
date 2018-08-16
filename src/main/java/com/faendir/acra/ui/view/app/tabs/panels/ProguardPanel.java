@@ -63,7 +63,7 @@ public class ProguardPanel implements AdminPanel{
     @Override
     public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
         VerticalLayout layout = new VerticalLayout();
-        MyGrid<ProguardMapping> grid = new MyGrid<>(dataService.getMappingProvider(app));
+        MyGrid<ProguardMapping> grid = new MyGrid<>(dataService.getMappingProvider(app), i18n);
         grid.setSizeToRows();
         grid.sort(grid.addColumn(ProguardMapping::getVersionCode, QProguardMapping.proguardMapping.versionCode, Messages.VERSION), SortDirection.ASCENDING);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
