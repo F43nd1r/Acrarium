@@ -15,6 +15,9 @@
  */
 package com.faendir.acra.ui.view.bug.tabs.panels;
 
+import com.faendir.acra.i18n.I18nButton;
+import com.faendir.acra.i18n.I18nLabel;
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.Bug;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.navigation.NavigationManager;
@@ -31,6 +34,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.AcraTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+import org.vaadin.spring.i18n.I18N;
 
 /**
  * @author lukas
@@ -40,32 +44,39 @@ import org.springframework.lang.NonNull;
 @ViewScope
 public class DangerPanel implements AdminPanel {
     @NonNull private final DataService dataService;
+    private final I18N i18n;
 
     @Autowired
-    public DangerPanel(@NonNull DataService dataService) {
+    public DangerPanel(@NonNull DataService dataService, I18N i18n) {
         this.dataService = dataService;
+        this.i18n = i18n;
     }
 
     @Override
     public Component createContent(@NonNull Bug bug, @NonNull NavigationManager navigationManager) {
-        Button unmerge = new Button("Disjoin Bug",
-                e -> new Popup().setTitle("Confirm").addComponent(new Label("Are you sure you want to revert merging this bug group?")).addYesNoButtons(p -> {
+        Button unmerge = new I18nButton(
+                e -> new Popup(i18n, Messages.CONFIRM).addComponent(new I18nLabel(i18n, Messages.UNMERGE_BUG_CONFIRM)).addYesNoButtons(p -> {
             dataService.unmergeBug(bug);
             navigationManager.navigateBack();
-        }, true).show());
+        }, true).show(), i18n, Messages.UNMERGE_BUG);
         unmerge.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        Button delete = new Button("Delete Bug",
-                e -> new Popup().setTitle("Confirm").addComponent(new Label("Are you sure you want to delete this bug and all its reports?")).addYesNoButtons(p -> {
+        Button delete = new I18nButton(
+                e -> new Popup(i18n, Messages.CONFIRM).addComponent(new Label(Messages.DELETE_BUG_CONFIRM)).addYesNoButtons(p -> {
                     dataService.delete(bug);
                     navigationManager.navigateBack();
-                }, true).show());
+                }, true).show(), i18n, Messages.DELETE_BUG);
         delete.setWidth(100, Sizeable.Unit.PERCENTAGE);
         return new VerticalLayout(unmerge, delete);
     }
 
     @Override
     public String getCaption() {
-        return "Danger Zone";
+        return i18n.get(Messages.DANGER_ZONE);
+    }
+
+    @Override
+    public String getId() {
+        return "danger-zone";
     }
 
     @Override

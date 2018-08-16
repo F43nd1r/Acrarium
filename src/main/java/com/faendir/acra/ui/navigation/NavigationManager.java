@@ -16,6 +16,7 @@
 
 package com.faendir.acra.ui.navigation;
 
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.ui.view.ErrorView;
 import com.faendir.acra.ui.view.base.navigation.BaseView;
 import com.faendir.acra.ui.view.base.navigation.Path;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+import org.vaadin.spring.i18n.I18N;
 
 import java.io.Serializable;
 import java.util.Deque;
@@ -47,7 +49,7 @@ public class NavigationManager implements Serializable {
     @NonNull private final MyNavigator navigator;
 
     @Autowired
-    public NavigationManager(@NonNull UI ui, @NonNull Panel mainView, @NonNull Path mainPath, @NonNull MyNavigator navigator) {
+    public NavigationManager(@NonNull UI ui, @NonNull Panel mainView, @NonNull Path mainPath, @NonNull MyNavigator navigator, @NonNull I18N i18n) {
         this.path = mainPath;
         this.navigator = navigator;
         this.navigator.init(ui, mainView);
@@ -57,7 +59,7 @@ public class NavigationManager implements Serializable {
             SingleViewProvider provider = (SingleViewProvider) hierarchy.getLast().getProvider();
             String title = provider.getTitle(provider.getParameters(hierarchy.getLast().getNavState()));
             if (hierarchy.size() > 1) {
-                title += " - Acrarium";
+                title += " - " + i18n.get(Messages.ACRARIUM);
             }
             ui.getPage().setTitle(title);
         });

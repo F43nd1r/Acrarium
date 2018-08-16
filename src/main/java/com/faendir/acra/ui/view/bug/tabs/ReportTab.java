@@ -16,6 +16,7 @@
 
 package com.faendir.acra.ui.view.bug.tabs;
 
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.Bug;
 import com.faendir.acra.service.AvatarService;
 import com.faendir.acra.service.DataService;
@@ -26,6 +27,7 @@ import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+import org.vaadin.spring.i18n.I18N;
 
 /**
  * @author Lukas
@@ -36,23 +38,30 @@ import org.springframework.lang.NonNull;
 public class ReportTab implements BugTab {
     @NonNull private final DataService dataService;
     @NonNull private final AvatarService avatarService;
+    @NonNull private final I18N i18n;
 
     @Autowired
-    public ReportTab(@NonNull DataService dataService, @NonNull AvatarService avatarService) {
+    public ReportTab(@NonNull DataService dataService, @NonNull AvatarService avatarService, @NonNull I18N i18n) {
         this.dataService = dataService;
         this.avatarService = avatarService;
+        this.i18n = i18n;
     }
 
     @Override
     public Component createContent(@NonNull Bug bug, @NonNull NavigationManager navigationManager) {
-        Component content = new ReportList(bug.getApp(), navigationManager, avatarService, dataService::delete, dataService.getReportProvider(bug));
+        Component content = new ReportList(bug.getApp(), navigationManager, avatarService, dataService::delete, dataService.getReportProvider(bug), i18n);
         content.setSizeFull();
         return content;
     }
 
     @Override
     public String getCaption() {
-        return ReportList.CAPTION;
+        return i18n.get(Messages.REPORTS);
+    }
+
+    @Override
+    public String getId() {
+        return "report";
     }
 
     @Override

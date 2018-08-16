@@ -16,6 +16,8 @@
 package com.faendir.acra.ui.view.base;
 
 import com.faendir.acra.dataprovider.QueryDslDataProvider;
+import com.faendir.acra.i18n.I18nLabel;
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Permission;
 import com.faendir.acra.model.QReport;
@@ -30,10 +32,10 @@ import com.faendir.acra.util.TimeSpanRenderer;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.ui.Grid;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.renderers.ImageRenderer;
 import org.springframework.lang.NonNull;
+import org.vaadin.spring.i18n.I18N;
 
 import java.util.function.Consumer;
 
@@ -42,22 +44,20 @@ import java.util.function.Consumer;
  * @since 14.05.2017
  */
 public class ReportList extends MyGrid<Report> {
-    public static final String CAPTION = "Reports";
 
-    public ReportList(@NonNull App app, @NonNull NavigationManager navigationManager, @NonNull AvatarService avatarService, @NonNull Consumer<Report> reportDeleter, @NonNull QueryDslDataProvider<Report> reportProvider) {
-        super(CAPTION, reportProvider);
-        setId(CAPTION);
+    public ReportList(@NonNull App app, @NonNull NavigationManager navigationManager, @NonNull AvatarService avatarService, @NonNull Consumer<Report> reportDeleter, @NonNull QueryDslDataProvider<Report> reportProvider, I18N i18n) {
+        super(reportProvider, i18n, Messages.REPORTS);
         setSelectionMode(Grid.SelectionMode.NONE);
-        addColumn(avatarService::getAvatar, new ImageRenderer<>(), QReport.report.installationId, "User");
-        sort(addColumn(Report::getDate, new TimeSpanRenderer(), QReport.report.date, "Date"), SortDirection.DESCENDING);
-        addColumn(report -> report.getStacktrace().getVersion().getCode(), QReport.report.stacktrace.version.code, "App Version");
-        addColumn(Report::getAndroidVersion, QReport.report.androidVersion, "Android Version");
-        addColumn(Report::getPhoneModel, QReport.report.phoneModel, "Device");
-        addColumn(report -> report.getStacktrace().getStacktrace().split("\n", 2)[0], QReport.report.stacktrace.stacktrace, "Stacktrace").setExpandRatio(1)
+        addColumn(avatarService::getAvatar, new ImageRenderer<>(), QReport.report.installationId, Messages.USER);
+        sort(addColumn(Report::getDate, new TimeSpanRenderer(), QReport.report.date, Messages.DATE), SortDirection.DESCENDING);
+        addColumn(report -> report.getStacktrace().getVersion().getCode(), QReport.report.stacktrace.version.code, Messages.APP_VERSION);
+        addColumn(Report::getAndroidVersion, QReport.report.androidVersion, Messages.ANDROID_VERSION);
+        addColumn(Report::getPhoneModel, QReport.report.phoneModel, Messages.DEVICE);
+        addColumn(report -> report.getStacktrace().getStacktrace().split("\n", 2)[0], QReport.report.stacktrace.stacktrace, Messages.STACKTRACE).setExpandRatio(1)
                 .setMinimumWidthFromContent(false);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-            ButtonRenderer<Report> renderer = new ButtonRenderer<>(e -> new Popup().setTitle("Confirm")
-                    .addComponent(new Label("Are you sure you want to delete this report?"))
+            ButtonRenderer<Report> renderer = new ButtonRenderer<>(e -> new Popup(i18n, Messages.CONFIRM)
+                    .addComponent(new I18nLabel(i18n, Messages.DELETE_REPORT_CONFIRM))
                     .addYesNoButtons(p -> {
                         reportDeleter.accept(e.getItem());
                         getDataProvider().refreshAll();

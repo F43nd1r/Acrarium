@@ -16,6 +16,8 @@
 
 package com.faendir.acra.ui.view;
 
+import com.faendir.acra.i18n.I18nLabel;
+import com.faendir.acra.i18n.Messages;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -24,6 +26,8 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Composite;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.spring.i18n.I18N;
 
 /**
  * @author Lukas
@@ -32,9 +36,10 @@ import com.vaadin.ui.VerticalLayout;
 @SpringComponent
 @UIScope
 public class ErrorView extends Composite implements View {
-    public ErrorView() {
+    @Autowired
+    public ErrorView(I18N i18n) {
         VerticalLayout layout = new VerticalLayout();
-        Label label = new Label("This page does not exist or you do not have the permission to view it.");
+        Label label = new I18nLabel(i18n, Messages.ERROR4XX);
         layout.addComponent(label);
         layout.setComponentAlignment(label, Alignment.MIDDLE_CENTER);
         layout.setSizeFull();

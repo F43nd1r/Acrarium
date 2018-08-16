@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.ui.view.base.statistics;
 
+import com.faendir.acra.i18n.Messages;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberTickUnitSource;
@@ -28,9 +28,11 @@ import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.springframework.lang.NonNull;
+import org.vaadin.spring.i18n.I18N;
 
 import java.awt.*;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -38,16 +40,24 @@ import java.util.Map;
  * @since 01.06.18
  */
 class TimeChart extends Chart<Date> {
-    TimeChart(@NonNull String caption) {
-        super(caption);
+    TimeChart(I18N i18n, String captionId, Object... params) {
+        super(i18n, captionId, params);
     }
 
     @Override
     public JFreeChart createChart(@NonNull Map<Date, Long> map) {
-        TimeSeries series = new TimeSeries("Date");
+        TimeSeries series = new TimeSeries(getI18n().get(Messages.DATE));
         series.add(new Day(new Date()), 0);
         map.forEach((date, count) -> series.addOrUpdate(new Day(date), count));
-        JFreeChart chart = ChartFactory.createXYBarChart("", "Date", true, "Reports", new TimeSeriesCollection(series), PlotOrientation.VERTICAL, false, false, false);
+        JFreeChart chart = ChartFactory.createXYBarChart("",
+                getI18n().get(Messages.DATE),
+                true,
+                getI18n().get(Messages.REPORTS),
+                new TimeSeriesCollection(series),
+                PlotOrientation.VERTICAL,
+                false,
+                false,
+                false);
         chart.setBackgroundPaint(null);
         XYPlot plot = chart.getXYPlot();
         plot.getRangeAxis().setStandardTickUnits(new NumberTickUnitSource(true));
@@ -72,5 +82,14 @@ class TimeChart extends Chart<Date> {
         barRenderer.setBarAlignmentFactor(0.5);
         barRenderer.setMargin(0.2);
         return chart;
+    }
+
+    @Override
+    public void updateMessageStrings(Locale locale) {
+        super.updateMessageStrings(locale);
+        XYPlot plot = getChart().getXYPlot();
+        plot.getDomainAxis().setLabel(getI18n().get(Messages.DATE));
+        plot.getRangeAxis().setLabel(getI18n().get(Messages.REPORTS));
+        markAsDirtyRecursive();
     }
 }

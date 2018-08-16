@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.ui.view.report;
 
+import com.faendir.acra.i18n.I18nLabel;
+import com.faendir.acra.i18n.I18nPanel;
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Attachment;
 import com.faendir.acra.model.Permission;
@@ -45,6 +47,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.AcraTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+import org.vaadin.spring.i18n.I18N;
 
 import java.io.InputStream;
 import java.util.Comparator;
@@ -64,11 +67,13 @@ import java.util.stream.Stream;
 public class ReportView extends ParametrizedBaseView<Report> {
     @NonNull private final DataService dataService;
     @NonNull private final AvatarService avatarService;
+    @NonNull private final I18N i18n;
 
     @Autowired
-    public ReportView(@NonNull DataService dataService, @NonNull AvatarService avatarService) {
+    public ReportView(@NonNull DataService dataService, @NonNull AvatarService avatarService, @NonNull I18N i18n) {
         this.dataService = dataService;
         this.avatarService = avatarService;
+        this.i18n = i18n;
     }
 
     @Override
@@ -76,30 +81,31 @@ public class ReportView extends ParametrizedBaseView<Report> {
         HorizontalLayout attachments = new HorizontalLayout();
         for (Attachment file : dataService.findAttachments(parameter)) {
             Button button = new Button(file.getFilename());
-            new FileDownloader(new StreamResource(new ExceptionAwareStreamSource(file.getContent()::getBinaryStream), file.getFilename())).extend(button);
+            new FileDownloader(new StreamResource(new ExceptionAwareStreamSource(() -> file.getContent().getBinaryStream()), file.getFilename())).extend(button);
             attachments.addComponent(button);
         }
         attachments.addStyleNames(AcraTheme.MARGIN_BOTTOM, AcraTheme.MARGIN_TOP, AcraTheme.MARGIN_LEFT, AcraTheme.MARGIN_RIGHT);
         GridLayout summaryGrid = new GridLayout(2, 1);
         summaryGrid.addStyleName(AcraTheme.BORDERED_GRIDLAYOUT);
-        summaryGrid.addComponents(new Label("Version", ContentMode.PREFORMATTED), new Label(parameter.getStacktrace().getVersion().getName(), ContentMode.PREFORMATTED));
-        summaryGrid.addComponents(new Label("User", ContentMode.PREFORMATTED), new HorizontalLayout(new Image(null, avatarService.getAvatar(parameter)), new Label(parameter.getInstallationId(), ContentMode.PREFORMATTED)));
-        summaryGrid.addComponents(new Label("Email", ContentMode.PREFORMATTED), new Label(parameter.getUserEmail(), ContentMode.PREFORMATTED));
-        summaryGrid.addComponents(new Label("Comment", ContentMode.PREFORMATTED), new Label(parameter.getUserComment(), ContentMode.PREFORMATTED));
+        summaryGrid.addComponents(new I18nLabel(ContentMode.PREFORMATTED, i18n, Messages.VERSION),
+                new Label(parameter.getStacktrace().getVersion().getName(), ContentMode.PREFORMATTED));
+        summaryGrid.addComponents(new I18nLabel(ContentMode.PREFORMATTED, i18n, Messages.USER),
+                new HorizontalLayout(new Image(null, avatarService.getAvatar(parameter)), new Label(parameter.getInstallationId(), ContentMode.PREFORMATTED)));
+        summaryGrid.addComponents(new I18nLabel(ContentMode.PREFORMATTED, i18n, Messages.EMAIL), new Label(parameter.getUserEmail(), ContentMode.PREFORMATTED));
+        summaryGrid.addComponents(new I18nLabel(ContentMode.PREFORMATTED, i18n, Messages.COMMENT), new Label(parameter.getUserComment(), ContentMode.PREFORMATTED));
         Optional<ProguardMapping> mapping = dataService.findMapping(parameter.getStacktrace().getBug().getApp(), parameter.getStacktrace().getVersion().getCode());
         if (mapping.isPresent()) {
-            summaryGrid.addComponents(new Label("De-obfuscated Stacktrace", ContentMode.PREFORMATTED),
+            summaryGrid.addComponents(new I18nLabel(ContentMode.PREFORMATTED, i18n, Messages.DE_OBFUSCATED_STACKTRACE),
                     new Label(Utils.retrace(parameter.getStacktrace().getStacktrace(), mapping.get().getMappings()), ContentMode.PREFORMATTED));
         } else {
-            summaryGrid.addComponents(new Label("Stacktrace (No mapping found)", ContentMode.PREFORMATTED), new Label(parameter.getStacktrace().getStacktrace(), ContentMode.PREFORMATTED));
+            summaryGrid.addComponents(new I18nLabel(ContentMode.PREFORMATTED, i18n, Messages.NO_MAPPING_STACKTRACE),
+                    new Label(parameter.getStacktrace().getStacktrace(), ContentMode.PREFORMATTED));
         }
-        summaryGrid.addComponents(new Label("Attachments", ContentMode.PREFORMATTED), attachments);
+        summaryGrid.addComponents(new I18nLabel(ContentMode.PREFORMATTED, i18n, Messages.ATTACHMENTS), attachments);
         summaryGrid.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
         summaryGrid.setSizeFull();
-        Panel summary = new Panel(summaryGrid);
-        summary.setCaption("Summary");
-        Panel details = new Panel(getLayoutForMap(parameter.getJsonObject().toMap()));
-        details.setCaption("Details");
+        Panel summary = new I18nPanel(summaryGrid, i18n, Messages.SUMMARY);
+        Panel details = new I18nPanel(getLayoutForMap(parameter.getJsonObject().toMap()), i18n, Messages.DETAILS);
         VerticalLayout layout = new VerticalLayout(summary, details);
         layout.setSizeUndefined();
         layout.setExpandRatio(details, 1);
@@ -117,11 +123,13 @@ public class ReportView extends ParametrizedBaseView<Report> {
 
     @NonNull
     private GridLayout getLayoutForMap(@NonNull Map<String, ?> map) {
-        GridLayout layout = new GridLayout(2, 1, map.entrySet()
-                .stream()
-                .sorted(Comparator.comparing(Map.Entry::getKey))
-                .flatMap(entry -> getLayoutForEntry(entry.getKey(), entry.getValue()))
-                .toArray(Component[]::new));
+        GridLayout layout = new GridLayout(2,
+                1,
+                map.entrySet()
+                        .stream()
+                        .sorted(Comparator.comparing(Map.Entry::getKey))
+                        .flatMap(entry -> getLayoutForEntry(entry.getKey(), entry.getValue()))
+                        .toArray(Component[]::new));
         layout.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
         layout.setSpacing(false);
         layout.setMargin(false);
@@ -146,6 +154,11 @@ public class ReportView extends ParametrizedBaseView<Report> {
         return new Label(String.valueOf(value), ContentMode.PREFORMATTED);
     }
 
+    @FunctionalInterface
+    private interface ThrowingSupplier<T> {
+        T get() throws Exception;
+    }
+
     private static class ExceptionAwareStreamSource implements StreamResource.StreamSource {
         private final ThrowingSupplier<InputStream> supplier;
 
@@ -155,18 +168,13 @@ public class ReportView extends ParametrizedBaseView<Report> {
 
         @Override
         public InputStream getStream() {
-            try{
+            try {
                 return supplier.get();
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
             }
         }
-    }
-
-    @FunctionalInterface
-    private interface ThrowingSupplier<T> {
-        T get() throws Exception;
     }
 
     @SpringComponent

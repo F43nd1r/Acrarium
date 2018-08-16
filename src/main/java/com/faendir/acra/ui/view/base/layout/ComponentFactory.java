@@ -29,4 +29,6 @@ public interface ComponentFactory<T> extends Ordered {
     Component createContent(@NonNull T t, @NonNull NavigationManager navigationManager);
 
     String getCaption();
+
+    String getId();
 }

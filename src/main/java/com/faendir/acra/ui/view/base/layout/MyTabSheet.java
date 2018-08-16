@@ -29,10 +29,6 @@ import org.springframework.lang.NonNull;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.List;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
@@ -52,27 +48,14 @@ public class MyTabSheet<T> extends TabSheet {
         MiddleClickExtension.extend(this);
     }
 
-    public List<String> getCaptions() {
-        return StreamSupport.stream(Spliterators.spliterator(iterator(), getComponentCount(), Spliterator.ORDERED), false).map(Component::getCaption).collect(Collectors.toList());
-    }
-
     public void addTab(ComponentFactory<T> tab) {
         TabWrapper<T> wrapper = new TabWrapper<>(t, navigationManager, tab);
         addComponent(wrapper);
         addSelectedTabChangeListener(wrapper);
     }
 
-    public void setInitialTab(String caption) {
-        StreamSupport.stream(spliterator(), false).filter(c -> c.getCaption().equals(caption)).findAny().ifPresent(component -> {
-            if (getSelectedTab() == component && component instanceof SelectedTabChangeListener) {
-                ((SelectedTabChangeListener) component).selectedTabChange(new SelectedTabChangeEvent(this, true));
-            }
-            setSelectedTab(component);
-        });
-    }
-
-    public void setFirstTabAsInitialTab() {
-        Component component = getTab(0).getComponent();
+    public void guessInitialTab(String id) {
+        Component component = StreamSupport.stream(spliterator(), false).filter(c -> c.getId().equals(id)).findAny().orElseGet(() -> getTab(0).getComponent());
         if (getSelectedTab() == component && component instanceof SelectedTabChangeListener) {
             ((SelectedTabChangeListener) component).selectedTabChange(new SelectedTabChangeEvent(this, true));
         }

@@ -16,6 +16,9 @@
 
 package com.faendir.acra.ui.view.app.tabs.panels;
 
+import com.faendir.acra.i18n.I18nButton;
+import com.faendir.acra.i18n.I18nComboBox;
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.rest.RestReportInterface;
@@ -33,6 +36,7 @@ import com.vaadin.ui.VerticalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.vaadin.spring.i18n.I18N;
 
 /**
  * @author lukas
@@ -42,22 +46,24 @@ import org.springframework.web.util.UriComponentsBuilder;
 @ViewScope
 public class ExportPanel implements AdminPanel {
     @NonNull private final DataService dataService;
+    @NonNull private final I18N i18n;
 
     @Autowired
-    public ExportPanel(@NonNull DataService dataService) {
+    public ExportPanel(@NonNull DataService dataService, @NonNull I18N i18n) {
         this.dataService = dataService;
+        this.i18n = i18n;
     }
     @Override
     public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
-        ComboBox<String> mailBox = new ComboBox<>("By Email Address", dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app), QReport.report.userEmail));
+        ComboBox<String> mailBox = new I18nComboBox<>(dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app), QReport.report.userEmail), i18n, Messages.BY_MAIL);
         mailBox.setEmptySelectionAllowed(true);
         mailBox.setSizeFull();
-        ComboBox<String> idBox = new ComboBox<>("By Installation ID", dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app), QReport.report.installationId));
+        ComboBox<String> idBox = new I18nComboBox<>(dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app), QReport.report.installationId), i18n, Messages.BY_ID);
         idBox.setEmptySelectionAllowed(true);
         idBox.setSizeFull();
-        Button download = new Button("Download", e -> {
+        Button download = new I18nButton(e -> {
             if (idBox.getValue() == null && mailBox.getValue() == null) {
-                Notification.show("Nothing selected", Notification.Type.WARNING_MESSAGE);
+                Notification.show(i18n.get(Messages.NOTHING_SELECTED), Notification.Type.WARNING_MESSAGE);
             } else {
                 Page page = UI.getCurrent().getPage();
                 page.open(UriComponentsBuilder.fromUri(page.getLocation())
@@ -69,14 +75,19 @@ public class ExportPanel implements AdminPanel {
                         .build()
                         .toUriString(), null);
             }
-        });
+        }, i18n, Messages.DOWNLOAD);
         download.setSizeFull();
         return new VerticalLayout(mailBox, idBox, download);
     }
 
     @Override
     public String getCaption() {
-        return "Export";
+        return i18n.get(Messages.EXPORT);
+    }
+
+    @Override
+    public String getId() {
+        return "export";
     }
 
     @Override

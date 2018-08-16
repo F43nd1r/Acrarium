@@ -13,47 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.i18n;
 
-package com.faendir.acra.ui.view.base;
-
-import com.faendir.acra.i18n.HasI18n;
-import com.vaadin.ui.Upload;
+import com.vaadin.ui.Slider;
 import org.vaadin.spring.i18n.I18N;
 import org.vaadin.spring.i18n.support.Translatable;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Locale;
 
 /**
- * @author Lukas
- * @since 19.12.2017
+ * @author lukas
+ * @since 15.08.18
  */
-public class InMemoryUpload extends Upload implements Translatable, HasI18n {
+public class I18nSlider extends Slider implements Translatable, HasI18n {
     private final I18N i18n;
     private final String captionId;
     private final Object[] params;
-    private final ByteArrayOutputStream outputStream;
-    private boolean finished;
 
-    public InMemoryUpload(I18N i18n, String captionId, Object... params) {
-        super();
+    public I18nSlider(int min, int max, I18N i18n, String captionId, Object... params) {
+        super(min, max);
         this.i18n = i18n;
         this.captionId = captionId;
         this.params = params;
-        outputStream = new ByteArrayOutputStream();
-        finished = false;
-        setReceiver((filename, mimeType) -> outputStream);
-        addSucceededListener(event -> finished = true);
-        addFailedListener(event -> finished = false);
         updateMessageStrings(i18n.getLocale());
-    }
-
-    public boolean isUploaded() {
-        return finished;
-    }
-
-    public String getUploadedString() {
-        return outputStream.toString();
     }
 
     @Override

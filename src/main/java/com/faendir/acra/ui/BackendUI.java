@@ -15,6 +15,9 @@
  */
 package com.faendir.acra.ui;
 
+import com.faendir.acra.i18n.I18nLabel;
+import com.faendir.acra.i18n.I18nMenuBar;
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.User;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.ui.navigation.NavigationManager;
@@ -35,10 +38,8 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.LoginForm;
-import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.AcraTheme;
 import com.vaadin.ui.themes.DarkAcraTheme;
@@ -53,6 +54,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.vaadin.spring.i18n.I18N;
+import org.vaadin.spring.i18n.support.TranslatableUI;
 
 import java.util.Optional;
 
@@ -64,17 +67,19 @@ import java.util.Optional;
 @Theme(AcraTheme.THEME_NAME)
 @Widgetset("com.faendir.acra.AppWidgetset")
 @Viewport("width=device-width, initial-scale=1")
-public class BackendUI extends UI {
+public class BackendUI extends TranslatableUI {
     private static final String DARK_THEME = "dark";
     @NonNull private final AuthenticationManager authenticationManager;
     @NonNull private final ApplicationContext applicationContext;
+    @NonNull private final I18N i18n;
     @NonNull private final Panel content;
     @NonNull private final Path path;
 
     @Autowired
-    public BackendUI(@NonNull AuthenticationManager authenticationManager, @NonNull ApplicationContext applicationContext) {
+    public BackendUI(@NonNull AuthenticationManager authenticationManager, @NonNull ApplicationContext applicationContext, @NonNull I18N i18n) {
         this.authenticationManager = authenticationManager;
         this.applicationContext = applicationContext;
+        this.i18n = i18n;
         content = new Panel();
         content.setSizeFull();
         content.addStyleNames(AcraTheme.NO_PADDING, AcraTheme.NO_BACKGROUND, AcraTheme.NO_BORDER);
@@ -82,7 +87,7 @@ public class BackendUI extends UI {
     }
 
     @Override
-    protected void init(VaadinRequest request) {
+    protected void initUI(VaadinRequest request) {
         if (isDarkTheme()) {
             setTheme(DarkAcraTheme.THEME_NAME);
         }
@@ -97,14 +102,14 @@ public class BackendUI extends UI {
         try {
             Authentication token = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username.toLowerCase(), password));
             if (!token.getAuthorities().contains(User.Role.USER)) {
-                throw new InsufficientAuthenticationException("Missing required role");
+                throw new InsufficientAuthenticationException(i18n.get(Messages.MISSING_ROLE));
             }
             VaadinService.reinitializeSession(VaadinService.getCurrentRequest());
             SecurityContextHolder.getContext().setAuthentication(token);
             showMain();
             getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
         } catch (AuthenticationException ex) {
-            Notification.show("Unknown username/password combination", Notification.Type.ERROR_MESSAGE);
+            Notification.show(i18n.get(Messages.LOGIN_FAILED), Notification.Type.ERROR_MESSAGE);
         }
     }
 
@@ -127,21 +132,23 @@ public class BackendUI extends UI {
     private void showMain() {
         NavigationManager navigationManager = applicationContext.getBean(NavigationManager.class);
 
-        MenuBar menuBar = new MenuBar();
-        MenuBar.MenuItem user = menuBar.addItem("", VaadinIcons.USER, null);
+        I18nMenuBar menuBar = new I18nMenuBar(i18n);
+        I18nMenuBar.I18nMenuItem user = menuBar.addItem(VaadinIcons.USER);
         user.addItem(SecurityUtils.getUsername()).setEnabled(false);
         user.addSeparator();
-        MenuBar.MenuItem theme = user.addItem("Dark Theme",
-                e -> getPage().setLocation(UriComponentsBuilder.fromUri(getPage().getLocation()).replaceQueryParam(DARK_THEME, e.isChecked()).build().toUri()));
+        I18nMenuBar.I18nMenuItem theme = user.addItem(e -> getPage().setLocation(UriComponentsBuilder.fromUri(getPage().getLocation())
+                .replaceQueryParam(DARK_THEME, e.isChecked())
+                .build()
+                .toUri()), Messages.DARK_THEME);
         theme.setCheckable(true);
         theme.setChecked(isDarkTheme());
         user.addSeparator();
         if (SecurityUtils.hasRole(User.Role.ADMIN)) {
-            user.addItem("User Manager", e -> navigationManager.cleanNavigateTo(UserManagerView.class));
+            user.addItem(e -> navigationManager.cleanNavigateTo(UserManagerView.class), Messages.USER_MANAGER);
             user.addSeparator();
         }
-        user.addItem("Change Password", e -> navigationManager.cleanNavigateTo(ChangePasswordView.class));
-        user.addItem("Logout", e -> logout());
+        user.addItem(e -> navigationManager.cleanNavigateTo(ChangePasswordView.class), Messages.CHANGE_PASSWORD);
+        user.addItem(e -> logout(), Messages.LOGOUT);
 
         HorizontalLayout header = new HorizontalLayout(path, menuBar);
         header.setExpandRatio(path, 1);
@@ -150,9 +157,7 @@ public class BackendUI extends UI {
 
         HorizontalLayout footer = new HorizontalLayout();
         footer.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
-        Label footerLabel = new Label(
-                "Acrarium is developed by <a href=https://github.com/F43nd1r>F43nd1r</a>." + " <a href=https://github.com/F43nd1r/acra-backend>Code</a> is licensed under"
-                + " <a href=https://github.com/F43nd1r/acra-backend/blob/master/LICENSE>Apache License v2</a>.", ContentMode.HTML);
+        Label footerLabel = new I18nLabel(ContentMode.HTML, i18n, Messages.FOOTER);
         footerLabel.setWidth(100, Unit.PERCENTAGE);
         footerLabel.addStyleName(AcraTheme.CENTER_TEXT);
         footer.addComponent(footerLabel);

@@ -14,12 +14,24 @@
  * limitations under the License.
  */
 
-repositories {
-    jcenter()
-}
+package com.faendir.acra.i18n;
 
-dependencies {
-    gradleApi()
-    compile 'com.squareup:javapoet:1.11.1'
-    compile 'com.google.guava:guava:26.0-jre'
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.vaadin.spring.i18n.MessageProvider;
+import org.vaadin.spring.i18n.ResourceBundleMessageProvider;
+import org.vaadin.spring.i18n.annotation.EnableI18N;
+
+/**
+ * @author lukas
+ * @since 15.08.18
+ */
+@EnableI18N
+@Configuration
+public class I18nConfiguration {
+
+    @Bean
+    MessageProvider messageProvider() {
+        return new ResourceBundleMessageProvider("i18n.com.faendir.acra.messages");
+    }
 }

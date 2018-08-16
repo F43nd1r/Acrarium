@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.ui.view.app.tabs;
 
+import com.faendir.acra.i18n.I18nButton;
+import com.faendir.acra.i18n.I18nCheckBox;
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Permission;
 import com.faendir.acra.model.QBug;
@@ -45,6 +47,7 @@ import com.vaadin.ui.renderers.ComponentRenderer;
 import com.vaadin.ui.themes.AcraTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+import org.vaadin.spring.i18n.I18N;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,15 +61,22 @@ import java.util.stream.Collectors;
 @ViewScope
 public class BugTab implements AppTab {
     @NonNull private final DataService dataService;
+    @NonNull private final I18N i18n;
 
     @Autowired
-    public BugTab(@NonNull DataService dataService) {
+    public BugTab(@NonNull DataService dataService, @NonNull I18N i18n) {
         this.dataService = dataService;
+        this.i18n = i18n;
     }
 
     @Override
     public String getCaption() {
-        return "Bugs";
+        return i18n.get(Messages.BUGS);
+    }
+
+    @Override
+    public String getId() {
+        return "bug";
     }
 
     @Override
@@ -77,38 +87,39 @@ public class BugTab implements AppTab {
         header.addStyleName(AcraTheme.PADDING_TOP);
         layout.addComponent(header);
         layout.setComponentAlignment(header, Alignment.MIDDLE_LEFT);
-        CheckBox hideSolved = new CheckBox("Hide solved", true);
-        MyGrid<VBug> bugs = new MyGrid<>(null, dataService.getBugProvider(app, hideSolved::getValue));
+        CheckBox hideSolved = new I18nCheckBox(true, i18n, Messages.HIDE_SOLVED);
+        MyGrid<VBug> bugs = new MyGrid<>(dataService.getBugProvider(app, hideSolved::getValue));
         bugs.setSelectionMode(Grid.SelectionMode.MULTI);
         hideSolved.addValueChangeListener(e -> layout.getUI().access(() -> {
             bugs.deselectAll();
             bugs.getDataProvider().refreshAll();
         }));
-        Button merge = new Button("Merge bugs", e -> {
+        Button merge = new I18nButton(e -> {
             List<VBug> selectedItems = new ArrayList<>(bugs.getSelectedItems());
             if (selectedItems.size() > 1) {
                 RadioButtonGroup<String> titles = new RadioButtonGroup<>("", selectedItems.stream().map(bug -> bug.getBug().getTitle()).collect(Collectors.toList()));
                 titles.setSelectedItem(selectedItems.get(0).getBug().getTitle());
-                new Popup().setTitle("Choose title for bug group").addComponent(titles).addCreateButton(p -> {
+                new Popup(i18n, Messages.CHOOSE_BUG_GROUP_TITLE).addComponent(titles).addCreateButton(p -> {
                     dataService.mergeBugs(selectedItems.stream().map(VBug::getBug).collect(Collectors.toList()), titles.getSelectedItem().orElseThrow(IllegalStateException::new));
                     bugs.deselectAll();
                     bugs.getDataProvider().refreshAll();
                 }, true).show();
             } else {
-                Notification.show("Please select at least two bugs", Notification.Type.ERROR_MESSAGE);
+                Notification.show(i18n.get(Messages.ONLY_ONE_BUG_SELECTED), Notification.Type.ERROR_MESSAGE);
             }
-        });
+        }, i18n, Messages.MERGE_BUGS);
         header.addComponent(merge);
         header.addComponent(hideSolved);
         header.setComponentAlignment(hideSolved, Alignment.MIDDLE_RIGHT);
-        bugs.addColumn(VBug::getReportCount,QReport.report.count(), "Reports");
-        bugs.sort(bugs.addColumn(VBug::getLastReport, new TimeSpanRenderer(), QReport.report.date.max(), "Latest Report"), SortDirection.DESCENDING);
-        bugs.addColumn(VBug::getHighestVersionCode, QReport.report.stacktrace.version.code.max(), "Latest Version");
-        bugs.addColumn(VBug::getUserCount, QReport.report.installationId.countDistinct(), "Affected Users");
-        bugs.addColumn(bug -> bug.getBug().getTitle(), QBug.bug.title, "Title").setExpandRatio(1).setMinimumWidthFromContent(false);
+        bugs.addColumn(VBug::getReportCount, QReport.report.count(), Messages.REPORTS);
+        bugs.sort(bugs.addColumn(VBug::getLastReport, new TimeSpanRenderer(), QReport.report.date.max(), Messages.LATEST_REPORT), SortDirection.DESCENDING);
+        bugs.addColumn(VBug::getHighestVersionCode, QReport.report.stacktrace.version.code.max(), Messages.LATEST_VERSION);
+        bugs.addColumn(VBug::getUserCount, QReport.report.installationId.countDistinct(), Messages.AFFECTED_USERS);
+        bugs.addColumn(bug -> bug.getBug().getTitle(), QBug.bug.title, Messages.TITLE).setExpandRatio(1).setMinimumWidthFromContent(false);
         bugs.addOnClickNavigation(navigationManager, com.faendir.acra.ui.view.bug.BugView.class, bugItemClick -> String.valueOf(bugItemClick.getItem().getBug().getId()));
-        bugs.addColumn(bug -> new MyCheckBox(bug.getBug().isSolved(), SecurityUtils.hasPermission(app, Permission.Level.EDIT), e -> dataService.setBugSolved(bug.getBug(), e.getValue())),
-                new ComponentRenderer(), QBug.bug.solved, "Solved");
+        bugs.addColumn(bug -> new MyCheckBox(bug.getBug().isSolved(),
+                SecurityUtils.hasPermission(app, Permission.Level.EDIT),
+                e -> dataService.setBugSolved(bug.getBug(), e.getValue())), new ComponentRenderer(), QBug.bug.solved, Messages.SOLVED);
         layout.addComponent(bugs);
         layout.setExpandRatio(bugs, 1);
         layout.setSizeFull();

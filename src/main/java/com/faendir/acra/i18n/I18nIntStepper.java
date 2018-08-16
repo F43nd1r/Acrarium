@@ -13,52 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.i18n;
 
-package com.faendir.acra.ui.view.base;
-
-import com.faendir.acra.i18n.HasI18n;
-import com.vaadin.ui.Upload;
+import org.vaadin.risto.stepper.IntStepper;
 import org.vaadin.spring.i18n.I18N;
 import org.vaadin.spring.i18n.support.Translatable;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Locale;
 
 /**
- * @author Lukas
- * @since 19.12.2017
+ * @author lukas
+ * @since 15.08.18
  */
-public class InMemoryUpload extends Upload implements Translatable, HasI18n {
+public class I18nIntStepper extends IntStepper implements Translatable, HasI18n {
     private final I18N i18n;
     private final String captionId;
     private final Object[] params;
-    private final ByteArrayOutputStream outputStream;
-    private boolean finished;
 
-    public InMemoryUpload(I18N i18n, String captionId, Object... params) {
-        super();
+    public I18nIntStepper(int value) {
+        this(value, null, null);
+    }
+
+    public I18nIntStepper(int value, I18N i18n, String captionId, Object... params) {
         this.i18n = i18n;
         this.captionId = captionId;
         this.params = params;
-        outputStream = new ByteArrayOutputStream();
-        finished = false;
-        setReceiver((filename, mimeType) -> outputStream);
-        addSucceededListener(event -> finished = true);
-        addFailedListener(event -> finished = false);
-        updateMessageStrings(i18n.getLocale());
-    }
-
-    public boolean isUploaded() {
-        return finished;
-    }
-
-    public String getUploadedString() {
-        return outputStream.toString();
+        setValue(value);
+        if (i18n != null) {
+            updateMessageStrings(i18n.getLocale());
+        }
     }
 
     @Override
     public void updateMessageStrings(Locale locale) {
-        setCaption(i18n.get(captionId, locale, params));
+        if (i18n != null) {
+            setCaption(i18n.get(captionId, locale, params));
+        }
     }
 
     @Override

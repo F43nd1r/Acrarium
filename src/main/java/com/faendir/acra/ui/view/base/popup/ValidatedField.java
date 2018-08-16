@@ -16,10 +16,12 @@
 
 package com.faendir.acra.ui.view.base.popup;
 
+import com.faendir.acra.i18n.HasI18n;
 import com.vaadin.server.UserError;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.AbstractField;
 import org.springframework.lang.NonNull;
+import org.vaadin.spring.i18n.I18N;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,29 +38,31 @@ import java.util.function.Supplier;
 public class ValidatedField<V, T extends AbstractComponent> {
     private final T field;
     private final Supplier<V> valueSupplier;
+    private final I18N i18n;
     private final Map<Function<V, Boolean>, String> validators;
     private final List<Listener> listeners;
     private boolean valid;
 
-    private ValidatedField(T field, Supplier<V> valueSupplier, Consumer<Consumer<V>> listenerRegistration) {
+    private ValidatedField(T field, Supplier<V> valueSupplier, Consumer<Consumer<V>> listenerRegistration, I18N i18n) {
         this.field = field;
         this.valueSupplier = valueSupplier;
+        this.i18n = i18n;
         this.validators = new HashMap<>();
         this.listeners = new ArrayList<>();
         this.valid = false;
         listenerRegistration.accept(this::validate);
     }
 
-    public static <V, T extends AbstractField<V>> ValidatedField<V, T> of(T field) {
-        return new ValidatedField<>(field, field::getValue, vConsumer -> field.addValueChangeListener(event -> vConsumer.accept(event.getValue())));
+    public static <V, T extends AbstractField<V> & HasI18n> ValidatedField<V, T> of(T field) {
+        return new ValidatedField<>(field, field::getValue, vConsumer -> field.addValueChangeListener(event -> vConsumer.accept(event.getValue())), field.getI18n());
     }
 
-    public static <V, T extends AbstractComponent> ValidatedField<V, T> of(T field, Supplier<V> valueSupplier, Consumer<Consumer<V>> listenerRegistration) {
-        return new ValidatedField<>(field, valueSupplier, listenerRegistration);
+    public static <V, T extends AbstractComponent & HasI18n> ValidatedField<V, T> of(T field, Supplier<V> valueSupplier, Consumer<Consumer<V>> listenerRegistration) {
+        return new ValidatedField<>(field, valueSupplier, listenerRegistration, field.getI18n());
     }
 
-    public ValidatedField<V, T> addValidator(Function<V, Boolean> validator, String errorMessage) {
-        validators.put(validator, errorMessage);
+    public ValidatedField<V, T> addValidator(Function<V, Boolean> validator, String errorMessageId) {
+        validators.put(validator, errorMessageId);
         return this;
     }
 
@@ -76,7 +80,7 @@ public class ValidatedField<V, T extends AbstractComponent> {
                 field.setComponentError(null);
                 return true;
             } else {
-                field.setComponentError(new UserError(entry.getValue()));
+                field.setComponentError(new UserError(i18n.get(entry.getValue())));
                 return false;
             }
         });

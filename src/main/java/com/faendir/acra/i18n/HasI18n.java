@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.i18n;
 
-repositories {
-    jcenter()
-}
+import org.vaadin.spring.i18n.I18N;
 
-dependencies {
-    gradleApi()
-    compile 'com.squareup:javapoet:1.11.1'
-    compile 'com.google.guava:guava:26.0-jre'
+/**
+ * @author lukas
+ * @since 16.08.18
+ */
+public interface HasI18n {
+    I18N getI18n();
 }

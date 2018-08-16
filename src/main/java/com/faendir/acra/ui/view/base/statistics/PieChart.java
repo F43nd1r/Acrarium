@@ -24,6 +24,7 @@ import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.util.SortOrder;
 import org.jfree.data.general.DefaultPieDataset;
 import org.springframework.lang.NonNull;
+import org.vaadin.spring.i18n.I18N;
 
 import java.awt.*;
 import java.util.List;
@@ -34,8 +35,8 @@ import java.util.Map;
  * @since 01.06.18
  */
 class PieChart extends Chart<String> {
-    PieChart(@NonNull String caption) {
-        super(caption);
+    PieChart(I18N i18n, String captionId, Object... params) {
+        super(i18n, captionId, params);
     }
 
     @Override

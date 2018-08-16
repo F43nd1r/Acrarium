@@ -15,6 +15,7 @@
  */
 package com.faendir.acra.ui.view.base.statistics;
 
+import com.faendir.acra.i18n.I18nCheckBox;
 import com.faendir.acra.service.DataService;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -28,6 +29,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.ComponentContainer;
 import org.vaadin.risto.stepper.IntStepper;
+import org.vaadin.spring.i18n.I18N;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -46,9 +48,9 @@ class Property<F, C extends Component & HasValue<F>, T> {
     private final Chart<T> chart;
     private final Expression<T> select;
 
-    private Property(String filterText, C filterComponent, Function<F, BooleanExpression> filter, Chart<T> chart, DataService dataService, Expression<T> select) {
+    private Property(C filterComponent, Function<F, BooleanExpression> filter, Chart<T> chart, DataService dataService, Expression<T> select, I18N i18n, String filterTextId) {
         this.dataService = dataService;
-        this.checkBox = new CheckBox(filterText);
+        this.checkBox = new I18nCheckBox(i18n, filterTextId);
         this.filterComponent = filterComponent;
         this.filter = filter;
         this.chart = chart;
@@ -85,22 +87,23 @@ class Property<F, C extends Component & HasValue<F>, T> {
             this.expression = expression;
         }
 
-        Property<?, ?, ?> createStringProperty(String filterText, String chartTitle, ComparableExpressionBase<String> stringExpression) {
+        Property<?, ?, ?> createStringProperty(ComparableExpressionBase<String> stringExpression, I18N i18n, String filterTextId, String chartTitleId) {
             ComboBox<String> comboBox = new ComboBox<>(null, dataService.getFromReports(expression, stringExpression));
             comboBox.setEmptySelectionAllowed(false);
-            return new Property<>(filterText, comboBox, stringExpression::eq, new PieChart(chartTitle), dataService, stringExpression);
+            return new Property<>(comboBox, stringExpression::eq, new PieChart(i18n, chartTitleId), dataService, stringExpression, i18n, filterTextId);
         }
 
-        Property<?, ?, ?> createAgeProperty(String filterText, String chartTitle, DateTimePath<ZonedDateTime> dateTimeExpression) {
+        Property<?, ?, ?> createAgeProperty(DateTimePath<ZonedDateTime> dateTimeExpression, I18N i18n, String filterTextId, String chartTitleId) {
             IntStepper stepper = new IntStepper();
             stepper.setValue(30);
             stepper.setMinValue(1);
-            return new Property<>(filterText,
-                    stepper,
+            return new Property<>(stepper,
                     days -> dateTimeExpression.after(ZonedDateTime.now().minus(days, ChronoUnit.DAYS)),
-                    new TimeChart(chartTitle),
+                    new TimeChart(i18n, chartTitleId),
                     dataService,
-                    SQLExpressions.date(Date.class, dateTimeExpression));
+                    SQLExpressions.date(Date.class, dateTimeExpression),
+                    i18n,
+                    filterTextId);
         }
     }
 }

@@ -16,6 +16,8 @@
 
 package com.faendir.acra.ui.view.base.popup;
 
+import com.faendir.acra.i18n.I18nButton;
+import com.faendir.acra.i18n.Messages;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.FormLayout;
@@ -25,10 +27,13 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.AcraTheme;
 import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
+import org.vaadin.spring.i18n.I18N;
+import org.vaadin.spring.i18n.support.Translatable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -36,21 +41,22 @@ import java.util.function.Consumer;
  * @author Lukas
  * @since 19.12.2017
  */
-public class Popup extends Window {
+public class Popup extends Window implements Translatable {
     private final List<Component> components;
     private final Map<ValidatedField<?, ?>, Pair<Boolean, ValidatedField.Listener>> fields;
     private final List<Button> buttons;
+    private final I18N i18n;
+    private final String captionId;
+    private final Object[] params;
 
-    public Popup() {
+    public Popup(I18N i18n, String captionId, Object... params) {
+        this.i18n = i18n;
+        this.captionId = captionId;
+        this.params = params;
         components = new ArrayList<>();
         fields = new HashMap<>();
         buttons = new ArrayList<>();
-    }
-
-    @NonNull
-    public Popup setTitle(@NonNull String title) {
-        super.setCaption(title);
-        return this;
+        updateMessageStrings(i18n.getLocale());
     }
 
     @NonNull
@@ -60,18 +66,18 @@ public class Popup extends Window {
 
     @NonNull
     public Popup addCreateButton(@NonNull Consumer<Popup> onCreateAction, boolean closeAfter) {
-        buttons.add(new Button("Create", event -> {
+        buttons.add(new I18nButton(event -> {
             onCreateAction.accept(this);
             if (closeAfter) {
                 close();
             }
-        }));
+        }, i18n, Messages.CREATE));
         return this;
     }
 
     @NonNull
     public Popup addCloseButton() {
-        buttons.add(new Button("Close", event -> close()));
+        buttons.add(new I18nButton(event -> close(), i18n, Messages.CLOSE));
         return this;
     }
 
@@ -82,13 +88,13 @@ public class Popup extends Window {
 
     @NonNull
     public Popup addYesNoButtons(@NonNull Consumer<Popup> onYesAction, boolean closeAfter) {
-        buttons.add(new Button("Yes", event -> {
+        buttons.add(new I18nButton(event -> {
             onYesAction.accept(this);
             if (closeAfter) {
                 close();
             }
-        }));
-        buttons.add(new Button("No", event -> close()));
+        }, i18n, Messages.YES));
+        buttons.add(new I18nButton(event -> close(), i18n, Messages.NO));
         return this;
     }
 
@@ -146,5 +152,10 @@ public class Popup extends Window {
     private void checkValid() {
         boolean valid = fields.values().stream().map(Pair::getFirst).reduce(Boolean::logicalAnd).orElse(true);
         buttons.forEach(button -> button.setEnabled(valid));
+    }
+
+    @Override
+    public void updateMessageStrings(Locale locale) {
+        setCaption(i18n.get(captionId, locale, params));
     }
 }

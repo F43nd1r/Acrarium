@@ -16,6 +16,9 @@
 
 package com.faendir.acra.ui.view.base.statistics;
 
+import com.faendir.acra.i18n.I18nButton;
+import com.faendir.acra.i18n.I18nPanel;
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.view.base.layout.FlexLayout;
@@ -27,6 +30,7 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.themes.AcraTheme;
 import org.vaadin.risto.stepper.IntStepper;
+import org.vaadin.spring.i18n.I18N;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -43,7 +47,7 @@ public class Statistics extends Composite {
     private final BooleanExpression baseExpression;
     private final List<Property<?, ?, ?>> properties;
 
-    public Statistics(BooleanExpression baseExpression, DataService dataService) {
+    public Statistics(BooleanExpression baseExpression, DataService dataService, I18N i18n) {
         this.baseExpression = baseExpression;
         properties = new ArrayList<>();
         GridLayout filterLayout = new GridLayout(2, 1);
@@ -57,21 +61,20 @@ public class Statistics extends Composite {
         dayStepper.setValue(30);
         dayStepper.setMinValue(1);
         Property.Factory factory = new Property.Factory(dataService, baseExpression);
-        properties.add(factory.createAgeProperty("Last X days", "Reports over time", QReport.report.date));
-        properties.add(factory.createStringProperty("Android Version", "Reports per Android Version", QReport.report.androidVersion));
-        properties.add(factory.createStringProperty("App Version", "Reports per App Version", QReport.report.stacktrace.version.name));
-        properties.add(factory.createStringProperty("Phone Model", "Reports per Phone Model", QReport.report.phoneModel));
-        properties.add(factory.createStringProperty("Phone Brand", "Reports per Brand", QReport.report.brand));
+        properties.add(factory.createAgeProperty(QReport.report.date, i18n, Messages.LAST_X_DAYS, Messages.REPORTS_OVER_TIME));
+        properties.add(factory.createStringProperty(QReport.report.androidVersion, i18n, Messages.ANDROID_VERSION, Messages.REPORTS_PER_ANDROID_VERSION));
+        properties.add(factory.createStringProperty(QReport.report.stacktrace.version.name, i18n, Messages.APP_VERSION, Messages.REPORTS_PER_APP_VERSION));
+        properties.add(factory.createStringProperty(QReport.report.phoneModel, i18n, Messages.PHONE_MODEL, Messages.REPORTS_PER_PHONE_MODEL));
+        properties.add(factory.createStringProperty(QReport.report.brand, i18n, Messages.PHONE_BRAND, Messages.REPORTS_PER_BRAND));
 
-        Panel filterPanel = new Panel(filterLayout);
+        Panel filterPanel = new I18nPanel(filterLayout, i18n, Messages.FILTER);
         filterPanel.addStyleName(AcraTheme.NO_BACKGROUND);
-        filterPanel.setCaption("Filter");
         FlexLayout layout = new FlexLayout(filterPanel);
         layout.setWidth(100, Unit.PERCENTAGE);
 
         properties.forEach(property -> property.addTo(filterLayout, layout));
 
-        Button applyButton = new Button("Apply", e -> update());
+        Button applyButton = new I18nButton(e -> update(), i18n, Messages.APPLY);
         applyButton.setWidth(100, Unit.PERCENTAGE);
         filterLayout.space();
         filterLayout.addComponent(applyButton);

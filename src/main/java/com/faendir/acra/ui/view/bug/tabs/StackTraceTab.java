@@ -15,6 +15,8 @@
  */
 package com.faendir.acra.ui.view.bug.tabs;
 
+import com.faendir.acra.i18n.I18nAccordion;
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.Bug;
 import com.faendir.acra.model.ProguardMapping;
 import com.faendir.acra.model.Stacktrace;
@@ -24,11 +26,11 @@ import com.faendir.acra.util.Utils;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+import org.vaadin.spring.i18n.I18N;
 
 import java.util.Optional;
 
@@ -40,22 +42,24 @@ import java.util.Optional;
 @ViewScope
 public class StackTraceTab implements BugTab {
     @NonNull private final DataService dataService;
+    @NonNull private final I18N i18n;
 
     @Autowired
-    public StackTraceTab(@NonNull DataService dataService) {
+    public StackTraceTab(@NonNull DataService dataService, @NonNull I18N i18n) {
         this.dataService = dataService;
+        this.i18n = i18n;
     }
 
     @Override
     public Component createContent(@NonNull Bug bug, @NonNull NavigationManager navigationManager) {
-        Accordion accordion = new Accordion();
+        I18nAccordion accordion = new I18nAccordion(i18n);
         for (Stacktrace stacktrace : dataService.getStacktraces(bug)) {
             Optional<ProguardMapping> mapping = dataService.findMapping(bug.getApp(), stacktrace.getVersion().getCode());
             String trace = stacktrace.getStacktrace();
             if (mapping.isPresent()) {
                 trace = Utils.retrace(trace, mapping.get().getMappings());
             }
-            accordion.addTab(new Label(trace, ContentMode.PREFORMATTED)).setCaption("Version \"" + stacktrace.getVersion().getName() + "\": " + trace.split("\n", 2)[0]);
+            accordion.addTab(new Label(trace, ContentMode.PREFORMATTED), Messages.STACKTRACE_TITLE, stacktrace.getVersion().getName(), trace.split("\n", 2)[0]);
         }
         accordion.setSizeFull();
         return accordion;
@@ -63,7 +67,12 @@ public class StackTraceTab implements BugTab {
 
     @Override
     public String getCaption() {
-        return "Stacktraces";
+        return i18n.get(Messages.STACKTRACES);
+    }
+
+    @Override
+    public String getId() {
+        return "stacktrace";
     }
 
     @Override

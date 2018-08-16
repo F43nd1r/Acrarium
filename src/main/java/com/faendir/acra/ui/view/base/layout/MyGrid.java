@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.ui.view.base.layout;
 
 import com.faendir.acra.client.mygrid.GridMiddleClickExtensionConnector;
@@ -30,10 +29,16 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.renderers.AbstractRenderer;
 import com.vaadin.ui.renderers.TextRenderer;
 import elemental.json.JsonObject;
+import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
+import org.vaadin.spring.i18n.I18N;
+import org.vaadin.spring.i18n.support.Translatable;
 
 import java.util.Collection;
 import java.util.EventObject;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -41,37 +46,58 @@ import java.util.function.Function;
  * @author Lukas
  * @since 14.05.2017
  */
-public class MyGrid<T> extends Composite {
+public class MyGrid<T> extends Composite implements Translatable {
+    private final I18N i18n;
+    private final String captionId;
+    private final Object[] params;
+    private final Map<Grid.Column<T, ?>, Pair<String, Object[]>> columnCaptions;
     private final ExposingGrid<T> grid;
     private final QueryDslDataProvider<T> dataProvider;
 
-    public MyGrid(String caption, QueryDslDataProvider<T> dataProvider) {
+    public MyGrid(QueryDslDataProvider<T> dataProvider) {
+        this(dataProvider, null, null);
+    }
+
+    public MyGrid(QueryDslDataProvider<T> dataProvider, I18N i18n, String captionId, Object... params) {
         this.dataProvider = dataProvider;
-        grid = new ExposingGrid<>(caption, dataProvider);
+        grid = new ExposingGrid<>(dataProvider);
         setCompositionRoot(grid);
         setSizeFull();
         MiddleClickExtension.extend(this);
+        this.i18n = i18n;
+        this.captionId = captionId;
+        columnCaptions = new HashMap<>();
+        this.params = params;
+        if (i18n != null) {
+            updateMessageStrings(i18n.getLocale());
+        }
     }
 
     @NonNull
-    public <R> Grid.Column<T, R> addColumn(@NonNull ValueProvider<T, R> valueProvider, @NonNull String caption) {
-        return addColumn(valueProvider, new TextRenderer(), caption);
+    public <R> Grid.Column<T, R> addColumn(@NonNull ValueProvider<T, R> valueProvider, @NonNull String captionId, Object... params) {
+        Grid.Column<T, R> column = addColumn(valueProvider, new TextRenderer(), i18n.get(captionId, params));
+        columnCaptions.put(column, Pair.of(captionId, params));
+        return column;
     }
 
     @NonNull
-    public <R> Grid.Column<T, R> addColumn(@NonNull ValueProvider<T, R> valueProvider, @NonNull AbstractRenderer<? super T, ? super R> renderer, @NonNull String caption) {
-        return grid.addColumn(valueProvider, renderer).setCaption(caption).setSortable(false);
+    public <R> Grid.Column<T, R> addColumn(@NonNull ValueProvider<T, R> valueProvider, @NonNull AbstractRenderer<? super T, ? super R> renderer, @NonNull String captionId, Object... params) {
+        Grid.Column<T, R> column = addColumn(valueProvider, renderer).setCaption(i18n.get(captionId, params));
+        columnCaptions.put(column, Pair.of(captionId, params));
+        return column;
     }
 
     @NonNull
-    public <R> Grid.Column<T, R> addColumn(@NonNull ValueProvider<T, R> valueProvider, @NonNull Expression<? extends Comparable> sort, @NonNull String caption) {
-        return addColumn(valueProvider, new TextRenderer(), sort, caption);
+    public <R> Grid.Column<T, R> addColumn(@NonNull ValueProvider<T, R> valueProvider, @NonNull Expression<? extends Comparable> sort, @NonNull String captionId, Object... params) {
+        return addColumn(valueProvider, new TextRenderer(), sort, captionId, params);
     }
 
     @NonNull
     public <R> Grid.Column<T, R> addColumn(@NonNull ValueProvider<T, R> valueProvider, @NonNull AbstractRenderer<? super T, ? super R> renderer,
-            @NonNull Expression<? extends Comparable> sort, @NonNull String caption) {
-        return grid.addColumn(valueProvider, renderer).setId(dataProvider.addSortable(sort)).setCaption(caption);
+            @NonNull Expression<? extends Comparable> sort, @NonNull String captionId, Object... params) {
+        Grid.Column<T, R> column = grid.addColumn(valueProvider, renderer).setId(dataProvider.addSortable(sort)).setCaption(i18n.get(captionId, params));
+        columnCaptions.put(column, Pair.of(captionId, params));
+        return column;
     }
 
     @NonNull
@@ -116,8 +142,7 @@ public class MyGrid<T> extends Composite {
         grid.deselectAll();
     }
 
-    public void addOnClickNavigation(@NonNull NavigationManager navigationManager, Class<? extends BaseView> namedView,
-            Function<Grid.ItemClick<T>, String> parameterGetter) {
+    public void addOnClickNavigation(@NonNull NavigationManager navigationManager, Class<? extends BaseView> namedView, Function<Grid.ItemClick<T>, String> parameterGetter) {
         grid.addItemClickListener(e -> {
             boolean newTab = e.getMouseEventDetails().getButton() == MouseEventDetails.MouseButton.MIDDLE || e.getMouseEventDetails().isCtrlKey();
             navigationManager.navigateTo(namedView, parameterGetter.apply(e), newTab);
@@ -126,6 +151,12 @@ public class MyGrid<T> extends Composite {
 
     public QueryDslDataProvider<T> getDataProvider() {
         return dataProvider;
+    }
+
+    @Override
+    public void updateMessageStrings(Locale locale) {
+        setCaption(i18n.get(captionId, locale, params));
+        columnCaptions.forEach((column, caption) -> column.setCaption(i18n.get(caption.getFirst(), locale, caption.getSecond())));
     }
 
     public static class MiddleClickExtension<T> extends Grid.AbstractGridExtension<T> {
@@ -161,8 +192,8 @@ public class MyGrid<T> extends Composite {
     }
 
     private static class ExposingGrid<T> extends Grid<T> {
-        ExposingGrid(String caption, DataProvider<T, ?> dataProvider) {
-            super(caption, dataProvider);
+        ExposingGrid(DataProvider<T, ?> dataProvider) {
+            super(dataProvider);
         }
 
         @Override

@@ -60,8 +60,7 @@ public class BugView extends ParametrizedBaseView<Pair<Bug, String>> {
         MyTabSheet<Bug> tabSheet = new MyTabSheet<>(bug, getNavigationManager(), tabs);
         tabSheet.setSizeFull();
         tabSheet.addSelectedTabChangeListener(e -> getNavigationManager().updatePageParameters(bug.getId() + "/" + e.getTabSheet().getSelectedTab().getCaption()));
-        if (tabSheet.getCaptions().contains(parameter.getSecond())) tabSheet.setInitialTab(parameter.getSecond());
-        else tabSheet.setFirstTabAsInitialTab();
+        tabSheet.guessInitialTab(parameter.getSecond());
         Panel root = new Panel(tabSheet);
         root.setSizeFull();
         root.addStyleNames( AcraTheme.NO_BORDER, AcraTheme.NO_BACKGROUND, AcraTheme.NO_PADDING, AcraTheme.PADDING_LEFT, AcraTheme.PADDING_RIGHT);

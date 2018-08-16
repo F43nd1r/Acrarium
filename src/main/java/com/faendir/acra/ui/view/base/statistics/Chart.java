@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.ui.view.base.statistics;
 
+import com.faendir.acra.i18n.HasI18n;
 import com.vaadin.ui.Composite;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
@@ -23,26 +23,41 @@ import com.vaadin.ui.themes.AcraTheme;
 import org.jfree.chart.JFreeChart;
 import org.springframework.lang.NonNull;
 import org.vaadin.addon.JFreeChartWrapper;
+import org.vaadin.spring.i18n.I18N;
+import org.vaadin.spring.i18n.support.Translatable;
 
 import java.awt.*;
+import java.util.Locale;
 import java.util.Map;
 
 /**
  * @author lukas
  * @since 01.06.18
  */
-abstract class Chart<T> extends Composite {
+abstract class Chart<T> extends Composite implements Translatable, HasI18n {
     private final Panel panel;
+    private final I18N i18n;
+    private final String captionId;
+    private final Object[] params;
+    private JFreeChart chart;
 
-    Chart(@NonNull String caption) {
+    Chart(I18N i18n, String captionId, Object... params) {
+        this.i18n = i18n;
+        this.captionId = captionId;
+        this.params = params;
         panel = new Panel();
-        panel.setCaption(caption);
         panel.addStyleName(AcraTheme.NO_BACKGROUND);
         setCompositionRoot(panel);
+        updateMessageStrings(i18n.getLocale());
+    }
+
+    @Override
+    public void updateMessageStrings(Locale locale) {
+        setCaption(i18n.get(captionId, locale, params));
     }
 
     public void setContent(@NonNull Map<T, Long> map) {
-        JFreeChart chart = createChart(map);
+        chart = createChart(map);
         JFreeChartWrapper content = new JFreeChartWrapper(chart);
         content.setWidth(100, Unit.PERCENTAGE);
         content.setHeight(100, Unit.PERCENTAGE);
@@ -54,4 +69,13 @@ abstract class Chart<T> extends Composite {
     }
 
     protected abstract JFreeChart createChart(@NonNull Map<T, Long> map);
+
+    protected JFreeChart getChart() {
+        return chart;
+    }
+
+    @Override
+    public I18N getI18n() {
+        return i18n;
+    }
 }

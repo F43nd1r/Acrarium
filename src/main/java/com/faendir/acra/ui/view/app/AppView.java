@@ -56,10 +56,9 @@ public class AppView extends ParametrizedBaseView<Pair<App, String>> {
     protected void enter(@NonNull Pair<App, String> parameter) {
         MyTabSheet<App> tabSheet = new MyTabSheet<>(parameter.getFirst(), getNavigationManager(), tabs);
         tabSheet.setSizeFull();
-        tabSheet.addSelectedTabChangeListener(e -> getNavigationManager().updatePageParameters(parameter.getFirst().getId() + "/" + e.getTabSheet().getSelectedTab().getCaption()));
-        tabSheet.addMiddleClickListener(e -> getNavigationManager().openInNewTab(parameter.getFirst().getId() + "/" + e.getTab().getCaption()));
-        if (tabSheet.getCaptions().contains(parameter.getSecond())) tabSheet.setInitialTab(parameter.getSecond());
-        else tabSheet.setFirstTabAsInitialTab();
+        tabSheet.addSelectedTabChangeListener(e -> getNavigationManager().updatePageParameters(parameter.getFirst().getId() + "/" + e.getTabSheet().getSelectedTab().getId()));
+        tabSheet.addMiddleClickListener(e -> getNavigationManager().openInNewTab(parameter.getFirst().getId() + "/" + e.getTab().getId()));
+        tabSheet.guessInitialTab(parameter.getSecond());
         Panel panel = new Panel(tabSheet);
         panel.setSizeFull();
         panel.addStyleNames(AcraTheme.NO_BORDER, AcraTheme.NO_BACKGROUND, AcraTheme.NO_PADDING, AcraTheme.PADDING_LEFT, AcraTheme.PADDING_RIGHT);

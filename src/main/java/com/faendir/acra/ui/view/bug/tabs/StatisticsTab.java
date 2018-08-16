@@ -16,6 +16,7 @@
 
 package com.faendir.acra.ui.view.bug.tabs;
 
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.Bug;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.service.DataService;
@@ -28,6 +29,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.themes.AcraTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+import org.vaadin.spring.i18n.I18N;
 
 /**
  * @author lukas
@@ -37,15 +39,17 @@ import org.springframework.lang.NonNull;
 @ViewScope
 public class StatisticsTab implements BugTab {
     @NonNull private final DataService dataService;
+    @NonNull private final I18N i18n;
 
     @Autowired
-    public StatisticsTab(@NonNull DataService dataService) {
+    public StatisticsTab(@NonNull DataService dataService, @NonNull I18N i18n) {
         this.dataService = dataService;
+        this.i18n = i18n;
     }
 
     @Override
     public Component createContent(@NonNull Bug bug, @NonNull NavigationManager navigationManager) {
-        Panel root = new Panel(new Statistics(QReport.report.stacktrace.bug.id.eq(bug.getId()), dataService));
+        Panel root = new Panel(new Statistics(QReport.report.stacktrace.bug.id.eq(bug.getId()), dataService, i18n));
         root.setSizeFull();
         root.addStyleNames(AcraTheme.NO_BACKGROUND, AcraTheme.NO_BORDER);
         return root;
@@ -53,7 +57,12 @@ public class StatisticsTab implements BugTab {
 
     @Override
     public String getCaption() {
-        return "Statistics";
+        return i18n.get(Messages.STATISTICS);
+    }
+
+    @Override
+    public String getId() {
+        return "statistics";
     }
 
     @Override

@@ -15,6 +15,10 @@
  */
 package com.faendir.acra.ui.view.app.tabs.panels;
 
+import com.faendir.acra.i18n.I18nButton;
+import com.faendir.acra.i18n.I18nLabel;
+import com.faendir.acra.i18n.I18nSlider;
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.service.DataService;
@@ -33,13 +37,12 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Slider;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.AcraTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.vaadin.risto.stepper.IntStepper;
+import org.vaadin.spring.i18n.I18N;
 
 /**
  * @author lukas
@@ -49,31 +52,29 @@ import org.vaadin.risto.stepper.IntStepper;
 @ViewScope
 public class DangerPanel implements AdminPanel {
     @NonNull private final DataService dataService;
+    @NonNull private final I18N i18n;
 
     @Autowired
-    public DangerPanel(@NonNull DataService dataService) {
+    public DangerPanel(@NonNull DataService dataService, @NonNull I18N i18n) {
         this.dataService = dataService;
+        this.i18n = i18n;
     }
 
     @Override
     public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
-        Button configButton = new Button("Create new ACRA Configuration",
-                e -> new Popup().setTitle("Confirm")
-                        .addComponent(new Label("Are you sure you want to create a new ACRA configuration?<br>The existing configuration will be invalidated", ContentMode.HTML))
-                        .addYesNoButtons(popup -> popup.clear().addComponent(new ConfigurationLabel(dataService.recreateReporterUser(app))).addCloseButton().show())
-                        .show());
+        Button configButton = new I18nButton(e -> new Popup(i18n, Messages.CONFIRM).addComponent(new I18nLabel(ContentMode.HTML, i18n, Messages.NEW_ACRA_CONFIG_CONFIRM))
+                .addYesNoButtons(popup -> popup.clear().addComponent(new ConfigurationLabel(dataService.recreateReporterUser(app), i18n)).addCloseButton().show())
+                .show(), i18n, Messages.NEW_ACRA_CONFIG);
         configButton.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        Button matchingButton = new Button("Configure bug matching", e -> {
+        Button matchingButton = new I18nButton(e -> {
             App.Configuration configuration = app.getConfiguration();
-            Slider score = new Slider("Minimum score", 0, 100);
+            I18nSlider score = new I18nSlider(0, 100, i18n, Messages.MIN_SCORE);
             score.setValue((double) configuration.getMinScore());
-            new Popup().addValidatedField(ValidatedField.of(score), true)
-                    .addComponent(new Label("Are you sure you want to save this configuration? " + "All bugs will be checked for merging, which may take some time. "
-                                            + "Note that a higher minimum score does not unmerge already merged bugs."))
-                    .addYesNoButtons(p -> dataService.changeConfiguration(app,
-                            new App.Configuration(score.getValue().intValue())), true)
+            new Popup(i18n, Messages.CONFIRM).addValidatedField(ValidatedField.of(score), true)
+                    .addComponent(new I18nLabel(i18n, Messages.NEW_BUG_CONFIG_CONFIRM))
+                    .addYesNoButtons(p -> dataService.changeConfiguration(app, new App.Configuration(score.getValue().intValue())), true)
                     .show();
-        });
+        }, i18n, Messages.NEW_BUG_CONFIG);
         matchingButton.setWidth(100, Sizeable.Unit.PERCENTAGE);
         IntStepper age = new IntStepper();
         age.setValue(30);
@@ -83,7 +84,10 @@ public class DangerPanel implements AdminPanel {
         purgeAge.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
         purgeAge.setWidth(100, Sizeable.Unit.PERCENTAGE);
         purgeAge.addStyleName(AcraTheme.NO_MARGIN);
-        purgeAge.addComponents(new Button("Purge", e -> dataService.deleteReportsOlderThanDays(app, age.getValue())), new Label(" Reports older than "), age, new Label(" Days"));
+        purgeAge.addComponents(new I18nButton(e -> dataService.deleteReportsOlderThanDays(app, age.getValue()), i18n, Messages.PURGE),
+                new I18nLabel(i18n, Messages.REPORTS_OLDER_THAN1),
+                age,
+                new I18nLabel(i18n, Messages.REPORTS_OLDER_THAN2));
         purgeAge.setExpandRatio(age, 1);
         ComboBox<Integer> versionBox = new ComboBox<>(null, dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app), QReport.report.stacktrace.version.code));
         versionBox.setEmptySelectionAllowed(false);
@@ -92,17 +96,16 @@ public class DangerPanel implements AdminPanel {
         purgeVersion.setWidth(100, Sizeable.Unit.PERCENTAGE);
         purgeVersion.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
         purgeVersion.addStyleName(AcraTheme.NO_MARGIN);
-        purgeVersion.addComponents(new Button("Purge", e -> {
+        purgeVersion.addComponents(new I18nButton(e -> {
             if (versionBox.getValue() != null) {
                 dataService.deleteReportsBeforeVersion(app, versionBox.getValue());
             }
-        }), new Label(" Reports before Version "), versionBox);
+        }, i18n, Messages.PURGE), new I18nLabel(i18n, Messages.REPORTS_BEFORE_VERSION), versionBox);
         purgeVersion.setExpandRatio(versionBox, 1);
-        Button deleteButton = new Button("Delete App",
-                e -> new Popup().setTitle("Confirm").addComponent(new Label("Are you sure you want to delete this app and all its associated content?")).addYesNoButtons(popup -> {
-                    dataService.delete(app);
-                    navigationManager.navigateBack();
-                }, true).show());
+        Button deleteButton = new I18nButton(e -> new Popup(i18n, Messages.CONFIRM).addComponent(new I18nLabel(i18n, Messages.DELETE_APP_CONFIRM)).addYesNoButtons(popup -> {
+            dataService.delete(app);
+            navigationManager.navigateBack();
+        }, true).show(), i18n, Messages.DELETE_APP);
         VerticalLayout layout = new VerticalLayout(configButton, matchingButton, purgeAge, purgeVersion, deleteButton);
         deleteButton.setWidth(100, Sizeable.Unit.PERCENTAGE);
         layout.setSizeFull();
@@ -112,7 +115,12 @@ public class DangerPanel implements AdminPanel {
 
     @Override
     public String getCaption() {
-        return "Danger Zone";
+        return i18n.get(Messages.DANGER_ZONE);
+    }
+
+    @Override
+    public String getId() {
+        return "danger-zone";
     }
 
     @Override

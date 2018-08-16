@@ -15,6 +15,7 @@
  */
 package com.faendir.acra.ui.view.bug.tabs;
 
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.Bug;
 import com.faendir.acra.model.Permission;
 import com.faendir.acra.ui.annotation.RequiresAppPermission;
@@ -24,6 +25,7 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.ViewScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+import org.vaadin.spring.i18n.I18N;
 
 import java.util.List;
 
@@ -35,15 +37,22 @@ import java.util.List;
 @SpringComponent("bugAdminTab")
 @ViewScope
 public class AdminTab extends PanelFlexTab<Bug> implements BugTab {
+    private final I18N i18n;
 
     @Autowired
-    public AdminTab(@NonNull List<AdminPanel> panels) {
+    public AdminTab(@NonNull List<AdminPanel> panels, I18N i18n) {
         super(panels);
+        this.i18n = i18n;
     }
 
     @Override
     public String getCaption() {
-        return "Admin";
+        return i18n.get(Messages.ADMIN);
+    }
+
+    @Override
+    public String getId() {
+        return "admin";
     }
 
     @Override

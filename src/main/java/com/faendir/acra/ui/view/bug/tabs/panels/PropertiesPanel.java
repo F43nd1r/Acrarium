@@ -16,6 +16,9 @@
 
 package com.faendir.acra.ui.view.bug.tabs.panels;
 
+import com.faendir.acra.i18n.I18nButton;
+import com.faendir.acra.i18n.I18nTextArea;
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.Bug;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.navigation.NavigationManager;
@@ -28,6 +31,7 @@ import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+import org.vaadin.spring.i18n.I18N;
 
 /**
  * @author lukas
@@ -37,28 +41,35 @@ import org.springframework.lang.NonNull;
 @ViewScope
 public class PropertiesPanel implements AdminPanel {
     @NonNull private final DataService dataService;
+    @NonNull private final I18N i18n;
 
     @Autowired
-    public PropertiesPanel(@NonNull DataService dataService) {
+    public PropertiesPanel(@NonNull DataService dataService, @NonNull I18N i18n) {
         this.dataService = dataService;
+        this.i18n = i18n;
     }
 
     @Override
     public Component createContent(@NonNull Bug bug, @NonNull NavigationManager navigationManager) {
-        TextArea title = new TextArea("Title");
+        TextArea title = new I18nTextArea(i18n, Messages.TITLE);
         title.setValue(bug.getTitle());
         title.setSizeFull();
-        Button save = new Button("Save", e -> {
+        Button save = new I18nButton(e -> {
             bug.setTitle(title.getValue());
             dataService.store(bug);
-        });
+        }, i18n, Messages.SAVE);
         save.setWidth(100, Sizeable.Unit.PERCENTAGE);
         return new VerticalLayout(title, save);
     }
 
     @Override
     public String getCaption() {
-        return "Properties";
+        return i18n.get(Messages.PROPERTIES);
+    }
+
+    @Override
+    public String getId() {
+        return "properties";
     }
 
     @Override
