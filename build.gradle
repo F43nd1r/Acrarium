@@ -95,7 +95,6 @@ dependencies {
     compile "com.querydsl:querydsl-apt:$queryDslVersion:jpa"
     //vaadin
     compile 'com.vaadin:vaadin-spring-boot-starter'
-    compile 'org.vaadin.spring.addons:vaadin-spring-addon-i18n:2.0.0.RELEASE'
     compile 'com.vaadin:vaadin-push'
     compile('org.vaadin.addon:jfreechartwrapper:4.0.0') {
         exclude group: 'javax.servlet', module: 'servlet-api'
