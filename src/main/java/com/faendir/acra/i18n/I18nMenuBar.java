@@ -35,8 +35,8 @@ public class I18nMenuBar extends MenuBar implements Translatable {
         this.i18n = i18n;
     }
 
-    public I18nMenuItem addItem(Resource icon) {
-        I18nMenuItem item = new I18nMenuItem(icon, null, i18n, Messages.BLANK);
+    public I18nMenuItem addItem(Resource icon, String captionId, Object... params) {
+        I18nMenuItem item = new I18nMenuItem(icon, null, i18n, captionId, params);
         getItems().add(item);
         return item;
     }
@@ -61,6 +61,9 @@ public class I18nMenuBar extends MenuBar implements Translatable {
 
         public I18nMenuItem addItem(Command command, String captionId, Object... params) {
             I18nMenuItem item = new I18nMenuItem(null, command, i18n, captionId, params);
+            if(getChildren() == null) {
+                removeItem(addItem(""));
+            }
             getChildren().add(item);
             return item;
         }

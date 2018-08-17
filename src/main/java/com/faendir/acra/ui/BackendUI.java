@@ -135,9 +135,7 @@ public class BackendUI extends TranslatableUI {
         NavigationManager navigationManager = applicationContext.getBean(NavigationManager.class);
 
         I18nMenuBar menuBar = new I18nMenuBar(i18n);
-        I18nMenuBar.I18nMenuItem user = menuBar.addItem(VaadinIcons.USER);
-        user.addItem(SecurityUtils.getUsername()).setEnabled(false);
-        user.addSeparator();
+        I18nMenuBar.I18nMenuItem user = menuBar.addItem(VaadinIcons.USER, Messages.ONE_ARG, SecurityUtils.getUsername());
         I18nMenuBar.I18nMenuItem theme = user.addItem(e -> getPage().setLocation(UriComponentsBuilder.fromUri(getPage().getLocation())
                 .replaceQueryParam(DARK_THEME, e.isChecked())
                 .build()
