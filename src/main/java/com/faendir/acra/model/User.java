@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.model;
 
 import org.springframework.data.annotation.PersistenceConstructor;
@@ -21,6 +20,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -41,8 +41,12 @@ import java.util.stream.Stream;
 public class User implements UserDetails {
     @Id private String username;
     @Enumerated(EnumType.STRING)
-    @ElementCollection(fetch = FetchType.EAGER) private Set<Role> roles;
-    @ElementCollection(fetch = FetchType.EAGER) private Set<Permission> permissions;
+    @Column(nullable = false)
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<Role> roles;
+    @Column(nullable = false)
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<Permission> permissions;
     private String password;
 
     @PersistenceConstructor

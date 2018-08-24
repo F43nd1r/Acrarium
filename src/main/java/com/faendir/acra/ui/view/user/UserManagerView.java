@@ -91,7 +91,10 @@ public class UserManagerView extends BaseView {
                 ComboBox<Permission.Level> levelComboBox = new ComboBox<>(null, Arrays.asList(Permission.Level.values()));
                 levelComboBox.setEmptySelectionAllowed(false);
                 levelComboBox.setValue(permission);
-                levelComboBox.addValueChangeListener(e -> userService.setPermission(user, app, e.getValue()));
+                levelComboBox.addValueChangeListener(e -> {
+                    userService.setPermission(user, app, e.getValue());
+                    userGrid.getDataProvider().refreshAll();
+                });
                 return levelComboBox;
             }, new ComponentRenderer(), Messages.ACCESS_PERMISSION, app.getName());
         }

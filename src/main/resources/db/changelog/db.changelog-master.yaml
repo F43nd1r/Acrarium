@@ -616,4 +616,12 @@ databaseChangeLog:
             type: INT
             constraints:
               nullable: false
+- changeSet:
+    id: 2018-08-24-fix-permission-key
+    author: lukas
+    changes:
+    - addPrimaryKey:
+        columnNames: user_username, app_id
+        tableName: user_permissions
+        constraintName: PK_user_permissions
 
