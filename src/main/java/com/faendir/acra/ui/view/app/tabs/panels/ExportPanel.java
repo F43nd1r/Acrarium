@@ -55,10 +55,10 @@ public class ExportPanel implements AdminPanel {
     }
     @Override
     public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
-        ComboBox<String> mailBox = new I18nComboBox<>(dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app), QReport.report.userEmail), i18n, Messages.BY_MAIL);
+        ComboBox<String> mailBox = new I18nComboBox<>(dataService.getFromReports(app, null, QReport.report.userEmail), i18n, Messages.BY_MAIL);
         mailBox.setEmptySelectionAllowed(true);
         mailBox.setSizeFull();
-        ComboBox<String> idBox = new I18nComboBox<>(dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app), QReport.report.installationId), i18n, Messages.BY_ID);
+        ComboBox<String> idBox = new I18nComboBox<>(dataService.getFromReports(app, null, QReport.report.installationId), i18n, Messages.BY_ID);
         idBox.setEmptySelectionAllowed(true);
         idBox.setSizeFull();
         Button download = new I18nButton(e -> {

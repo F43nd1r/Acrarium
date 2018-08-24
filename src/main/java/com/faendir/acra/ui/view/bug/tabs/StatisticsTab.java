@@ -49,7 +49,7 @@ public class StatisticsTab implements BugTab {
 
     @Override
     public Component createContent(@NonNull Bug bug, @NonNull NavigationManager navigationManager) {
-        Panel root = new Panel(new Statistics(QReport.report.stacktrace.bug.id.eq(bug.getId()), dataService, i18n));
+        Panel root = new Panel(new Statistics(bug.getApp(), QReport.report.stacktrace.bug.id.eq(bug.getId()), dataService, i18n));
         root.setSizeFull();
         root.addStyleNames(AcraTheme.NO_BACKGROUND, AcraTheme.NO_BORDER);
         return root;

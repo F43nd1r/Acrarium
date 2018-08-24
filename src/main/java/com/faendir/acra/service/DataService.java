@@ -19,17 +19,15 @@ import com.faendir.acra.dataprovider.QueryDslDataProvider;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Attachment;
 import com.faendir.acra.model.Bug;
-import com.faendir.acra.model.Permission;
 import com.faendir.acra.model.ProguardMapping;
 import com.faendir.acra.model.QApp;
 import com.faendir.acra.model.Report;
 import com.faendir.acra.model.Stacktrace;
-import com.faendir.acra.model.User;
 import com.faendir.acra.model.Version;
 import com.faendir.acra.model.view.Queries;
 import com.faendir.acra.model.view.VApp;
 import com.faendir.acra.model.view.VBug;
-import com.faendir.acra.security.SecurityUtils;
+import com.faendir.acra.model.view.WhereExpressions;
 import com.faendir.acra.util.ImportResult;
 import com.faendir.acra.util.PlainTextUser;
 import com.querydsl.core.Tuple;
@@ -37,9 +35,6 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
-import com.querydsl.core.types.dsl.EnumPath;
-import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPADeleteClause;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.acra.ReportField;
@@ -56,6 +51,7 @@ import org.hibernate.Session;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -74,9 +70,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -84,11 +78,9 @@ import java.util.stream.StreamSupport;
 import static com.faendir.acra.model.QApp.app;
 import static com.faendir.acra.model.QAttachment.attachment;
 import static com.faendir.acra.model.QBug.bug;
-import static com.faendir.acra.model.QPermission.permission;
 import static com.faendir.acra.model.QProguardMapping.proguardMapping;
 import static com.faendir.acra.model.QReport.report;
 import static com.faendir.acra.model.QStacktrace.stacktrace1;
-import static com.faendir.acra.model.QUser.user;
 
 /**
  * @author lukas
@@ -110,14 +102,13 @@ public class DataService implements Serializable {
 
     @NonNull
     public QueryDslDataProvider<VApp> getAppProvider() {
-        boolean isAdmin = SecurityUtils.hasRole(User.Role.ADMIN);
-        Function<JPQLQuery<?>, BooleanExpression> existenceFunction = isAdmin ? JPQLQuery::notExists : JPQLQuery::exists;
-        BiFunction<EnumPath<Permission.Level>, Permission.Level, BooleanExpression> compareFunction = isAdmin ? EnumPath::lt : EnumPath::goe;
-        BooleanExpression where = existenceFunction.apply(JPAExpressions.select(permission)
-                .from(user)
-                .join(user.permissions, permission)
-                .where(user.username.eq(SecurityUtils.getUsername()).and(permission.app.eq(app)).and(compareFunction.apply(permission.level, Permission.Level.VIEW))));
+        BooleanExpression where = WhereExpressions.whereHasAppPermission();
         return new QueryDslDataProvider<>(Queries.selectVApp(entityManager).where(where), new JPAQuery<>(entityManager).from(app).where(where));
+    }
+
+    @NonNull
+    public List<Integer> getAppIds() {
+        return new JPAQuery<>(entityManager).from(app).where(WhereExpressions.whereHasAppPermission()).select(app.id).fetch();
     }
 
     @NonNull
@@ -126,6 +117,18 @@ public class DataService implements Serializable {
         Supplier<BooleanExpression> whereSupplier = () -> onlyNonSolvedProvider.getAsBoolean() ? bug.app.eq(app).and(bug.solved.eq(false)) : bug.app.eq(app);
         return new QueryDslDataProvider<>(() -> Queries.selectVBug(entityManager).where(whereSupplier.get()),
                 () -> new JPAQuery<>(entityManager).from(bug).where(whereSupplier.get()));
+    }
+
+    @NonNull
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
+    public List<Integer> getBugIds(@NonNull App app) {
+        return new JPAQuery<>(entityManager).from(bug).where(bug.app.eq(app)).select(bug.id).fetch();
+    }
+
+    @NonNull
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission$Level).VIEW)")
+    public List<Integer> getStacktraceIds(@NonNull Bug bug) {
+        return new JPAQuery<>(entityManager).from(stacktrace1).where(stacktrace1.bug.eq(bug)).select(stacktrace1.id).fetch();
     }
 
     @NonNull
@@ -147,6 +150,22 @@ public class DataService implements Serializable {
                 .join(stacktrace1.bug, bug)
                 .where(bug.app.eq(app))
                 .select(report));
+    }
+
+    @NonNull
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#stacktrace.bug.app, T(com.faendir.acra.model.Permission$Level).VIEW)")
+    public List<String> getReportIds(@NonNull Stacktrace stacktrace) {
+        return new JPAQuery<>(entityManager).from(report).where(report.stacktrace.eq(stacktrace)).select(report.id).fetch();
+    }
+
+    @NonNull
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
+    public List<String> getReportIds(@NonNull App app, @Nullable ZonedDateTime after) {
+        BooleanExpression where = report.stacktrace.bug.app.eq(app);
+        if(after != null) {
+            where = where.and(report.date.after(after));
+        }
+        return new JPAQuery<>(entityManager).from(report).where(where).select(report.id).fetch();
     }
 
     @NonNull
@@ -237,7 +256,23 @@ public class DataService implements Serializable {
     @PostAuthorize("!returnObject.isPresent() || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.get().app, T(com.faendir.acra.model.Permission$Level).VIEW)")
     public Optional<Bug> findBug(@NonNull String encodedId) {
         try {
-            return Optional.ofNullable(new JPAQuery<>(entityManager).from(bug).join(bug.app).fetchJoin().where(bug.id.eq(Integer.parseInt(encodedId))).select(bug).fetchOne());
+            return findBug(Integer.parseInt(encodedId));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
+    }
+
+    @NonNull
+    @PostAuthorize("!returnObject.isPresent() || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.get().app, T(com.faendir.acra.model.Permission$Level).VIEW)")
+    public Optional<Bug> findBug(@NonNull int id) {
+        return Optional.ofNullable(new JPAQuery<>(entityManager).from(bug).join(bug.app).fetchJoin().where(bug.id.eq(id)).select(bug).fetchOne());
+    }
+
+    @NonNull
+    @PostAuthorize("!returnObject.isPresent() || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.get(), T(com.faendir.acra.model.Permission$Level).VIEW)")
+    public Optional<App> findApp(@NonNull String encodedId) {
+        try {
+            return findApp(Integer.parseInt(encodedId));
         } catch (NumberFormatException e) {
             return Optional.empty();
         }
@@ -245,16 +280,12 @@ public class DataService implements Serializable {
 
     @NonNull
     @PostAuthorize("!returnObject.isPresent() || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.get(), T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public Optional<App> findApp(@NonNull String encodedId) {
-        try {
-            return Optional.ofNullable(new JPAQuery<>(entityManager).from(app).where(app.id.eq(Integer.parseInt(encodedId))).select(app).fetchOne());
-        } catch (NumberFormatException e) {
-            return Optional.empty();
-        }
+    public Optional<App> findApp(int id) {
+        return Optional.ofNullable(new JPAQuery<>(entityManager).from(app).where(app.id.eq(id)).select(app).fetchOne());
     }
 
     @NonNull
-    @PostFilter("T(com.faendir.acra.security.SecurityUtils).hasPermission(filterObject, T(com.faendir.acra.model.Permission$Level).VIEW)")
+    @PostFilter("hasRole(T(com.faendir.acra.model.User$Role).ADMIN) || T(com.faendir.acra.security.SecurityUtils).hasPermission(filterObject, T(com.faendir.acra.model.Permission$Level).VIEW)")
     public List<App> findAllApps() {
         return new JPAQuery<>(entityManager).from(app).select(app).fetch();
     }
@@ -263,6 +294,10 @@ public class DataService implements Serializable {
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#report.stacktrace.bug.app, T(com.faendir.acra.model.Permission$Level).VIEW)")
     public List<Attachment> findAttachments(@NonNull Report report) {
         return new JPAQuery<>(entityManager).from(attachment).where(attachment.report.eq(report)).select(attachment).fetch();
+    }
+    @PostAuthorize("!returnObject.isPresent() || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.get().bug.app, T(com.faendir.acra.model.Permission$Level).VIEW)")
+    public Optional<Stacktrace> findStacktrace(int id) {
+        return Optional.ofNullable(new JPAQuery<>(entityManager).from(stacktrace1).where(stacktrace1.id.eq(id)).select(stacktrace1).fetchOne());
     }
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
@@ -365,13 +400,13 @@ public class DataService implements Serializable {
 
     @NonNull
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public <T extends Comparable> List<T> getFromReports(@NonNull App app, @NonNull Predicate where, @NonNull ComparableExpressionBase<T> select) {
+    public <T extends Comparable> List<T> getFromReports(@NonNull App app, @Nullable Predicate where, @NonNull ComparableExpressionBase<T> select) {
         return getFromReports(app, where, select, select);
     }
 
     @NonNull
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public <T> List<T> getFromReports(@NonNull App app, @NonNull Predicate where, @NonNull Expression<T> select, ComparableExpressionBase<?> order) {
+    public <T> List<T> getFromReports(@NonNull App app, @Nullable Predicate where, @NonNull Expression<T> select, ComparableExpressionBase<?> order) {
         return ((JPAQuery<?>) new JPAQuery<>(entityManager)).from(report)
                 .where(report.stacktrace.bug.app.eq(app).and(where))
                 .select(select)

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.service;
 
 import com.faendir.acra.config.AcraConfiguration;
@@ -126,7 +125,9 @@ public class UserService implements Serializable {
 
     @NonNull
     private User getDefaultUser() {
-        return new User(acraConfiguration.getUser().getName(), passwordEncoder.encode(acraConfiguration.getUser().getPassword()), Arrays.asList(User.Role.USER, User.Role.ADMIN));
+        return new User(acraConfiguration.getUser().getName(),
+                passwordEncoder.encode(acraConfiguration.getUser().getPassword()),
+                Arrays.asList(User.Role.USER, User.Role.ADMIN, User.Role.API));
     }
 
     public QueryDslDataProvider<User> getUserProvider() {

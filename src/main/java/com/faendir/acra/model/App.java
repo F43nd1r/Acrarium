@@ -16,6 +16,7 @@
 
 package com.faendir.acra.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.PersistenceConstructor;
@@ -36,6 +37,7 @@ import javax.persistence.OneToOne;
  */
 @Entity
 public class App {
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL, optional = false, orphanRemoval = true, fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User reporter;

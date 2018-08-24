@@ -93,6 +93,7 @@ dependencies {
     compile "com.querydsl:querydsl-jpa:$queryDslVersion"
     compile "com.querydsl:querydsl-sql:$queryDslVersion"
     compile "com.querydsl:querydsl-apt:$queryDslVersion:jpa"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
     //vaadin
     compile 'com.vaadin:vaadin-spring-boot-starter'
     compile 'com.vaadin:vaadin-push'

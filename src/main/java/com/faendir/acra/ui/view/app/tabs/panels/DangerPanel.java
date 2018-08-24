@@ -89,7 +89,7 @@ public class DangerPanel implements AdminPanel {
                 age,
                 new I18nLabel(i18n, Messages.REPORTS_OLDER_THAN2));
         purgeAge.setExpandRatio(age, 1);
-        ComboBox<Integer> versionBox = new ComboBox<>(null, dataService.getFromReports(QReport.report.stacktrace.bug.app.eq(app), QReport.report.stacktrace.version.code));
+        ComboBox<Integer> versionBox = new ComboBox<>(null, dataService.getFromReports(app, null, QReport.report.stacktrace.version.code));
         versionBox.setEmptySelectionAllowed(false);
         versionBox.setWidth(100, Sizeable.Unit.PERCENTAGE);
         HorizontalLayout purgeVersion = new HorizontalLayout();
