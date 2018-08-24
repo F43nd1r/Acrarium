@@ -111,7 +111,8 @@ public class User implements UserDetails {
     public enum Role implements GrantedAuthority {
         ADMIN,
         USER,
-        REPORTER;
+        REPORTER,
+        API;
 
         @Override
         public String getAuthority() {

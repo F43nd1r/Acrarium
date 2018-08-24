@@ -96,10 +96,10 @@ public class RestReportInterface {
         if (!app.isPresent()) {
             return ResponseEntity.notFound().build();
         }
-        BooleanExpression where = report.stacktrace.bug.app.eq(app.get());
+        BooleanExpression where = null;
         String name = "";
         if (mail != null && !mail.isEmpty()) {
-            where = where.and(report.userEmail.eq(mail));
+            where = report.userEmail.eq(mail).and(where);
             name += "_" + mail;
         }
         if (id != null && !id.isEmpty()) {
@@ -111,6 +111,6 @@ public class RestReportInterface {
         }
         HttpHeaders headers = new HttpHeaders();
         headers.setContentDispositionFormData("attachment", "reports" + name + ".json");
-        return ResponseEntity.ok().headers(headers).body(dataService.getFromReports(where, report.content, report.id).stream().collect(Collectors.joining(", ", "[", "]")));
+        return ResponseEntity.ok().headers(headers).body(dataService.getFromReports(app.get(), where, report.content, report.id).stream().collect(Collectors.joining(", ", "[", "]")));
     }
 }

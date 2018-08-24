@@ -16,6 +16,7 @@
 package com.faendir.acra.ui.view.base.statistics;
 
 import com.faendir.acra.i18n.I18nCheckBox;
+import com.faendir.acra.model.App;
 import com.faendir.acra.service.DataService;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -28,6 +29,7 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.ComponentContainer;
+import org.springframework.lang.Nullable;
 import org.vaadin.risto.stepper.IntStepper;
 import org.vaadin.spring.i18n.I18N;
 
@@ -41,6 +43,7 @@ import java.util.function.Function;
  * @since 01.06.18
  */
 class Property<F, C extends Component & HasValue<F>, T> {
+    private final App app;
     private final DataService dataService;
     private final CheckBox checkBox;
     private final C filterComponent;
@@ -48,7 +51,8 @@ class Property<F, C extends Component & HasValue<F>, T> {
     private final Chart<T> chart;
     private final Expression<T> select;
 
-    private Property(C filterComponent, Function<F, BooleanExpression> filter, Chart<T> chart, DataService dataService, Expression<T> select, I18N i18n, String filterTextId) {
+    private Property(App app, C filterComponent, Function<F, BooleanExpression> filter, Chart<T> chart, DataService dataService, Expression<T> select, I18N i18n, String filterTextId) {
+        this.app = app;
         this.dataService = dataService;
         this.checkBox = new I18nCheckBox(i18n, filterTextId);
         this.filterComponent = filterComponent;
@@ -67,15 +71,15 @@ class Property<F, C extends Component & HasValue<F>, T> {
         chartLayout.addComponent(chart);
     }
 
-    BooleanExpression applyFilter(BooleanExpression expression) {
+    BooleanExpression applyFilter(@Nullable BooleanExpression expression) {
         if (checkBox.getValue() && filterComponent.getValue() != null) {
-            return expression.and(filter.apply(filterComponent.getValue()));
+            return filter.apply(filterComponent.getValue()).and(expression);
         }
         return expression;
     }
 
     void update(BooleanExpression expression) {
-        chart.setContent(dataService.countReports(expression, select));
+        chart.setContent(dataService.countReports(app, expression, select));
     }
 
     static class Factory {
@@ -87,17 +91,17 @@ class Property<F, C extends Component & HasValue<F>, T> {
             this.expression = expression;
         }
 
-        Property<?, ?, ?> createStringProperty(ComparableExpressionBase<String> stringExpression, I18N i18n, String filterTextId, String chartTitleId) {
-            ComboBox<String> comboBox = new ComboBox<>(null, dataService.getFromReports(expression, stringExpression));
+        Property<?, ?, ?> createStringProperty(App app, ComparableExpressionBase<String> stringExpression, I18N i18n, String filterTextId, String chartTitleId) {
+            ComboBox<String> comboBox = new ComboBox<>(null, dataService.getFromReports(app, expression, stringExpression));
             comboBox.setEmptySelectionAllowed(false);
-            return new Property<>(comboBox, stringExpression::eq, new PieChart(i18n, chartTitleId), dataService, stringExpression, i18n, filterTextId);
+            return new Property<>(app, comboBox, stringExpression::eq, new PieChart(i18n, chartTitleId), dataService, stringExpression, i18n, filterTextId);
         }
 
-        Property<?, ?, ?> createAgeProperty(DateTimePath<ZonedDateTime> dateTimeExpression, I18N i18n, String filterTextId, String chartTitleId) {
+        Property<?, ?, ?> createAgeProperty(App app, DateTimePath<ZonedDateTime> dateTimeExpression, I18N i18n, String filterTextId, String chartTitleId) {
             IntStepper stepper = new IntStepper();
             stepper.setValue(30);
             stepper.setMinValue(1);
-            return new Property<>(stepper,
+            return new Property<>(app, stepper,
                     days -> dateTimeExpression.after(ZonedDateTime.now().minus(days, ChronoUnit.DAYS)),
                     new TimeChart(i18n, chartTitleId),
                     dataService,

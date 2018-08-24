@@ -16,6 +16,7 @@
 package com.faendir.acra.security;
 
 import com.faendir.acra.model.User;
+import com.faendir.acra.rest.RestApiInterface;
 import com.faendir.acra.rest.RestReportInterface;
 import com.faendir.acra.service.UserService;
 import org.apache.commons.text.RandomStringGenerator;
@@ -54,7 +55,6 @@ import java.util.stream.Stream;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-
     @NonNull private final UserService userService;
 
     @Autowired
@@ -116,17 +116,22 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(@NonNull HttpSecurity http) throws Exception {
-        // @formatter:off
-        http
-                .csrf().disable()
-                .headers().disable()
-                .anonymous().disable()
-                .exceptionHandling().authenticationEntryPoint(new Http403ForbiddenEntryPoint())
+        http.csrf()
+                .disable()
+                .headers()
+                .disable()
+                .anonymous()
+                .disable()
+                .exceptionHandling()
+                .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
                 .and()
                 .sessionManagement()
                 .and()
-                .antMatcher("/"+RestReportInterface.REPORT_PATH).httpBasic();
-        // @formatter:on
+                .antMatcher("/" + RestReportInterface.REPORT_PATH)
+                .httpBasic()
+                .and()
+                .antMatcher("/" + RestApiInterface.API_PATH + "/**")
+                .httpBasic();
     }
 
     @NonNull

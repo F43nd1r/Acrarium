@@ -18,7 +18,6 @@ package com.faendir.acra.ui.view.app.tabs;
 
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
-import com.faendir.acra.model.QReport;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.navigation.NavigationManager;
 import com.faendir.acra.ui.view.base.statistics.Statistics;
@@ -49,7 +48,7 @@ public class StatisticsTab implements AppTab {
 
     @Override
     public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
-        Panel root = new Panel(new Statistics(QReport.report.stacktrace.bug.app.eq(app), dataService, i18n));
+        Panel root = new Panel(new Statistics(app, null, dataService, i18n));
         root.setSizeFull();
         root.addStyleNames(AcraTheme.NO_BACKGROUND, AcraTheme.NO_BORDER);
         return root;
