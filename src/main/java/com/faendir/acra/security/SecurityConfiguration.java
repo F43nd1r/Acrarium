@@ -127,10 +127,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .sessionManagement()
                 .and()
-                .antMatcher("/" + RestReportInterface.REPORT_PATH)
-                .httpBasic()
-                .and()
-                .antMatcher("/" + RestApiInterface.API_PATH + "/**")
+                .regexMatcher("/(" + RestReportInterface.REPORT_PATH + "|" + RestApiInterface.API_PATH + "/.*)")
                 .httpBasic();
     }
 
