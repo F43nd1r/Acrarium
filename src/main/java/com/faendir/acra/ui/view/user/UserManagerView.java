@@ -81,6 +81,10 @@ public class UserManagerView extends BaseView {
             userService.setAdmin(user, e.getValue());
             userGrid.getDataProvider().refreshAll();
         }), new ComponentRenderer(), Messages.ADMIN);
+        userGrid.addColumn(user -> new MyCheckBox(user.getRoles().contains(User.Role.API), !user.getUsername().equals(SecurityUtils.getUsername()), e -> {
+            userService.setApiAccess(user, e.getValue());
+            userGrid.getDataProvider().refreshAll();
+        }), new ComponentRenderer(), Messages.API);
         for (App app : dataService.findAllApps()) {
             userGrid.addColumn(user -> {
                 Permission.Level permission = SecurityUtils.getPermission(app, user);
