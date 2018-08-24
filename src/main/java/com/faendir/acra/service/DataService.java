@@ -160,8 +160,11 @@ public class DataService implements Serializable {
 
     @NonNull
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public List<String> getReportIds(@NonNull App app, @Nullable ZonedDateTime after) {
+    public List<String> getReportIds(@NonNull App app, @Nullable ZonedDateTime before, @Nullable ZonedDateTime after) {
         BooleanExpression where = report.stacktrace.bug.app.eq(app);
+        if(before != null) {
+            where = where.and(report.date.before(before));
+        }
         if(after != null) {
             where = where.and(report.date.after(after));
         }

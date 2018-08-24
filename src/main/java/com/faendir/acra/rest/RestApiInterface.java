@@ -88,8 +88,9 @@ public class RestApiInterface {
     }
 
     @RequestMapping(value = "apps/{id}/reports", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
-    public List<String> listReportsOfApp(@PathVariable int id, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime after) {
-        return dataService.findApp(id).map(app -> dataService.getReportIds(app, after)).orElse(Collections.emptyList());
+    public List<String> listReportsOfApp(@PathVariable int id, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime before,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime after) {
+        return dataService.findApp(id).map(app -> dataService.getReportIds(app, before, after)).orElse(Collections.emptyList());
     }
 
     @RequestMapping(value = "reports/{id}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
