@@ -103,7 +103,7 @@ public class RestReportInterface {
             name += "_" + mail;
         }
         if (id != null && !id.isEmpty()) {
-            where = where.and(report.installationId.eq(id));
+            where = report.installationId.eq(id).and(where);
             name += "_" + id;
         }
         if (name.isEmpty()) {

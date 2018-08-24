@@ -620,6 +620,9 @@ databaseChangeLog:
     id: 2018-08-24-fix-permission-key
     author: lukas
     changes:
+    - addNotNullConstraint:
+        columnName: app_id
+        tableName: user_permissions
     - addPrimaryKey:
         columnNames: user_username, app_id
         tableName: user_permissions
