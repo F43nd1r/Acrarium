@@ -18,8 +18,8 @@ plugins {
     id 'java'
     id 'idea'
     id 'war'
-    id 'org.springframework.boot' version '2.0.2.RELEASE'
-    id 'com.devsoap.vaadin-flow' version '1.0.0.M3'
+    id 'org.springframework.boot' version '2.0.4.RELEASE'
+    id 'com.devsoap.vaadin-flow' version '1.0.0.M5'
     id 'io.spring.dependency-management' version '1.0.5.RELEASE'
     id 'cn.bestwu.propdeps' version '0.0.10'
 }
@@ -30,7 +30,7 @@ repositories {
 }
 
 vaadin {
-    version '10.0.1'
+    version '10.0.5'
 }
 
 
@@ -62,6 +62,10 @@ idea {
     }
 }
 
+configurations {
+    all*.exclude module : 'slf4j-simple'
+}
+
 dependencies {
     //spring
     compile 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -78,7 +82,6 @@ dependencies {
     compile "com.querydsl:querydsl-apt:$queryDslVersion:jpa"
     //vaadin
     compile "com.vaadin:vaadin-spring-boot-starter:${vaadin.version}"
-    compile "com.vaadin:flow:1.0.1"
     compile 'com.vaadin:vaadin-icons:3.0.1'
     compile 'org.jfree:jfreechart:1.5.0'
     compile 'javax.servlet:javax.servlet-api:3.1.0'
