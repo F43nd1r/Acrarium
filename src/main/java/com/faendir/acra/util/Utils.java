@@ -17,6 +17,7 @@
 package com.faendir.acra.util;
 
 import com.faendir.acra.model.App;
+import com.vaadin.ui.UI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.NonNull;
@@ -28,14 +29,9 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * @author Lukas
@@ -46,11 +42,11 @@ public final class Utils {
     private static final Log log = LogFactory.getLog(Utils.class);
 
     @NonNull
-    public static LocalDateTime getDateFromString(@NonNull String s) {
+    public static ZonedDateTime getDateFromString(@NonNull String s) {
         try {
-            return LocalDateTime.parse(s, formatter);
+            return ZonedDateTime.parse(s, formatter);
         } catch (DateTimeParseException e) {
-            return LocalDateTime.now();
+            return ZonedDateTime.now();
         }
     }
 

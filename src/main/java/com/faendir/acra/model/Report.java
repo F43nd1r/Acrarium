@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.model;
 
 import com.faendir.acra.util.Utils;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.querydsl.core.annotations.QueryInit;
 import org.acra.ReportField;
 import org.hibernate.annotations.OnDelete;
@@ -32,7 +35,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * @author Lukas
@@ -42,12 +45,16 @@ import java.time.LocalDateTime;
 public class Report {
     @Id private String id;
     @QueryInit("*.*")
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, optional = false, fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Stacktrace stacktrace;
     @Type(type = "text") private String content;
-    @Transient private JSONObject jsonObject;
-    private LocalDateTime date;
+    @JsonIgnore
+    @Transient
+    private JSONObject jsonObject;
+    private ZonedDateTime date;
     private String userEmail;
     @Type(type = "text") private String userComment;
     private String androidVersion;
@@ -86,7 +93,7 @@ public class Report {
     }
 
     @NonNull
-    public LocalDateTime getDate() {
+    public ZonedDateTime getDate() {
         return date;
     }
 
@@ -126,5 +133,9 @@ public class Report {
 
     public void setStacktrace(Stacktrace stacktrace) {
         this.stacktrace = stacktrace;
+    }
+
+    public String getContent() {
+        return content;
     }
 }

@@ -19,7 +19,7 @@ package com.faendir.acra.model.view;
 import com.faendir.acra.model.Bug;
 import com.querydsl.core.annotations.QueryProjection;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * @author lukas
@@ -27,13 +27,13 @@ import java.time.LocalDateTime;
  */
 public class VBug {
     private final Bug bug;
-    private final LocalDateTime lastReport;
+    private final ZonedDateTime lastReport;
     private final long reportCount;
     private final int highestVersionCode;
     private final long userCount;
 
     @QueryProjection
-    public VBug(Bug bug, LocalDateTime lastReport, long reportCount, int highestVersionCode, long userCount) {
+    public VBug(Bug bug, ZonedDateTime lastReport, long reportCount, int highestVersionCode, long userCount) {
         this.bug = bug;
         this.lastReport = lastReport;
         this.reportCount = reportCount;
@@ -49,7 +49,7 @@ public class VBug {
         return reportCount;
     }
 
-    public LocalDateTime getLastReport() {
+    public ZonedDateTime getLastReport() {
         return lastReport;
     }
 

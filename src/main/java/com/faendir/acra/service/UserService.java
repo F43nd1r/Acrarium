@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.service;
 
 import com.faendir.acra.config.AcraConfiguration;
@@ -70,7 +69,7 @@ public class UserService implements Serializable {
     }
 
     @Transactional
-    @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
     public void createUser(@NonNull String username, @NonNull String password) {
         if (new JPAQuery<>(entityManager).from(USER).where(USER.username.eq(username)).fetchFirst() != null) {
             throw new IllegalArgumentException("Username already exists");
@@ -78,6 +77,7 @@ public class UserService implements Serializable {
         entityManager.persist(new User(username, passwordEncoder.encode(password), Collections.singleton(User.Role.USER)));
     }
 
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
     public PlainTextUser createReporterUser() {
         String username;
         do {
@@ -92,9 +92,10 @@ public class UserService implements Serializable {
     }
 
     @Transactional
+    @PreAuthorize("authentication.name == #user.username")
     public boolean changePassword(@NonNull User user, @NonNull String oldPassword, @NonNull String newPassword) {
         if (checkPassword(user, oldPassword)) {
-            user.setPassword(newPassword);
+            user.setPassword(passwordEncoder.encode(newPassword));
             entityManager.merge(user);
             return true;
         }
@@ -102,7 +103,7 @@ public class UserService implements Serializable {
     }
 
     @Transactional
-    @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
     public void setAdmin(@NonNull User user, boolean admin) {
         if (admin) {
             user.getRoles().add(User.Role.ADMIN);
@@ -113,7 +114,18 @@ public class UserService implements Serializable {
     }
 
     @Transactional
-    @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
+    public void setApiAccess(@NonNull User user, boolean access) {
+        if (access) {
+            user.getRoles().add(User.Role.API);
+        } else {
+            user.getRoles().remove(User.Role.API);
+        }
+        entityManager.merge(user);
+    }
+
+    @Transactional
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
     public void setPermission(@NonNull User user, @NonNull App app, @NonNull Permission.Level level) {
         Optional<Permission> permission = user.getPermissions().stream().filter(p -> p.getApp().equals(app)).findAny();
         if (permission.isPresent()) {
@@ -126,9 +138,12 @@ public class UserService implements Serializable {
 
     @NonNull
     private User getDefaultUser() {
-        return new User(acraConfiguration.getUser().getName(), passwordEncoder.encode(acraConfiguration.getUser().getPassword()), Arrays.asList(User.Role.USER, User.Role.ADMIN));
+        return new User(acraConfiguration.getUser().getName(),
+                passwordEncoder.encode(acraConfiguration.getUser().getPassword()),
+                Arrays.asList(User.Role.USER, User.Role.ADMIN));
     }
 
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
     public QueryDslDataProvider<User> getUserProvider() {
         return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(USER).where(USER.roles.any().eq(User.Role.USER)).select(USER));
     }

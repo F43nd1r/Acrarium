@@ -16,6 +16,7 @@
 
 package com.faendir.acra.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.PersistenceConstructor;
@@ -36,6 +37,7 @@ import javax.persistence.OneToOne;
  */
 @Entity
 public class App {
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL, optional = false, orphanRemoval = true, fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User reporter;
@@ -96,33 +98,19 @@ public class App {
 
     @Embeddable
     public static class Configuration {
-        private boolean matchByMessage;
-        private boolean ignoreInstanceIds;
-        private boolean ignoreAndroidLineNumbers;
+        private int minScore;
 
         @PersistenceConstructor
         Configuration() {
-            matchByMessage = true;
-            ignoreInstanceIds = true;
-            ignoreAndroidLineNumbers = true;
+            minScore = 95;
         }
 
-        public Configuration(boolean matchByMessage, boolean ignoreInstanceIds, boolean ignoreAndroidLineNumbers) {
-            this.matchByMessage = matchByMessage;
-            this.ignoreInstanceIds = ignoreInstanceIds;
-            this.ignoreAndroidLineNumbers = ignoreAndroidLineNumbers;
+        public Configuration(int minScore) {
+            this.minScore = minScore;
         }
 
-        public boolean matchByMessage() {
-            return matchByMessage;
-        }
-
-        public boolean ignoreInstanceIds() {
-            return ignoreInstanceIds;
-        }
-
-        public boolean ignoreAndroidLineNumbers() {
-            return ignoreAndroidLineNumbers;
+        public int getMinScore() {
+            return minScore;
         }
     }
 }

@@ -485,6 +485,7 @@ databaseChangeLog:
     author: lukas
     validCheckSum:
     - 7:d4d705882f587123182e03aeae66f7b7
+    - 7:5becb08fe98c36e5642e91a6492aac92
     changes:
     - createTable:
         tableName: stacktrace
@@ -501,8 +502,8 @@ databaseChangeLog:
             type: INT
             constraints:
               nullable: false
-              referencedTablename: bug
-              referencedColumnName: id
+              referencedTableName: bug
+              referencedColumnNames: id
               foreignKeyName: FK_stacktrace_bug
               deleteCascade: true
               deferrable: false
@@ -563,3 +564,70 @@ databaseChangeLog:
     - dropColumn:
         tableName: report
         columnName: bug_id
+- changeSet:
+    id: 2018-07-28-switch-to-fuzzy-bug-auto-merge
+    author: lukas
+    changes:
+    - dropColumn:
+        tableName: app
+        columnName: ignore_android_line_numbers
+    - dropColumn:
+        tableName: app
+        columnName: ignore_instance_ids
+    - dropColumn:
+        tableName: app
+        columnName: match_by_message
+    - addColumn:
+        tableName: app
+        columns:
+        - column:
+            name: min_score
+            type: INT
+            defaultValueNumeric: 95
+            constraints:
+              nullable: false
+    - createTable:
+        tableName: stacktrace_match
+        columns:
+        - column:
+            name: left_id
+            type: INT
+            constraints:
+              nullable: false
+              referencedTableName: stacktrace
+              referencedColumnNames: id
+              foreignKeyName: FK_match_left_stacktrace
+              deleteCascade: true
+              deferrable: false
+              initiallyDeferred: false
+        - column:
+            name: right_id
+            type: INT
+            constraints:
+              nullable: false
+              referencedTableName: stacktrace
+              referencedColumnNames: id
+              foreignKeyName: FK_match_right_stacktrace
+              deleteCascade: true
+              deferrable: false
+              initiallyDeferred: false
+        - column:
+            name: score
+            type: INT
+            constraints:
+              nullable: false
+- changeSet:
+    id: 2018-08-24-fix-permission-key
+    author: lukas
+    validCheckSum:
+    - 7:eb8588c3140f88c4e61d82d6fbe06846
+    changes:
+    - addNotNullConstraint:
+        columnName: app_id
+        tableName: user_permissions
+        columnDataType: INT
+    - addPrimaryKey:
+        columnNames: user_username, app_id
+        tableName: user_permissions
+        constraintName: PK_user_permissions
+

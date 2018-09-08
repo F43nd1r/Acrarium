@@ -69,10 +69,10 @@ public class RestReportInterfaceTest {
     @Autowired MockMvc mvc;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         App app = mock(App.class);
         when(dataService.findApp(TEST_STRING)).thenReturn(Optional.of(app));
-        when(dataService.getFromReports(any(), any(), any())).thenReturn(Arrays.asList("{\"name\":\"a\"}", "{\"name\":\"b\"}"));
+        when(dataService.getFromReports(any(), any(), any(), any())).thenReturn(Arrays.asList("{\"name\":\"a\"}", "{\"name\":\"b\"}"));
     }
 
     @Test
