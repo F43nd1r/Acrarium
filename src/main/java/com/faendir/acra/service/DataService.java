@@ -63,6 +63,7 @@ import javax.persistence.EntityManager;
 import javax.validation.constraints.Size;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
@@ -71,7 +72,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -443,7 +443,7 @@ public class DataService implements Serializable {
             if (!id.startsWith("_design")) {
                 total++;
                 try {
-                    JSONObject report = new JSONObject(IOUtils.toString(db.getAsStream(id)));
+                    JSONObject report = new JSONObject(IOUtils.toString(db.getAsStream(id), StandardCharsets.UTF_8));
                     fixStringIsArray(report, ReportField.STACK_TRACE);
                     fixStringIsArray(report, ReportField.LOGCAT);
                     createNewReport(user.getUsername(), report.toString(), Collections.emptyList());

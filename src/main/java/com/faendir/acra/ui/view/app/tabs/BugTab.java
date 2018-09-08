@@ -17,6 +17,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -76,23 +77,24 @@ public class BugTab extends AppTab<VerticalLayout> {
         header.add(merge, hideSolved);
         header.setSpacing(false);
         header.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        bugs.addColumn(VBug::getReportCount,QReport.report.count(), "Reports").setFlexGrow(0);
-        bugs.addColumn(new TimeSpanRenderer<>(VBug::getLastReport), QReport.report.date.max(), "Latest Report").setFlexGrow(0);
-        bugs.addColumn(VBug::getHighestVersionCode, QReport.report.stacktrace.versionCode.max(), "Latest Version").setFlexGrow(0);
-        bugs.addColumn(VBug::getUserCount, QReport.report.installationId.countDistinct(), "Affected Users").setFlexGrow(0);
+        bugs.addColumn(VBug::getReportCount,QReport.report.count(), "Reports");
+        bugs.addColumn(new TimeSpanRenderer<>(VBug::getLastReport), QReport.report.date.max(), "Latest Report");
+        bugs.addColumn(VBug::getHighestVersionCode, QReport.report.stacktrace.version.code.max(), "Latest Version");
+        bugs.addColumn(VBug::getUserCount, QReport.report.installationId.countDistinct(), "Affected Users");
         bugs.addColumn(bug -> bug.getBug().getTitle(), QBug.bug.title, "Title").setFlexGrow(1);
         bugs.addColumn(new ComponentRenderer<>(bug -> {
             Checkbox checkbox = new Checkbox(bug.getBug().isSolved());
             checkbox.setEnabled(SecurityUtils.hasPermission(app, Permission.Level.EDIT));
             checkbox.addValueChangeListener(e -> getDataService().setBugSolved(bug.getBug(), e.getValue()));
             return checkbox;
-        }), QBug.bug.solved, "Solved").setFlexGrow(0);
+        }), QBug.bug.solved, "Solved");
         bugs.addColumn(new ComponentRenderer<>(bug -> {
             Anchor anchor = new Anchor();
             anchor.setHref(UI.getCurrent().getRouter().getUrl(BugView.class, bug.getBug().getId()));
-            anchor.setText("Open");
+            anchor.add(VaadinIcon.EXTERNAL_LINK.create());
             return anchor;
         }), "");
+        getContent().removeAll();
         getContent().add(bugs);
         getContent().setFlexGrow(1, bugs);
         getContent().setSizeFull();

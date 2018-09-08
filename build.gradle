@@ -81,7 +81,7 @@ dependencies {
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
     //vaadin
     compile "com.vaadin:vaadin-spring-boot-starter:${vaadin.version}"
-    compile 'com.vaadin:vaadin-icons:3.0.1'
+    compile 'com.vaadin:vaadin-icons-flow:1.0.3'
     compile 'org.jfree:jfreechart:1.5.0'
     compile 'javax.servlet:javax.servlet-api:3.1.0'
     compile 'org.vaadin.addons:stepper:2.4.0'

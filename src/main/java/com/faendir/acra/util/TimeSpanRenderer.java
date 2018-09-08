@@ -20,20 +20,20 @@ import com.vaadin.flow.data.renderer.BasicRenderer;
 import com.vaadin.flow.function.ValueProvider;
 import org.xbib.time.pretty.PrettyTime;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Locale;
 
 /**
  * @author Lukas
  * @since 26.05.2017
  */
-public class TimeSpanRenderer<T> extends BasicRenderer<T, LocalDateTime> {
-    public TimeSpanRenderer(ValueProvider<T, LocalDateTime> valueProvider) {
+public class TimeSpanRenderer<T> extends BasicRenderer<T, ZonedDateTime> {
+    public TimeSpanRenderer(ValueProvider<T, ZonedDateTime> valueProvider) {
         super(valueProvider);
     }
 
     @Override
-    protected String getFormattedValue(LocalDateTime object) {
-        return new PrettyTime(Locale.US).formatUnrounded(object);
+    protected String getFormattedValue(ZonedDateTime object) {
+        return object != null ? new PrettyTime(Locale.US).formatUnrounded(object.toLocalDateTime()) : "";
     }
 }
