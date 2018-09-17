@@ -14,7 +14,6 @@ import java.util.Optional;
  * @since 14.07.18
  */
 public abstract class AppTab<T extends Component> extends Composite<T> implements SecurityAwareHasUrlParameter {
-
     private final DataService dataService;
 
     public AppTab(DataService dataService) {
@@ -26,7 +25,7 @@ public abstract class AppTab<T extends Component> extends Composite<T> implement
     }
 
     @Override
-    public void setParameterSecure(BeforeEvent event, Integer parameter){
+    public void setParameterSecure(BeforeEvent event, Integer parameter) {
         Optional<App> app = dataService.findApp(parameter);
         if (app.isPresent()) {
             init(app.get());
@@ -36,6 +35,4 @@ public abstract class AppTab<T extends Component> extends Composite<T> implement
     }
 
     abstract void init(App app);
-
-
 }

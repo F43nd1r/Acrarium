@@ -1,14 +1,16 @@
 package com.faendir.acra.ui.view.app.tabs;
 
 import com.faendir.acra.model.App;
+import com.faendir.acra.service.AvatarService;
 import com.faendir.acra.service.DataService;
+import com.faendir.acra.ui.base.ReportList;
 import com.faendir.acra.ui.view.app.AppView;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 
 /**
  * @author lukas
@@ -18,14 +20,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 @SpringComponent
 @Route(value = "report", layout = AppView.class)
 public class ReportTab extends AppTab<VerticalLayout> {
+    @NonNull private final AvatarService avatarService;
 
     @Autowired
-    public ReportTab(DataService dataService) {
+    public ReportTab(@NonNull DataService dataService, @NonNull AvatarService avatarService) {
         super(dataService);
+        this.avatarService = avatarService;
     }
 
     @Override
     void init(App app) {
-        getContent().add(new Text("Hello2"));
+        getContent().removeAll();
+        getContent().add(new ReportList(app, getDataService().getReportProvider(app), avatarService, getDataService()::delete));
     }
 }
