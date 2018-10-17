@@ -12,12 +12,9 @@ import com.faendir.acra.ui.base.popup.Popup;
 import com.faendir.acra.ui.view.app.AppView;
 import com.faendir.acra.ui.view.bug.BugView;
 import com.faendir.acra.util.TimeSpanRenderer;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -88,12 +85,7 @@ public class BugTab extends AppTab<VerticalLayout> {
             checkbox.addValueChangeListener(e -> getDataService().setBugSolved(bug.getBug(), e.getValue()));
             return checkbox;
         }), QBug.bug.solved, "Solved");
-        bugs.addColumn(new ComponentRenderer<>(bug -> {
-            Anchor anchor = new Anchor();
-            anchor.setHref(UI.getCurrent().getRouter().getUrl(BugView.class, bug.getBug().getId()));
-            anchor.add(VaadinIcon.EXTERNAL_LINK.create());
-            return anchor;
-        }), "");
+        bugs.addOnClickNavigation(BugView.class, bug -> bug.getBug().getId());
         getContent().removeAll();
         getContent().add(bugs);
         getContent().setFlexGrow(1, bugs);

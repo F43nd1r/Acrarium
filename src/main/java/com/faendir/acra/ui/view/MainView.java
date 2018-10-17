@@ -7,15 +7,11 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
@@ -41,10 +37,14 @@ public class MainView extends ParentLayout {
     @Autowired
     public MainView(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
-        setSizeFull();
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
+        setSizeFull();
+        getStyle().set("flex-direction","column");
         layout = new ParentLayout();
+        layout.setWidth("100%");
+        expand(layout);
+        layout.getStyle().set("overflow","hidden");
         setRouterRoot(layout);
         if (SecurityUtils.isLoggedIn()) {
             showMain();
@@ -54,27 +54,16 @@ public class MainView extends ParentLayout {
     }
 
     private void showMain() {
-        HorizontalLayout header = new HorizontalLayout();
-        HorizontalLayout footer = new HorizontalLayout(new Text("Acrarium is developed by"),
+        Div header = new Div(new Text("Dummy header"));
+        Div footer = new Div(new Text("Acrarium is developed by "),
                 new Anchor("https://github.com/F43nd1r", "F43nd1r"),
-                new Span(". "),
+                new Text(". "),
                 new Anchor("https://github.com/F43nd1r/acra-backend", "Code"),
-                new Span(" is licensed under "),
+                new Text(" is licensed under "),
                 new Anchor("https://github.com/F43nd1r/acra-backend/blob/master/LICENSE", "Apache License v2"),
-                new Span("."));
-        footer.setAlignItems(Alignment.CENTER);
-        footer.setSpacing(true);
-        VerticalLayout root = new VerticalLayout(header, layout, footer);
-        if (layout.getContent() instanceof BeforeEnterObserver) {
-            ((BeforeEnterObserver) layout.getContent()).beforeEnter(new BeforeEnterEvent(getUI().get().getRouter(),
-                    NavigationTrigger.PROGRAMMATIC,
-                    null,
-                    layout.getContent().getClass(),
-                    getUI().get()));
-        }
-        root.expand(layout);
-        root.setSizeFull();
-        setContent(root);
+                new Text("."));
+        removeAll();
+        add(header, layout, footer);
     }
 
     private void showLogin() {

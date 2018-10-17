@@ -393,7 +393,7 @@ public class DataService implements Serializable {
 
     @NonNull
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public <T> Map<T, Long> countReports(@NonNull App app, @NonNull Predicate where, @NonNull Expression<T> select) {
+    public <T> Map<T, Long> countReports(@NonNull App app, @Nullable Predicate where, @NonNull Expression<T> select) {
         List<Tuple> result = ((JPAQuery<?>) new JPAQuery<>(entityManager)).from(report)
                 .where(report.stacktrace.bug.app.eq(app).and(where))
                 .groupBy(select)

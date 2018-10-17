@@ -9,6 +9,7 @@ import com.faendir.acra.ui.base.MyGrid;
 import com.faendir.acra.ui.view.app.tabs.BugTab;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -35,10 +36,11 @@ public class Overview extends VerticalLayout implements ComponentEventListener<A
     public void onComponentEvent(AttachEvent event) {
         removeAll();
         MyGrid<VApp> grid = new MyGrid<>(dataService.getAppProvider());
+        grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.addColumn(VApp::getName, QApp.app.name, "Name");
         grid.addColumn(VApp::getBugCount, QBug.bug.countDistinct(), "Bugs");
         grid.addColumn(VApp::getReportCount, QReport.report.count(), "Reports");
-        grid.addSelectionListener(e -> e.getFirstSelectedItem().ifPresent(app -> getUI().ifPresent(ui -> ui.navigate(BugTab.class, app.getApp().getId()))));
+        grid.addOnClickNavigation(BugTab.class, VApp::getId);
         setSizeFull();
         add(grid);
     }

@@ -12,10 +12,8 @@ import com.faendir.acra.ui.view.report.ReportView;
 import com.faendir.acra.util.TimeSpanRenderer;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -45,11 +43,6 @@ public class ReportList extends MyGrid<Report>{
                         getDataProvider().refreshAll();
                     }, true).show())), "");
         }
-        addColumn(new ComponentRenderer<>(report -> {
-            Anchor anchor = new Anchor();
-            anchor.setHref(UI.getCurrent().getRouter().getUrl(ReportView.class, report.getId()));
-            anchor.add(VaadinIcon.EXTERNAL_LINK.create());
-            return anchor;
-        }), "");
+        addOnClickNavigation(ReportView.class, Report::getId);
     }
 }

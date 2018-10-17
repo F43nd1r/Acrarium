@@ -20,7 +20,6 @@ public class ParentLayout extends FlexLayout implements RouterLayout {
 
     public ParentLayout() {
         this.routerRoot = this;
-        setSizeFull();
     }
 
     private void setContent(HasElement content, HasElement root) {

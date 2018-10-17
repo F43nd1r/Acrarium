@@ -2,15 +2,20 @@ package com.faendir.acra.ui.base;
 
 import com.faendir.acra.dataprovider.QueryDslDataProvider;
 import com.querydsl.core.types.Expression;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.shared.Registration;
 import org.springframework.lang.NonNull;
 
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * @author lukas
@@ -56,6 +61,14 @@ public class MyGrid<T> extends Composite<Grid<T>> {
         column.setId(dataProvider.addSortable(sort));
         column.setSortable(true);
         return column;
+    }
+
+    public Registration addItemClickListener(ComponentEventListener<ItemClickEvent<T>> listener) {
+        return getContent().addItemClickListener(listener);
+    }
+
+    public <C extends Component & HasUrlParameter<R>, R> void addOnClickNavigation(Class<C> target, Function<T, R> parameterTransformer) {
+        getContent().addItemClickListener(e -> getUI().ifPresent(e.getButton() == 1 ? (ui -> ui.getPage().executeJavaScript("window.open(\"" + ui.getRouter().getUrl(target, parameterTransformer.apply(e.getItem())) + "\", \"blank\", \"\");")) : (ui -> ui.navigate(target, parameterTransformer.apply(e.getItem())))));
     }
 
     public Registration addSelectionListener(SelectionListener<Grid<T>, T> listener) {
