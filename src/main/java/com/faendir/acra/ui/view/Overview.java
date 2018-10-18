@@ -5,7 +5,9 @@ import com.faendir.acra.model.QBug;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.model.view.VApp;
 import com.faendir.acra.service.DataService;
+import com.faendir.acra.ui.base.HasRoute;
 import com.faendir.acra.ui.base.MyGrid;
+import com.faendir.acra.ui.base.Path;
 import com.faendir.acra.ui.view.app.tabs.BugTab;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -23,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @UIScope
 @SpringComponent
 @Route(value = "", layout = MainView.class)
-public class Overview extends VerticalLayout implements ComponentEventListener<AttachEvent> {
+public class Overview extends VerticalLayout implements ComponentEventListener<AttachEvent>, HasRoute {
     private final DataService dataService;
 
     @Autowired
@@ -43,5 +45,15 @@ public class Overview extends VerticalLayout implements ComponentEventListener<A
         grid.addOnClickNavigation(BugTab.class, VApp::getId);
         setSizeFull();
         add(grid);
+    }
+
+    @Override
+    public Path.Element<?> getPathElement() {
+        return new Path.Element<>(getClass(), "Acrarium");
+    }
+
+    @Override
+    public Class<? extends HasRoute> getLogicalParent() {
+        return null;
     }
 }

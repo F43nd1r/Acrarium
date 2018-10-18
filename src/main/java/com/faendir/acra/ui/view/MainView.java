@@ -3,6 +3,7 @@ package com.faendir.acra.ui.view;
 import com.faendir.acra.model.User;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.ui.base.ParentLayout;
+import com.faendir.acra.ui.base.Path;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -16,6 +17,7 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -32,11 +34,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @SpringComponent
 public class MainView extends ParentLayout {
     private final AuthenticationManager authenticationManager;
+    private final ApplicationContext applicationContext;
     private ParentLayout layout;
 
     @Autowired
-    public MainView(AuthenticationManager authenticationManager) {
+    public MainView(AuthenticationManager authenticationManager, ApplicationContext applicationContext) {
         this.authenticationManager = authenticationManager;
+        this.applicationContext = applicationContext;
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
         setSizeFull();
@@ -54,7 +58,7 @@ public class MainView extends ParentLayout {
     }
 
     private void showMain() {
-        Div header = new Div(new Text("Dummy header"));
+        Div header = new Div(new Path(applicationContext));
         Div footer = new Div(new Text("Acrarium is developed by "),
                 new Anchor("https://github.com/F43nd1r", "F43nd1r"),
                 new Text(". "),
