@@ -25,6 +25,7 @@ import com.querydsl.sql.SQLExpressions;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -43,7 +44,7 @@ import java.util.function.Function;
  * @author lukas
  * @since 01.06.18
  */
-class Property<F, C extends Component & HasValue<?, F> & HasEnabled & HasSize, T> {
+class Property<F, C extends Component & HasValue<?, F> & HasEnabled & HasSize & HasStyle, T> {
     private final App app;
     private final DataService dataService;
     private final Checkbox checkBox;
@@ -55,7 +56,8 @@ class Property<F, C extends Component & HasValue<?, F> & HasEnabled & HasSize, T
     private Property(App app, C filterComponent, Function<F, BooleanExpression> filter, Chart<T> chart, DataService dataService, Expression<T> select, String filterText) {
         this.app = app;
         this.dataService = dataService;
-        this.checkBox = new Checkbox(filterText);
+        this.checkBox = new Checkbox();
+        checkBox.setLabelAsHtml(filterText);
         this.filterComponent = filterComponent;
         this.filter = filter;
         this.chart = chart;

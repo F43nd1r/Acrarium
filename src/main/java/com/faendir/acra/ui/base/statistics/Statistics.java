@@ -19,8 +19,10 @@ package com.faendir.acra.ui.base.statistics;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.service.DataService;
+import com.faendir.acra.ui.base.Card;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
@@ -49,23 +51,26 @@ public class Statistics extends Composite<FlexLayout> {
         properties = new ArrayList<>();
         FormLayout filterLayout = new FormLayout();
         filterLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 1));
-        filterLayout.setWidth("500px");
+        filterLayout.setWidth("100%");
+        Card card = new Card(filterLayout);
+        card.setHeader(new Text("Filter"));
+        card.setWidth("500px");
 
         TextField dayStepper = new TextField();
         dayStepper.setValue("30");
         Property.Factory factory = new Property.Factory(dataService, baseExpression);
-        properties.add(factory.createAgeProperty(app, QReport.report.date, "Last X Days", "Reports over time"));
-        properties.add(factory.createStringProperty(app, QReport.report.androidVersion, "Android Version", "Reports per Android Version"));
-        properties.add(factory.createStringProperty(app, QReport.report.stacktrace.version.name, "App Version", "Reports per App Version"));
-        properties.add(factory.createStringProperty(app, QReport.report.phoneModel, "Phone Model", "Reports per Phone Model"));
+        properties.add(factory.createAgeProperty(app, QReport.report.date, "Last&nbsp;X&nbsp;Days", "Reports over time"));
+        properties.add(factory.createStringProperty(app, QReport.report.androidVersion, "Android&nbsp;Version", "Reports per Android Version"));
+        properties.add(factory.createStringProperty(app, QReport.report.stacktrace.version.name, "App&nbsp;Version", "Reports per App Version"));
+        properties.add(factory.createStringProperty(app, QReport.report.phoneModel, "Phone&nbsp;Model", "Reports per Phone Model"));
         properties.add(factory.createStringProperty(app, QReport.report.brand, "Brand", "Reports per Brand"));
 
         getContent().getStyle().set("flex-wrap","wrap");
         getContent().setWidth("100%");
         getContent().removeAll();
 
-        getContent().add(filterLayout);
-        getContent().expand(filterLayout);
+        getContent().add(card);
+        getContent().expand(card);
         properties.forEach(property -> property.addTo(filterLayout, getContent()));
 
         Button applyButton = new Button("Apply", e -> update());

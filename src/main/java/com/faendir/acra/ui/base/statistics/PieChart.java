@@ -26,6 +26,9 @@ import org.jfree.data.general.DefaultPieDataset;
 import org.springframework.lang.NonNull;
 
 import java.awt.*;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -34,18 +37,25 @@ import java.util.Map;
  * @since 01.06.18
  */
 class PieChart extends Chart<String> {
+    private static final int MAX_PARTS = 4;
     PieChart(String caption) {
         super(caption);
     }
 
     @Override
     public JFreeChart createChart(@NonNull Map<String, Long> map) {
+        List<Map.Entry<String, Long>> values = new ArrayList<>(map.entrySet());
+        values.sort((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()));
         DefaultPieDataset dataset = new DefaultPieDataset();
-        map.forEach((label, count) -> dataset.insertValue(0, label, count));
-        dataset.sortByKeys(SortOrder.ASCENDING);
+        values.subList(0, Math.min(MAX_PARTS, values.size())).forEach(e -> dataset.insertValue(0, e.getKey(), e.getValue()));
+        dataset.sortByValues(SortOrder.DESCENDING);
+        if (values.size() > MAX_PARTS) {
+            dataset.insertValue(dataset.getItemCount(), "Other", values.subList(MAX_PARTS, values.size()).stream().mapToLong(Map.Entry::getValue).sum());
+        }
         JFreeChart chart = ChartFactory.createPieChart("", dataset, false, false, false);
         chart.setBackgroundPaint(null);
         PiePlot plot = (PiePlot) chart.getPlot();
+        plot.setStartAngle(0);
         plot.setShadowPaint(null);
         plot.setBackgroundAlpha(0);
         plot.setOutlineVisible(false);
@@ -57,7 +67,7 @@ class PieChart extends Chart<String> {
         plot.setLabelFont(Statistics.LABEL_FONT);
         plot.setLabelLinkPaint(foregroundColor);
         plot.setLabelLinkStyle(PieLabelLinkStyle.QUAD_CURVE);
-        plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0} ({2})"));
+        plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0} ({2})", NumberFormat.getNumberInstance(), new DecimalFormat("0.0%")));
         //noinspection unchecked
         ((List<String>) dataset.getKeys()).forEach(key -> plot.setExplodePercent(key, 0.01));
         return chart;
