@@ -90,4 +90,8 @@ public class MyGrid<T> extends Composite<Grid<T>> {
     public Set<T> getSelectedItems() {
         return getContent().getSelectedItems();
     }
+
+    public void setHeightToRows() {
+        getContent().setHeightByRows(true);
+    }
 }

@@ -4,6 +4,7 @@ import com.faendir.acra.model.App;
 import com.faendir.acra.ui.base.ActiveChildAware;
 import com.faendir.acra.ui.base.ParentLayout;
 import com.faendir.acra.ui.view.MainView;
+import com.faendir.acra.ui.view.app.tabs.AdminTab;
 import com.faendir.acra.ui.view.app.tabs.AppTab;
 import com.faendir.acra.ui.view.app.tabs.BugTab;
 import com.faendir.acra.ui.view.app.tabs.ReportTab;
@@ -53,7 +54,8 @@ public class AppView extends ParentLayout implements ActiveChildAware<AppTab<?>,
     private enum TabDef {
         BUG("Bug", BugTab.class),
         REPORT("Report", ReportTab.class),
-        STATISTICS("Statistics", StatisticsTab.class);
+        STATISTICS("Statistics", StatisticsTab.class),
+        ADMIN("Admin", AdminTab.class);
         private String label;
         private Class<? extends AppTab<?>> tabClass;
 
