@@ -119,8 +119,8 @@ public class AdminTab extends AppTab<FlexLayout> {
         download.add(new Button("Download"));
         download.setSizeFull();
         Card exportCard = new Card(mailBox, idBox, download);
-        mappingCard.setHeader(new Text("Export"));
-        mappingCard.setWidth("500px");
+        exportCard.setHeader(new Text("Export"));
+        exportCard.setWidth("500px");
         getContent().add(exportCard);
         getContent().expand(exportCard);
 
