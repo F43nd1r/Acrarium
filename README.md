@@ -1,3 +1,7 @@
+<h1 align=center>
+<img src="logo/1024 blue logotype.svg" width=50%>
+</h1>
+
 [![Build Status](https://travis-ci.org/F43nd1r/Acrarium.svg?branch=master)](https://travis-ci.org/F43nd1r/Acrarium)
 
 # Acrarium (formerly Acra-backend)
