@@ -1,15 +1,16 @@
 package com.faendir.acra.ui.view.app;
 
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
 import com.faendir.acra.ui.base.ActiveChildAware;
 import com.faendir.acra.ui.base.ParentLayout;
+import com.faendir.acra.ui.component.Tab;
 import com.faendir.acra.ui.view.MainView;
 import com.faendir.acra.ui.view.app.tabs.AdminTab;
 import com.faendir.acra.ui.view.app.tabs.AppTab;
 import com.faendir.acra.ui.view.app.tabs.BugTab;
 import com.faendir.acra.ui.view.app.tabs.ReportTab;
 import com.faendir.acra.ui.view.app.tabs.StatisticsTab;
-import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.RoutePrefix;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -32,11 +33,11 @@ public class AppView extends ParentLayout implements ActiveChildAware<AppTab<?>,
 
     @Autowired
     public AppView() {
-        tabs = new Tabs(Stream.of(TabDef.values()).map(def -> new Tab(def.label)).toArray(Tab[]::new));
+        tabs = new Tabs(Stream.of(TabDef.values()).map(def -> new Tab(def.labelId)).toArray(Tab[]::new));
         tabs.addSelectedChangeListener(e -> getUI().ifPresent(ui -> ui.navigate(TabDef.values()[e.getSource().getSelectedIndex()].tabClass, app.getId())));
         setSizeFull();
         ParentLayout content = new ParentLayout();
-        content.setWidth("100%");
+        content.setWidthFull();
         expand(content);
         content.getStyle().set("overflow","auto");
         setRouterRoot(content);
@@ -52,15 +53,15 @@ public class AppView extends ParentLayout implements ActiveChildAware<AppTab<?>,
     }
 
     private enum TabDef {
-        BUG("Bug", BugTab.class),
-        REPORT("Report", ReportTab.class),
-        STATISTICS("Statistics", StatisticsTab.class),
-        ADMIN("Admin", AdminTab.class);
-        private String label;
+        BUG(Messages.BUGS, BugTab.class),
+        REPORT(Messages.REPORTS, ReportTab.class),
+        STATISTICS(Messages.STATISTICS, StatisticsTab.class),
+        ADMIN(Messages.ADMIN, AdminTab.class);
+        private String labelId;
         private Class<? extends AppTab<?>> tabClass;
 
-        TabDef(String label, Class<? extends AppTab<?>> tabClass) {
-            this.label = label;
+        TabDef(String labelId, Class<? extends AppTab<?>> tabClass) {
+            this.labelId = labelId;
             this.tabClass = tabClass;
         }
     }

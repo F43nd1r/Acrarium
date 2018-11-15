@@ -1,8 +1,8 @@
 package com.faendir.acra.ui.base;
 
+import com.faendir.acra.ui.component.HasSize;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.html.Div;
 

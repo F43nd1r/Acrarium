@@ -38,8 +38,8 @@ import java.util.Map;
  */
 class PieChart extends Chart<String> {
     private static final int MAX_PARTS = 4;
-    PieChart(String caption) {
-        super(caption);
+    PieChart(@NonNull String captionId, @NonNull Object... params) {
+        super(captionId, params);
     }
 
     @Override

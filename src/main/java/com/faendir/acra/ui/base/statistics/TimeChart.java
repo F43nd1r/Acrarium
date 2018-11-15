@@ -37,8 +37,8 @@ import java.util.Map;
  * @since 01.06.18
  */
 class TimeChart extends Chart<Date> {
-    TimeChart(String caption) {
-        super(caption);
+    TimeChart(@NonNull String captionId, @NonNull Object... params) {
+        super(captionId, params);
     }
 
     @Override

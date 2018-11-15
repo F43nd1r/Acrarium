@@ -16,9 +16,10 @@
 
 package com.faendir.acra.ui.base.popup;
 
+import com.faendir.acra.i18n.Messages;
+import com.faendir.acra.ui.component.Translatable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -39,7 +40,7 @@ import java.util.function.Consumer;
 public class Popup extends Dialog {
     private final List<Component> components;
     private final Map<ValidatedField<?, ?>, Pair<Boolean, ValidatedField.Listener>> fields;
-    private final List<Button> buttons;
+    private final List<Translatable<Button>> buttons;
 
     public Popup() {
         components = new ArrayList<>();
@@ -48,8 +49,8 @@ public class Popup extends Dialog {
     }
 
     @NonNull
-    public Popup setTitle(@NonNull String title) {
-        components.add(0, new Text(title));
+    public Popup setTitle(@NonNull String titleId, Object... params) {
+        components.add(0, Translatable.createText(titleId, params));
         return this;
     }
 
@@ -60,18 +61,18 @@ public class Popup extends Dialog {
 
     @NonNull
     public Popup addCreateButton(@NonNull Consumer<Popup> onCreateAction, boolean closeAfter) {
-        buttons.add(new Button("Create", event -> {
+        buttons.add(Translatable.createButton(event -> {
             onCreateAction.accept(this);
             if (closeAfter) {
                 close();
             }
-        }));
+        }, Messages.CREATE));
         return this;
     }
 
     @NonNull
     public Popup addCloseButton() {
-        buttons.add(new Button("Close", event -> close()));
+        buttons.add(Translatable.createButton(event -> close(), Messages.CLOSE));
         return this;
     }
 
@@ -82,13 +83,13 @@ public class Popup extends Dialog {
 
     @NonNull
     public Popup addYesNoButtons(@NonNull Consumer<Popup> onYesAction, boolean closeAfter) {
-        buttons.add(new Button("Yes", event -> {
+        buttons.add(Translatable.createButton(event -> {
             onYesAction.accept(this);
             if (closeAfter) {
                 close();
             }
-        }));
-        buttons.add(new Button("No", event -> close()));
+        }, Messages.YES));
+        buttons.add(Translatable.createButton(event -> close(), Messages.NO));
         return this;
     }
 
@@ -129,7 +130,7 @@ public class Popup extends Dialog {
             HorizontalLayout buttonLayout = new HorizontalLayout();
             components.add(buttonLayout);
             buttons.forEach(buttonLayout::add);
-            buttons.forEach(button -> button.setWidth("100%"));
+            buttons.forEach(com.faendir.acra.ui.component.HasSize::setWidthFull);
         }
         components.forEach(component -> {
             if(component instanceof HasSize) {
@@ -148,6 +149,6 @@ public class Popup extends Dialog {
 
     private void checkValid() {
         boolean valid = fields.values().stream().map(Pair::getFirst).reduce(Boolean::logicalAnd).orElse(true);
-        buttons.forEach(button -> button.setEnabled(valid));
+        buttons.forEach(button -> button.getContent().setEnabled(valid));
     }
 }

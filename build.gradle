@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 plugins {
     id 'java'
     id 'idea'
     id 'war'
-    id 'org.springframework.boot' version '2.0.5.RELEASE'
-    id 'com.devsoap.vaadin-flow' version '1.0.0.M6'
+    id 'org.springframework.boot' version '2.1.0.RELEASE'
+    id 'com.devsoap.vaadin-flow' version '1.0.0.RC2'
     id 'io.spring.dependency-management' version '1.0.6.RELEASE'
     id 'cn.bestwu.propdeps' version '0.0.10'
 }
 
 vaadin {
-    version '12.0.0.alpha3'
+    version '12.0.0.beta1'
+    submitStatistics false
 }
 
 repositories {
@@ -68,12 +68,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.liquibase:liquibase-core'
     implementation 'org.yaml:snakeyaml'
-    optional 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
     def queryDslVersion = '4.2.1'
     implementation "com.querydsl:querydsl-jpa:$queryDslVersion"
     implementation "com.querydsl:querydsl-sql:$queryDslVersion"
-    implementation "com.querydsl:querydsl-apt:$queryDslVersion:jpa"
+    annotationProcessor "com.querydsl:querydsl-apt:$queryDslVersion:jpa"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
     //vaadin
     implementation vaadin.bom()
@@ -83,7 +83,7 @@ dependencies {
     implementation 'com.vaadin:vaadin-grid-flow:2.1.0.alpha1'
     implementation 'org.jfree:jfreechart:1.5.0'
     implementation 'org.apache.xmlgraphics:batik-svggen:1.7'
-    implementation 'javax.servlet:javax.servlet-api:3.1.0'
+    implementation 'javax.servlet:javax.servlet-api:4.0.1'
     //utility
     implementation 'org.codeartisans:org.json:20161124'
     implementation 'org.apache.commons:commons-text:1.4'
@@ -109,6 +109,15 @@ war {
     version = version
     enabled = true
 }
+
+task generateMessageClasses(type: com.faendir.acra.gradle.I18nClassGenerator) {
+    inputDirectory file('src/main/resources/i18n/com/faendir/acra')
+    outputDirectory file("$generated/faendir/java")
+    packageName 'com.faendir.acra.i18n'
+    className 'Messages'
+}
+
+compileJava.dependsOn(generateMessageClasses)
 
 test {
     testLogging {

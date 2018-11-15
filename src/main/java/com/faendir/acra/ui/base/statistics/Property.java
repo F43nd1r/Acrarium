@@ -17,6 +17,7 @@ package com.faendir.acra.ui.base.statistics;
 
 import com.faendir.acra.model.App;
 import com.faendir.acra.service.DataService;
+import com.faendir.acra.ui.component.Translatable;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
@@ -47,25 +48,24 @@ import java.util.function.Function;
 class Property<F, C extends Component & HasValue<?, F> & HasEnabled & HasSize & HasStyle, T> {
     private final App app;
     private final DataService dataService;
-    private final Checkbox checkBox;
+    private final Translatable<Checkbox> checkBox;
     private final C filterComponent;
     private final Function<F, BooleanExpression> filter;
     private final Chart<T> chart;
     private final Expression<T> select;
 
-    private Property(App app, C filterComponent, Function<F, BooleanExpression> filter, Chart<T> chart, DataService dataService, Expression<T> select, String filterText) {
+    private Property(App app, C filterComponent, Function<F, BooleanExpression> filter, Chart<T> chart, DataService dataService, Expression<T> select, String filterTextId, Object... params) {
         this.app = app;
         this.dataService = dataService;
-        this.checkBox = new Checkbox();
-        checkBox.setLabelAsHtml(filterText);
+        this.checkBox = Translatable.createCheckbox(false, filterTextId, params);
+        checkBox.preventWhiteSpaceBreaking();
         this.filterComponent = filterComponent;
         this.filter = filter;
         this.chart = chart;
         this.select = select;
         filterComponent.setEnabled(false);
         filterComponent.setWidth("100%");
-        checkBox.setValue(false);
-        checkBox.addValueChangeListener(e -> filterComponent.setEnabled(e.getValue()));
+        checkBox.getContent().addValueChangeListener(e -> filterComponent.setEnabled(e.getValue()));
     }
 
     void addTo(FormLayout filterLayout, FlexComponent chartLayout) {
@@ -75,7 +75,7 @@ class Property<F, C extends Component & HasValue<?, F> & HasEnabled & HasSize & 
     }
 
     BooleanExpression applyFilter(@Nullable BooleanExpression expression) {
-        if (checkBox.getValue() && filterComponent.getValue() != null) {
+        if (checkBox.getContent().getValue() && filterComponent.getValue() != null) {
             return filter.apply(filterComponent.getValue()).and(expression);
         }
         return expression;
@@ -94,24 +94,24 @@ class Property<F, C extends Component & HasValue<?, F> & HasEnabled & HasSize & 
             this.expression = expression;
         }
 
-        Property<?, ?, ?> createStringProperty(App app, ComparableExpressionBase<String> stringExpression, String filterText, String chartTitle) {
+        Property<?, ?, ?> createStringProperty(App app, ComparableExpressionBase<String> stringExpression, String filterTextId, String chartTitleId) {
             List<String> list = dataService.getFromReports(app, expression, stringExpression);
             ComboBox<String> comboBox = new ComboBox<>(null, list);
             comboBox.setAllowCustomValue(false);
             comboBox.setRequired(true);
             comboBox.setValue(list.get(0));
-            return new Property<>(app, comboBox, stringExpression::eq, new PieChart(chartTitle), dataService, stringExpression, filterText);
+            return new Property<>(app, comboBox, stringExpression::eq, new PieChart(chartTitleId), dataService, stringExpression, filterTextId);
         }
 
-        Property<?, ?, ?> createAgeProperty(App app, DateTimePath<ZonedDateTime> dateTimeExpression, String filterText, String chartTitle) {
+        Property<?, ?, ?> createAgeProperty(App app, DateTimePath<ZonedDateTime> dateTimeExpression, String filterTextId, String chartTitleId) {
             TextField stepper = new TextField();
             stepper.setValue("30");
             return new Property<>(app, stepper,
                     days -> dateTimeExpression.after(ZonedDateTime.now().minus(Integer.parseInt(days), ChronoUnit.DAYS)),
-                    new TimeChart(chartTitle),
+                    new TimeChart(chartTitleId),
                     dataService,
                     SQLExpressions.date(Date.class, dateTimeExpression),
-                    filterText);
+                    filterTextId);
         }
     }
 }

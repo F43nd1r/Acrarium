@@ -1,5 +1,6 @@
 package com.faendir.acra.ui.view;
 
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.QApp;
 import com.faendir.acra.model.QBug;
 import com.faendir.acra.model.QReport;
@@ -17,6 +18,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 
 /**
  * @author lukas
@@ -39,17 +41,18 @@ public class Overview extends VerticalLayout implements ComponentEventListener<A
         removeAll();
         MyGrid<VApp> grid = new MyGrid<>(dataService.getAppProvider());
         grid.setSelectionMode(Grid.SelectionMode.NONE);
-        grid.addColumn(VApp::getName, QApp.app.name, "Name");
-        grid.addColumn(VApp::getBugCount, QBug.bug.countDistinct(), "Bugs");
-        grid.addColumn(VApp::getReportCount, QReport.report.count(), "Reports");
+        grid.addColumn(VApp::getName, QApp.app.name, Messages.NAME);
+        grid.addColumn(VApp::getBugCount, QBug.bug.countDistinct(), Messages.BUGS);
+        grid.addColumn(VApp::getReportCount, QReport.report.count(), Messages.REPORTS);
         grid.addOnClickNavigation(BugTab.class, VApp::getId);
         setSizeFull();
         add(grid);
     }
 
     @Override
+    @NonNull
     public Path.Element<?> getPathElement() {
-        return new Path.Element<>(getClass(), "Acrarium");
+        return new Path.Element<>(getClass(), Messages.ACRARIUM);
     }
 
     @Override

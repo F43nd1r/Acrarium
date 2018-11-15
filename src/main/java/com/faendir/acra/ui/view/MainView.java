@@ -1,9 +1,11 @@
 package com.faendir.acra.ui.view;
 
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.User;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.ui.base.ParentLayout;
 import com.faendir.acra.ui.base.Path;
+import com.faendir.acra.ui.component.Translatable;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -75,8 +77,8 @@ public class MainView extends ParentLayout {
         loginForm.setSizeUndefined();
         TextField username = new TextField();
         PasswordField password = new PasswordField();
-        Button login = new Button("Login", event -> login(username.getValue(), password.getValue()));
-        login.setWidth("100%");
+        Translatable<Button> login = Translatable.createButton(event -> login(username.getValue(), password.getValue()), Messages.LOGIN);
+        login.setWidthFull();
         loginForm.add(username, password, login);
         setContent(loginForm);
     }
@@ -91,7 +93,7 @@ public class MainView extends ParentLayout {
             SecurityContextHolder.getContext().setAuthentication(token);
             UI.getCurrent().getPage().reload();
         } catch (AuthenticationException ex) {
-            Notification.show("Unknown username/password combination");
+            Notification.show(getTranslation(Messages.LOGIN_FAILED), 5000, Notification.Position.MIDDLE);
         }
     }
 

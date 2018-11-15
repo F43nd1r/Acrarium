@@ -1,5 +1,6 @@
 package com.faendir.acra.ui.view.app.tabs;
 
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Permission;
 import com.faendir.acra.model.ProguardMapping;
@@ -11,19 +12,19 @@ import com.faendir.acra.ui.base.Card;
 import com.faendir.acra.ui.base.ConfigurationLabel;
 import com.faendir.acra.ui.base.MyGrid;
 import com.faendir.acra.ui.base.popup.Popup;
+import com.faendir.acra.ui.component.DownloadButton;
+import com.faendir.acra.ui.component.FlexLayout;
+import com.faendir.acra.ui.component.HasSize;
+import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.view.Overview;
 import com.faendir.acra.ui.view.app.AppView;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Input;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
@@ -58,50 +59,51 @@ public class AdminTab extends AppTab<FlexLayout> {
 
     @Override
     void init(App app) {
-        getContent().getStyle().set("flex-wrap", "wrap");
-        getContent().setWidth("100%");
+        getContent().removeAll();
+        getContent().setFlexWrap(FlexLayout.FLEX_WRAP.WRAP);
+        getContent().setWidthFull();
         MyGrid<ProguardMapping> mappingGrid = new MyGrid<>(getDataService().getMappingProvider(app));
         mappingGrid.setHeightToRows();
-        mappingGrid.addColumn(ProguardMapping::getVersionCode, QProguardMapping.proguardMapping.versionCode, "Version");
+        mappingGrid.addColumn(ProguardMapping::getVersionCode, QProguardMapping.proguardMapping.versionCode, Messages.VERSION);
         Card mappingCard = new Card(mappingGrid);
-        mappingCard.setHeader(new Text("Deobfuscation"));
-        mappingCard.setWidth("500px");
+        mappingCard.setHeader(Translatable.createText(Messages.DE_OBFUSCATION));
+        mappingCard.setWidth(500, HasSize.Unit.PIXEL);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-            mappingGrid.addColumn(new ComponentRenderer<>(mapping -> new Button(new Icon(VaadinIcon.TRASH), e -> new Popup().addComponent(new Text("Are you sure you want to delete the mapping for version " + mapping.getVersionCode() + "?")).addYesNoButtons(p -> {
+            mappingGrid.addColumn(new ComponentRenderer<>(mapping -> new Button(new Icon(VaadinIcon.TRASH), e -> new Popup().addComponent(Translatable.createText(Messages.DELETE_MAPPING_CONFIRM, mapping.getVersionCode())).addYesNoButtons(p -> {
                 getDataService().delete(mapping);
                 mappingGrid.getDataProvider().refreshAll();
-            }, true).show())), "");
-            mappingCard.add(new Button("Add File", e -> {
-                TextField version = new TextField("Version Code", String.valueOf(getDataService().getMaximumMappingVersion(app).map(i -> i + 1).orElse(1)));
+            }, true).show())));
+            mappingCard.add(Translatable.createButton(e -> {
+                Translatable<TextField> version = Translatable.createTextField(String.valueOf(getDataService().getMaximumMappingVersion(app).map(i -> i + 1).orElse(1)), Messages.VERSION_CODE);
                 MemoryBuffer buffer = new MemoryBuffer();
                 Upload upload = new Upload(buffer);
                 new Popup()
-                        .setTitle("New Mapping")
+                        .setTitle(Messages.NEW_MAPPING)
                         .addComponent(version)
                         .addComponent(upload)
                         .addCreateButton(popup -> {
                             try {
-                                getDataService().store(new ProguardMapping(app, Integer.valueOf(version.getValue()), StreamUtils.copyToString(buffer.getInputStream(), Charset.defaultCharset())));
+                                getDataService().store(new ProguardMapping(app, Integer.valueOf(version.getContent().getValue()), StreamUtils.copyToString(buffer.getInputStream(), Charset.defaultCharset())));
                             } catch (Exception ex) {
                                 //TODO
                             }
                             mappingGrid.getDataProvider().refreshAll();
                         }, true)
                         .show();
-            }));
+            }, Messages.NEW_FILE));
         }
         getContent().add(mappingCard);
         getContent().expand(mappingCard);
 
-        ComboBox<String> mailBox = new ComboBox<>("By mail", getDataService().getFromReports(app, null, QReport.report.userEmail));
-        mailBox.setSizeFull();
-        ComboBox<String> idBox = new ComboBox<>("By Id", getDataService().getFromReports(app, null, QReport.report.installationId));
-        idBox.setSizeFull();
-        Anchor download = new Anchor(new StreamResource("reports.json", () -> {
+        Translatable<ComboBox<String>> mailBox = Translatable.createComboBox(getDataService().getFromReports(app, null, QReport.report.userEmail), Messages.BY_MAIL);
+        mailBox.getContent().setSizeFull();
+        Translatable<ComboBox<String>> idBox = Translatable.createComboBox(getDataService().getFromReports(app, null, QReport.report.installationId), Messages.BY_ID);
+        idBox.getContent().setSizeFull();
+        DownloadButton download = new DownloadButton(new StreamResource("reports.json", () -> {
             BooleanExpression where = null;
             String name = "";
-            String mail = mailBox.getValue();
-            String id = idBox.getValue();
+            String mail = mailBox.getContent().getValue();
+            String id = idBox.getContent().getValue();
             if (mail != null && !mail.isEmpty()) {
                 where = report.userEmail.eq(mail).and(where);
                 name += "_" + mail;
@@ -114,21 +116,19 @@ public class AdminTab extends AppTab<FlexLayout> {
                 return new ByteArrayInputStream(new byte[0]);
             }
             return new ByteArrayInputStream(getDataService().getFromReports(app, where, report.content, report.id).stream().collect(Collectors.joining(", ", "[", "]")).getBytes(StandardCharsets.UTF_8));
-        }), "");
-        download.getElement().setAttribute("download", true);
-        download.add(new Button("Download"));
+        }), Messages.DOWNLOAD);
         download.setSizeFull();
         Card exportCard = new Card(mailBox, idBox, download);
-        exportCard.setHeader(new Text("Export"));
-        exportCard.setWidth("500px");
+        exportCard.setHeader(Translatable.createText(Messages.EXPORT));
+        exportCard.setWidth(500, HasSize.Unit.PIXEL);
         getContent().add(exportCard);
         getContent().expand(exportCard);
 
-        Button configButton = new Button("Create new ACRA config", e -> new Popup().addComponent(new Label("Create new ACRA Configuration"))
+        Translatable<Button> configButton = Translatable.createButton(e -> new Popup().setTitle(Messages.NEW_ACRA_CONFIG_CONFIRM)
                 .addYesNoButtons(popup -> popup.clear().addComponent(new ConfigurationLabel(getDataService().recreateReporterUser(app))).addCloseButton().show())
-                .show());
-        configButton.setSizeFull();
-        Button matchingButton = new Button("New bug config", e -> {
+                .show(), Messages.NEW_ACRA_CONFIG);
+        configButton.getContent().setSizeFull();
+        Translatable<Button> matchingButton = Translatable.createButton(e -> {
             App.Configuration configuration = app.getConfiguration();
             Input score = new Input();
             score.setType("range");
@@ -136,38 +136,42 @@ public class AdminTab extends AppTab<FlexLayout> {
             score.getElement().setProperty("max", 100);
             score.setValue(String.valueOf(configuration.getMinScore()));
             new Popup().addComponent(score)
-                    .addComponent(new Text("Confirm new bug config"))
+                    .setTitle(Messages.NEW_BUG_CONFIG_CONFIRM)
                     .addYesNoButtons(p -> getDataService().changeConfiguration(app, new App.Configuration(Integer.parseInt(score.getValue()))), true)
                     .show();
-        });
-        matchingButton.setSizeFull();
+        }, Messages.NEW_BUG_CONFIG);
+        matchingButton.getContent().setSizeFull();
         TextField age = new TextField();
         age.setValue("30");
         age.setSizeFull();
         FlexLayout purgeAge = new FlexLayout();
         purgeAge.setSizeFull();
-        purgeAge.add(new Button("Purge", e -> getDataService().deleteReportsOlderThanDays(app, Integer.parseInt(age.getValue()))),
-                new Text("Reports older than"),
-                age);
+        purgeAge.preventWhiteSpaceBreaking();
+        purgeAge.setAlignContent(FlexLayout.ALIGN_CONTENT.CENTER);
+        purgeAge.add(Translatable.createButton(e -> getDataService().deleteReportsOlderThanDays(app, Integer.parseInt(age.getValue())), Messages.PURGE),
+                Translatable.createP(Messages.REPORTS_OLDER_THAN1),
+                age, Translatable.createP(Messages.REPORTS_OLDER_THAN2));
         purgeAge.expand(age);
         ComboBox<Integer> versionBox = new ComboBox<>(null, getDataService().getFromReports(app, null, QReport.report.stacktrace.version.code));
         versionBox.setSizeFull();
         FlexLayout purgeVersion = new FlexLayout();
         purgeVersion.setSizeFull();
-        purgeVersion.add(new Button("Purge", e -> {
+        purgeVersion.preventWhiteSpaceBreaking();
+        purgeVersion.setAlignContent(FlexLayout.ALIGN_CONTENT.CENTER);
+        purgeVersion.add(Translatable.createButton(e -> {
             if (versionBox.getValue() != null) {
                 getDataService().deleteReportsBeforeVersion(app, versionBox.getValue());
             }
-        }), new Text("Reports before version"), versionBox);
+        }, Messages.PURGE), Translatable.createP(Messages.REPORTS_BEFORE_VERSION), versionBox);
         purgeVersion.expand(versionBox);
-        Button deleteButton = new Button("Delete app", e -> new Popup().addComponent(new Text("Confirm delete")).addYesNoButtons(popup -> {
+        Translatable<Button> deleteButton = Translatable.createButton(e -> new Popup().setTitle(Messages.DELETE_APP_CONFIRM).addYesNoButtons(popup -> {
             getDataService().delete(app);
             UI.getCurrent().navigate(Overview.class);
-        }, true).show());
-        deleteButton.setSizeFull();
+        }, true).show(), Messages.DELETE_APP);
+        deleteButton.getContent().setSizeFull();
         Card dangerCard = new Card(configButton, matchingButton, purgeAge, purgeVersion, deleteButton);
-        dangerCard.setHeader(new Text("Danger Zone"));
-        dangerCard.setWidth("500px");
+        dangerCard.setHeader(Translatable.createText(Messages.DANGER_ZONE));
+        dangerCard.setWidth(500, HasSize.Unit.PIXEL);
         getContent().add(dangerCard);
         getContent().expand(dangerCard);
     }

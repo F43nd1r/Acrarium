@@ -16,16 +16,17 @@
 
 package com.faendir.acra.ui.base.statistics;
 
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.base.Card;
+import com.faendir.acra.ui.component.FlexLayout;
+import com.faendir.acra.ui.component.HasSize;
+import com.faendir.acra.ui.component.Translatable;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import org.springframework.lang.Nullable;
 
@@ -53,28 +54,27 @@ public class Statistics extends Composite<FlexLayout> {
         filterLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 1));
         filterLayout.setWidth("100%");
         Card card = new Card(filterLayout);
-        card.setHeader(new Text("Filter"));
-        card.setWidth("500px");
+        card.setHeader(Translatable.createText(Messages.FILTER));
+        card.setWidth(500, HasSize.Unit.PIXEL);
 
         TextField dayStepper = new TextField();
         dayStepper.setValue("30");
         Property.Factory factory = new Property.Factory(dataService, baseExpression);
-        properties.add(factory.createAgeProperty(app, QReport.report.date, "Last&nbsp;X&nbsp;Days", "Reports over time"));
-        properties.add(factory.createStringProperty(app, QReport.report.androidVersion, "Android&nbsp;Version", "Reports per Android Version"));
-        properties.add(factory.createStringProperty(app, QReport.report.stacktrace.version.name, "App&nbsp;Version", "Reports per App Version"));
-        properties.add(factory.createStringProperty(app, QReport.report.phoneModel, "Phone&nbsp;Model", "Reports per Phone Model"));
-        properties.add(factory.createStringProperty(app, QReport.report.brand, "Brand", "Reports per Brand"));
+        properties.add(factory.createAgeProperty(app, QReport.report.date, Messages.LAST_X_DAYS, Messages.REPORTS_OVER_TIME));
+        properties.add(factory.createStringProperty(app, QReport.report.androidVersion, Messages.ANDROID_VERSION, Messages.REPORTS_PER_ANDROID_VERSION));
+        properties.add(factory.createStringProperty(app, QReport.report.stacktrace.version.name, Messages.APP_VERSION, Messages.REPORTS_PER_APP_VERSION));
+        properties.add(factory.createStringProperty(app, QReport.report.phoneModel, Messages.PHONE_MODEL, Messages.REPORTS_PER_PHONE_MODEL));
+        properties.add(factory.createStringProperty(app, QReport.report.brand, Messages.PHONE_BRAND, Messages.REPORTS_PER_BRAND));
 
-        getContent().getStyle().set("flex-wrap","wrap");
-        getContent().setWidth("100%");
+        getContent().setFlexWrap(FlexLayout.FLEX_WRAP.WRAP);
+        getContent().setWidthFull();
         getContent().removeAll();
 
         getContent().add(card);
         getContent().expand(card);
         properties.forEach(property -> property.addTo(filterLayout, getContent()));
 
-        Button applyButton = new Button("Apply", e -> update());
-        filterLayout.add(applyButton);
+        filterLayout.add(Translatable.createButton(e -> update(), Messages.APPLY));
         update();
     }
 

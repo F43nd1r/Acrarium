@@ -1,1 +1,1 @@
-enableFeaturePreview('IMPROVED_POM_SUPPORT')
+include 'buildSrc'

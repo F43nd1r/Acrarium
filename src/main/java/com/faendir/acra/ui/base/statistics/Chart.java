@@ -17,8 +17,9 @@ package com.faendir.acra.ui.base.statistics;
 
 import com.faendir.acra.ui.base.Card;
 import com.faendir.acra.ui.base.JFreeChartWrapper;
+import com.faendir.acra.ui.component.HasSize;
+import com.faendir.acra.ui.component.Translatable;
 import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.Text;
 import org.jfree.chart.JFreeChart;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -31,21 +32,19 @@ import java.util.Map;
  * @since 01.06.18
  */
 abstract class Chart<T> extends Composite<Card> {
-    private final String caption;
     private JFreeChart chart;
 
-    Chart(String caption) {
-        this.caption = caption;
-        getContent().setWidth("500px");
-        getContent().getStyle().set("max-width","100%");
-        getContent().setHeader(new Text(caption));
+    Chart(@NonNull String captionId, @NonNull Object... params) {
+        getContent().setWidth(500, HasSize.Unit.PIXEL);
+        getContent().setMaxWidthFull();
+        getContent().setHeader(Translatable.createText(captionId, params));
     }
 
     public void setContent(@NonNull Map<T, Long> map) {
         chart = createChart(map);
         JFreeChartWrapper content = new JFreeChartWrapper(chart);
         content.setSvgAspectRatio("xMidYMid");
-        content.setWidth("100%");
+        content.setWidthFull();
         getContent().removeAll();
         getContent().add(content);
     }

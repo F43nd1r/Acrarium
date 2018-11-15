@@ -1,5 +1,6 @@
 package com.faendir.acra.ui.view.app.tabs;
 
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.base.ActiveChildAware;
@@ -62,7 +63,7 @@ public abstract class AppTab<T extends Component> extends Composite<T> implement
     @NonNull
     public Path.Element<?> getPathElement() {
         //noinspection unchecked
-        return new Path.ParametrizedElement<>((Class<? extends AppTab<?>>) getClass(), app.getName(), app.getId());
+        return new Path.ParametrizedElement<>((Class<? extends AppTab<?>>) getClass(), app.getId(), Messages.ONE_ARG, app.getName());
     }
 
     @Override
