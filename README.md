@@ -1,6 +1,10 @@
 [![Build Status](https://travis-ci.org/F43nd1r/Acrarium.svg?branch=master)](https://travis-ci.org/F43nd1r/Acrarium)
 
-# Acrarium (formerly Acra-backend)
+<h1 align=center>
+<img src="src/main/webapp/frontend/logo.png" width=50%>
+</h1>
+
+# Acrarium
 A Backend for ACRA written in Java using Spring Boot, Vaadin and MySQL
 
 # Setup
@@ -49,3 +53,7 @@ Binary distributions may contain dependencies licensed under any of the followin
  - [LGPL 2.1](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
  - [EPL 1.0](http://www.eclipse.org/legal/epl-v10.html)
  - [MPL 1.1](https://www.mozilla.org/en-US/MPL/1.1/)
+
+# Credits
+
+ Thanks to [Mirza Zulfan](https://github.com/mirzazulfan) for creating the logo.

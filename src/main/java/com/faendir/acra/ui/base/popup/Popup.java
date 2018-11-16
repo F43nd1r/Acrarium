@@ -141,6 +141,7 @@ public class Popup extends Dialog {
             }
         });
         FormLayout layout = new FormLayout();
+        layout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 1));
         components.forEach(c -> layout.addFormItem(c, ""));
         checkValid();
         removeAll();

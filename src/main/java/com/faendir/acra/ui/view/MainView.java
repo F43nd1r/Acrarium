@@ -5,6 +5,7 @@ import com.faendir.acra.model.User;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.ui.base.ParentLayout;
 import com.faendir.acra.ui.base.Path;
+import com.faendir.acra.ui.base.popup.Popup;
 import com.faendir.acra.ui.component.DropdownMenu;
 import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.Translatable;
@@ -52,11 +53,11 @@ public class MainView extends ParentLayout {
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
         setSizeFull();
-        getStyle().set("flex-direction","column");
+        getStyle().set("flex-direction", "column");
         layout = new ParentLayout();
         layout.setWidth("100%");
         expand(layout);
-        layout.getStyle().set("overflow","hidden");
+        layout.getStyle().set("overflow", "hidden");
         setRouterRoot(layout);
         if (SecurityUtils.isLoggedIn()) {
             showMain();
@@ -77,7 +78,14 @@ public class MainView extends ParentLayout {
         Translatable<Button> logout = Translatable.createButton(e -> logout(), Messages.LOGOUT);
         logout.getElement().setAttribute("theme", "tertiary");
         logout.setDefaultTextStyle();
-        DropdownMenu menu = new DropdownMenu(new FormLayout(darkTheme, userManager, changePassword, logout));
+        Translatable<Button> about = Translatable.createButton(e -> {
+            Div content = new Div();
+            content.getElement().setProperty("innerHTML", getTranslation(Messages.FOOTER));
+            new Popup().addComponent(content).addCloseButton().show();
+        }, Messages.ABOUT);
+        about.getElement().setAttribute("theme", "tertiary");
+        about.setDefaultTextStyle();
+        DropdownMenu menu = new DropdownMenu(new FormLayout(darkTheme, userManager, changePassword, logout, about));
         menu.getStyle().set("margin", "1rem");
         menu.setLabel(SecurityUtils.getUsername());
         menu.setMinWidth(130, Unit.PIXEL);
@@ -86,12 +94,10 @@ public class MainView extends ParentLayout {
         FlexLayout header = new FlexLayout(path, menu);
         header.expand(path);
         header.setWidthFull();
-        header.getStyle().set("box-shadow","0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)");
-        header.getStyle().set("border-radius","2px");
-        Div footer = new Div();
-        footer.getElement().setProperty("innerHTML", getTranslation(Messages.FOOTER));
+        header.getStyle().set("box-shadow", "0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)");
+        header.getStyle().set("border-radius", "2px");
         removeAll();
-        add(header, layout, footer);
+        add(header, layout);
     }
 
     private void showLogin() {
