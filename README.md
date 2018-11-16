@@ -3,8 +3,6 @@
 <h1 align=center>
 <img src="src/main/webapp/frontend/logo.png" width=50%>
 </h1>
-
-# Acrarium
 A Backend for ACRA written in Java using Spring Boot, Vaadin and MySQL
 
 # Setup
