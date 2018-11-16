@@ -63,7 +63,7 @@ public abstract class AppTab<T extends Component> extends Composite<T> implement
     @NonNull
     public Path.Element<?> getPathElement() {
         //noinspection unchecked
-        return new Path.ParametrizedElement<>((Class<? extends AppTab<?>>) getClass(), app.getId(), Messages.ONE_ARG, app.getName());
+        return new Path.ParametrizedTextElement<>((Class<? extends AppTab<?>>) getClass(), app.getId(), Messages.ONE_ARG, app.getName());
     }
 
     @Override

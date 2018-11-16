@@ -20,7 +20,7 @@ import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.base.Card;
+import com.faendir.acra.ui.component.Card;
 import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.HasSize;
 import com.faendir.acra.ui.component.Translatable;
@@ -66,7 +66,7 @@ public class Statistics extends Composite<FlexLayout> {
         properties.add(factory.createStringProperty(app, QReport.report.phoneModel, Messages.PHONE_MODEL, Messages.REPORTS_PER_PHONE_MODEL));
         properties.add(factory.createStringProperty(app, QReport.report.brand, Messages.PHONE_BRAND, Messages.REPORTS_PER_BRAND));
 
-        getContent().setFlexWrap(FlexLayout.FLEX_WRAP.WRAP);
+        getContent().setFlexWrap(FlexLayout.FlexWrap.WRAP);
         getContent().setWidthFull();
         getContent().removeAll();
 

@@ -5,19 +5,25 @@ import com.faendir.acra.model.User;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.ui.base.ParentLayout;
 import com.faendir.acra.ui.base.Path;
+import com.faendir.acra.ui.component.DropdownMenu;
+import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.Translatable;
-import com.vaadin.flow.component.Text;
+import com.faendir.acra.ui.view.user.ChangePasswordView;
+import com.faendir.acra.ui.view.user.UserManager;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
+import com.vaadin.flow.theme.lumo.Lumo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.NonNull;
@@ -60,14 +66,30 @@ public class MainView extends ParentLayout {
     }
 
     private void showMain() {
-        Div header = new Div(new Path(applicationContext));
-        Div footer = new Div(new Text("Acrarium is developed by "),
-                new Anchor("https://github.com/F43nd1r", "F43nd1r"),
-                new Text(". "),
-                new Anchor("https://github.com/F43nd1r/acra-backend", "Code"),
-                new Text(" is licensed under "),
-                new Anchor("https://github.com/F43nd1r/acra-backend/blob/master/LICENSE", "Apache License v2"),
-                new Text("."));
+        Translatable<Checkbox> darkTheme = Translatable.createCheckbox(false, Messages.DARK_THEME);
+        darkTheme.getContent().addValueChangeListener(e -> {
+            UI.getCurrent().getElement().setAttribute("theme", e.getValue() ? Lumo.DARK : Lumo.LIGHT);
+        });
+        Translatable<RouterLink> userManager = Translatable.createRouterLink(UserManager.class, Messages.USER_MANAGER);
+        userManager.setDefaultTextStyle();
+        Translatable<RouterLink> changePassword = Translatable.createRouterLink(ChangePasswordView.class, Messages.CHANGE_PASSWORD);
+        changePassword.setDefaultTextStyle();
+        Translatable<Button> logout = Translatable.createButton(e -> logout(), Messages.LOGOUT);
+        logout.getElement().setAttribute("theme", "tertiary");
+        logout.setDefaultTextStyle();
+        DropdownMenu menu = new DropdownMenu(new FormLayout(darkTheme, userManager, changePassword, logout));
+        menu.getStyle().set("margin", "1rem");
+        menu.setLabel(SecurityUtils.getUsername());
+        menu.setMinWidth(130, Unit.PIXEL);
+        menu.setOrigin(DropdownMenu.Origin.RIGHT);
+        Path path = new Path(applicationContext);
+        FlexLayout header = new FlexLayout(path, menu);
+        header.expand(path);
+        header.setWidthFull();
+        header.getStyle().set("box-shadow","0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)");
+        header.getStyle().set("border-radius","2px");
+        Div footer = new Div();
+        footer.getElement().setProperty("innerHTML", getTranslation(Messages.FOOTER));
         removeAll();
         add(header, layout, footer);
     }

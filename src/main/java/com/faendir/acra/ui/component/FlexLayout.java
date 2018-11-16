@@ -1,5 +1,6 @@
 package com.faendir.acra.ui.component;
 
+import com.vaadin.flow.component.Component;
 import org.springframework.lang.NonNull;
 
 /**
@@ -7,29 +8,23 @@ import org.springframework.lang.NonNull;
  * @since 14.11.18
  */
 public class FlexLayout extends com.vaadin.flow.component.orderedlayout.FlexLayout implements HasSize, HasStyle {
-    public enum FLEX_WRAP {
+    public FlexLayout(Component... components) {
+        super(components);
+    }
+
+    public FlexLayout() {
+    }
+
+    public enum FlexWrap {
         WRAP("wrap");
         private final String value;
 
-        FLEX_WRAP(@NonNull String value) {
+        FlexWrap(@NonNull String value) {
             this.value = value;
         }
     }
 
-    public enum ALIGN_CONTENT {
-        CENTER("center");
-        private final String value;
-
-        ALIGN_CONTENT(String value) {
-            this.value = value;
-        }
-    }
-
-    public void setFlexWrap(FLEX_WRAP flexWrap) {
+    public void setFlexWrap(FlexWrap flexWrap) {
         getStyle().set("flex-wrap", flexWrap.value);
-    }
-
-    public void setAlignContent(ALIGN_CONTENT alignContent){
-        getStyle().set("align-content", alignContent.value);
     }
 }

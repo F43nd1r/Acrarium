@@ -134,7 +134,10 @@ public class Popup extends Dialog {
         }
         components.forEach(component -> {
             if(component instanceof HasSize) {
-                ((HasSize)component).setWidth("100%");
+                try {
+                    ((HasSize)component).setWidth("100%");
+                }catch (UnsupportedOperationException e) {
+                }
             }
         });
         FormLayout layout = new FormLayout();

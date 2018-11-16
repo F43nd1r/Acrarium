@@ -15,7 +15,7 @@
  */
 package com.faendir.acra.ui.base.statistics;
 
-import com.faendir.acra.ui.base.Card;
+import com.faendir.acra.ui.component.Card;
 import com.faendir.acra.ui.base.JFreeChartWrapper;
 import com.faendir.acra.ui.component.HasSize;
 import com.faendir.acra.ui.component.Translatable;

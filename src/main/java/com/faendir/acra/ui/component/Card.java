@@ -1,6 +1,5 @@
-package com.faendir.acra.ui.base;
+package com.faendir.acra.ui.component;
 
-import com.faendir.acra.ui.component.HasSize;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasStyle;
@@ -21,7 +20,7 @@ public class Card extends Composite<Div> implements HasSize, HasStyle {
         header = new Div();
         header.getStyle().set("padding","1rem");
         header.getStyle().set("box-sizing","border-box");
-        header.getStyle().set("background-color","#f3f5f7");
+        header.getStyle().set("background-color","var(--lumo-contrast-5pct)");
         header.setWidth("100%");
         content = new Div();
         content.getStyle().set("padding","1rem");

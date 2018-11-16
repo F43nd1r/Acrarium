@@ -1,15 +1,20 @@
 package com.faendir.acra.ui.base;
 
+import com.faendir.acra.ui.component.FlexLayout;
+import com.faendir.acra.ui.component.HasSize;
 import com.faendir.acra.ui.component.Translatable;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationListener;
 import com.vaadin.flow.router.HasUrlParameter;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.shared.Registration;
 import org.springframework.context.ApplicationContext;
 
@@ -27,6 +32,8 @@ public class Path extends Composite<FlexLayout> implements AfterNavigationListen
 
     public Path(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
+        getContent().setAlignItems(FlexComponent.Alignment.CENTER);
+        getContent().setFlexWrap(FlexLayout.FlexWrap.WRAP);
     }
 
     @Override
@@ -66,21 +73,59 @@ public class Path extends Composite<FlexLayout> implements AfterNavigationListen
             this.params = params;
         }
 
-        public Component toComponent() {
-            return Translatable.createRouterLink(target, titleId, params);
+        protected RouterLink createRouterLink() {
+            return new RouterLink("", target);
         }
+
+        protected Component createContent() {
+            Translatable<Paragraph> p = Translatable.createP(titleId, params);
+            p.setMargin(0, HasSize.Unit.PIXEL);
+            p.getStyle().set("padding-top", "2px");
+            return p;
+        }
+
+        public Component toComponent() {
+            RouterLink routerLink = createRouterLink();
+            Component component = createContent();
+            routerLink.add(component);
+            routerLink.getStyle().set("height", "32px");
+            routerLink.getStyle().set("padding", "1rem");
+            routerLink.getStyle().set("font-size", "130%");
+            routerLink.getStyle().set("text-decoration","none");
+            routerLink.getStyle().set("color","inherit");
+            return routerLink;
+        }
+
     }
 
-    public static class ParametrizedElement<T extends Component & HasUrlParameter<P>, P> extends Element<T> {
+    public static class ParametrizedTextElement<T extends Component & HasUrlParameter<P>, P> extends Element<T> {
         final P parameter;
 
-        public ParametrizedElement(Class<T> target, P parameter, String titleId, Object... params) {
+        public ParametrizedTextElement(Class<T> target, P parameter, String titleId, Object... params) {
             super(target, titleId, params);
             this.parameter = parameter;
         }
 
-        public Component toComponent() {
-            return Translatable.createRouterLink(target, parameter, titleId, params);
+        @Override
+        protected RouterLink createRouterLink() {
+            return new RouterLink("", target, parameter);
         }
     }
+
+    public static class ImageElement<T extends Component> extends Element<T> {
+        private final String src;
+
+        public ImageElement(Class<T> target, String src, String titleId, Object... params) {
+            super(target, titleId, params);
+            this.src = src;
+        }
+
+        @Override
+        protected Component createContent() {
+            Translatable<Image> image = Translatable.createImage(src, titleId, params);
+            image.setMaxHeightFull();
+            return image;
+        }
+    }
+
 }

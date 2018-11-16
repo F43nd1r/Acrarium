@@ -15,6 +15,10 @@ public interface HasSize extends com.vaadin.flow.component.HasSize, HasStyle {
         Unit(String text) {
             this.text = text;
         }
+
+        public String getText() {
+            return text;
+        }
     }
 
     default void setWidthFull() {
@@ -22,15 +26,23 @@ public interface HasSize extends com.vaadin.flow.component.HasSize, HasStyle {
     }
 
     default void setWidth(int value, Unit unit) {
-        setWidth(value + unit.text);
+        setWidth(value + unit.getText());
     }
 
     default void setMaxWidth(int value, Unit unit) {
-        getStyle().set("max-width", value + unit.text);
+        getStyle().set("max-width", value + unit.getText());
     }
 
     default void setMaxWidthFull(){
         setMaxWidth(100, Unit.PERCENTAGE);
+    }
+
+    default void setMinWidth(int value, Unit unit) {
+        getStyle().set("min-width", value + unit.getText());
+    }
+
+    default void setMinWidthFull(){
+        setMinWidth(100, Unit.PERCENTAGE);
     }
 
     default void setHeightFull() {
@@ -38,6 +50,22 @@ public interface HasSize extends com.vaadin.flow.component.HasSize, HasStyle {
     }
 
     default void setHeight(int value, Unit unit) {
-        setHeight(value + unit.text);
+        setHeight(value + unit.getText());
+    }
+
+    default void setMaxHeight(int value, Unit unit) {
+        getStyle().set("max-height", value + unit.getText());
+    }
+
+    default void setMaxHeightFull(){
+        setMaxHeight(100, Unit.PERCENTAGE);
+    }
+
+    default void setMinHeight(int value, Unit unit) {
+        getStyle().set("min-height", value + unit.getText());
+    }
+
+    default void setMinHeightFull(){
+        setMinHeight(100, Unit.PERCENTAGE);
     }
 }

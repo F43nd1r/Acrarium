@@ -91,17 +91,11 @@ public class ResourceBundleI18NProvider implements I18NProvider {
                 if (stream == null) {
                     return null; // Not found
                 }
-                Reader reader = null;
-                try {
-                    reader = new InputStreamReader(stream, encoding);
+                try (Reader reader = new InputStreamReader(stream, encoding)) {
                     return new PropertyResourceBundle(reader);
                 } catch (UnsupportedEncodingException ex) {
                     stream.close();
                     throw ex;
-                } finally {
-                    if (reader != null) {
-                        reader.close();
-                    }
                 }
             } else {
                 return super.newBundle(baseName, locale, format, loader, reload);

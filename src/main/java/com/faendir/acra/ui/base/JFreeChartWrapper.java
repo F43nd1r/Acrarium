@@ -18,7 +18,6 @@ import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
@@ -43,46 +42,43 @@ public class JFreeChartWrapper extends Component implements HasSize, HasStyle {
         this.chart = chartToBeWrapped;
         getElement().setAttribute("type", "image/svg+xml");
         //getElement().getStyle().set("display", "block");
-        getElement().setAttribute("data", new StreamResource("chart" + System.currentTimeMillis() + ".svg", new InputStreamFactory() {
-            @Override
-            public InputStream createInputStream() {
-                int width = getGraphWidth();
-                int height = getGraphHeight();
-                DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder docBuilder;
-                try {
-                    docBuilder = docBuilderFactory.newDocumentBuilder();
-                } catch (ParserConfigurationException e1) {
-                    throw new RuntimeException(e1);
-                }
-                Document document = docBuilder.newDocument();
-                Element svgelem = document.createElement("svg");
-                document.appendChild(svgelem);
-                // Create an instance of the SVG Generator
-                SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
-
-                // draw the chart in the SVG generator
-                chart.draw(svgGenerator, new Rectangle(width, height));
-                Element el = svgGenerator.getRoot();
-                el.setAttributeNS(null, "viewBox", "0 0 " + width + " " + height + "");
-                el.setAttributeNS(null, "style", "width:100%;height:100%;");
-                el.setAttributeNS(null, "preserveAspectRatio", getSvgAspectRatio());
-                // Write svg to buffer
-                try (ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                     Writer out = new OutputStreamWriter(stream, StandardCharsets.UTF_8)) {
-                    /*
-                     * don't use css, FF3 can'd deal with the result perfectly: wrong font sizes
-                     */
-                    boolean useCSS = false;
-                    svgGenerator.stream(el, out, useCSS, false);
-                    stream.flush();
-                    return new ByteArrayInputStream(stream.toByteArray());
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                return null;
+        getElement().setAttribute("data", new StreamResource("chart" + System.currentTimeMillis() + ".svg", (InputStreamFactory) () -> {
+            int width = getGraphWidth();
+            int height = getGraphHeight();
+            DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder;
+            try {
+                docBuilder = docBuilderFactory.newDocumentBuilder();
+            } catch (ParserConfigurationException e1) {
+                throw new RuntimeException(e1);
             }
+            Document document = docBuilder.newDocument();
+            Element svgelem = document.createElement("svg");
+            document.appendChild(svgelem);
+            // Create an instance of the SVG Generator
+            SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+
+            // draw the chart in the SVG generator
+            chart.draw(svgGenerator, new Rectangle(width, height));
+            Element el = svgGenerator.getRoot();
+            el.setAttributeNS(null, "viewBox", "0 0 " + width + " " + height + "");
+            el.setAttributeNS(null, "style", "width:100%;height:100%;");
+            el.setAttributeNS(null, "preserveAspectRatio", getSvgAspectRatio());
+            // Write svg to buffer
+            try (ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                 Writer out = new OutputStreamWriter(stream, StandardCharsets.UTF_8)) {
+                /*
+                 * don't use css, FF3 can'd deal with the result perfectly: wrong font sizes
+                 */
+                boolean useCSS = false;
+                svgGenerator.stream(el, out, useCSS, false);
+                stream.flush();
+                return new ByteArrayInputStream(stream.toByteArray());
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            return null;
         }));
     }
 

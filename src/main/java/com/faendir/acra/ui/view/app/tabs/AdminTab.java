@@ -8,7 +8,7 @@ import com.faendir.acra.model.QProguardMapping;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.base.Card;
+import com.faendir.acra.ui.component.Card;
 import com.faendir.acra.ui.base.ConfigurationLabel;
 import com.faendir.acra.ui.base.MyGrid;
 import com.faendir.acra.ui.base.popup.Popup;
@@ -25,6 +25,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
@@ -60,7 +61,7 @@ public class AdminTab extends AppTab<FlexLayout> {
     @Override
     void init(App app) {
         getContent().removeAll();
-        getContent().setFlexWrap(FlexLayout.FLEX_WRAP.WRAP);
+        getContent().setFlexWrap(FlexLayout.FlexWrap.WRAP);
         getContent().setWidthFull();
         MyGrid<ProguardMapping> mappingGrid = new MyGrid<>(getDataService().getMappingProvider(app));
         mappingGrid.setHeightToRows();
@@ -105,7 +106,7 @@ public class AdminTab extends AppTab<FlexLayout> {
             String mail = mailBox.getContent().getValue();
             String id = idBox.getContent().getValue();
             if (mail != null && !mail.isEmpty()) {
-                where = report.userEmail.eq(mail).and(where);
+                where = report.userEmail.eq(mail);
                 name += "_" + mail;
             }
             if (id != null && !id.isEmpty()) {
@@ -147,7 +148,7 @@ public class AdminTab extends AppTab<FlexLayout> {
         FlexLayout purgeAge = new FlexLayout();
         purgeAge.setSizeFull();
         purgeAge.preventWhiteSpaceBreaking();
-        purgeAge.setAlignContent(FlexLayout.ALIGN_CONTENT.CENTER);
+        purgeAge.setAlignItems(FlexComponent.Alignment.CENTER);
         purgeAge.add(Translatable.createButton(e -> getDataService().deleteReportsOlderThanDays(app, Integer.parseInt(age.getValue())), Messages.PURGE),
                 Translatable.createP(Messages.REPORTS_OLDER_THAN1),
                 age, Translatable.createP(Messages.REPORTS_OLDER_THAN2));
@@ -157,7 +158,7 @@ public class AdminTab extends AppTab<FlexLayout> {
         FlexLayout purgeVersion = new FlexLayout();
         purgeVersion.setSizeFull();
         purgeVersion.preventWhiteSpaceBreaking();
-        purgeVersion.setAlignContent(FlexLayout.ALIGN_CONTENT.CENTER);
+        purgeVersion.setAlignItems(FlexComponent.Alignment.CENTER);
         purgeVersion.add(Translatable.createButton(e -> {
             if (versionBox.getValue() != null) {
                 getDataService().deleteReportsBeforeVersion(app, versionBox.getValue());

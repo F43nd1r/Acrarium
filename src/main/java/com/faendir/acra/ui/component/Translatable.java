@@ -9,6 +9,8 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
@@ -81,6 +83,10 @@ public class Translatable<T extends Component> extends Composite<T> implements L
 
     public static Translatable<Paragraph> createP(@NonNull String captionId, @NonNull Object... params) {
         return create(new Paragraph(), captionId, params);
+    }
+
+    public static Translatable<Image> createImage(@NonNull String src, @NonNull String captionId, @NonNull Object... params) {
+        return new Translatable<>(new Image(src, ""), image -> image.setAlt(image.getTranslation(captionId, params)));
     }
 
     @Override
