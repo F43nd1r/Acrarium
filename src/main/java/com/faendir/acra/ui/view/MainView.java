@@ -15,8 +15,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouterLink;
@@ -95,13 +95,18 @@ public class MainView extends ParentLayout {
     }
 
     private void showLogin() {
-        VerticalLayout loginForm = new VerticalLayout();
-        loginForm.setSizeUndefined();
+        Translatable<Image> logo = Translatable.createImage("frontend/logo.png", Messages.ACRARIUM);
+        logo.setWidth(0, Unit.PIXEL);
+        logo.setPadding(1, Unit.REM);
+        FlexLayout logoWrapper = new FlexLayout(logo);
+        logoWrapper.expand(logo);
         TextField username = new TextField();
         PasswordField password = new PasswordField();
         Translatable<Button> login = Translatable.createButton(event -> login(username.getValue(), password.getValue()), Messages.LOGIN);
         login.setWidthFull();
-        loginForm.add(username, password, login);
+        FlexLayout loginForm = new FlexLayout(logoWrapper, username, password, login);
+        loginForm.setFlexDirection(FlexDirection.COLUMN);
+        loginForm.setSizeUndefined();
         setContent(loginForm);
     }
 

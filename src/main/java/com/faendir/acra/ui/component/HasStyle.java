@@ -17,4 +17,8 @@ public interface HasStyle extends com.vaadin.flow.component.HasStyle {
         getStyle().set("text-decoration","none");
         getStyle().set("color","inherit");
     }
+
+    default void setPadding(int value, HasSize.Unit unit) {
+        getStyle().set("padding", value + unit.getText());
+    }
 }

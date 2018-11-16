@@ -15,6 +15,14 @@ public class FlexLayout extends com.vaadin.flow.component.orderedlayout.FlexLayo
     public FlexLayout() {
     }
 
+    public void setFlexDirection(FlexDirection flexDirection) {
+        getStyle().set("flex-direction", flexDirection.value);
+    }
+
+    public void setFlexWrap(FlexWrap flexWrap) {
+        getStyle().set("flex-wrap", flexWrap.value);
+    }
+
     public enum FlexWrap {
         WRAP("wrap");
         private final String value;
@@ -24,7 +32,12 @@ public class FlexLayout extends com.vaadin.flow.component.orderedlayout.FlexLayo
         }
     }
 
-    public void setFlexWrap(FlexWrap flexWrap) {
-        getStyle().set("flex-wrap", flexWrap.value);
+    public enum FlexDirection {
+        COLUMN("column");
+        private final String value;
+
+        FlexDirection(@NonNull String value) {
+            this.value = value;
+        }
     }
 }
