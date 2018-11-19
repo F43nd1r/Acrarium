@@ -6,15 +6,16 @@ import com.vaadin.flow.router.HasUrlParameter;
 
 /**
  * @author lukas
- * @since 08.09.18
+ * @since 19.11.18
  */
-public interface SecurityAwareHasUrlParameter extends HasUrlParameter<Integer> {
+public
+interface HasSecureStringParameter extends HasUrlParameter<String> {
     @Override
-    default void setParameter(BeforeEvent event, Integer parameter){
-        if(SecurityUtils.isLoggedIn()) {
+    default void setParameter(BeforeEvent event, String parameter) {
+        if (SecurityUtils.isLoggedIn()) {
             setParameterSecure(event, parameter);
         }
     }
 
-    void setParameterSecure(BeforeEvent event, Integer parameter);
+    void setParameterSecure(BeforeEvent event, String parameter);
 }

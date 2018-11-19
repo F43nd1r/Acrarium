@@ -150,8 +150,8 @@ public class AdminTab extends AppTab<FlexLayout> {
         purgeAge.preventWhiteSpaceBreaking();
         purgeAge.setAlignItems(FlexComponent.Alignment.CENTER);
         purgeAge.add(Translatable.createButton(e -> getDataService().deleteReportsOlderThanDays(app, Integer.parseInt(age.getValue())), Messages.PURGE),
-                Translatable.createP(Messages.REPORTS_OLDER_THAN1),
-                age, Translatable.createP(Messages.REPORTS_OLDER_THAN2));
+                Translatable.createLabel(Messages.REPORTS_OLDER_THAN1),
+                age, Translatable.createLabel(Messages.REPORTS_OLDER_THAN2));
         purgeAge.expand(age);
         ComboBox<Integer> versionBox = new ComboBox<>(null, getDataService().getFromReports(app, null, QReport.report.stacktrace.version.code));
         versionBox.setSizeFull();
@@ -163,7 +163,7 @@ public class AdminTab extends AppTab<FlexLayout> {
             if (versionBox.getValue() != null) {
                 getDataService().deleteReportsBeforeVersion(app, versionBox.getValue());
             }
-        }, Messages.PURGE), Translatable.createP(Messages.REPORTS_BEFORE_VERSION), versionBox);
+        }, Messages.PURGE), Translatable.createLabel(Messages.REPORTS_BEFORE_VERSION), versionBox);
         purgeVersion.expand(versionBox);
         Translatable<Button> deleteButton = Translatable.createButton(e -> new Popup().setTitle(Messages.DELETE_APP_CONFIRM).addYesNoButtons(popup -> {
             getDataService().delete(app);

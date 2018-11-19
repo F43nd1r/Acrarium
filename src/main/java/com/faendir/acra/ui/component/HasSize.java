@@ -10,7 +10,8 @@ public interface HasSize extends com.vaadin.flow.component.HasSize, HasStyle {
     enum Unit {
         PERCENTAGE("%"),
         PIXEL("px"),
-        REM("rem");
+        REM("rem"),
+        EM("em");
         private final String text;
 
         Unit(String text) {

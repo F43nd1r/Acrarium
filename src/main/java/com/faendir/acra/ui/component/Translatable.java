@@ -9,9 +9,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
@@ -38,6 +36,16 @@ public class Translatable<T extends Component> extends Composite<T> implements L
     @Override
     protected T initContent() {
         return t;
+    }
+
+    @Override
+    public void localeChange(LocaleChangeEvent event) {
+        setter.accept(getContent());
+    }
+
+    public Translatable<T> with(Consumer<T> consumer) {
+        consumer.accept(t);
+        return this;
     }
 
     @NonNull
@@ -81,16 +89,11 @@ public class Translatable<T extends Component> extends Composite<T> implements L
         return create(new RouterLink("", target, parameter), captionId, params);
     }
 
-    public static Translatable<Paragraph> createP(@NonNull String captionId, @NonNull Object... params) {
-        return create(new Paragraph(), captionId, params);
+    public static Translatable<Label> createLabel(@NonNull String captionId, @NonNull Object... params) {
+        return create(new Label(), captionId, params);
     }
 
     public static Translatable<Image> createImage(@NonNull String src, @NonNull String captionId, @NonNull Object... params) {
         return new Translatable<>(new Image(src, ""), image -> image.setAlt(image.getTranslation(captionId, params)));
-    }
-
-    @Override
-    public void localeChange(LocaleChangeEvent event) {
-        setter.accept(getContent());
     }
 }

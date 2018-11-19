@@ -19,7 +19,14 @@ package com.faendir.acra.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.NonNull;
+import proguard.retrace.ReTrace;
 
+import java.io.IOException;
+import java.io.LineNumberReader;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -38,6 +45,18 @@ public final class Utils {
             return ZonedDateTime.parse(s, formatter);
         } catch (DateTimeParseException e) {
             return ZonedDateTime.now();
+        }
+    }
+
+    public static String retrace(@NonNull String stacktrace, @NonNull String mappings) {
+        try (Reader mappingsReader = new StringReader(mappings);
+             LineNumberReader stacktraceReader = new LineNumberReader(new StringReader(stacktrace));
+             StringWriter output = new StringWriter()) {
+            new ReTrace(ReTrace.STACK_TRACE_EXPRESSION, false, mappingsReader).retrace(stacktraceReader, new PrintWriter(output));
+            return output.toString();
+        } catch (IOException e) {
+            log.error("Failed to retrace stacktrace", e);
+            return stacktrace;
         }
     }
 }

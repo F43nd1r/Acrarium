@@ -2,13 +2,13 @@ package com.faendir.acra.ui.base;
 
 import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.HasSize;
+import com.faendir.acra.ui.component.Label;
 import com.faendir.acra.ui.component.Translatable;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.router.AfterNavigationEvent;
@@ -78,7 +78,7 @@ public class Path extends Composite<FlexLayout> implements AfterNavigationListen
         }
 
         protected Component createContent() {
-            Translatable<Paragraph> p = Translatable.createP(titleId, params);
+            Translatable<Label> p = Translatable.createLabel(titleId, params);
             p.setMargin(0, HasSize.Unit.PIXEL);
             p.getStyle().set("padding-top", "2px");
             return p;

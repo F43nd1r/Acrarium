@@ -5,8 +5,8 @@ import com.faendir.acra.model.App;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.base.ActiveChildAware;
 import com.faendir.acra.ui.base.HasRoute;
+import com.faendir.acra.ui.base.HasSecureIntParameter;
 import com.faendir.acra.ui.base.Path;
-import com.faendir.acra.ui.base.SecurityAwareHasUrlParameter;
 import com.faendir.acra.ui.view.Overview;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -20,7 +20,7 @@ import java.util.Optional;
  * @author lukas
  * @since 14.07.18
  */
-public abstract class AppTab<T extends Component> extends Composite<T> implements SecurityAwareHasUrlParameter, HasRoute {
+public abstract class AppTab<T extends Component> extends Composite<T> implements HasSecureIntParameter, HasRoute {
     private final DataService dataService;
     private App app;
 
