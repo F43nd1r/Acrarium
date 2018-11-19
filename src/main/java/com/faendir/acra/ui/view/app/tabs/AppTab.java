@@ -37,7 +37,6 @@ public abstract class AppTab<T extends Component> extends Composite<T> implement
         Optional<App> app = dataService.findApp(parameter);
         if (app.isPresent()) {
             this.app = app.get();
-            init(this.app);
         } else {
             event.rerouteToError(IllegalArgumentException.class);
         }
@@ -48,6 +47,7 @@ public abstract class AppTab<T extends Component> extends Composite<T> implement
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+        init(this.app);
         Optional<Component> parent = getParent();
         while (parent.isPresent()) {
             if (parent.get() instanceof ActiveChildAware) {
@@ -67,7 +67,7 @@ public abstract class AppTab<T extends Component> extends Composite<T> implement
     }
 
     @Override
-    public Class<? extends HasRoute> getLogicalParent() {
-        return Overview.class;
+    public Parent<?> getLogicalParent() {
+        return new Parent<>(Overview.class);
     }
 }

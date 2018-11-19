@@ -1,5 +1,12 @@
 package com.faendir.acra.ui.base;
 
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.HasUrlParameter;
+import com.vaadin.flow.router.Location;
+import com.vaadin.flow.router.NavigationTrigger;
+import com.vaadin.flow.router.Router;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -16,17 +23,52 @@ public interface HasRoute {
     Path.Element<?> getPathElement();
 
     @Nullable
-    default Class<? extends HasRoute> getLogicalParent() {
+    default Parent<?> getLogicalParent() {
         return null;
     }
 
-    default List<Path.Element<?>> getPathElements(ApplicationContext applicationContext) {
+    default List<Path.Element<?>> getPathElements(ApplicationContext applicationContext, AfterNavigationEvent afterNavigationEvent) {
         List<Path.Element<?>> list = new ArrayList<>();
         list.add(getPathElement());
-        Class<? extends HasRoute> parent = getLogicalParent();
+        Parent<?> parent = getLogicalParent();
         if (parent != null) {
-            list.addAll(applicationContext.getBean(parent).getPathElements(applicationContext));
+            list.addAll(parent.get(applicationContext, afterNavigationEvent).getPathElements(applicationContext, afterNavigationEvent));
         }
         return list;
+    }
+
+    class Parent<T extends HasRoute> {
+        private final Class<T> parentClass;
+
+        public Parent(Class<T> parentClass) {
+            this.parentClass = parentClass;
+        }
+
+        public T get(ApplicationContext applicationContext, AfterNavigationEvent afterNavigationEvent) {
+            return applicationContext.getBean(parentClass);
+        }
+    }
+
+    class ParametrizedParent<T extends HasRoute & HasUrlParameter<P>, P> extends Parent<T> {
+        private final P parameter;
+
+        public ParametrizedParent(Class<T> parentClass, P parameter) {
+            super(parentClass);
+            this.parameter = parameter;
+        }
+
+        @Override
+        public T get(ApplicationContext applicationContext, AfterNavigationEvent afterNavigationEvent) {
+            T t = super.get(applicationContext, afterNavigationEvent);
+            t.setParameter(new BeforeRouteEvent(afterNavigationEvent.getSource(), afterNavigationEvent.getLocation(), afterNavigationEvent.getActiveChain().get(0).getClass()), parameter);
+            return t;
+        }
+    }
+
+    class BeforeRouteEvent extends BeforeEvent {
+
+        public BeforeRouteEvent(Router router, Location location, Class<?> navigationTarget) {
+            super(router, NavigationTrigger.PAGE_LOAD,location, navigationTarget, UI.getCurrent());
+        }
     }
 }

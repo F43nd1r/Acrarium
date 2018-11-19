@@ -54,9 +54,4 @@ public class Overview extends VerticalLayout implements ComponentEventListener<A
     public Path.Element<?> getPathElement() {
         return new Path.ImageElement<>(getClass(), "frontend/logo.png", Messages.ACRARIUM);
     }
-
-    @Override
-    public Class<? extends HasRoute> getLogicalParent() {
-        return null;
-    }
 }

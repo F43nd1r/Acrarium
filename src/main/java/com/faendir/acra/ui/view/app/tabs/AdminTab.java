@@ -97,9 +97,9 @@ public class AdminTab extends AppTab<FlexLayout> {
         getContent().expand(mappingCard);
 
         Translatable<ComboBox<String>> mailBox = Translatable.createComboBox(getDataService().getFromReports(app, null, QReport.report.userEmail), Messages.BY_MAIL);
-        mailBox.getContent().setSizeFull();
+        mailBox.setWidthFull();
         Translatable<ComboBox<String>> idBox = Translatable.createComboBox(getDataService().getFromReports(app, null, QReport.report.installationId), Messages.BY_ID);
-        idBox.getContent().setSizeFull();
+        idBox.setWidthFull();
         DownloadButton download = new DownloadButton(new StreamResource("reports.json", () -> {
             BooleanExpression where = null;
             String name = "";
@@ -128,7 +128,7 @@ public class AdminTab extends AppTab<FlexLayout> {
         Translatable<Button> configButton = Translatable.createButton(e -> new Popup().setTitle(Messages.NEW_ACRA_CONFIG_CONFIRM)
                 .addYesNoButtons(popup -> popup.clear().addComponent(new ConfigurationLabel(getDataService().recreateReporterUser(app))).addCloseButton().show())
                 .show(), Messages.NEW_ACRA_CONFIG);
-        configButton.getContent().setSizeFull();
+        configButton.setWidthFull();
         Translatable<Button> matchingButton = Translatable.createButton(e -> {
             App.Configuration configuration = app.getConfiguration();
             Input score = new Input();
@@ -141,12 +141,12 @@ public class AdminTab extends AppTab<FlexLayout> {
                     .addYesNoButtons(p -> getDataService().changeConfiguration(app, new App.Configuration(Integer.parseInt(score.getValue()))), true)
                     .show();
         }, Messages.NEW_BUG_CONFIG);
-        matchingButton.getContent().setSizeFull();
+        matchingButton.setWidthFull();
         TextField age = new TextField();
         age.setValue("30");
-        age.setSizeFull();
+        age.setWidth("100%");
         FlexLayout purgeAge = new FlexLayout();
-        purgeAge.setSizeFull();
+        purgeAge.setWidthFull();
         purgeAge.preventWhiteSpaceBreaking();
         purgeAge.setAlignItems(FlexComponent.Alignment.CENTER);
         purgeAge.add(Translatable.createButton(e -> getDataService().deleteReportsOlderThanDays(app, Integer.parseInt(age.getValue())), Messages.PURGE),
@@ -154,9 +154,9 @@ public class AdminTab extends AppTab<FlexLayout> {
                 age, Translatable.createLabel(Messages.REPORTS_OLDER_THAN2));
         purgeAge.expand(age);
         ComboBox<Integer> versionBox = new ComboBox<>(null, getDataService().getFromReports(app, null, QReport.report.stacktrace.version.code));
-        versionBox.setSizeFull();
+        versionBox.setWidth("100%");
         FlexLayout purgeVersion = new FlexLayout();
-        purgeVersion.setSizeFull();
+        purgeVersion.setWidthFull();
         purgeVersion.preventWhiteSpaceBreaking();
         purgeVersion.setAlignItems(FlexComponent.Alignment.CENTER);
         purgeVersion.add(Translatable.createButton(e -> {
@@ -169,7 +169,7 @@ public class AdminTab extends AppTab<FlexLayout> {
             getDataService().delete(app);
             UI.getCurrent().navigate(Overview.class);
         }, true).show(), Messages.DELETE_APP);
-        deleteButton.getContent().setSizeFull();
+        deleteButton.setWidthFull();
         Card dangerCard = new Card(configButton, matchingButton, purgeAge, purgeVersion, deleteButton);
         dangerCard.setHeader(Translatable.createText(Messages.DANGER_ZONE));
         dangerCard.setWidth(500, HasSize.Unit.PIXEL);

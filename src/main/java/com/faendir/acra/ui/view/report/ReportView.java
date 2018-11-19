@@ -17,6 +17,7 @@ import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.view.MainView;
 import com.faendir.acra.ui.view.bug.BugView;
 import com.faendir.acra.util.Utils;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.Text;
@@ -60,9 +61,18 @@ public class ReportView extends Composite<Div> implements HasSecureStringParamet
 
     @Override
     public void setParameterSecure(BeforeEvent event, String parameter) {
+        Optional<Report> r = dataService.findReport(parameter);
+        if (r.isPresent()) {
+            report = r.get();
+        } else {
+            event.rerouteToError(IllegalArgumentException.class);
+        }
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
         getContent().removeAll();
-        //TODO better handling
-        report = dataService.findReport(parameter).orElseThrow(RuntimeException::new);
         CssGrid summaryLayout = new CssGrid();
         summaryLayout.setTemplateColumns("auto auto");
         summaryLayout.setColumnGap(1, HasSize.Unit.EM);
@@ -140,7 +150,7 @@ public class ReportView extends Composite<Div> implements HasSecureStringParamet
     }
 
     @Override
-    public Class<? extends HasRoute> getLogicalParent() {
-        return BugView.class;
+    public Parent<?> getLogicalParent() {
+        return new ParametrizedParent<>(BugView.class, report.getStacktrace().getBug().getId());
     }
 }

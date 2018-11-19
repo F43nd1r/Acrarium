@@ -26,7 +26,9 @@ public class Card extends Composite<Div> implements HasSize, HasStyle {
         header.setWidth("100%");
         content = new Div();
         content.getStyle().set("padding","1rem");
+        content.getStyle().set("box-sizing","border-box");
         content.getStyle().set("display","inline-block");
+        content.setSizeFull();
         getContent().add(header, content);
     }
 

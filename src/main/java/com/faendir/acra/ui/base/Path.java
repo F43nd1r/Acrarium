@@ -39,7 +39,7 @@ public class Path extends Composite<FlexLayout> implements AfterNavigationListen
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
         getContent().removeAll();
-        List<Element<?>> elements = event.getActiveChain().stream().filter(HasRoute.class::isInstance).map(HasRoute.class::cast).flatMap(e -> e.getPathElements(applicationContext).stream()).collect(Collectors.toList());
+        List<Element<?>> elements = event.getActiveChain().stream().filter(HasRoute.class::isInstance).map(HasRoute.class::cast).flatMap(e -> e.getPathElements(applicationContext, event).stream()).collect(Collectors.toList());
         if (!elements.isEmpty()) {
             Collections.reverse(elements);
             getContent().add(elements.remove(0).toComponent());
@@ -88,7 +88,7 @@ public class Path extends Composite<FlexLayout> implements AfterNavigationListen
             RouterLink routerLink = createRouterLink();
             Component component = createContent();
             routerLink.add(component);
-            routerLink.getStyle().set("height", "32px");
+            routerLink.getStyle().set("line-height", "32px");
             routerLink.getStyle().set("padding", "1rem");
             routerLink.getStyle().set("font-size", "130%");
             routerLink.getStyle().set("text-decoration","none");
@@ -123,7 +123,7 @@ public class Path extends Composite<FlexLayout> implements AfterNavigationListen
         @Override
         protected Component createContent() {
             Translatable<Image> image = Translatable.createImage(src, titleId, params);
-            image.setMaxHeightFull();
+            image.setHeight(32, HasSize.Unit.PIXEL);
             return image;
         }
     }
