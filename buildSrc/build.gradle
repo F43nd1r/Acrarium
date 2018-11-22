@@ -1,3 +1,6 @@
+plugins {
+    id 'groovy'
+}
 /*
  * (C) Copyright 2018 Lukas Morawietz (https://github.com/F43nd1r)
  *
@@ -19,7 +22,8 @@ repositories {
 }
 
 dependencies {
-    gradleApi()
+    compile localGroovy()
+    compile gradleApi()
     compile 'com.squareup:javapoet:1.11.1'
     compile 'com.google.guava:guava:26.0-jre'
 }

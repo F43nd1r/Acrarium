@@ -1,71 +1,33 @@
-/*
- * (C) Copyright 2018 Lukas Morawietz (https://github.com/F43nd1r)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.faendir.acra.ui.view.app.tabs;
 
-import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
 import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.navigation.NavigationManager;
-import com.faendir.acra.ui.view.base.statistics.Statistics;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.themes.AcraTheme;
+import com.faendir.acra.ui.base.statistics.Statistics;
+import com.faendir.acra.ui.view.app.AppView;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
-import org.vaadin.spring.i18n.I18N;
 
 /**
- * @author Lukas
- * @since 22.05.2017
+ * @author lukas
+ * @since 11.10.18
  */
+@UIScope
 @SpringComponent
-@ViewScope
-public class StatisticsTab implements AppTab {
-    @NonNull private final DataService dataService;
-    @NonNull private final I18N i18n;
-
+@Route(value = "statistics", layout = AppView.class)
+public class StatisticsTab extends AppTab<Div> {
     @Autowired
-    public StatisticsTab(@NonNull DataService dataService, @NonNull I18N i18n) {
-        this.dataService = dataService;
-        this.i18n = i18n;
+    public StatisticsTab(@NonNull DataService dataService) {
+        super(dataService);
+        getContent().setSizeFull();
     }
 
     @Override
-    public Component createContent(@NonNull App app, @NonNull NavigationManager navigationManager) {
-        Panel root = new Panel(new Statistics(app, null, dataService, i18n));
-        root.setSizeFull();
-        root.addStyleNames(AcraTheme.NO_BACKGROUND, AcraTheme.NO_BORDER);
-        return root;
-    }
-
-    @Override
-    public String getCaption() {
-        return i18n.get(Messages.STATISTICS);
-    }
-
-    @Override
-    public String getId() {
-        return "statistics";
-    }
-
-    @Override
-    public int getOrder() {
-        return 2;
+    void init(App app) {
+        getContent().removeAll();
+        getContent().add(new Statistics(app, null, getDataService()));
     }
 }

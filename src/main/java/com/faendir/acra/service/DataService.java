@@ -63,6 +63,7 @@ import javax.persistence.EntityManager;
 import javax.validation.constraints.Size;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
@@ -392,7 +393,7 @@ public class DataService implements Serializable {
 
     @NonNull
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public <T> Map<T, Long> countReports(@NonNull App app, @NonNull Predicate where, @NonNull Expression<T> select) {
+    public <T> Map<T, Long> countReports(@NonNull App app, @Nullable Predicate where, @NonNull Expression<T> select) {
         List<Tuple> result = ((JPAQuery<?>) new JPAQuery<>(entityManager)).from(report)
                 .where(report.stacktrace.bug.app.eq(app).and(where))
                 .groupBy(select)
@@ -442,7 +443,7 @@ public class DataService implements Serializable {
             if (!id.startsWith("_design")) {
                 total++;
                 try {
-                    JSONObject report = new JSONObject(IOUtils.toString(db.getAsStream(id)));
+                    JSONObject report = new JSONObject(IOUtils.toString(db.getAsStream(id), StandardCharsets.UTF_8));
                     fixStringIsArray(report, ReportField.STACK_TRACE);
                     fixStringIsArray(report, ReportField.LOGCAT);
                     createNewReport(user.getUsername(), report.toString(), Collections.emptyList());

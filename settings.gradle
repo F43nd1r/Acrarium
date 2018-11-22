@@ -1,0 +1,2 @@
+include 'buildSrc'
+enableFeaturePreview('IMPROVED_POM_SUPPORT')

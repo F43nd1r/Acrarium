@@ -1,113 +1,68 @@
-/*
- * (C) Copyright 2018 Lukas Morawietz (https://github.com/F43nd1r)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.faendir.acra.ui.view.bug;
 
-import com.faendir.acra.model.App;
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.Bug;
-import com.faendir.acra.model.Permission;
-import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.annotation.RequiresAppPermission;
-import com.faendir.acra.ui.navigation.MyNavigator;
-import com.faendir.acra.ui.navigation.SingleParametrizedViewProvider;
-import com.faendir.acra.ui.view.base.layout.MyTabSheet;
-import com.faendir.acra.ui.view.base.navigation.ParametrizedBaseView;
+import com.faendir.acra.ui.base.ActiveChildAware;
+import com.faendir.acra.ui.base.ParentLayout;
+import com.faendir.acra.ui.component.Tab;
+import com.faendir.acra.ui.view.MainView;
+import com.faendir.acra.ui.view.bug.tabs.AdminTab;
 import com.faendir.acra.ui.view.bug.tabs.BugTab;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
-import com.vaadin.spring.annotation.ViewScope;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.themes.AcraTheme;
+import com.faendir.acra.ui.view.bug.tabs.ReportTab;
+import com.faendir.acra.ui.view.bug.tabs.StacktraceTab;
+import com.faendir.acra.ui.view.bug.tabs.StatisticsTab;
+import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.router.RoutePrefix;
+import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.data.util.Pair;
-import org.springframework.lang.NonNull;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
- * @author Lukas
- * @since 21.03.2018
+ * @author lukas
+ * @since 08.09.18
  */
+@UIScope
 @SpringComponent
-@ViewScope
-@RequiresAppPermission(Permission.Level.VIEW)
-public class BugView extends ParametrizedBaseView<Pair<Bug, String>> {
-    private final List<BugTab> tabs;
+@RoutePrefix("bug")
+@com.vaadin.flow.router.ParentLayout(MainView.class)
+public class BugView extends ParentLayout implements ActiveChildAware<BugTab<?>, Bug> {
+    private Bug bug;
+    private final Tabs tabs;
 
     @Autowired
-    public BugView(@NonNull @Lazy List<BugTab> tabs) {
-        this.tabs = tabs;
+    public BugView() {
+        tabs = new Tabs(Stream.of(TabDef.values()).map(def -> new Tab(def.labelId)).toArray(Tab[]::new));
+        tabs.addSelectedChangeListener(e -> getUI().ifPresent(ui -> ui.navigate(TabDef.values()[e.getSource().getSelectedIndex()].tabClass, bug.getId())));
+        setSizeFull();
+        ParentLayout content = new ParentLayout();
+        content.setWidthFull();
+        expand(content);
+        content.getStyle().set("overflow", "auto");
+        setRouterRoot(content);
+        getStyle().set("flex-direction", "column");
+        removeAll();
+        add(tabs, content);
     }
 
     @Override
-    protected void enter(@NonNull Pair<Bug, String> parameter) {
-        Bug bug = parameter.getFirst();
-        MyTabSheet<Bug> tabSheet = new MyTabSheet<>(bug, getNavigationManager(), tabs);
-        tabSheet.setSizeFull();
-        tabSheet.addSelectedTabChangeListener(e -> getNavigationManager().updatePageParameters(bug.getId() + "/" + e.getTabSheet().getSelectedTab().getCaption()));
-        tabSheet.guessInitialTab(parameter.getSecond());
-        Panel root = new Panel(tabSheet);
-        root.setSizeFull();
-        root.addStyleNames( AcraTheme.NO_BORDER, AcraTheme.NO_BACKGROUND, AcraTheme.NO_PADDING, AcraTheme.PADDING_LEFT, AcraTheme.PADDING_RIGHT);
-        setCompositionRoot(root);
+    public void setActiveChild(BugTab<?> child, Bug parameter) {
+        bug = parameter;
+        Stream.of(TabDef.values()).filter(def -> def.tabClass.equals(child.getClass())).findAny().ifPresent(def -> tabs.setSelectedIndex(def.ordinal()));
     }
 
-    @SpringComponent
-    @UIScope
-    public static class Provider extends SingleParametrizedViewProvider<Pair<Bug, String>, BugView> {
-        @NonNull private final DataService dataService;
+    private enum TabDef {
+        REPORT(Messages.REPORTS, ReportTab.class),
+        STACKTRACE(Messages.STACKTRACES, StacktraceTab.class),
+        STATISTICS(Messages.STATISTICS, StatisticsTab.class),
+        ADMIN(Messages.ADMIN, AdminTab.class);
+        private String labelId;
+        private Class<? extends BugTab<?>> tabClass;
 
-        @Autowired
-        public Provider(@NonNull DataService dataService) {
-            super(BugView.class);
-            this.dataService = dataService;
-        }
-
-        @Override
-        protected String getTitle(Pair<Bug, String> parameter) {
-            return parameter.getFirst().getTitle();
-        }
-
-        @Override
-        protected boolean isValidParameter(Pair<Bug, String> parameter) {
-            return parameter != null;
-        }
-
-        @Override
-        protected Pair<Bug, String> parseParameter(String parameter) {
-            String[] parameters = parameter.split(MyNavigator.SEPARATOR);
-            if (parameters.length > 0) {
-                Optional<Bug> bug = dataService.findBug(parameters[0]);
-                if (bug.isPresent()) {
-                    return Pair.of(bug.get(), parameters.length == 1 ? "" : parameters[1]);
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected App toApp(Pair<Bug, String> parameter) {
-            return parameter.getFirst().getApp();
-        }
-
-        @Override
-        public String getId() {
-            return "bug";
+        TabDef(String labelId, Class<? extends BugTab<?>> tabClass) {
+            this.labelId = labelId;
+            this.tabClass = tabClass;
         }
     }
 }

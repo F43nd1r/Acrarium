@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.faendir.acra.service;
 
 import com.faendir.acra.model.Report;
 import com.talanlabs.avatargenerator.Avatar;
 import com.talanlabs.avatargenerator.IdenticonAvatar;
-import com.vaadin.server.ExternalResource;
-import org.springframework.cache.annotation.Cacheable;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.server.StreamResource;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Base64Utils;
+
+import java.io.ByteArrayInputStream;
 
 /**
  * @author lukas
@@ -39,9 +40,9 @@ public class AvatarService {
         avatar = IdenticonAvatar.newAvatarBuilder().size(32, 32).build();
     }
 
-    @Cacheable(cacheNames = "avatars", key = "#report.installationId")
-    public ExternalResource getAvatar(@NonNull Report report) {
+    //@Cacheable(cacheNames = "avatars", key = "#report.installationId")
+    public Component getAvatar(@NonNull Report report) {
         byte[] bytes = avatar.createAsPngBytes(report.getInstallationId().hashCode());
-        return new ExternalResource("data:image/png;base64," + Base64Utils.encodeToString(bytes));
+        return new Image(new StreamResource("", () -> new ByteArrayInputStream(bytes)), "");
     }
 }
