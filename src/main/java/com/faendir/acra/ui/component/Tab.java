@@ -13,7 +13,6 @@ public class Tab extends com.vaadin.flow.component.tabs.Tab implements LocaleCha
     private final Object[] params;
 
     public Tab(@NonNull String captionId, @NonNull Object... params) {
-
         this.captionId = captionId;
         this.params = params;
     }

@@ -10,6 +10,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
@@ -70,6 +72,16 @@ public class Translatable<T extends Component> extends Composite<T> implements L
     @NonNull
     public static Translatable<TextField> createTextField(@NonNull String initialValue, @NonNull String captionId, @NonNull Object... params) {
         return new Translatable<>(new TextField("", initialValue, ""), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
+    }
+
+    @NonNull
+    public static Translatable<PasswordField> createPasswordField(@NonNull String captionId, @NonNull Object... params) {
+        return new Translatable<>(new PasswordField(), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
+    }
+
+    @NonNull
+    public static Translatable<TextArea> createTextArea(@NonNull String initialValue, @NonNull String captionId, @NonNull Object... params) {
+        return new Translatable<>(new TextArea("", initialValue, ""), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
     }
 
     public static <T> Translatable<ComboBox<T>> createComboBox(@NonNull Collection<T> items, @NonNull String captionId, @NonNull Object... params) {

@@ -1,10 +1,10 @@
-package com.faendir.acra.ui.view.app.tabs;
+package com.faendir.acra.ui.view.bug.tabs;
 
-import com.faendir.acra.model.App;
+import com.faendir.acra.model.Bug;
 import com.faendir.acra.service.AvatarService;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.base.ReportList;
-import com.faendir.acra.ui.view.app.AppView;
+import com.faendir.acra.ui.view.bug.BugView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -14,13 +14,14 @@ import org.springframework.lang.NonNull;
 
 /**
  * @author lukas
- * @since 14.07.18
+ * @since 19.11.18
  */
 @UIScope
-@SpringComponent
-@Route(value = "report", layout = AppView.class)
-public class ReportTab extends AppTab<Div> {
-    @NonNull private final AvatarService avatarService;
+@SpringComponent("bugReportTab")
+@Route(value = "report", layout = BugView.class)
+public class ReportTab extends BugTab<Div> {
+    @NonNull
+    private final AvatarService avatarService;
 
     @Autowired
     public ReportTab(@NonNull DataService dataService, @NonNull AvatarService avatarService) {
@@ -30,8 +31,8 @@ public class ReportTab extends AppTab<Div> {
     }
 
     @Override
-    void init(App app) {
+    void init(Bug bug) {
         getContent().removeAll();
-        getContent().add(new ReportList(app, getDataService().getReportProvider(app), avatarService, getDataService()::delete));
+        getContent().add(new ReportList(bug.getApp(), getDataService().getReportProvider(bug), avatarService, getDataService()::delete));
     }
 }

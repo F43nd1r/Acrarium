@@ -41,6 +41,7 @@ targetCompatibility = 1.8
 ext {
     generated = file("$buildDir/generated")
     queryDslOutput = file("$generated/querydsl/java")
+    messagesOutput = file("$generated/faendir/java")
 }
 
 compileJava {
@@ -54,6 +55,8 @@ idea {
     module {
         sourceDirs += queryDslOutput
         generatedSourceDirs += queryDslOutput
+        sourceDirs += messagesOutput
+        generatedSourceDirs += messagesOutput
     }
 }
 
@@ -115,7 +118,7 @@ war {
 
 task generateMessageClasses(type: com.faendir.acra.gradle.I18nClassGenerator) {
     inputDirectory file('src/main/resources/i18n/com/faendir/acra')
-    outputDirectory file("$generated/faendir/java")
+    outputDirectory messagesOutput
     packageName 'com.faendir.acra.i18n'
     className 'Messages'
 }

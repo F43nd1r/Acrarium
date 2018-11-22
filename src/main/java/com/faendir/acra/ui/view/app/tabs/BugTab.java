@@ -12,7 +12,7 @@ import com.faendir.acra.ui.base.MyGrid;
 import com.faendir.acra.ui.base.popup.Popup;
 import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.view.app.AppView;
-import com.faendir.acra.ui.view.bug.BugView;
+import com.faendir.acra.ui.view.bug.tabs.ReportTab;
 import com.faendir.acra.util.TimeSpanRenderer;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -87,7 +87,7 @@ public class BugTab extends AppTab<VerticalLayout> {
             checkbox.addValueChangeListener(e -> getDataService().setBugSolved(bug.getBug(), e.getValue()));
             return checkbox;
         }), QBug.bug.solved, Messages.SOLVED);
-        bugs.addOnClickNavigation(BugView.class, bug -> bug.getBug().getId());
+        bugs.addOnClickNavigation(ReportTab.class, bug -> bug.getBug().getId());
         getContent().removeAll();
         getContent().add(bugs);
         getContent().setFlexGrow(1, bugs);

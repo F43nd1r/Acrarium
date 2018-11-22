@@ -15,7 +15,7 @@ import com.faendir.acra.ui.component.HasSize;
 import com.faendir.acra.ui.component.Label;
 import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.view.MainView;
-import com.faendir.acra.ui.view.bug.BugView;
+import com.faendir.acra.ui.view.bug.tabs.ReportTab;
 import com.faendir.acra.util.Utils;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -151,6 +151,6 @@ public class ReportView extends Composite<Div> implements HasSecureStringParamet
 
     @Override
     public Parent<?> getLogicalParent() {
-        return new ParametrizedParent<>(BugView.class, report.getStacktrace().getBug().getId());
+        return new ParametrizedParent<>(ReportTab.class, report.getStacktrace().getBug().getId());
     }
 }
