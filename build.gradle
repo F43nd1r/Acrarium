@@ -21,6 +21,7 @@ plugins {
     id 'com.devsoap.vaadin-flow' version '1.0.0.M6'
     id 'io.spring.dependency-management' version '1.0.6.RELEASE'
     id 'cn.bestwu.propdeps' version '0.0.10'
+    id 'net.researchgate.release' version '2.7.0'
 }
 
 vaadin {
@@ -130,4 +131,9 @@ test {
         events "failed"
         exceptionFormat "full"
     }
+}
+
+release {
+    failOnUnversionedFiles = false
+    tagTemplate = 'v$version'
 }
