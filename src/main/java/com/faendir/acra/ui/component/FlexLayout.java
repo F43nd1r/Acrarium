@@ -33,7 +33,8 @@ public class FlexLayout extends com.vaadin.flow.component.orderedlayout.FlexLayo
     }
 
     public enum FlexDirection {
-        COLUMN("column");
+        COLUMN("column"),
+        ROW("row");
         private final String value;
 
         FlexDirection(@NonNull String value) {

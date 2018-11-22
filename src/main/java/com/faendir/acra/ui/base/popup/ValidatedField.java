@@ -17,6 +17,7 @@
 package com.faendir.acra.ui.base.popup;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import org.springframework.lang.NonNull;
@@ -33,28 +34,34 @@ import java.util.function.Supplier;
  * @author Lukas
  * @since 22.06.2017
  */
-public class ValidatedField<V, T extends Component & HasValue<?,V> & HasValidation> {
+public class ValidatedField<V, T extends Component> {
     private final T field;
     private final Supplier<V> valueSupplier;
+    private final Consumer<String> messageSetter;
     private final Map<Function<V, Boolean>, String> validators;
     private final List<Listener> listeners;
     private boolean valid;
 
-    private ValidatedField(T field, Supplier<V> valueSupplier, Consumer<Consumer<V>> listenerRegistration) {
+    private ValidatedField(T field, Supplier<V> valueSupplier, Consumer<Consumer<V>> listenerRegistration, Consumer<String> messageSetter) {
         this.field = field;
         this.valueSupplier = valueSupplier;
+        this.messageSetter = messageSetter;
         this.validators = new HashMap<>();
         this.listeners = new ArrayList<>();
         this.valid = false;
         listenerRegistration.accept(this::validate);
     }
 
-    public static <V, T extends Component & HasValue<?,V> & HasValidation> ValidatedField<V, T> of(T field) {
-        return new ValidatedField<>(field, field::getValue, vConsumer -> field.addValueChangeListener(event -> vConsumer.accept(event.getValue())));
+    public static <V, T extends Component & HasValue<?, V> & HasValidation> ValidatedField<V, T> of(T field) {
+        return new ValidatedField<>(field, field::getValue, vConsumer -> field.addValueChangeListener(event -> vConsumer.accept(event.getValue())), field::setErrorMessage);
     }
 
-    public static <V, T extends Component & HasValue<?,V> & HasValidation> ValidatedField<V, T> of(T field, Supplier<V> valueSupplier, Consumer<Consumer<V>> listenerRegistration) {
-        return new ValidatedField<>(field, valueSupplier, listenerRegistration);
+    public static <V, C extends Composite<T>, T extends Component & HasValue<?, V> & HasValidation> ValidatedField<V, C> of(C field) {
+        return new ValidatedField<>(field, () -> field.getContent().getValue(), vConsumer -> field.getContent().addValueChangeListener(event -> vConsumer.accept(event.getValue())), m -> field.getContent().setErrorMessage(m));
+    }
+
+    public static <V, T extends Component & HasValue<?, V> & HasValidation> ValidatedField<V, T> of(T field, Supplier<V> valueSupplier, Consumer<Consumer<V>> listenerRegistration) {
+        return new ValidatedField<>(field, valueSupplier, listenerRegistration, field::setErrorMessage);
     }
 
     public ValidatedField<V, T> addValidator(Function<V, Boolean> validator, String errorMessage) {
@@ -73,10 +80,10 @@ public class ValidatedField<V, T extends Component & HasValue<?,V> & HasValidati
     private boolean validate(V value) {
         boolean valid = validators.entrySet().stream().allMatch(entry -> {
             if (entry.getKey().apply(value)) {
-                field.setErrorMessage(null);
+                messageSetter.accept(null);
                 return true;
             } else {
-                field.setErrorMessage(entry.getValue());
+                messageSetter.accept(entry.getValue());
                 return false;
             }
         });

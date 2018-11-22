@@ -1,6 +1,7 @@
 package com.faendir.acra.ui.base;
 
 import com.faendir.acra.dataprovider.QueryDslDataProvider;
+import com.faendir.acra.ui.component.HasSize;
 import com.querydsl.core.types.Expression;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -26,7 +27,7 @@ import java.util.function.Function;
  * @author lukas
  * @since 13.07.18
  */
-public class MyGrid<T> extends Composite<Grid<T>> implements LocaleChangeObserver {
+public class MyGrid<T> extends Composite<Grid<T>> implements LocaleChangeObserver, HasSize {
     private final QueryDslDataProvider<T> dataProvider;
     private final Map<Grid.Column<T>, Pair<String, Object[]>> columnCaptions;
 

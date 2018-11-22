@@ -10,7 +10,6 @@ import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.view.MainView;
 import com.faendir.acra.ui.view.Overview;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.notification.Notification;
@@ -67,11 +66,6 @@ public class ChangePasswordView extends Composite<FlexLayout> implements HasRout
         getContent().setSizeFull();
         getContent().setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         getContent().setAlignItems(FlexComponent.Alignment.CENTER);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
     }
 
     @NonNull
