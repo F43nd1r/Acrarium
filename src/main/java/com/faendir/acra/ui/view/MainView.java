@@ -30,6 +30,7 @@ import com.faendir.acra.ui.view.user.UserManager;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
@@ -55,6 +56,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
  * @author lukas
  * @since 13.07.18
  */
+@HtmlImport("frontend://styles/shared-styles.html")
 @UIScope
 @SpringComponent
 public class MainView extends ParentLayout {
@@ -101,7 +103,9 @@ public class MainView extends ParentLayout {
         }, Messages.ABOUT);
         about.getElement().setAttribute("theme", "tertiary");
         about.setDefaultTextStyle();
-        DropdownMenu menu = new DropdownMenu(new FormLayout(darkTheme, userManager, changePassword, logout, about));
+        FormLayout formLayout = new FormLayout(darkTheme, userManager, changePassword, logout, about);
+        formLayout.getStyle().set("background","var(--lumo-contrast-5pct");
+        DropdownMenu menu = new DropdownMenu(formLayout);
         menu.getStyle().set("margin", "1rem");
         menu.setLabel(SecurityUtils.getUsername());
         menu.setMinWidth(130, Unit.PIXEL);
