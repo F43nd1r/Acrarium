@@ -150,7 +150,7 @@ public class ReportView extends Composite<Div> implements HasSecureStringParamet
             //noinspection unchecked
             List<Object> values = (List<Object>) value;
             Map<String, Object> map = new HashMap<>();
-            String format = "%0"+ ((int)Math.log10(values.size()-1)+1) + "d";
+            String format = "%0" + ((int) Math.max(Math.log10(values.size() - 1), 0) + 1) + "d";
             for (int i = 0; i < values.size(); i++) {
                 map.put(String.format(format, i), values.get(0));
             }

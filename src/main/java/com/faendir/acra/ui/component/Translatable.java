@@ -25,6 +25,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -123,5 +124,12 @@ public class Translatable<T extends Component> extends Composite<T> implements L
 
     public static Translatable<Image> createImage(@NonNull String src, @NonNull String captionId, @NonNull Object... params) {
         return new Translatable<>(new Image(src, ""), image -> image.setAlt(image.getTranslation(captionId, params)));
+    }
+
+    public static Translatable<Div> createDiv(@NonNull String captionId, @NonNull Object... params) {
+        return new Translatable<>(new Div(), div -> {
+            String translation = div.getTranslation(captionId, params);
+            div.setText(translation);
+        });
     }
 }

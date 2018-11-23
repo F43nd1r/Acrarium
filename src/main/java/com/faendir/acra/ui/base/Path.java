@@ -18,12 +18,13 @@ package com.faendir.acra.ui.base;
 
 import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.HasSize;
-import com.faendir.acra.ui.component.Label;
+import com.faendir.acra.ui.component.HasStyle;
 import com.faendir.acra.ui.component.Translatable;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -42,14 +43,15 @@ import java.util.stream.Collectors;
  * @author lukas
  * @since 18.10.18
  */
-public class Path extends Composite<FlexLayout> implements AfterNavigationListener {
+public class Path extends Composite<FlexLayout> implements AfterNavigationListener, HasStyle, HasSize {
     private final ApplicationContext applicationContext;
     private Registration registration;
 
     public Path(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
         getContent().setAlignItems(FlexComponent.Alignment.CENTER);
-        getContent().setFlexWrap(FlexLayout.FlexWrap.WRAP);
+        setWidth(0, Unit.PIXEL);
+        getStyle().set("overflow","hidden");
     }
 
     @Override
@@ -57,11 +59,16 @@ public class Path extends Composite<FlexLayout> implements AfterNavigationListen
         getContent().removeAll();
         List<Element<?>> elements = event.getActiveChain().stream().filter(HasRoute.class::isInstance).map(HasRoute.class::cast).flatMap(e -> e.getPathElements(applicationContext, event).stream()).collect(Collectors.toList());
         if (!elements.isEmpty()) {
+            Element<?> last = elements.remove(0);
             Collections.reverse(elements);
-            getContent().add(elements.remove(0).toComponent());
             for (Element<?> element : elements) {
-                getContent().add(VaadinIcon.CARET_RIGHT.create(), element.toComponent());
+                Component component = element.toComponent();
+                component.getElement().getStyle().set("flex-shrink", "1");
+                getContent().add(component, VaadinIcon.CARET_RIGHT.create());
             }
+            Component component = last.toComponent();
+            component.getElement().getStyle().set("flex-shrink", "0");
+            getContent().add(component);
         }
     }
 
@@ -94,8 +101,10 @@ public class Path extends Composite<FlexLayout> implements AfterNavigationListen
         }
 
         protected Component createContent() {
-            Translatable<Label> p = Translatable.createLabel(titleId, params);
+            Translatable<Div> p = Translatable.createDiv(titleId, params);
             p.setMargin(0, HasSize.Unit.PIXEL);
+            p.getStyle().set("overflow", "hidden");
+            p.getStyle().set("text-overflow", "ellipsis");
             p.getStyle().set("padding-top", "2px");
             return p;
         }
@@ -109,6 +118,10 @@ public class Path extends Composite<FlexLayout> implements AfterNavigationListen
             routerLink.getStyle().set("font-size", "130%");
             routerLink.getStyle().set("text-decoration","none");
             routerLink.getStyle().set("color","inherit");
+            routerLink.getStyle().set("white-space", "pre");
+            routerLink.getStyle().set("overflow", "hidden");
+            routerLink.getStyle().set("text-overflow", "ellipsis");
+            routerLink.getStyle().set("cursor", "pointer");
             return routerLink;
         }
 

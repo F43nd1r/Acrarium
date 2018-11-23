@@ -105,14 +105,16 @@ public class MainView extends ParentLayout {
         about.setDefaultTextStyle();
         FormLayout formLayout = new FormLayout(darkTheme, userManager, changePassword, logout, about);
         formLayout.getStyle().set("background","var(--lumo-contrast-5pct");
+        formLayout.getStyle().set("padding","1rem");
         DropdownMenu menu = new DropdownMenu(formLayout);
-        menu.getStyle().set("margin", "1rem");
+        menu.getStyle().set("padding", "1rem");
         menu.setLabel(SecurityUtils.getUsername());
-        menu.setMinWidth(130, Unit.PIXEL);
+        menu.setMinWidth(170, Unit.PIXEL);
         menu.setOrigin(DropdownMenu.Origin.RIGHT);
         Path path = new Path(applicationContext);
         FlexLayout header = new FlexLayout(path, menu);
         header.expand(path);
+        path.getStyle().set("flex-shrink", "1");
         header.setWidthFull();
         header.getStyle().set("box-shadow", "0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)");
         header.getStyle().set("border-radius", "2px");
