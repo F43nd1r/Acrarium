@@ -126,11 +126,15 @@ public class UserService implements Serializable {
 
     @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
-    public void setPermission(@NonNull User user, @NonNull App app, @NonNull Permission.Level level) {
+    public void setPermission(@NonNull User user, @NonNull App app, @Nullable Permission.Level level) {
         Optional<Permission> permission = user.getPermissions().stream().filter(p -> p.getApp().equals(app)).findAny();
         if (permission.isPresent()) {
-            permission.get().setLevel(level);
-        } else {
+            if (level != null) {
+                permission.get().setLevel(level);
+            } else {
+                user.getPermissions().remove(permission.get());
+            }
+        } else if (level != null) {
             user.getPermissions().add(new Permission(app, level));
         }
         entityManager.merge(user);
