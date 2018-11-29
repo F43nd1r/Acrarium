@@ -16,13 +16,12 @@
 package com.faendir.acra.ui.base.statistics;
 
 import com.faendir.acra.ui.component.Card;
-import com.faendir.acra.ui.base.JFreeChartWrapper;
 import com.faendir.acra.ui.component.HasSize;
 import com.faendir.acra.ui.component.Translatable;
 import com.vaadin.flow.component.Composite;
 import org.jfree.chart.JFreeChart;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
+import org.vaadin.addon.JFreeChartWrapper;
 
 import java.awt.*;
 import java.util.Map;
@@ -32,21 +31,21 @@ import java.util.Map;
  * @since 01.06.18
  */
 abstract class Chart<T> extends Composite<Card> {
-    private JFreeChart chart;
+    private final JFreeChartWrapper content;
 
     Chart(@NonNull String captionId, @NonNull Object... params) {
         getContent().setWidth(500, HasSize.Unit.PIXEL);
         getContent().setMaxWidthFull();
         getContent().setHeader(Translatable.createText(captionId, params));
+        content = new JFreeChartWrapper();
+        content.setSvgAspectRatio("xMidYMid");
+        content.setWidth("100%");
+        getContent().removeAll();
+        getContent().add(content);
     }
 
     public void setContent(@NonNull Map<T, Long> map) {
-        chart = createChart(map);
-        JFreeChartWrapper content = new JFreeChartWrapper(chart);
-        content.setSvgAspectRatio("xMidYMid");
-        content.setWidthFull();
-        getContent().removeAll();
-        getContent().add(content);
+        content.setChart(createChart(map));
     }
 
     Paint getForegroundColor() {
@@ -54,9 +53,4 @@ abstract class Chart<T> extends Composite<Card> {
     }
 
     protected abstract JFreeChart createChart(@NonNull Map<T, Long> map);
-
-    @Nullable
-    JFreeChart getChart() {
-        return chart;
-    }
 }

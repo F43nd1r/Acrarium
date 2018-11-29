@@ -25,7 +25,7 @@ plugins {
 }
 
 vaadin {
-    version '12.0.0.beta1'
+    version '12.0.0.beta2'
     submitStatistics false
 }
 
@@ -91,6 +91,7 @@ dependencies {
     implementation 'org.apache.xmlgraphics:batik-svggen:1.7'
     implementation 'javax.servlet:javax.servlet-api:4.0.1'
     implementation 'org.webjars.bowergithub.simpleelements:simple-dropdown:1.0.0'
+    implementation 'com.faendir.vaadin:jfreechart-flow:1.1.6'
     //utility
     implementation 'org.codeartisans:org.json:20161124'
     implementation 'org.apache.commons:commons-text:1.4'
