@@ -24,13 +24,15 @@ import com.faendir.acra.model.QProguardMapping;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.component.Card;
 import com.faendir.acra.ui.base.ConfigurationLabel;
 import com.faendir.acra.ui.base.MyGrid;
 import com.faendir.acra.ui.base.popup.Popup;
+import com.faendir.acra.ui.component.Card;
 import com.faendir.acra.ui.component.DownloadButton;
 import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.HasSize;
+import com.faendir.acra.ui.component.NumberInput;
+import com.faendir.acra.ui.component.RangeInput;
 import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.view.Overview;
 import com.faendir.acra.ui.view.app.AppView;
@@ -38,7 +40,6 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -91,7 +92,7 @@ public class AdminTab extends AppTab<FlexLayout> {
                 mappingGrid.getDataProvider().refreshAll();
             }, true).show())));
             mappingCard.add(Translatable.createButton(e -> {
-                Translatable<TextField> version = Translatable.createTextField(String.valueOf(getDataService().getMaximumMappingVersion(app).map(i -> i + 1).orElse(1)), Messages.VERSION_CODE);
+                NumberInput version = new NumberInput(getDataService().getMaximumMappingVersion(app).map(i -> i + 1).orElse(1));//, Messages.VERSION_CODE);
                 MemoryBuffer buffer = new MemoryBuffer();
                 Upload upload = new Upload(buffer);
                 new Popup()
@@ -100,7 +101,7 @@ public class AdminTab extends AppTab<FlexLayout> {
                         .addComponent(upload)
                         .addCreateButton(popup -> {
                             try {
-                                getDataService().store(new ProguardMapping(app, Integer.valueOf(version.getContent().getValue()), StreamUtils.copyToString(buffer.getInputStream(), Charset.defaultCharset())));
+                                getDataService().store(new ProguardMapping(app, version.getValue().intValue(), StreamUtils.copyToString(buffer.getInputStream(), Charset.defaultCharset())));
                             } catch (Exception ex) {
                                 //TODO
                             }
@@ -118,18 +119,15 @@ public class AdminTab extends AppTab<FlexLayout> {
         idBox.setWidthFull();
         DownloadButton download = new DownloadButton(new StreamResource("reports.json", () -> {
             BooleanExpression where = null;
-            String name = "";
             String mail = mailBox.getContent().getValue();
             String id = idBox.getContent().getValue();
             if (mail != null && !mail.isEmpty()) {
                 where = report.userEmail.eq(mail);
-                name += "_" + mail;
             }
             if (id != null && !id.isEmpty()) {
                 where = report.installationId.eq(id).and(where);
-                name += "_" + id;
             }
-            if (name.isEmpty()) {
+            if (where == null) {
                 return new ByteArrayInputStream(new byte[0]);
             }
             return new ByteArrayInputStream(getDataService().getFromReports(app, where, report.content, report.id).stream().collect(Collectors.joining(", ", "[", "]")).getBytes(StandardCharsets.UTF_8));
@@ -147,14 +145,10 @@ public class AdminTab extends AppTab<FlexLayout> {
         configButton.setWidthFull();
         Translatable<Button> matchingButton = Translatable.createButton(e -> {
             App.Configuration configuration = app.getConfiguration();
-            Input score = new Input();
-            score.setType("range");
-            score.getElement().setProperty("min", 0);
-            score.getElement().setProperty("max", 100);
-            score.setValue(String.valueOf(configuration.getMinScore()));
+            RangeInput score = new RangeInput(0, 100, configuration.getMinScore());
             new Popup().addComponent(score)
                     .setTitle(Messages.NEW_BUG_CONFIG_CONFIRM)
-                    .addYesNoButtons(p -> getDataService().changeConfiguration(app, new App.Configuration(Integer.parseInt(score.getValue()))), true)
+                    .addYesNoButtons(p -> getDataService().changeConfiguration(app, new App.Configuration(score.getValue().intValue())), true)
                     .show();
         }, Messages.NEW_BUG_CONFIG);
         matchingButton.setWidthFull();
