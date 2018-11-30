@@ -17,12 +17,12 @@
 package com.faendir.acra.ui.base.popup;
 
 import com.faendir.acra.i18n.Messages;
+import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.Translatable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
@@ -140,9 +140,9 @@ public class Popup extends Dialog {
                 }
             }
         });
-        FormLayout layout = new FormLayout();
-        layout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 1));
-        components.forEach(c -> layout.addFormItem(c, ""));
+        FlexLayout layout = new FlexLayout();
+        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+        components.forEach(layout::add);
         checkValid();
         removeAll();
         add(layout);

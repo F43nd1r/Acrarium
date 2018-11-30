@@ -99,7 +99,9 @@ class Property<F, C extends Component & HasValue<?, F> & HasEnabled & HasSize & 
             ComboBox<String> comboBox = new ComboBox<>(null, list);
             comboBox.setAllowCustomValue(false);
             comboBox.setRequired(true);
-            comboBox.setValue(list.get(0));
+            if(!list.isEmpty()) {
+                comboBox.setValue(list.get(0));
+            }
             return new Property<>(app, comboBox, stringExpression::eq, new PieChart(chartTitleId), dataService, stringExpression, filterTextId);
         }
 
