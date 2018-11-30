@@ -22,6 +22,7 @@ import com.querydsl.core.types.Expression;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.grid.FooterRow;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -68,7 +69,7 @@ public class MyGrid<T> extends Composite<Grid<T>> implements LocaleChangeObserve
 
     @NonNull
     public Grid.Column<T> addColumn(@NonNull Renderer<T> renderer) {
-        return getContent().addColumn(renderer);
+        return getContent().addColumn(renderer).setResizable(true).setFlexGrow(0);
     }
 
     @NonNull
@@ -83,7 +84,7 @@ public class MyGrid<T> extends Composite<Grid<T>> implements LocaleChangeObserve
 
     private Grid.Column<T> setupColumn(@NonNull Grid.Column<T> column, @NonNull String captionId, Object... params) {
         String caption = getTranslation(captionId, params);
-        column = column.setHeader(caption).setResizable(true).setFlexGrow(0).setWidth(Math.max(50, caption.length() * 10 + 20) + "px");
+        column = column.setHeader(caption).setResizable(true).setFlexGrow(0);//.setWidth(Math.max(50, caption.length() * 10 + 20) + "px");
         columnCaptions.put(column, Pair.of(captionId, params));
         return column;
     }
@@ -124,6 +125,10 @@ public class MyGrid<T> extends Composite<Grid<T>> implements LocaleChangeObserve
 
     public void setHeightToRows() {
         getContent().setHeightByRows(true);
+    }
+
+    public FooterRow appendFooterRow() {
+        return getContent().appendFooterRow();
     }
 
     @Override

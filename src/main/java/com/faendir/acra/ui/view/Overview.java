@@ -20,16 +20,22 @@ import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.QApp;
 import com.faendir.acra.model.QBug;
 import com.faendir.acra.model.QReport;
+import com.faendir.acra.model.User;
 import com.faendir.acra.model.view.VApp;
+import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.DataService;
+import com.faendir.acra.ui.base.ConfigurationLabel;
 import com.faendir.acra.ui.base.HasRoute;
 import com.faendir.acra.ui.base.MyGrid;
 import com.faendir.acra.ui.base.Path;
+import com.faendir.acra.ui.base.popup.Popup;
+import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.view.app.tabs.BugTab;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
@@ -57,10 +63,19 @@ public class Overview extends VerticalLayout implements ComponentEventListener<A
         removeAll();
         MyGrid<VApp> grid = new MyGrid<>(dataService.getAppProvider());
         grid.setSelectionMode(Grid.SelectionMode.NONE);
-        grid.addColumn(VApp::getName, QApp.app.name, Messages.NAME);
+        Grid.Column<VApp> appColumn = grid.addColumn(VApp::getName, QApp.app.name, Messages.NAME).setFlexGrow(1);
         grid.addColumn(VApp::getBugCount, QBug.bug.countDistinct(), Messages.BUGS);
         grid.addColumn(VApp::getReportCount, QReport.report.count(), Messages.REPORTS);
         grid.addOnClickNavigation(BugTab.class, VApp::getId);
+        if (SecurityUtils.hasRole(User.Role.ADMIN)) {
+            grid.appendFooterRow().getCell(appColumn).setComponent(Translatable.createButton(e -> {
+                Translatable<TextField> name = Translatable.createTextField("", Messages.NAME);
+                new Popup().setTitle(Messages.NEW_APP).addComponent(name).addCreateButton(popup -> {
+                    popup.clear().addComponent(new ConfigurationLabel(dataService.createNewApp(name.getContent().getValue()))).addCloseButton().show();
+                    grid.getDataProvider().refreshAll();
+                }).show();
+            }, Messages.NEW_APP));
+        }
         setSizeFull();
         add(grid);
     }
