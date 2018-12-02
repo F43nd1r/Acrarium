@@ -36,6 +36,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -129,6 +130,10 @@ public class MyGrid<T> extends Composite<Grid<T>> implements LocaleChangeObserve
 
     public FooterRow appendFooterRow() {
         return getContent().appendFooterRow();
+    }
+
+    public List<Grid.Column<T>> getColumns() {
+        return getContent().getColumns();
     }
 
     @Override

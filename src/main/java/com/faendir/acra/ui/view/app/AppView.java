@@ -20,6 +20,7 @@ import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
 import com.faendir.acra.ui.base.ActiveChildAware;
 import com.faendir.acra.ui.base.ParentLayout;
+import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.Tab;
 import com.faendir.acra.ui.view.MainView;
 import com.faendir.acra.ui.view.app.tabs.AdminTab;
@@ -52,7 +53,7 @@ public class AppView extends ParentLayout implements ActiveChildAware<AppTab<?>,
         tabs = new Tabs(Stream.of(TabDef.values()).map(def -> new Tab(def.labelId)).toArray(Tab[]::new));
         tabs.addSelectedChangeListener(e -> getUI().ifPresent(ui -> ui.navigate(TabDef.values()[e.getSource().getSelectedIndex()].tabClass, app.getId())));
         setSizeFull();
-        ParentLayout content = new ParentLayout();
+        FlexLayout content = new FlexLayout();
         content.setWidthFull();
         expand(content);
         content.getStyle().set("overflow","auto");

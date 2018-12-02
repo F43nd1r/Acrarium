@@ -79,10 +79,12 @@ public class AdminTab extends AppTab<FlexLayout> {
     void init(App app) {
         getContent().removeAll();
         getContent().setFlexWrap(FlexLayout.FlexWrap.WRAP);
+        getContent().setAlignItems(FlexComponent.Alignment.START);
         getContent().setWidthFull();
         MyGrid<ProguardMapping> mappingGrid = new MyGrid<>(getDataService().getMappingProvider(app));
         mappingGrid.setHeightToRows();
-        mappingGrid.addColumn(ProguardMapping::getVersionCode, QProguardMapping.proguardMapping.versionCode, Messages.VERSION);
+        mappingGrid.addColumn(ProguardMapping::getVersionCode, QProguardMapping.proguardMapping.versionCode, Messages.VERSION).setFlexGrow(1);
+        mappingGrid.setHeight("");
         Card mappingCard = new Card(mappingGrid);
         mappingCard.setHeader(Translatable.createText(Messages.DE_OBFUSCATION));
         mappingCard.setWidth(500, HasSize.Unit.PIXEL);
@@ -91,7 +93,7 @@ public class AdminTab extends AppTab<FlexLayout> {
                 getDataService().delete(mapping);
                 mappingGrid.getDataProvider().refreshAll();
             }, true).show())));
-            mappingCard.add(Translatable.createButton(e -> {
+            mappingGrid.appendFooterRow().getCell(mappingGrid.getColumns().get(0)).setComponent(Translatable.createButton(e -> {
                 NumberInput version = new NumberInput(getDataService().getMaximumMappingVersion(app).map(i -> i + 1).orElse(1));//, Messages.VERSION_CODE);
                 MemoryBuffer buffer = new MemoryBuffer();
                 Upload upload = new Upload(buffer);
