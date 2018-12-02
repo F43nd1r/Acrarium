@@ -184,6 +184,7 @@ public class AdminTab extends AppTab<FlexLayout> {
         deleteButton.setWidthFull();
         Card dangerCard = new Card(configButton, matchingButton, purgeAge, purgeVersion, deleteButton);
         dangerCard.setHeader(Translatable.createText(Messages.DANGER_ZONE));
+        dangerCard.setHeaderColor("var(----lumo-error-text-color)", "var(--lumo-error-color)");
         dangerCard.setWidth(500, HasSize.Unit.PIXEL);
         getContent().add(dangerCard);
         getContent().expand(dangerCard);

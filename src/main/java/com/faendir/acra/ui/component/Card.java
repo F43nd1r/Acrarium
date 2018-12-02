@@ -107,4 +107,9 @@ public class Card extends Composite<Div> implements HasSize, HasStyle {
     public boolean isCollapsed() {
         return content.getStyle().get("display").equals("none");
     }
+
+    public void setHeaderColor(String textColor, String backgroundColor) {
+        header.getStyle().set("color",textColor);
+        header.getStyle().set("background-color", backgroundColor);
+    }
 }
