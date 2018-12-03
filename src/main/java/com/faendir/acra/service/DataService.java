@@ -89,10 +89,15 @@ import static com.faendir.acra.model.QStacktrace.stacktrace1;
  */
 @Service
 public class DataService implements Serializable {
-    @NonNull private final Log log = LogFactory.getLog(getClass());
-    @NonNull private final UserService userService;
-    @NonNull private final EntityManager entityManager;
-    @NonNull private final BugMerger bugMerger;
+    @NonNull
+    private final Log log = LogFactory.getLog(getClass());
+    @NonNull
+    private final UserService userService;
+    @NonNull
+    private final EntityManager entityManager;
+    @NonNull
+    private final BugMerger bugMerger;
+    private final Object stacktraceLock = new Object();
 
     @Autowired
     public DataService(@NonNull UserService userService, @NonNull EntityManager entityManager, @NonNull BugMerger bugMerger) {
@@ -163,10 +168,10 @@ public class DataService implements Serializable {
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
     public List<String> getReportIds(@NonNull App app, @Nullable ZonedDateTime before, @Nullable ZonedDateTime after) {
         BooleanExpression where = report.stacktrace.bug.app.eq(app);
-        if(before != null) {
+        if (before != null) {
             where = where.and(report.date.before(before));
         }
-        if(after != null) {
+        if (after != null) {
             where = where.and(report.date.after(after));
         }
         return new JPAQuery<>(entityManager).from(report).where(where).select(report.id).fetch();
@@ -299,6 +304,7 @@ public class DataService implements Serializable {
     public List<Attachment> findAttachments(@NonNull Report report) {
         return new JPAQuery<>(entityManager).from(attachment).where(attachment.report.eq(report)).select(attachment).fetch();
     }
+
     @PostAuthorize("!returnObject.isPresent() || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.get().bug.app, T(com.faendir.acra.model.Permission$Level).VIEW)")
     public Optional<Stacktrace> findStacktrace(int id) {
         return Optional.ofNullable(new JPAQuery<>(entityManager).from(stacktrace1).where(stacktrace1.id.eq(id)).select(stacktrace1).fetchOne());
@@ -351,9 +357,11 @@ public class DataService implements Serializable {
             JSONObject jsonObject = new JSONObject(content);
             String trace = jsonObject.optString(ReportField.STACK_TRACE.name());
             Version version = getVersion(jsonObject);
-            Stacktrace stacktrace = findStacktrace(app, trace, version.getCode()).orElseGet(() -> new Stacktrace(findBug(app, trace).orElseGet(() -> new Bug(app, trace)),
-                    trace,
-                    version));
+            Stacktrace stacktrace = findStacktrace(app, trace, version.getCode()).orElseGet(() -> {
+                synchronized (stacktraceLock) {
+                    return findStacktrace(app, trace, version.getCode()).orElseGet(() -> store(new Stacktrace(findBug(app, trace).orElseGet(() -> new Bug(app, trace)), trace, version)));
+                }
+            });
             Report report = store(new Report(stacktrace, content));
             attachments.forEach(multipartFile -> {
                 try {
