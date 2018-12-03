@@ -32,10 +32,10 @@ import com.faendir.acra.ui.view.bug.tabs.ReportTab;
 import com.faendir.acra.util.TimeSpanRenderer;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.grid.FooterRow;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -63,9 +63,6 @@ public class BugTab extends AppTab<VerticalLayout> {
 
     @Override
     protected void init(App app) {
-        HorizontalLayout header = new HorizontalLayout();
-        header.setWidth("100%");
-        getContent().add(header);
         getContent().setAlignItems(FlexComponent.Alignment.START);
         Translatable<Checkbox> hideSolved = Translatable.createCheckbox(true, Messages.HIDE_SOLVED);
         MyGrid<VBug> bugs = new MyGrid<>(getDataService().getBugProvider(app, () -> hideSolved.getContent().getValue()));
@@ -89,21 +86,21 @@ public class BugTab extends AppTab<VerticalLayout> {
                 Notification.show(Messages.ONLY_ONE_BUG_SELECTED);
             }
         }, Messages.MERGE_BUGS);
-        header.add(merge, hideSolved);
-        header.setSpacing(false);
-        header.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        bugs.addColumn(VBug::getReportCount, QReport.report.count(), Messages.REPORTS);
+        Grid.Column<VBug> countColumn = bugs.addColumn(VBug::getReportCount, QReport.report.count(), Messages.REPORTS);
         bugs.addColumn(new TimeSpanRenderer<>(VBug::getLastReport), QReport.report.date.max(), Messages.LATEST_REPORT);
         bugs.addColumn(VBug::getHighestVersionCode, QReport.report.stacktrace.version.code.max(), Messages.LATEST_VERSION);
         bugs.addColumn(VBug::getUserCount, QReport.report.installationId.countDistinct(), Messages.AFFECTED_USERS);
         bugs.addColumn(bug -> bug.getBug().getTitle(), QBug.bug.title, Messages.TITLE).setFlexGrow(1);
-        bugs.addColumn(new ComponentRenderer<>(bug -> {
+        Grid.Column<VBug> solvedColumn = bugs.addColumn(new ComponentRenderer<>(bug -> {
             Checkbox checkbox = new Checkbox(bug.getBug().isSolved());
             checkbox.setEnabled(SecurityUtils.hasPermission(app, Permission.Level.EDIT));
             checkbox.addValueChangeListener(e -> getDataService().setBugSolved(bug.getBug(), e.getValue()));
             return checkbox;
         }), QBug.bug.solved, Messages.SOLVED);
         bugs.addOnClickNavigation(ReportTab.class, bug -> bug.getBug().getId());
+        FooterRow footerRow = bugs.appendFooterRow();
+        footerRow.getCell(countColumn).setComponent(merge);
+        footerRow.getCell(solvedColumn).setComponent(hideSolved);
         getContent().removeAll();
         getContent().add(bugs);
         getContent().setFlexGrow(1, bugs);

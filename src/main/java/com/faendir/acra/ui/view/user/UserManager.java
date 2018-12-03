@@ -75,7 +75,7 @@ public class UserManager extends Composite<FlexLayout> implements HasRoute {
         MyGrid<User> userGrid = new MyGrid<>(userService.getUserProvider());
         userGrid.setWidthFull();
         userGrid.setSelectionMode(Grid.SelectionMode.NONE);
-        userGrid.addColumn(User::getUsername, QUser.user.username, Messages.USERNAME);
+        userGrid.addColumn(User::getUsername, QUser.user.username, Messages.USERNAME).setFlexGrow(1);
         userGrid.addColumn(new ComponentRenderer<>(user -> {
             Checkbox checkbox = new Checkbox(user.getRoles().contains(User.Role.ADMIN));
             checkbox.addValueChangeListener(e -> {
@@ -118,7 +118,8 @@ public class UserManager extends Composite<FlexLayout> implements HasRoute {
                     }, true)
                     .show();
         }, Messages.NEW_USER);
-        getContent().add(userGrid, newUser);
+        userGrid.appendFooterRow().getCell(userGrid.getColumns().get(0)).setComponent(newUser);
+        getContent().add(userGrid);
     }
 
     @NonNull
