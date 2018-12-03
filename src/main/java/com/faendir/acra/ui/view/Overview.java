@@ -29,11 +29,16 @@ import com.faendir.acra.ui.base.HasRoute;
 import com.faendir.acra.ui.base.MyGrid;
 import com.faendir.acra.ui.base.Path;
 import com.faendir.acra.ui.base.popup.Popup;
+import com.faendir.acra.ui.base.popup.ValidatedField;
+import com.faendir.acra.ui.component.NumberInput;
 import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.view.app.tabs.BugTab;
+import com.faendir.acra.util.ImportResult;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
@@ -68,13 +73,33 @@ public class Overview extends VerticalLayout implements ComponentEventListener<A
         grid.addColumn(VApp::getReportCount, QReport.report.count(), Messages.REPORTS);
         grid.addOnClickNavigation(BugTab.class, VApp::getId);
         if (SecurityUtils.hasRole(User.Role.ADMIN)) {
-            grid.appendFooterRow().getCell(appColumn).setComponent(Translatable.createButton(e -> {
+            grid.appendFooterRow().getCell(appColumn).setComponent(new Div(Translatable.createButton(e -> {
                 Translatable<TextField> name = Translatable.createTextField("", Messages.NAME);
                 new Popup().setTitle(Messages.NEW_APP).addComponent(name).addCreateButton(popup -> {
                     popup.clear().addComponent(new ConfigurationLabel(dataService.createNewApp(name.getContent().getValue()))).addCloseButton().show();
                     grid.getDataProvider().refreshAll();
                 }).show();
-            }, Messages.NEW_APP));
+            }, Messages.NEW_APP), Translatable.createButton(e -> {
+                Translatable<TextField> host = Translatable.createTextField("localhost", Messages.HOST);
+                NumberInput port = new NumberInput(5984, 0, 65535);
+                Translatable<Checkbox> ssl = Translatable.createCheckbox(false, Messages.SSL);
+                Translatable<TextField> databaseName = Translatable.createTextField("acra-myapp", Messages.DATABASE_NAME);
+                new Popup().setTitle(Messages.IMPORT_ACRALYZER)
+                        .addComponent(host)
+                        .addComponent(port)
+                        .addComponent(ssl)
+                        .addValidatedField(ValidatedField.of(databaseName), true)
+                        .addCreateButton(popup -> {
+                            ImportResult importResult = dataService.importFromAcraStorage(host.getContent().getValue(), port.getValue().intValue(), ssl.getContent().getValue(), databaseName.getContent().getValue());
+                            popup.clear()
+                                    .addComponent(Translatable.createLabel(Messages.IMPORT_SUCCESS, importResult.getSuccessCount(), importResult.getTotalCount()))
+                                    .addComponent(new ConfigurationLabel(importResult.getUser()))
+                                    .addCloseButton()
+                                    .show();
+                            grid.getDataProvider().refreshAll();
+                        })
+                        .show();
+            }, Messages.IMPORT_ACRALYZER)));
         }
         setSizeFull();
         add(grid);

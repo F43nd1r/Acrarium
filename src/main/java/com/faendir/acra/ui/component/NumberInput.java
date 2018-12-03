@@ -29,4 +29,11 @@ public class NumberInput extends AbstractNumberInput {
         this();
         setValue(value);
     }
+
+    public NumberInput(double value, double min, double max) {
+        this();
+        setValue(value);
+        setMin(min);
+        setMax(max);
+    }
 }
