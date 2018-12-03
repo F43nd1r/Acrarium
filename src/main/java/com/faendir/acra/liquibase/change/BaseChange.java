@@ -68,7 +68,7 @@ public abstract class BaseChange implements LiquibaseChangePostProcessor {
         int offset = 0;
         List<?> list;
         while (!(list = supplier.get().setFirstResult(offset).setMaxResults(64).getResultList()).isEmpty()) {
-            list.forEach(consumer::accept);
+            list.forEach(consumer);
             offset += list.size();
         }
     }

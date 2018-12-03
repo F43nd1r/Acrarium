@@ -43,7 +43,7 @@ public class StatisticsTab extends BugTab<Div> {
     }
 
     @Override
-    void init(Bug bug) {
+    protected void init(Bug bug) {
         getContent().removeAll();
         getContent().add(new Statistics(bug.getApp(), QReport.report.stacktrace.bug.eq(bug), getDataService()));
     }

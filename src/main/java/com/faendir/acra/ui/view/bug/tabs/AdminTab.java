@@ -28,6 +28,7 @@ import com.faendir.acra.ui.view.Overview;
 import com.faendir.acra.ui.view.bug.BugView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -42,17 +43,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 @UIScope
 @SpringComponent("bugAdminTab")
 @Route(value = "admin", layout = BugView.class)
-public class AdminTab extends BugTab<FlexLayout> {
+public class AdminTab extends BugTab<Div> {
     @Autowired
     public AdminTab(DataService dataService) {
         super(dataService);
+        getContent().setSizeFull();
     }
 
     @Override
-    void init(Bug bug) {
+    protected void init(Bug bug) {
         getContent().removeAll();
-        getContent().setFlexWrap(FlexLayout.FlexWrap.WRAP);
-        getContent().setWidthFull();
+        FlexLayout layout = new FlexLayout();
+        layout.setFlexWrap(FlexLayout.FlexWrap.WRAP);
+        layout.setWidthFull();
         Translatable<TextArea> title = Translatable.createTextArea(bug.getTitle(), Messages.TITLE);
         title.setWidthFull();
         Translatable<Button> save = Translatable.createButton(e -> {
@@ -63,8 +66,8 @@ public class AdminTab extends BugTab<FlexLayout> {
         Card propertiesCard = new Card(title, save);
         propertiesCard.setHeader(Translatable.createText(Messages.PROPERTIES));
         propertiesCard.setWidth(500, HasSize.Unit.PIXEL);
-        getContent().add(propertiesCard);
-        getContent().expand(propertiesCard);
+        layout.add(propertiesCard);
+        layout.expand(propertiesCard);
 
         Translatable<Button> unmergeButton = Translatable.createButton(e -> new Popup().setTitle(Messages.UNMERGE_BUG_CONFIRM).addYesNoButtons(p -> {
             getDataService().unmergeBug(bug);
@@ -78,8 +81,10 @@ public class AdminTab extends BugTab<FlexLayout> {
         deleteButton.setWidthFull();
         Card dangerCard = new Card(unmergeButton, deleteButton);
         dangerCard.setHeader(Translatable.createText(Messages.DANGER_ZONE));
+        dangerCard.setHeaderColor("var(----lumo-error-text-color)", "var(--lumo-error-color)");
         dangerCard.setWidth(500, HasSize.Unit.PIXEL);
-        getContent().add(dangerCard);
-        getContent().expand(dangerCard);
+        layout.add(dangerCard);
+        layout.expand(dangerCard);
+        getContent().add(layout);
     }
 }

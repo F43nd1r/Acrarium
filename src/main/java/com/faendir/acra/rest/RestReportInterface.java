@@ -99,7 +99,7 @@ public class RestReportInterface {
         BooleanExpression where = null;
         String name = "";
         if (mail != null && !mail.isEmpty()) {
-            where = report.userEmail.eq(mail).and(where);
+            where = report.userEmail.eq(mail);
             name += "_" + mail;
         }
         if (id != null && !id.isEmpty()) {

@@ -85,9 +85,7 @@ public class MainView extends ParentLayout {
 
     private void showMain() {
         Translatable<Checkbox> darkTheme = Translatable.createCheckbox(false, Messages.DARK_THEME);
-        darkTheme.getContent().addValueChangeListener(e -> {
-            UI.getCurrent().getElement().setAttribute("theme", e.getValue() ? Lumo.DARK : Lumo.LIGHT);
-        });
+        darkTheme.getContent().addValueChangeListener(e -> UI.getCurrent().getElement().setAttribute("theme", e.getValue() ? Lumo.DARK : Lumo.LIGHT));
         Translatable<Button> userManager = Translatable.createButton(e -> UI.getCurrent().navigate(UserManager.class), Messages.USER_MANAGER);
         userManager.setDefaultTextStyle();
         userManager.getContent().addThemeVariants(ButtonVariant.LUMO_TERTIARY);

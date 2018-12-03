@@ -49,7 +49,7 @@ public class StacktraceTab extends BugTab<Div> implements HasSize {
     }
 
     @Override
-    void init(Bug bug) {
+    protected void init(Bug bug) {
         getContent().removeAll();
         for (Stacktrace stacktrace : getDataService().getStacktraces(bug)) {
             Optional<ProguardMapping> mapping = getDataService().findMapping(bug.getApp(), stacktrace.getVersion().getCode());

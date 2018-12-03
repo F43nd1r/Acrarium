@@ -40,10 +40,10 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -69,18 +69,19 @@ import static com.faendir.acra.model.QReport.report;
 @UIScope
 @SpringComponent
 @Route(value = "admin", layout = AppView.class)
-public class AdminTab extends AppTab<FlexLayout> {
+public class AdminTab extends AppTab<Div> {
     @Autowired
     public AdminTab(DataService dataService) {
         super(dataService);
+        getContent().setSizeFull();
     }
 
     @Override
-    void init(App app) {
+    protected void init(App app) {
         getContent().removeAll();
-        getContent().setFlexWrap(FlexLayout.FlexWrap.WRAP);
-        getContent().setAlignItems(FlexComponent.Alignment.START);
-        getContent().setWidthFull();
+        FlexLayout layout = new FlexLayout();
+        layout.setFlexWrap(FlexLayout.FlexWrap.WRAP);
+        layout.setWidthFull();
         MyGrid<ProguardMapping> mappingGrid = new MyGrid<>(getDataService().getMappingProvider(app));
         mappingGrid.setHeightToRows();
         mappingGrid.addColumn(ProguardMapping::getVersionCode, QProguardMapping.proguardMapping.versionCode, Messages.VERSION).setFlexGrow(1);
@@ -112,8 +113,8 @@ public class AdminTab extends AppTab<FlexLayout> {
                         .show();
             }, Messages.NEW_FILE));
         }
-        getContent().add(mappingCard);
-        getContent().expand(mappingCard);
+        layout.add(mappingCard);
+        layout.expand(mappingCard);
 
         Translatable<ComboBox<String>> mailBox = Translatable.createComboBox(getDataService().getFromReports(app, null, QReport.report.userEmail), Messages.BY_MAIL);
         mailBox.setWidthFull();
@@ -138,8 +139,8 @@ public class AdminTab extends AppTab<FlexLayout> {
         Card exportCard = new Card(mailBox, idBox, download);
         exportCard.setHeader(Translatable.createText(Messages.EXPORT));
         exportCard.setWidth(500, HasSize.Unit.PIXEL);
-        getContent().add(exportCard);
-        getContent().expand(exportCard);
+        layout.add(exportCard);
+        layout.expand(exportCard);
 
         Translatable<Button> configButton = Translatable.createButton(e -> new Popup().setTitle(Messages.NEW_ACRA_CONFIG_CONFIRM)
                 .addYesNoButtons(popup -> popup.clear().addComponent(new ConfigurationLabel(getDataService().recreateReporterUser(app))).addCloseButton().show())
@@ -154,14 +155,13 @@ public class AdminTab extends AppTab<FlexLayout> {
                     .show();
         }, Messages.NEW_BUG_CONFIG);
         matchingButton.setWidthFull();
-        TextField age = new TextField();
-        age.setValue("30");
-        age.setWidth("100%");
+        NumberInput age = new NumberInput(30);
+        age.setWidthFull();
         FlexLayout purgeAge = new FlexLayout();
         purgeAge.setWidthFull();
         purgeAge.preventWhiteSpaceBreaking();
         purgeAge.setAlignItems(FlexComponent.Alignment.CENTER);
-        purgeAge.add(Translatable.createButton(e -> getDataService().deleteReportsOlderThanDays(app, Integer.parseInt(age.getValue())), Messages.PURGE),
+        purgeAge.add(Translatable.createButton(e -> getDataService().deleteReportsOlderThanDays(app, age.getValue().intValue()), Messages.PURGE),
                 Translatable.createLabel(Messages.REPORTS_OLDER_THAN1),
                 age, Translatable.createLabel(Messages.REPORTS_OLDER_THAN2));
         purgeAge.expand(age);
@@ -186,7 +186,8 @@ public class AdminTab extends AppTab<FlexLayout> {
         dangerCard.setHeader(Translatable.createText(Messages.DANGER_ZONE));
         dangerCard.setHeaderColor("var(----lumo-error-text-color)", "var(--lumo-error-color)");
         dangerCard.setWidth(500, HasSize.Unit.PIXEL);
-        getContent().add(dangerCard);
-        getContent().expand(dangerCard);
+        layout.add(dangerCard);
+        layout.expand(dangerCard);
+        getContent().add(layout);
     }
 }

@@ -62,7 +62,7 @@ public class BugTab extends AppTab<VerticalLayout> {
     }
 
     @Override
-    void init(App app) {
+    protected void init(App app) {
         HorizontalLayout header = new HorizontalLayout();
         header.setWidth("100%");
         getContent().add(header);

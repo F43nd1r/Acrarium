@@ -47,7 +47,7 @@ public class ReportTab extends BugTab<Div> {
     }
 
     @Override
-    void init(Bug bug) {
+    protected void init(Bug bug) {
         getContent().removeAll();
         getContent().add(new ReportList(bug.getApp(), getDataService().getReportProvider(bug), avatarService, getDataService()::delete));
     }

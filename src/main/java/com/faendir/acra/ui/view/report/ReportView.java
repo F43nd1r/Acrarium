@@ -135,9 +135,7 @@ public class ReportView extends Composite<Div> implements HasSecureStringParamet
         map.entrySet()
                 .stream()
                 .sorted(Comparator.comparing(Map.Entry::getKey))
-                .forEach(entry -> {
-                    layout.add(new Label(entry.getKey()).secondary(), getComponentForContent(entry.getValue()));
-                });
+                .forEach(entry -> layout.add(new Label(entry.getKey()).secondary(), getComponentForContent(entry.getValue())));
         return layout;
     }
 

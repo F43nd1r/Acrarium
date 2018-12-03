@@ -136,7 +136,7 @@ public class Popup extends Dialog {
             if(component instanceof HasSize) {
                 try {
                     ((HasSize)component).setWidth("100%");
-                }catch (UnsupportedOperationException e) {
+                }catch (UnsupportedOperationException ignored) {
                 }
             }
         });
