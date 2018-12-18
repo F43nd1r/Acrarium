@@ -29,9 +29,11 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAUpdateClause;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,16 +56,18 @@ import static com.faendir.acra.model.QStacktraceMatch.stacktraceMatch;
 @EnableAsync
 @Service
 public class BugMerger {
-    @NonNull private final EntityManager entityManager;
+    @NonNull
+    private final EntityManager entityManager;
 
     @Autowired
     public BugMerger(@NonNull EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
-    @Async
+    @EventListener
     @Transactional
-    void checkAutoMerge(@NonNull Stacktrace stacktrace) {
+    public void checkAutoMerge(@NonNull NewReportEvent event) {
+        Stacktrace stacktrace = event.getReport().getStacktrace();
         Bug b = new JPAQuery<>(entityManager).from(stacktrace1).where(stacktrace1.eq(stacktrace)).join(stacktrace1.bug, bug).join(bug.app).fetchJoin().select(bug).fetchOne();
         if (b != null) {
             CloseableIterator<Stacktrace> iterator = new JPAQuery<>(entityManager).from(stacktrace1)
@@ -90,11 +94,11 @@ public class BugMerger {
         }
     }
 
+    @EventListener
     @Async
     @Transactional
-    public void changeConfiguration(@NonNull App app, @NonNull App.Configuration configuration) {
-        app.setConfiguration(configuration);
-        app = entityManager.merge(app);
+    public void changeConfiguration(@NonNull ConfigurationUpdateEvent event) {
+        App app = event.getApp();
         QStacktrace stacktrace2 = new QStacktrace("stacktrace2");
         QBug bug2 = new QBug("bug2");
         CloseableIterator<Tuple> traceIterator = new JPAQuery<>(entityManager).from(stacktrace1)
@@ -110,7 +114,7 @@ public class BugMerger {
                                 .notExists()))
                 .select(stacktrace1, stacktrace2)
                 .iterate();
-        while (traceIterator.hasNext()){
+        while (traceIterator.hasNext()) {
             Tuple tuple = traceIterator.next();
             Stacktrace left = tuple.get(stacktrace1);
             Stacktrace right = tuple.get(stacktrace2);
@@ -133,7 +137,7 @@ public class BugMerger {
                 .iterate();
         while (matchIterator.hasNext()) {
             StacktraceMatch match = matchIterator.next();
-            if (match.getScore() >= configuration.getMinScore() && !match.getLeft().getBug().equals(match.getRight().getBug())) {
+            if (match.getScore() >= app.getConfiguration().getMinScore() && !match.getLeft().getBug().equals(match.getRight().getBug())) {
                 new JPAUpdateClause(entityManager, stacktrace1).set(stacktrace1.bug, match.getLeft().getBug()).where(stacktrace1.bug.eq(match.getRight().getBug())).execute();
             }
         }
@@ -142,6 +146,7 @@ public class BugMerger {
         deleteOrphanBugs();
     }
 
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bugs[0].app, T(com.faendir.acra.model.Permission$Level).EDIT)")
     @Transactional
     public Bug mergeBugs(@NonNull @Size(min = 2) Collection<Bug> bugs, @NonNull String title) {
         List<Bug> list = new ArrayList<>(bugs);
@@ -151,6 +156,12 @@ public class BugMerger {
         new JPAUpdateClause(entityManager, stacktrace1).set(stacktrace1.bug, bug).where(stacktrace1.bug.in(list)).execute();
         list.forEach(entity -> entityManager.remove(entityManager.contains(entity) ? entity : entityManager.merge(entity)));
         return bug;
+    }
+
+    @EventListener
+    @Transactional
+    public void onReportsDeleted(ReportsDeleteEvent event) {
+        deleteOrphanBugs();
     }
 
     @Transactional

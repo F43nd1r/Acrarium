@@ -50,6 +50,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -60,13 +61,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
-import javax.validation.constraints.Size;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -96,14 +95,14 @@ public class DataService implements Serializable {
     @NonNull
     private final EntityManager entityManager;
     @NonNull
-    private final BugMerger bugMerger;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final Object stacktraceLock = new Object();
 
     @Autowired
-    public DataService(@NonNull UserService userService, @NonNull EntityManager entityManager, @NonNull BugMerger bugMerger) {
+    public DataService(@NonNull UserService userService, @NonNull EntityManager entityManager, @NonNull ApplicationEventPublisher applicationEventPublisher) {
         this.userService = userService;
         this.entityManager = entityManager;
-        this.bugMerger = bugMerger;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @NonNull
@@ -218,11 +217,6 @@ public class DataService implements Serializable {
         return user;
     }
 
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bugs[0].app, T(com.faendir.acra.model.Permission$Level).EDIT)")
-    public void mergeBugs(@NonNull @Size(min = 2) Collection<Bug> bugs, @NonNull String title) {
-        bugMerger.mergeBugs(bugs, title);
-    }
-
     @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission$Level).EDIT)")
     public void unmergeBug(@NonNull Bug bug) {
@@ -259,16 +253,6 @@ public class DataService implements Serializable {
                 .where(report.id.eq(id))
                 .select(report)
                 .fetchOne());
-    }
-
-    @NonNull
-    @PostAuthorize("!returnObject.isPresent() || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.get().app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public Optional<Bug> findBug(@NonNull String encodedId) {
-        try {
-            return findBug(Integer.parseInt(encodedId));
-        } catch (NumberFormatException e) {
-            return Optional.empty();
-        }
     }
 
     @NonNull
@@ -330,7 +314,11 @@ public class DataService implements Serializable {
     @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).EDIT)")
     public void changeConfiguration(@NonNull App app, @NonNull App.Configuration configuration) {
-        bugMerger.changeConfiguration(app, configuration);
+        app.setConfiguration(configuration);
+        app = store(app);
+        entityManager.flush();
+        applicationEventPublisher.publishEvent(new ConfigurationUpdateEvent(this, app));
+
     }
 
     @Transactional
@@ -338,7 +326,7 @@ public class DataService implements Serializable {
     public void deleteReportsOlderThanDays(@NonNull App app, @NonNull int days) {
         new JPADeleteClause(entityManager, report).where(report.stacktrace.bug.app.eq(app).and(report.date.before(ZonedDateTime.now().minus(days, ChronoUnit.DAYS))));
         entityManager.flush();
-        bugMerger.deleteOrphanBugs();
+        applicationEventPublisher.publishEvent(new ReportsDeleteEvent(this));
     }
 
     @Transactional
@@ -346,7 +334,7 @@ public class DataService implements Serializable {
     public void deleteReportsBeforeVersion(@NonNull App app, int versionCode) {
         new JPADeleteClause(entityManager, report).where(report.stacktrace.bug.app.eq(app).and(report.stacktrace.version.code.lt(versionCode)));
         entityManager.flush();
-        bugMerger.deleteOrphanBugs();
+        applicationEventPublisher.publishEvent(new ReportsDeleteEvent(this));
     }
 
     @Transactional
@@ -372,7 +360,8 @@ public class DataService implements Serializable {
                     log.warn("Failed to load attachment with name " + multipartFile.getName(), e);
                 }
             });
-            bugMerger.checkAutoMerge(report.getStacktrace());
+            entityManager.flush();
+            applicationEventPublisher.publishEvent(new NewReportEvent(this, report));
         }
     }
 

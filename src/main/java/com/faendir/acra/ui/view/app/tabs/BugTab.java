@@ -23,6 +23,7 @@ import com.faendir.acra.model.QBug;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.model.view.VBug;
 import com.faendir.acra.security.SecurityUtils;
+import com.faendir.acra.service.BugMerger;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.base.MyGrid;
 import com.faendir.acra.ui.base.popup.Popup;
@@ -56,9 +57,12 @@ import java.util.stream.Collectors;
 @SpringComponent
 @Route(value = "bug", layout = AppView.class)
 public class BugTab extends AppTab<VerticalLayout> {
+    private final BugMerger bugMerger;
+
     @Autowired
-    public BugTab(DataService dataService) {
+    public BugTab(DataService dataService, BugMerger bugMerger) {
         super(dataService);
+        this.bugMerger = bugMerger;
     }
 
     @Override
@@ -78,7 +82,7 @@ public class BugTab extends AppTab<VerticalLayout> {
                 titles.setItems(selectedItems.stream().map(bug -> bug.getBug().getTitle()).collect(Collectors.toList()));
                 titles.setValue(selectedItems.get(0).getBug().getTitle());
                 new Popup().setTitle(Messages.CHOOSE_BUG_GROUP_TITLE).addComponent(titles).addCreateButton(p -> {
-                    getDataService().mergeBugs(selectedItems.stream().map(VBug::getBug).collect(Collectors.toList()), titles.getValue());
+                    bugMerger.mergeBugs(selectedItems.stream().map(VBug::getBug).collect(Collectors.toList()), titles.getValue());
                     bugs.deselectAll();
                     bugs.getDataProvider().refreshAll();
                 }, true).show();

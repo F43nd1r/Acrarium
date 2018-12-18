@@ -16,21 +16,35 @@
 
 package com.faendir.acra.model;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.lang.Nullable;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 /**
  * @author lukas
  * @since 26.07.18
  */
-@Embeddable
+@Entity
 public class Version {
-    @Column(name = "version_code")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+    @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private App app;
     private int code;
-    @Column(name = "version_name")
     private String name;
+    @Type(type = "text")
+    @Nullable
+    private String mappings;
 
     @PersistenceConstructor
     Version() {

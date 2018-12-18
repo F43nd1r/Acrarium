@@ -48,6 +48,7 @@ public class Stacktrace {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Bug bug;
     @Type(type = "text") private String stacktrace;
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, optional = false, fetch = FetchType.EAGER)
     private Version version;
 
     @PersistenceConstructor
