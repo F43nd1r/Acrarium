@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * @author lukas
@@ -91,7 +92,7 @@ public class MyGrid<T> extends Composite<Grid<T>> implements LocaleChangeObserve
     }
 
     private Grid.Column<T> setupSortableColumn(@NonNull Grid.Column<T> column, @NonNull Expression<? extends Comparable> sort) {
-        column.setId(dataProvider.addSortable(sort));
+        column.setSortOrderProvider(direction -> Stream.of(new QueryDslDataProvider.QueryDslSortOrder(sort, direction)));
         column.setSortable(true);
         return column;
     }
