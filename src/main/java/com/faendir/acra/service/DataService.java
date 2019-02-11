@@ -19,7 +19,6 @@ import com.faendir.acra.dataprovider.QueryDslDataProvider;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Attachment;
 import com.faendir.acra.model.Bug;
-import com.faendir.acra.model.ProguardMapping;
 import com.faendir.acra.model.QApp;
 import com.faendir.acra.model.Report;
 import com.faendir.acra.model.Stacktrace;
@@ -78,7 +77,6 @@ import java.util.stream.StreamSupport;
 import static com.faendir.acra.model.QApp.app;
 import static com.faendir.acra.model.QAttachment.attachment;
 import static com.faendir.acra.model.QBug.bug;
-import static com.faendir.acra.model.QProguardMapping.proguardMapping;
 import static com.faendir.acra.model.QReport.report;
 import static com.faendir.acra.model.QStacktrace.stacktrace1;
 
@@ -176,11 +174,11 @@ public class DataService implements Serializable {
         return new JPAQuery<>(entityManager).from(report).where(where).select(report.id).fetch();
     }
 
-    @NonNull
+    /*@NonNull
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
     public QueryDslDataProvider<ProguardMapping> getMappingProvider(@NonNull App app) {
         return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(proguardMapping).where(proguardMapping.app.eq(app)).select(proguardMapping));
-    }
+    }*/
 
     @Transactional
     public <T> T store(T entity) {
@@ -231,14 +229,14 @@ public class DataService implements Serializable {
         store(bug);
     }
 
-    @NonNull
+    /*@NonNull
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
     public Optional<ProguardMapping> findMapping(@NonNull App app, int versionCode) {
         return Optional.ofNullable(new JPAQuery<>(entityManager).from(proguardMapping)
                 .where(proguardMapping.app.eq(app).and(proguardMapping.versionCode.eq(versionCode)))
                 .select(proguardMapping)
                 .fetchOne());
-    }
+    }*/
 
     @NonNull
     @PostAuthorize("!returnObject.isPresent() || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.get().stacktrace.bug.app, T(com.faendir.acra.model.Permission$Level).VIEW)")
@@ -422,11 +420,11 @@ public class DataService implements Serializable {
         return new JPAQuery<>(entityManager).from(stacktrace1).where(stacktrace1.bug.eq(bug)).select(stacktrace1).fetch();
     }
 
-    @NonNull
+    /*@NonNull
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
     public Optional<Integer> getMaximumMappingVersion(@NonNull App app) {
         return Optional.ofNullable(new JPAQuery<>(entityManager).from(proguardMapping).where(proguardMapping.app.eq(app)).select(proguardMapping.versionCode.max()).fetchOne());
-    }
+    }*/
 
     @Transactional
     @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")

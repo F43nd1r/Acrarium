@@ -62,4 +62,9 @@ public class Version {
     public String getName() {
         return name;
     }
+
+    @Nullable
+    public String getMappings() {
+        return mappings;
+    }
 }

@@ -18,14 +18,9 @@ package com.faendir.acra.ui.view.app.tabs;
 
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
-import com.faendir.acra.model.Permission;
-import com.faendir.acra.model.ProguardMapping;
-import com.faendir.acra.model.QProguardMapping;
 import com.faendir.acra.model.QReport;
-import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.base.ConfigurationLabel;
-import com.faendir.acra.ui.base.MyGrid;
 import com.faendir.acra.ui.base.popup.Popup;
 import com.faendir.acra.ui.component.Card;
 import com.faendir.acra.ui.component.DownloadButton;
@@ -41,21 +36,14 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StreamUtils;
 
 import java.io.ByteArrayInputStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
@@ -82,6 +70,8 @@ public class AdminTab extends AppTab<Div> {
         FlexLayout layout = new FlexLayout();
         layout.setFlexWrap(FlexLayout.FlexWrap.WRAP);
         layout.setWidthFull();
+        //TODO
+        /*
         MyGrid<ProguardMapping> mappingGrid = new MyGrid<>(getDataService().getMappingProvider(app));
         mappingGrid.setHeightToRows();
         mappingGrid.addColumn(ProguardMapping::getVersionCode, QProguardMapping.proguardMapping.versionCode, Messages.VERSION).setFlexGrow(1);
@@ -114,7 +104,7 @@ public class AdminTab extends AppTab<Div> {
             }, Messages.NEW_FILE));
         }
         layout.add(mappingCard);
-        layout.expand(mappingCard);
+        layout.expand(mappingCard);*/
 
         Translatable<ComboBox<String>> mailBox = Translatable.createComboBox(getDataService().getFromReports(app, null, QReport.report.userEmail), Messages.BY_MAIL);
         mailBox.setWidthFull();

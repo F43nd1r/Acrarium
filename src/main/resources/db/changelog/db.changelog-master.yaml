@@ -534,10 +534,12 @@ databaseChangeLog:
       author: lukas
       validCheckSum:
         - 8:6910f277d46cb17c3f4a1c9a72c27ed2
+        - 8:e5c8558072cd3f6c0970820344b789d7
       changes:
         - addNotNullConstraint:
             columnName: stacktrace_id
             tableName: report
+            columnDataType: INT
         - addForeignKeyConstraint:
             baseColumnNames: stacktrace_id
             baseTableName: report
@@ -710,3 +712,18 @@ databaseChangeLog:
                     foreignKeyName: FK_stacktrace_version
                     deferrable: false
                     initiallyDeferred: false
+  - changeSet:
+      id: 2019-02-11-remove-old-version-structure
+      author: lukas
+      changes:
+        - dropColumn:
+            tableName: stacktrace
+            columnName: version_code
+        - dropColumn:
+            tableName: stacktrace
+            columnName: version_name
+        - dropColumn:
+            tableName: bug
+            columnName: solved
+        - dropTable:
+            tableName: proguard_mapping

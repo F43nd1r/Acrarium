@@ -17,7 +17,6 @@
 package com.faendir.acra.ui.view.report;
 
 import com.faendir.acra.i18n.Messages;
-import com.faendir.acra.model.ProguardMapping;
 import com.faendir.acra.model.Report;
 import com.faendir.acra.service.AvatarService;
 import com.faendir.acra.service.DataService;
@@ -102,8 +101,8 @@ public class ReportView extends Composite<Div> implements HasSecureStringParamet
         summaryLayout.add(userLabel, userLayout);
         summaryLayout.add(Translatable.createLabel(Messages.EMAIL).with(Label::secondary), new Label(report.getUserEmail()));
         summaryLayout.add(Translatable.createLabel(Messages.COMMENT).with(Label::secondary), new Label(report.getUserComment()));
-        Optional<ProguardMapping> mapping = dataService.findMapping(report.getStacktrace().getBug().getApp(), report.getStacktrace().getVersion().getCode());
-        Label stacktrace = new Label(mapping.map(m -> Utils.retrace(report.getStacktrace().getStacktrace(), m.getMappings())).orElse(report.getStacktrace().getStacktrace()));
+        Optional<String> mapping = Optional.ofNullable(report.getStacktrace().getVersion().getMappings());
+        Label stacktrace = new Label(mapping.map(m -> Utils.retrace(report.getStacktrace().getStacktrace(), m)).orElse(report.getStacktrace().getStacktrace()));
         stacktrace.honorWhitespaces();
         summaryLayout.add(Translatable.createLabel(mapping.isPresent() ? Messages.DE_OBFUSCATED_STACKTRACE : Messages.NO_MAPPING_STACKTRACE).with(Label::secondary), stacktrace);
         summaryLayout.add(Translatable.createLabel(Messages.ATTACHMENTS).with(Label::secondary), new Div(dataService.findAttachments(report).stream().map(attachment -> {
