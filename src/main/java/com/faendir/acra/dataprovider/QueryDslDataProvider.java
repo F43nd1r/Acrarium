@@ -24,11 +24,8 @@ import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
+import org.springframework.lang.NonNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -37,10 +34,8 @@ import java.util.stream.Stream;
  * @since 30.05.18
  */
 public class QueryDslDataProvider<T> extends AbstractBackEndDataProvider<T, Void> {
-    private final List<SizeListener> sizeListeners;
     private final Supplier<JPAQuery<T>> fetchProvider;
     private final Supplier<JPAQuery<?>> countProvider;
-    private final Map<String, Expression<? extends Comparable>> sortOptions;
 
     public QueryDslDataProvider(JPAQuery<T> base) {
         this(base, base);
@@ -53,27 +48,14 @@ public class QueryDslDataProvider<T> extends AbstractBackEndDataProvider<T, Void
     public QueryDslDataProvider(Supplier<JPAQuery<T>> fetchProvider, Supplier<JPAQuery<?>> countProvider){
         this.fetchProvider = fetchProvider;
         this.countProvider = countProvider;
-        sizeListeners = new ArrayList<>();
-        sortOptions = new HashMap<>();
-    }
-
-    public void addSizeListener(SizeListener listener) {
-        sizeListeners.add(listener);
-    }
-
-    public String addSortable(Expression<? extends Comparable> expression) {
-        String id = String.valueOf(sortOptions.size());
-        sortOptions.put(id, expression);
-        return id;
     }
 
     @Override
     protected Stream<T> fetchFromBackEnd(Query<T, Void> query) {
         JPAQuery<T> q = fetchProvider.get().offset(query.getOffset()).limit(query.getLimit());
         for (QuerySortOrder order : query.getSortOrders()) {
-            Expression<? extends Comparable> sort = sortOptions.get(order.getSorted());
-            if (sort != null) {
-                q = q.orderBy(new OrderSpecifier<>(order.getDirection() == SortDirection.ASCENDING ? Order.ASC : Order.DESC, sort));
+            if(order instanceof QueryDslSortOrder) {
+                q = q.orderBy(((QueryDslSortOrder) order).toSpecifier());
             }
         }
         return q.fetch().stream();
@@ -81,13 +63,19 @@ public class QueryDslDataProvider<T> extends AbstractBackEndDataProvider<T, Void
 
     @Override
     protected int sizeInBackEnd(Query<T, Void> query) {
-        int result = Math.toIntExact(countProvider.get().fetchCount());
-        sizeListeners.forEach(listener -> listener.sizeChanged(result));
-        return result;
+        return Math.toIntExact(countProvider.get().fetchCount());
     }
 
-    @FunctionalInterface
-    public interface SizeListener {
-        void sizeChanged(int size);
+    public static class QueryDslSortOrder extends QuerySortOrder {
+        private final Expression<? extends Comparable> expression;
+
+        public QueryDslSortOrder(@NonNull Expression<? extends Comparable> expression, @NonNull SortDirection direction) {
+            super(expression.toString(), direction);
+            this.expression = expression;
+        }
+
+        public OrderSpecifier<?> toSpecifier() {
+            return new OrderSpecifier<>(getDirection() == SortDirection.ASCENDING ? Order.ASC : Order.DESC, expression);
+        }
     }
 }

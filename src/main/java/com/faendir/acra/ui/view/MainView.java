@@ -34,9 +34,8 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.login.LoginForm;
+import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
@@ -129,17 +128,23 @@ public class MainView extends ParentLayout {
         logo.setPadding(1, Unit.REM);
         FlexLayout logoWrapper = new FlexLayout(logo);
         logoWrapper.expand(logo);
-        TextField username = new TextField();
-        PasswordField password = new PasswordField();
-        Translatable<Button> login = Translatable.createButton(event -> login(username.getValue(), password.getValue()), Messages.LOGIN);
-        login.setWidthFull();
-        FlexLayout loginForm = new FlexLayout(logoWrapper, username, password, login);
-        loginForm.setFlexDirection(FlexDirection.COLUMN);
-        loginForm.setSizeUndefined();
-        setContent(loginForm);
+        LoginI18n loginI18n = LoginI18n.createDefault();
+        loginI18n.getForm().setTitle("");
+        LoginForm loginForm = new LoginForm(loginI18n);
+        loginForm.setForgotPasswordButtonVisible(false);
+        loginForm.getElement().getStyle().set("padding", "0");
+        loginForm.addLoginListener(event -> {
+            if(!login(event.getUsername(), event.getPassword())){
+                event.getSource().setError(true);
+            }
+        });
+        FlexLayout layout = new FlexLayout(logoWrapper, loginForm);
+        layout.setFlexDirection(FlexDirection.COLUMN);
+        layout.setSizeUndefined();
+        setContent(layout);
     }
 
-    private void login(@NonNull String username, @NonNull String password) {
+    private boolean login(@NonNull String username, @NonNull String password) {
         try {
             Authentication token = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username.toLowerCase(), password));
             if (!token.getAuthorities().contains(User.Role.USER)) {
@@ -148,8 +153,9 @@ public class MainView extends ParentLayout {
             VaadinService.reinitializeSession(VaadinService.getCurrentRequest());
             SecurityContextHolder.getContext().setAuthentication(token);
             UI.getCurrent().getPage().reload();
+            return true;
         } catch (AuthenticationException ex) {
-            Notification.show(getTranslation(Messages.LOGIN_FAILED), 5000, Notification.Position.MIDDLE);
+            return false;
         }
     }
 
