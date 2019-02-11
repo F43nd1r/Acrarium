@@ -79,6 +79,15 @@ public class Bug {
         this.title = title;
     }
 
+    @Nullable
+    public Version getSolvedVersion() {
+        return solvedVersion;
+    }
+
+    public void setSolvedVersion(@Nullable Version solvedVersion) {
+        this.solvedVersion = solvedVersion;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

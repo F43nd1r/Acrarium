@@ -640,15 +640,15 @@ databaseChangeLog:
             tableName: version
             columns:
               - column:
-                name: id
-                type: INT
-                autoIncrement: true
-                constraints:
-                  nullable: false
-                  primaryKey: true
-                  primaryKeyName: PK_version
-                  deferrable: false
-                  initiallyDeferred: false
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: PK_version
+                    deferrable: false
+                    initiallyDeferred: false
               - column:
                   name: code
                   type: INT
@@ -688,12 +688,12 @@ databaseChangeLog:
             tableName: bug
             columns:
               - column:
-                  name: solvedVersion
+                  name: solved_version
                   type: INT
                   constraints:
                     nullable: true
                     referencedTableName: version
-                    referencedColumnNames: code
+                    referencedColumnNames: id
                     foreignKeyName: FK_bug_solved_version
                     deferrable: false
                     initiallyDeferred: false
@@ -706,7 +706,7 @@ databaseChangeLog:
                   constraints:
                     nullable: true
                     referencedTableName: version
-                    referencedColumnNames: code
-                    foreignKeyName: FK_bug_solved_version
+                    referencedColumnNames: id
+                    foreignKeyName: FK_stacktrace_version
                     deferrable: false
                     initiallyDeferred: false

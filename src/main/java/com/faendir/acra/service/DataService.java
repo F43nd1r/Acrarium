@@ -119,7 +119,7 @@ public class DataService implements Serializable {
     @NonNull
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
     public QueryDslDataProvider<VBug> getBugProvider(@NonNull App app, BooleanSupplier onlyNonSolvedProvider) {
-        Supplier<BooleanExpression> whereSupplier = () -> onlyNonSolvedProvider.getAsBoolean() ? bug.app.eq(app).and(bug.solved.eq(false)) : bug.app.eq(app);
+        Supplier<BooleanExpression> whereSupplier = () -> onlyNonSolvedProvider.getAsBoolean() ? bug.app.eq(app).and(bug.solvedVersion.isNull()) : bug.app.eq(app);
         return new QueryDslDataProvider<>(() -> Queries.selectVBug(entityManager).where(whereSupplier.get()),
                 () -> new JPAQuery<>(entityManager).from(bug).where(whereSupplier.get()));
     }
@@ -226,8 +226,8 @@ public class DataService implements Serializable {
 
     @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission$Level).EDIT)")
-    public void setBugSolved(@NonNull Bug bug, boolean solved) {
-        bug.setSolved(solved);
+    public void setBugSolved(@NonNull Bug bug, Version solved) {
+        bug.setSolvedVersion(solved);
         store(bug);
     }
 

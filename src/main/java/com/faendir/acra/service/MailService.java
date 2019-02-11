@@ -84,7 +84,7 @@ public class MailService {
                 Map<Bug, List<Report>> bugMap = reports.stream().collect(Collectors.groupingBy(r -> r.getStacktrace().getBug()));
                 for (Map.Entry<Bug, List<Report>> bugEntry : bugMap.entrySet()) {
                     boolean newBug = new JPAQuery<>().select(report).where(report.stacktrace.bug.eq(bugEntry.getKey()).and(report.notIn(bugEntry.getValue()))).fetchFirst() == null;
-                    if (!newBug && bugEntry.getKey().isSolved()) {
+                    if (!newBug && bugEntry.getKey().getSolvedVersion() != null) {
                         int maxNewVersion = reports.stream().map(Report::getStacktrace).map(Stacktrace::getVersion).mapToInt(Version::getCode).max().orElseThrow(IllegalStateException::new);
                         boolean regression = new JPAQuery<>().select(report).where(report.stacktrace.bug.eq(bugEntry.getKey()).and(report.notIn(bugEntry.getValue())).and(report.stacktrace.version.code.goe(maxNewVersion))).fetchFirst() == null;
                     }

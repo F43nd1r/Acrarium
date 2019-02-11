@@ -22,6 +22,9 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author lukas
@@ -40,8 +43,31 @@ public class VersionChange extends BaseChange {
 
     @Override
     protected void afterChange() {
-        iterate(() -> entityManager.createNativeQuery("SELECT" + quote("version_code") + ", " + quote("version_name") + ", " + quote("app_id") + " FROM " + quote("stacktrace") + " JOIN " + quote("bug") + " ON " + quote("stacktrace") + "." + quote("bug_id") + " = " + quote("bug") + "." + quote("id") + " GROUP BY " + quote("version_code") + ", " + quote("version_name") + ", " + quote("app_id")), o -> {
-
+        iterate(() -> entityManager.createNativeQuery("SELECT " + quote("version_code") + ", " + quote("version_name") + ", " + quote("app_id") + ", GROUP_CONCAT(" + quote("stacktrace") + "." + quote("id") + " SEPARATOR ',') FROM " + quote("stacktrace") + " JOIN " + quote("bug") + " ON " + quote("stacktrace") + "." + quote("bug_id") + " = " + quote("bug") + "." + quote("id") + " GROUP BY " + quote("version_code") + ", " + quote("version_name") + ", " + quote("app_id")), o -> {
+            Object[] result = (Object[]) o;
+            int versionCode = (int) result[0];
+            String versioName = (String) result[1];
+            int appId = (int) result[2];
+            List<Integer> stacktraces = Stream.of((String) result[3]).map(Integer::parseInt).collect(Collectors.toList());
+            List<Object> list = entityManager.createNativeQuery("SELECT " + quote("mappings") + " FROM " + quote("proguard_mapping") + " WHERE " + quote("version_code") + " = ?1 AND " + quote("app_id") + " = ?2")
+                    .setParameter(1, versionCode)
+                    .setParameter(2, appId)
+                    .getResultList();
+            String mappings = list.isEmpty() ? null : (String) list.get(0);
+            entityManager.createNativeQuery("INSERT INTO " + quote("version") + "(" + quote("code") + ", " + quote("name") + ", " + quote("app_id") + ", " + quote("mappings") + ") VALUES (?1, ?2, ?3, ?4)")
+                    .setParameter(1, versionCode)
+                    .setParameter(2, versioName)
+                    .setParameter(3, appId)
+                    .setParameter(4, mappings)
+                    .executeUpdate();
+            int id = (int) entityManager.createNativeQuery("SELECT " + quote("id") + " FROM " + quote("version") + " WHERE " + quote("code") + " = ?1 AND " + quote("app_id") + " = ?2")
+                    .setParameter(1, versionCode)
+                    .setParameter(2, appId)
+                    .getSingleResult();
+            entityManager.createNativeQuery("UPDATE " + quote("stacktrace") + " SET " + quote("version_id") + " = ?1 WHERE " + quote("id") + " IN ?2")
+                    .setParameter(1, id)
+                    .setParameter(2, stacktraces)
+                    .executeUpdate();
         });
     }
 }
