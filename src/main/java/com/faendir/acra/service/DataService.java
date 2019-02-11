@@ -79,6 +79,7 @@ import static com.faendir.acra.model.QAttachment.attachment;
 import static com.faendir.acra.model.QBug.bug;
 import static com.faendir.acra.model.QReport.report;
 import static com.faendir.acra.model.QStacktrace.stacktrace1;
+import static com.faendir.acra.model.QVersion.version;
 
 /**
  * @author lukas
@@ -174,11 +175,11 @@ public class DataService implements Serializable {
         return new JPAQuery<>(entityManager).from(report).where(where).select(report.id).fetch();
     }
 
-    /*@NonNull
+    @NonNull
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public QueryDslDataProvider<ProguardMapping> getMappingProvider(@NonNull App app) {
-        return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(proguardMapping).where(proguardMapping.app.eq(app)).select(proguardMapping));
-    }*/
+    public QueryDslDataProvider<Version> getVersionProvider(@NonNull App app) {
+        return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(version).where(version.app.eq(app)).select(version));
+    }
 
     @Transactional
     public <T> T store(T entity) {
@@ -309,6 +310,12 @@ public class DataService implements Serializable {
                 .fetchFirst());
     }
 
+    @NonNull
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
+    public List<Version> findAllVersions(@NonNull App app) {
+        return new JPAQuery<>(entityManager).from(version).where(version.app.eq(app)).select(version).fetch();
+    }
+
     @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).EDIT)")
     public void changeConfiguration(@NonNull App app, @NonNull App.Configuration configuration) {
@@ -342,7 +349,7 @@ public class DataService implements Serializable {
         if (app != null) {
             JSONObject jsonObject = new JSONObject(content);
             String trace = jsonObject.optString(ReportField.STACK_TRACE.name());
-            Version version = getVersion(jsonObject);
+            Version version = getVersion(app, jsonObject);
             Stacktrace stacktrace = findStacktrace(app, trace, version.getCode()).orElseGet(() -> {
                 synchronized (stacktraceLock) {
                     return findStacktrace(app, trace, version.getCode()).orElseGet(() -> store(new Stacktrace(findBug(app, trace).orElseGet(() -> new Bug(app, trace)), trace, version)));
@@ -363,7 +370,7 @@ public class DataService implements Serializable {
         }
     }
 
-    private Version getVersion(JSONObject jsonObject) {
+    private Version getVersion(App app, JSONObject jsonObject) {
         JSONObject buildConfig = jsonObject.optJSONObject(ReportField.BUILD_CONFIG.name());
         Integer versionCode = null;
         String versionName = null;
@@ -383,7 +390,7 @@ public class DataService implements Serializable {
         if (versionName == null) {
             versionName = jsonObject.optString(ReportField.APP_VERSION_NAME.name(), "N/A");
         }
-        return new Version(versionCode, versionName);
+        return new Version(app, versionCode, versionName);
     }
 
     @NonNull
@@ -420,11 +427,11 @@ public class DataService implements Serializable {
         return new JPAQuery<>(entityManager).from(stacktrace1).where(stacktrace1.bug.eq(bug)).select(stacktrace1).fetch();
     }
 
-    /*@NonNull
+    @NonNull
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public Optional<Integer> getMaximumMappingVersion(@NonNull App app) {
-        return Optional.ofNullable(new JPAQuery<>(entityManager).from(proguardMapping).where(proguardMapping.app.eq(app)).select(proguardMapping.versionCode.max()).fetchOne());
-    }*/
+    public Optional<Integer> getMaxVersion(@NonNull App app) {
+        return Optional.ofNullable(new JPAQuery<>(entityManager).from(version).where(version.app.eq(app)).select(version.code.max()).fetchOne());
+    }
 
     @Transactional
     @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")

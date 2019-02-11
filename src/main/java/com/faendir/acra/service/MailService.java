@@ -76,7 +76,7 @@ public class MailService {
     }
 
     private void check(MailSettings.SendMode sendMode) {
-        List<MailSettings> settings = new JPAQuery<>(entityManager).select(mailSettings).where(mailSettings.sendMode.eq(sendMode)).fetch();
+        List<MailSettings> settings = new JPAQuery<>(entityManager).select(mailSettings).from(mailSettings).where(mailSettings.sendMode.eq(sendMode)).fetch();
         Map<App, List<MailSettings>> appMap = settings.stream().collect(Collectors.groupingBy(MailSettings::getApp));
         for (Map.Entry<App, List<MailSettings>> appEntry : appMap.entrySet()) {
             List<Report> reports = new JPAQuery<>(entityManager).select(report).where(report.date.after(ZonedDateTime.now().minus(1, sendMode.getUnit())).and(report.stacktrace.bug.app.eq(appEntry.getKey()))).fetch();

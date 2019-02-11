@@ -20,6 +20,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import javax.persistence.Entity;
@@ -33,7 +34,7 @@ import javax.persistence.ManyToOne;
  * @since 26.07.18
  */
 @Entity
-public class Version {
+public class Version implements Comparable<Version>{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -50,9 +51,15 @@ public class Version {
     Version() {
     }
 
-    public Version(int code, String name) {
+    public Version(App app, int code, String name) {
+        this.app = app;
         this.code = code;
         this.name = name;
+    }
+
+    public Version(App app, int code, String name, String mappings) {
+        this(app, code, name);
+        this.mappings = mappings;
     }
 
     public int getCode() {
@@ -66,5 +73,10 @@ public class Version {
     @Nullable
     public String getMappings() {
         return mappings;
+    }
+
+    @Override
+    public int compareTo(@NonNull Version o) {
+        return Integer.compare(code, o.code);
     }
 }

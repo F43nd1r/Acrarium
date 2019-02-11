@@ -18,9 +18,14 @@ package com.faendir.acra.ui.view.app.tabs;
 
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
+import com.faendir.acra.model.Permission;
 import com.faendir.acra.model.QReport;
+import com.faendir.acra.model.QVersion;
+import com.faendir.acra.model.Version;
+import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.base.ConfigurationLabel;
+import com.faendir.acra.ui.base.MyGrid;
 import com.faendir.acra.ui.base.popup.Popup;
 import com.faendir.acra.ui.component.Card;
 import com.faendir.acra.ui.component.DownloadButton;
@@ -36,14 +41,22 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StreamUtils;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
@@ -70,41 +83,40 @@ public class AdminTab extends AppTab<Div> {
         FlexLayout layout = new FlexLayout();
         layout.setFlexWrap(FlexLayout.FlexWrap.WRAP);
         layout.setWidthFull();
-        //TODO
-        /*
-        MyGrid<ProguardMapping> mappingGrid = new MyGrid<>(getDataService().getMappingProvider(app));
-        mappingGrid.setHeightToRows();
-        mappingGrid.addColumn(ProguardMapping::getVersionCode, QProguardMapping.proguardMapping.versionCode, Messages.VERSION).setFlexGrow(1);
-        mappingGrid.setHeight("");
-        Card mappingCard = new Card(mappingGrid);
-        mappingCard.setHeader(Translatable.createText(Messages.DE_OBFUSCATION));
-        mappingCard.setWidth(500, HasSize.Unit.PIXEL);
+        MyGrid<Version> versionGrid = new MyGrid<>(getDataService().getVersionProvider(app));
+        versionGrid.setHeightToRows();
+        versionGrid.addColumn(Version::getCode, QVersion.version.code, Messages.VERSION_CODE).setFlexGrow(1);
+        versionGrid.addColumn(Version::getName, QVersion.version.name, Messages.VERSION).setFlexGrow(1);
+        versionGrid.setHeight("");
+        Card versionCard = new Card(versionGrid);
+        versionCard.setHeader(Translatable.createText(Messages.VERSIONS));
+        versionCard.setWidth(500, HasSize.Unit.PIXEL);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-            mappingGrid.addColumn(new ComponentRenderer<>(mapping -> new Button(new Icon(VaadinIcon.TRASH), e -> new Popup().addComponent(Translatable.createText(Messages.DELETE_MAPPING_CONFIRM, mapping.getVersionCode())).addYesNoButtons(p -> {
-                getDataService().delete(mapping);
-                mappingGrid.getDataProvider().refreshAll();
+            versionGrid.addColumn(new ComponentRenderer<>(v -> new Button(new Icon(VaadinIcon.TRASH), e -> new Popup().addComponent(Translatable.createText(Messages.DELETE_MAPPING_CONFIRM, v.getCode())).addYesNoButtons(p -> {
+                getDataService().delete(v);
+                versionGrid.getDataProvider().refreshAll();
             }, true).show())));
-            mappingGrid.appendFooterRow().getCell(mappingGrid.getColumns().get(0)).setComponent(Translatable.createButton(e -> {
-                NumberInput version = new NumberInput(getDataService().getMaximumMappingVersion(app).map(i -> i + 1).orElse(1));//, Messages.VERSION_CODE);
+            versionGrid.appendFooterRow().getCell(versionGrid.getColumns().get(0)).setComponent(Translatable.createButton(e -> {
+                TextField name = new TextField();
+                NumberInput version = new NumberInput(getDataService().getMaxVersion(app).map(i -> i + 1).orElse(1));//, Messages.VERSION_CODE);
                 MemoryBuffer buffer = new MemoryBuffer();
                 Upload upload = new Upload(buffer);
-                new Popup()
-                        .setTitle(Messages.NEW_MAPPING)
+                new Popup().setTitle(Messages.NEW_MAPPING)
+                        .addComponent(name)
                         .addComponent(version)
                         .addComponent(upload)
                         .addCreateButton(popup -> {
                             try {
-                                getDataService().store(new ProguardMapping(app, version.getValue().intValue(), StreamUtils.copyToString(buffer.getInputStream(), Charset.defaultCharset())));
+                                getDataService().store(new Version(app, version.getValue().intValue(), name.getValue(), StreamUtils.copyToString(buffer.getInputStream(), Charset.defaultCharset())));
                             } catch (Exception ex) {
                                 //TODO
                             }
-                            mappingGrid.getDataProvider().refreshAll();
-                        }, true)
-                        .show();
-            }, Messages.NEW_FILE));
+                            versionGrid.getDataProvider().refreshAll();
+                        }, true).show();
+            }, Messages.NEW_VERSION));
         }
-        layout.add(mappingCard);
-        layout.expand(mappingCard);*/
+        layout.add(versionCard);
+        layout.expand(versionCard);
 
         Translatable<ComboBox<String>> mailBox = Translatable.createComboBox(getDataService().getFromReports(app, null, QReport.report.userEmail), Messages.BY_MAIL);
         mailBox.setWidthFull();

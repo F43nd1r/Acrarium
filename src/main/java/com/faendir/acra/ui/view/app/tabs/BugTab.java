@@ -18,9 +18,12 @@ package com.faendir.acra.ui.view.app.tabs;
 
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
+import com.faendir.acra.model.Permission;
 import com.faendir.acra.model.QBug;
 import com.faendir.acra.model.QReport;
+import com.faendir.acra.model.Version;
 import com.faendir.acra.model.view.VBug;
+import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.BugMerger;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.base.MyGrid;
@@ -31,12 +34,14 @@ import com.faendir.acra.ui.view.bug.tabs.ReportTab;
 import com.faendir.acra.util.TimeSpanRenderer;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.FooterRow;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
@@ -92,17 +97,19 @@ public class BugTab extends AppTab<VerticalLayout> {
         bugs.addColumn(VBug::getHighestVersionCode, QReport.report.stacktrace.version.code.max(), Messages.LATEST_VERSION);
         bugs.addColumn(VBug::getUserCount, QReport.report.installationId.countDistinct(), Messages.AFFECTED_USERS);
         bugs.addColumn(bug -> bug.getBug().getTitle(), QBug.bug.title, Messages.TITLE).setFlexGrow(1);
-        //TODO
-        /*Grid.Column<VBug> solvedColumn = bugs.addColumn(new ComponentRenderer<>(bug -> {
-            Checkbox checkbox = new Checkbox(bug.getBug().isSolved());
-            checkbox.setEnabled(SecurityUtils.hasPermission(app, Permission.Level.EDIT));
-            checkbox.addValueChangeListener(e -> getDataService().setBugSolved(bug.getBug(), e.getValue()));
-            return checkbox;
-        }), QBug.bug.solved, Messages.SOLVED);*/
+        List<Version> versions = getDataService().findAllVersions(app);
+        Grid.Column<VBug> solvedColumn = bugs.addColumn(new ComponentRenderer<>((VBug bug) -> {
+            ComboBox<Version> comboBox = new ComboBox<>("", versions);
+            comboBox.setItemLabelGenerator(Version::getName);
+            comboBox.setValue(bug.getBug().getSolvedVersion());
+            comboBox.setEnabled(SecurityUtils.hasPermission(app, Permission.Level.EDIT));
+            comboBox.addValueChangeListener(e -> getDataService().setBugSolved(bug.getBug(), e.getValue()));
+            return comboBox;
+        }), QBug.bug.solvedVersion, Messages.SOLVED);
         bugs.addOnClickNavigation(ReportTab.class, bug -> bug.getBug().getId());
         FooterRow footerRow = bugs.appendFooterRow();
         footerRow.getCell(countColumn).setComponent(merge);
-        //footerRow.getCell(solvedColumn).setComponent(hideSolved);
+        footerRow.getCell(solvedColumn).setComponent(hideSolved);
         getContent().removeAll();
         getContent().add(bugs);
         getContent().setFlexGrow(1, bugs);
