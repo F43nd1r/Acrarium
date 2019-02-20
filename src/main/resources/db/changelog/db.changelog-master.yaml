@@ -727,3 +727,73 @@ databaseChangeLog:
             columnName: solved
         - dropTable:
             tableName: proguard_mapping
+  - changeSet:
+      id: 2019-02-19-mail
+      author: lukas
+      changes:
+        - createTable:
+            tableName: mail_settings
+            columns:
+              - column:
+                  name: app_id
+                  type: INT
+                  constraints:
+                    nullable: false
+                    referencedTableName: app
+                    referencedColumnNames: id
+                    foreignKeyName: FK_mail_app
+                    deferrable: false
+                    initiallyDeffered: false
+              - column:
+                  name: username
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    referencedTableName: user
+                    referencedColumnNames: username
+                    foreignKeyName: FK_mail_user
+                    deferrable: false
+                    initiallyDeffered: false
+              - column:
+                  name: new_bug
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+                    deferrable: false
+                    initiallyDeffered: false
+              - column:
+                  name: regression
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+                    deferrable: false
+                    initiallyDeffered: false
+              - column:
+                  name: spike
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+                    deferrable: false
+                    initiallyDeffered: false
+              - column:
+                  name: summary
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+                    deferrable: false
+                    initiallyDeffered: false
+        - addPrimaryKey:
+            tableName: mail_settings
+            columnNames: app_id, username
+            constraintName: PK_mail
+        - addColumn:
+            tableName: user
+            columns:
+              - column:
+                  name: mail
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: true
+                    deferrable: false
+                    initiallyDeffered: false
+

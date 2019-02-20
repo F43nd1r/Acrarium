@@ -23,10 +23,9 @@ import org.springframework.data.annotation.PersistenceConstructor;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import java.io.Serializable;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.Objects;
 
 /**
@@ -43,11 +42,12 @@ public class MailSettings {
     @Id
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "username")
     private User user;
-    private SendMode sendMode;
-    private boolean all;
     private boolean newBug;
     private boolean regression;
+    private boolean spike;
+    private boolean summary;
 
     @PersistenceConstructor
     MailSettings() {
@@ -61,37 +61,20 @@ public class MailSettings {
         return user;
     }
 
-    public SendMode getSendMode() {
-        return sendMode;
-    }
-
-    public boolean isAll() {
-        return all;
-    }
-
-    public boolean isNewBug() {
+    public boolean getNewBug() {
         return newBug;
     }
 
-    public boolean isRegression() {
+    public boolean getRegression() {
         return regression;
     }
 
-    public enum SendMode {
-        OFF(null),
-        INSTANT(null),
-        HOURLY(ChronoUnit.HOURS),
-        DAILY(ChronoUnit.DAYS),
-        WEEKLY(ChronoUnit.WEEKS);
-        private final TemporalUnit unit;
+    public boolean getSpike() {
+        return spike;
+    }
 
-        SendMode(TemporalUnit unit) {
-            this.unit = unit;
-        }
-
-        public TemporalUnit getUnit() {
-            return unit;
-        }
+    public boolean getSummary() {
+        return summary;
     }
 
     static class ID implements Serializable {

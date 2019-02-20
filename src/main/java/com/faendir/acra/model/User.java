@@ -48,6 +48,7 @@ public class User implements UserDetails {
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<Permission> permissions;
     private String password;
+    private String mail;
 
     @PersistenceConstructor
     User() {
@@ -111,6 +112,15 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+    public String getMail() {
+        return mail;
+    }
+
+    public void setMail(String mail) {
+        this.mail = mail;
+    }
+
 
     public enum Role implements GrantedAuthority {
         ADMIN,
