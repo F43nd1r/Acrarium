@@ -41,6 +41,7 @@ import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.view.Overview;
 import com.faendir.acra.ui.view.app.AppView;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -79,28 +80,30 @@ import static com.faendir.acra.model.QReport.report;
 public class AdminTab extends AppTab<Div> {
     @NonNull
     private final UserService userService;
+    private final FlexLayout layout;
 
     @Autowired
     public AdminTab(DataService dataService, @NonNull UserService userService) {
         super(dataService);
         this.userService = userService;
         getContent().setSizeFull();
+        layout = new FlexLayout();
+        layout.setWidthFull();
+        layout.setFlexWrap(FlexLayout.FlexWrap.WRAP);
+        layout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        getContent().add(layout);
     }
 
     @Override
     protected void init(App app) {
-        getContent().removeAll();
-        FlexLayout layout = new FlexLayout();
-        layout.setFlexWrap(FlexLayout.FlexWrap.WRAP);
-        layout.setWidthFull();
+        layout.removeAll();
         MyGrid<Version> versionGrid = new MyGrid<>(getDataService().getVersionProvider(app));
         versionGrid.setHeightToRows();
         versionGrid.addColumn(Version::getCode, QVersion.version.code, Messages.VERSION_CODE).setFlexGrow(1);
         versionGrid.addColumn(Version::getName, QVersion.version.name, Messages.VERSION).setFlexGrow(1);
         versionGrid.setHeight("");
-        Card versionCard = new Card(versionGrid);
+        Card versionCard = createCard(versionGrid);
         versionCard.setHeader(Translatable.createText(Messages.VERSIONS));
-        versionCard.setWidth(500, HasSize.Unit.PIXEL);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
             versionGrid.addColumn(new ComponentRenderer<>(v -> new Button(new Icon(VaadinIcon.TRASH), e -> new Popup().addComponent(Translatable.createText(Messages.DELETE_MAPPING_CONFIRM, v.getCode())).addYesNoButtons(p -> {
                 getDataService().delete(v);
@@ -125,8 +128,6 @@ public class AdminTab extends AppTab<Div> {
                         }, true).show();
             }, Messages.NEW_VERSION));
         }
-        layout.add(versionCard);
-        layout.expand(versionCard);
 
         CssGrid notificationLayout = new CssGrid();
         notificationLayout.setTemplateColumns("auto max-content");
@@ -157,11 +158,8 @@ public class AdminTab extends AppTab<Div> {
             div.getStyle().set("font-style", "italic");
             notificationLayout.add(div);
         }
-        Card notificationCard = new Card(notificationLayout);
+        Card notificationCard = createCard(notificationLayout);
         notificationCard.setHeader(Translatable.createText(Messages.NOTIFICATIONS));
-        notificationCard.setWidth(500, HasSize.Unit.PIXEL);
-        layout.add(notificationCard);
-        layout.expand(notificationCard);
 
         Translatable<ComboBox<String>> mailBox = Translatable.createComboBox(getDataService().getFromReports(app, null, QReport.report.userEmail), Messages.BY_MAIL);
         mailBox.setWidthFull();
@@ -183,11 +181,8 @@ public class AdminTab extends AppTab<Div> {
             return new ByteArrayInputStream(getDataService().getFromReports(app, where, report.content, report.id).stream().collect(Collectors.joining(", ", "[", "]")).getBytes(StandardCharsets.UTF_8));
         }), Messages.DOWNLOAD);
         download.setSizeFull();
-        Card exportCard = new Card(mailBox, idBox, download);
+        Card exportCard = createCard(mailBox, idBox, download);
         exportCard.setHeader(Translatable.createText(Messages.EXPORT));
-        exportCard.setWidth(500, HasSize.Unit.PIXEL);
-        layout.add(exportCard);
-        layout.expand(exportCard);
 
         Translatable<Button> configButton = Translatable.createButton(e -> new Popup().setTitle(Messages.NEW_ACRA_CONFIG_CONFIRM)
                 .addYesNoButtons(popup -> popup.clear().addComponent(new ConfigurationLabel(getDataService().recreateReporterUser(app))).addCloseButton().show())
@@ -229,12 +224,17 @@ public class AdminTab extends AppTab<Div> {
             UI.getCurrent().navigate(Overview.class);
         }, true).show(), Messages.DELETE_APP);
         deleteButton.setWidthFull();
-        Card dangerCard = new Card(configButton, matchingButton, purgeAge, purgeVersion, deleteButton);
+        Card dangerCard = createCard(configButton, matchingButton, purgeAge, purgeVersion, deleteButton);
         dangerCard.setHeader(Translatable.createText(Messages.DANGER_ZONE));
         dangerCard.setHeaderColor("var(----lumo-error-text-color)", "var(--lumo-error-color)");
-        dangerCard.setWidth(500, HasSize.Unit.PIXEL);
-        layout.add(dangerCard);
-        layout.expand(dangerCard);
-        getContent().add(layout);
+    }
+
+    private Card createCard(Component... content) {
+        Card card = new Card(content);
+        card.setWidth(500, HasSize.Unit.PIXEL);
+        card.setMaxWidth(1000, HasSize.Unit.PIXEL);
+        layout.add(card);
+        layout.expand(card);
+        return card;
     }
 }
