@@ -18,16 +18,20 @@ package com.faendir.acra.ui.view.app.tabs;
 
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
+import com.faendir.acra.model.MailSettings;
 import com.faendir.acra.model.Permission;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.model.QVersion;
+import com.faendir.acra.model.User;
 import com.faendir.acra.model.Version;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.DataService;
+import com.faendir.acra.service.UserService;
 import com.faendir.acra.ui.base.ConfigurationLabel;
 import com.faendir.acra.ui.base.MyGrid;
 import com.faendir.acra.ui.base.popup.Popup;
 import com.faendir.acra.ui.component.Card;
+import com.faendir.acra.ui.component.CssGrid;
 import com.faendir.acra.ui.component.DownloadButton;
 import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.HasSize;
@@ -39,6 +43,7 @@ import com.faendir.acra.ui.view.app.AppView;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
@@ -53,6 +58,7 @@ import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.util.StreamUtils;
 
 import java.io.ByteArrayInputStream;
@@ -71,9 +77,13 @@ import static com.faendir.acra.model.QReport.report;
 @SpringComponent
 @Route(value = "admin", layout = AppView.class)
 public class AdminTab extends AppTab<Div> {
+    @NonNull
+    private final UserService userService;
+
     @Autowired
-    public AdminTab(DataService dataService) {
+    public AdminTab(DataService dataService, @NonNull UserService userService) {
         super(dataService);
+        this.userService = userService;
         getContent().setSizeFull();
     }
 
@@ -117,6 +127,41 @@ public class AdminTab extends AppTab<Div> {
         }
         layout.add(versionCard);
         layout.expand(versionCard);
+
+        CssGrid notificationLayout = new CssGrid();
+        notificationLayout.setTemplateColumns("auto max-content");
+        notificationLayout.setWidthFull();
+        User user = userService.getUser(SecurityUtils.getUsername());
+        MailSettings settings = getDataService().findMailSettings(app, user).orElse(new MailSettings(app, user));
+        notificationLayout.add(Translatable.createLabel(Messages.NEW_BUG_MAIL_LABEL), new Checkbox("", event -> {
+            settings.setNewBug(event.getValue());
+            getDataService().store(settings);
+        }));
+        notificationLayout.add(Translatable.createLabel(Messages.REGRESSION_MAIL_LABEL), new Checkbox("", event -> {
+            settings.setRegression(event.getValue());
+            getDataService().store(settings);
+        }));
+        notificationLayout.add(Translatable.createLabel(Messages.SPIKE_MAIL_LABEL), new Checkbox("", event -> {
+            settings.setSpike(event.getValue());
+            getDataService().store(settings);
+        }));
+        notificationLayout.add(Translatable.createLabel(Messages.WEEKLY_MAIL_LABEL), new Checkbox("", event -> {
+            settings.setSummary(event.getValue());
+            getDataService().store(settings);
+        }));
+        if(user.getMail() == null) {
+            Icon icon = VaadinIcon.WARNING.create();
+            icon.getStyle().set("height", "var(--lumo-font-size-m)");
+            Div div = new Div(icon, Translatable.createText(Messages.NO_MAIL_SET));
+            div.getStyle().set("color","var(--lumo-error-color)");
+            div.getStyle().set("font-style", "italic");
+            notificationLayout.add(div);
+        }
+        Card notificationCard = new Card(notificationLayout);
+        notificationCard.setHeader(Translatable.createText(Messages.NOTIFICATIONS));
+        notificationCard.setWidth(500, HasSize.Unit.PIXEL);
+        layout.add(notificationCard);
+        layout.expand(notificationCard);
 
         Translatable<ComboBox<String>> mailBox = Translatable.createComboBox(getDataService().getFromReports(app, null, QReport.report.userEmail), Messages.BY_MAIL);
         mailBox.setWidthFull();

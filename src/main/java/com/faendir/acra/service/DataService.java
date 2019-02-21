@@ -19,9 +19,11 @@ import com.faendir.acra.dataprovider.QueryDslDataProvider;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Attachment;
 import com.faendir.acra.model.Bug;
+import com.faendir.acra.model.MailSettings;
 import com.faendir.acra.model.QApp;
 import com.faendir.acra.model.Report;
 import com.faendir.acra.model.Stacktrace;
+import com.faendir.acra.model.User;
 import com.faendir.acra.model.Version;
 import com.faendir.acra.model.view.Queries;
 import com.faendir.acra.model.view.VApp;
@@ -77,6 +79,7 @@ import java.util.stream.StreamSupport;
 import static com.faendir.acra.model.QApp.app;
 import static com.faendir.acra.model.QAttachment.attachment;
 import static com.faendir.acra.model.QBug.bug;
+import static com.faendir.acra.model.QMailSettings.mailSettings;
 import static com.faendir.acra.model.QReport.report;
 import static com.faendir.acra.model.QStacktrace.stacktrace1;
 import static com.faendir.acra.model.QVersion.version;
@@ -314,6 +317,12 @@ public class DataService implements Serializable {
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
     public List<Version> findAllVersions(@NonNull App app) {
         return new JPAQuery<>(entityManager).from(version).where(version.app.eq(app)).select(version).fetch();
+    }
+
+    @NonNull
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
+    public Optional<MailSettings> findMailSettings(@NonNull App app, @NonNull User user) {
+        return Optional.ofNullable(new JPAQuery<>(entityManager).from(mailSettings).where(mailSettings.app.eq(app).and(mailSettings.user.eq(user))).select(mailSettings).fetchOne());
     }
 
     @Transactional

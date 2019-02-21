@@ -21,6 +21,9 @@ import com.faendir.acra.model.App;
 import com.faendir.acra.model.Bug;
 import com.faendir.acra.model.MailSettings;
 import com.faendir.acra.model.QBug;
+import com.faendir.acra.model.QReport;
+import com.faendir.acra.model.Report;
+import com.faendir.acra.model.Stacktrace;
 import com.faendir.acra.model.User;
 import com.faendir.acra.ui.view.bug.tabs.ReportTab;
 import com.querydsl.core.Tuple;
@@ -36,6 +39,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -74,9 +78,28 @@ public class MailService {
         this.mailSender = mailSender;
     }
 
+    @Transactional
     @EventListener
     @Async
     public void onNewReport(NewReportEvent event) {
+        Report report = event.getReport();
+        Stacktrace stacktrace = report.getStacktrace();
+        Bug bug = stacktrace.getBug();
+        App app = bug.getApp();
+        List<MailSettings> settings = new JPAQuery<>(entityManager).select(mailSettings).from(mailSettings).where(mailSettings.app.eq(app)).fetch();
+        List<User> newBugReceiver = settings.stream().filter(MailSettings::getNewBug).map(MailSettings::getUser).collect(Collectors.toList());
+        List<User> regressionReceiver = settings.stream().filter(MailSettings::getRegression).map(MailSettings::getUser).collect(Collectors.toList());
+        List<User> spikeReceiver = settings.stream().filter(MailSettings::getSpike).map(MailSettings::getUser).collect(Collectors.toList());
+        RouteConfiguration configuration = RouteConfiguration.forApplicationScope();
+        if (!newBugReceiver.isEmpty() && new JPAQuery<>(entityManager).from(QReport.report).join(QReport.report.stacktrace, stacktrace1).join(stacktrace1.bug, QBug.bug).where(QBug.bug.eq(bug)).limit(2).select(QReport.report.count()).fetchCount() == 1) {
+            sendMessage(newBugReceiver, getTranslation(Messages.NEW_BUG_MAIL_TEMPLATE, configuration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), report.getBrand(), report.getPhoneModel(), report.getAndroidVersion(), app.getName(), stacktrace.getVersion().getName()), getTranslation(Messages.NEW_BUG_MAIL_SUBJECT, app.getName()));
+        } else if(!regressionReceiver.isEmpty() && bug.getSolvedVersion() != null && bug.getSolvedVersion().getCode() <= stacktrace.getVersion().getCode()) {
+            sendMessage(regressionReceiver, getTranslation(Messages.REGRESSION_MAIL_TEMPLATE, configuration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), report.getBrand(), bug.getSolvedVersion().getName(), report.getPhoneModel(), report.getAndroidVersion(), app.getName(), stacktrace.getVersion().getName()), getTranslation(Messages.REGRESSION_MAIL_SUBJECT, app.getName()));
+            bug.setSolvedVersion(null);
+            entityManager.merge(bug);
+        } else if(!spikeReceiver.isEmpty() && false ) {
+            //TODO
+        }
     }
 
     @Scheduled(cron = "0 0 0 * * SUN")
@@ -92,24 +115,34 @@ public class MailService {
                     .fetch();
             String body = tuples.stream().map(tuple -> {
                 Bug bug = tuple.get(QBug.bug);
-                return i18nProvider.getTranslation(Messages.WEEKLY_MAIL_BUG_TEMPLATE, Locale.ENGLISH, configuration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), tuple.get(report.count()), tuple.get(report.installationId.countDistinct()));
+                return getTranslation(Messages.WEEKLY_MAIL_BUG_TEMPLATE, configuration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), tuple.get(report.count()), tuple.get(report.installationId.countDistinct()));
             }).collect(Collectors.joining("\n"));
-            if (body.isEmpty()) body = i18nProvider.getTranslation(Messages.WEEKLY_MAIL_NO_REPORTS, Locale.ENGLISH);
-            try {
-                MimeMessage template = mailSender.createMimeMessage();
-                template.setContent(body, "text/html");
-                template.setSubject(i18nProvider.getTranslation(Messages.WEEKLY_MAIL_SUBJECT, Locale.ENGLISH, entry.getKey().getName()));
-                for (MailSettings s : entry.getValue()) {
-                    User user = s.getUser();
-                    if (user.getMail() != null) {
-                        MimeMessage message = new MimeMessage(template);
-                        message.setRecipients(Message.RecipientType.TO, user.getMail());
-                        mailSender.send(message);
-                    }
-                }
-            } catch (MessagingException e) {
-                e.printStackTrace();
+            if (body.isEmpty()) {
+                body = getTranslation(Messages.WEEKLY_MAIL_NO_REPORTS);
             }
+            sendMessage(entry.getValue().stream().map(MailSettings::getUser).collect(Collectors.toList()), body, getTranslation(Messages.WEEKLY_MAIL_SUBJECT, entry.getKey().getName()));
         }
+    }
+
+    private void sendMessage(@NonNull List<User> users, @NonNull String body, @NonNull String subject) {
+        try {
+            MimeMessage template = mailSender.createMimeMessage();
+            template.setContent(body, "text/html");
+            template.setSubject(subject);
+            for (User user : users) {
+                if (user.getMail() != null) {
+                    MimeMessage message = new MimeMessage(template);
+                    message.setRecipients(Message.RecipientType.TO, user.getMail());
+                    mailSender.send(message);
+                }
+            }
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getTranslation(String messageId, Object... params) {
+        //TODO use user locale
+        return i18nProvider.getTranslation(messageId, Locale.ENGLISH, params);
     }
 }

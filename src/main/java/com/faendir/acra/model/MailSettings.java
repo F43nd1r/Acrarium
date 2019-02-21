@@ -19,6 +19,7 @@ package com.faendir.acra.model;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.lang.NonNull;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -53,6 +54,11 @@ public class MailSettings {
     MailSettings() {
     }
 
+    public MailSettings(@NonNull App app, @NonNull User user) {
+        this.app = app;
+        this.user = user;
+    }
+
     public App getApp() {
         return app;
     }
@@ -65,16 +71,32 @@ public class MailSettings {
         return newBug;
     }
 
+    public void setNewBug(boolean newBug) {
+        this.newBug = newBug;
+    }
+
     public boolean getRegression() {
         return regression;
+    }
+
+    public void setRegression(boolean regression) {
+        this.regression = regression;
     }
 
     public boolean getSpike() {
         return spike;
     }
 
+    public void setSpike(boolean spike) {
+        this.spike = spike;
+    }
+
     public boolean getSummary() {
         return summary;
+    }
+
+    public void setSummary(boolean summary) {
+        this.summary = summary;
     }
 
     static class ID implements Serializable {
