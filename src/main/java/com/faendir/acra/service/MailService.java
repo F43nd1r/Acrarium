@@ -86,18 +86,18 @@ public class MailService {
         Stacktrace stacktrace = report.getStacktrace();
         Bug bug = stacktrace.getBug();
         App app = bug.getApp();
-        List<MailSettings> settings = new JPAQuery<>(entityManager).select(mailSettings).from(mailSettings).where(mailSettings.app.eq(app)).fetch();
+        List<MailSettings> settings = new JPAQuery<>(entityManager).select(mailSettings).from(mailSettings).where(mailSettings.app.eq(app).and(mailSettings.user.mail.isNotNull())).fetch();
         List<User> newBugReceiver = settings.stream().filter(MailSettings::getNewBug).map(MailSettings::getUser).collect(Collectors.toList());
         List<User> regressionReceiver = settings.stream().filter(MailSettings::getRegression).map(MailSettings::getUser).collect(Collectors.toList());
         List<User> spikeReceiver = settings.stream().filter(MailSettings::getSpike).map(MailSettings::getUser).collect(Collectors.toList());
         RouteConfiguration configuration = RouteConfiguration.forApplicationScope();
         if (!newBugReceiver.isEmpty() && new JPAQuery<>(entityManager).from(QReport.report).join(QReport.report.stacktrace, stacktrace1).join(stacktrace1.bug, QBug.bug).where(QBug.bug.eq(bug)).limit(2).select(QReport.report.count()).fetchCount() == 1) {
             sendMessage(newBugReceiver, getTranslation(Messages.NEW_BUG_MAIL_TEMPLATE, configuration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), report.getBrand(), report.getPhoneModel(), report.getAndroidVersion(), app.getName(), stacktrace.getVersion().getName()), getTranslation(Messages.NEW_BUG_MAIL_SUBJECT, app.getName()));
-        } else if(!regressionReceiver.isEmpty() && bug.getSolvedVersion() != null && bug.getSolvedVersion().getCode() <= stacktrace.getVersion().getCode()) {
+        } else if (!regressionReceiver.isEmpty() && bug.getSolvedVersion() != null && bug.getSolvedVersion().getCode() <= stacktrace.getVersion().getCode()) {
             sendMessage(regressionReceiver, getTranslation(Messages.REGRESSION_MAIL_TEMPLATE, configuration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), report.getBrand(), bug.getSolvedVersion().getName(), report.getPhoneModel(), report.getAndroidVersion(), app.getName(), stacktrace.getVersion().getName()), getTranslation(Messages.REGRESSION_MAIL_SUBJECT, app.getName()));
             bug.setSolvedVersion(null);
             entityManager.merge(bug);
-        } else if(!spikeReceiver.isEmpty() && false ) {
+        } else if (!spikeReceiver.isEmpty() && false) {
             //TODO
         }
     }
@@ -130,11 +130,9 @@ public class MailService {
             template.setContent(body, "text/html");
             template.setSubject(subject);
             for (User user : users) {
-                if (user.getMail() != null) {
-                    MimeMessage message = new MimeMessage(template);
-                    message.setRecipients(Message.RecipientType.TO, user.getMail());
-                    mailSender.send(message);
-                }
+                MimeMessage message = new MimeMessage(template);
+                message.setRecipients(Message.RecipientType.TO, user.getMail());
+                mailSender.send(message);
             }
         } catch (MessagingException e) {
             e.printStackTrace();
