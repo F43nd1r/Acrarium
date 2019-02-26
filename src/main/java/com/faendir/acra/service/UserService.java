@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.validation.Validator;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,18 +46,25 @@ import java.util.Optional;
 @Service
 public class UserService implements Serializable {
     private static final QUser USER = QUser.user;
-    @NonNull private final AcraConfiguration acraConfiguration;
-    @NonNull private final PasswordEncoder passwordEncoder;
-    @NonNull private final RandomStringGenerator randomStringGenerator;
-    @NonNull private final EntityManager entityManager;
+    @NonNull
+    private final AcraConfiguration acraConfiguration;
+    @NonNull
+    private final PasswordEncoder passwordEncoder;
+    @NonNull
+    private final RandomStringGenerator randomStringGenerator;
+    @NonNull
+    private final EntityManager entityManager;
+    @NonNull
+    private final Validator validator;
 
     @Autowired
     public UserService(@NonNull PasswordEncoder passwordEncoder, @NonNull AcraConfiguration acraConfiguration, @NonNull RandomStringGenerator randomStringGenerator,
-            @NonNull EntityManager entityManager) {
+                       @NonNull EntityManager entityManager, @NonNull Validator validator) {
         this.passwordEncoder = passwordEncoder;
         this.acraConfiguration = acraConfiguration;
         this.randomStringGenerator = randomStringGenerator;
         this.entityManager = entityManager;
+        this.validator = validator;
     }
 
     @Nullable
@@ -101,6 +109,20 @@ public class UserService implements Serializable {
         }
         return false;
     }
+
+    @Transactional
+    @PreAuthorize("authentication.name == #user.username")
+    public boolean changeMail(@NonNull User user, @Nullable String mail) {
+        String oldMail = user.getMail();
+        user.setMail(mail);
+        if (!validator.validate(user).isEmpty()) {
+            user.setMail(oldMail);
+            return false;
+        }
+        entityManager.merge(user);
+        return true;
+    }
+
 
     @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")

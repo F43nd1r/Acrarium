@@ -25,7 +25,7 @@ import com.faendir.acra.ui.base.popup.Popup;
 import com.faendir.acra.ui.component.DropdownMenu;
 import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.Translatable;
-import com.faendir.acra.ui.view.user.ChangePasswordView;
+import com.faendir.acra.ui.view.user.AccountView;
 import com.faendir.acra.ui.view.user.UserManager;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -88,7 +88,7 @@ public class MainView extends ParentLayout {
         Translatable<Button> userManager = Translatable.createButton(e -> UI.getCurrent().navigate(UserManager.class), Messages.USER_MANAGER);
         userManager.setDefaultTextStyle();
         userManager.getContent().addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        Translatable<Button> changePassword = Translatable.createButton(e -> UI.getCurrent().navigate(ChangePasswordView.class), Messages.CHANGE_PASSWORD);
+        Translatable<Button> changePassword = Translatable.createButton(e -> UI.getCurrent().navigate(AccountView.class), Messages.ACCOUNT);
         changePassword.setDefaultTextStyle();
         changePassword.getContent().addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         Translatable<Button> logout = Translatable.createButton(e -> logout(), Messages.LOGOUT);

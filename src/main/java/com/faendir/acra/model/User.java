@@ -27,6 +27,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.validation.constraints.Email;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -48,6 +49,7 @@ public class User implements UserDetails {
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<Permission> permissions;
     private String password;
+    @Email
     private String mail;
 
     @PersistenceConstructor

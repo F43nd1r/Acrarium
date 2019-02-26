@@ -35,6 +35,7 @@ import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.RouterLink;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -87,8 +88,8 @@ public class Translatable<T extends Component> extends Composite<T> implements L
     }
 
     @NonNull
-    public static Translatable<TextField> createTextField(@NonNull String initialValue, @NonNull String captionId, @NonNull Object... params) {
-        return new Translatable<>(new TextField("", initialValue, ""), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
+    public static Translatable<TextField> createTextField(@Nullable String initialValue, @NonNull String captionId, @NonNull Object... params) {
+        return new Translatable<>(new TextField("", initialValue == null ? "" : initialValue, ""), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
     }
 
     @NonNull
