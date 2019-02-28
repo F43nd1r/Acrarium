@@ -21,7 +21,6 @@ import com.faendir.acra.model.App;
 import com.faendir.acra.model.Bug;
 import com.faendir.acra.model.MailSettings;
 import com.faendir.acra.model.QBug;
-import com.faendir.acra.model.QReport;
 import com.faendir.acra.model.Report;
 import com.faendir.acra.model.Stacktrace;
 import com.faendir.acra.model.User;
@@ -50,7 +49,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 import static com.faendir.acra.model.QBug.bug;
 import static com.faendir.acra.model.QMailSettings.mailSettings;
@@ -82,24 +83,37 @@ public class MailService {
     @EventListener
     @Async
     public void onNewReport(NewReportEvent event) {
-        Report report = event.getReport();
-        Stacktrace stacktrace = report.getStacktrace();
+        Report r = event.getReport();
+        Stacktrace stacktrace = r.getStacktrace();
         Bug bug = stacktrace.getBug();
         App app = bug.getApp();
         List<MailSettings> settings = new JPAQuery<>(entityManager).select(mailSettings).from(mailSettings).where(mailSettings.app.eq(app).and(mailSettings.user.mail.isNotNull())).fetch();
-        List<User> newBugReceiver = settings.stream().filter(MailSettings::getNewBug).map(MailSettings::getUser).collect(Collectors.toList());
-        List<User> regressionReceiver = settings.stream().filter(MailSettings::getRegression).map(MailSettings::getUser).collect(Collectors.toList());
-        List<User> spikeReceiver = settings.stream().filter(MailSettings::getSpike).map(MailSettings::getUser).collect(Collectors.toList());
+        List<User> newBugReceiver = getUserBy(settings, MailSettings::getNewBug);
+        List<User> regressionReceiver = getUserBy(settings, MailSettings::getRegression);
+        List<User> spikeReceiver = getUserBy(settings, MailSettings::getSpike);
         RouteConfiguration configuration = RouteConfiguration.forApplicationScope();
-        if (!newBugReceiver.isEmpty() && new JPAQuery<>(entityManager).from(QReport.report).join(QReport.report.stacktrace, stacktrace1).join(stacktrace1.bug, QBug.bug).where(QBug.bug.eq(bug)).limit(2).select(QReport.report.count()).fetchCount() == 1) {
-            sendMessage(newBugReceiver, getTranslation(Messages.NEW_BUG_MAIL_TEMPLATE, configuration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), report.getBrand(), report.getPhoneModel(), report.getAndroidVersion(), app.getName(), stacktrace.getVersion().getName()), getTranslation(Messages.NEW_BUG_MAIL_SUBJECT, app.getName()));
+        if (!newBugReceiver.isEmpty() && new JPAQuery<>(entityManager).from(report).where(report.stacktrace.bug.eq(bug)).limit(2).select(report.count()).fetchCount() == 1) {
+            sendMessage(newBugReceiver, getTranslation(Messages.NEW_BUG_MAIL_TEMPLATE, configuration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), r.getBrand(), r.getPhoneModel(), r.getAndroidVersion(), app.getName(), stacktrace.getVersion().getName()), getTranslation(Messages.NEW_BUG_MAIL_SUBJECT, app.getName()));
         } else if (!regressionReceiver.isEmpty() && bug.getSolvedVersion() != null && bug.getSolvedVersion().getCode() <= stacktrace.getVersion().getCode()) {
-            sendMessage(regressionReceiver, getTranslation(Messages.REGRESSION_MAIL_TEMPLATE, configuration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), report.getBrand(), bug.getSolvedVersion().getName(), report.getPhoneModel(), report.getAndroidVersion(), app.getName(), stacktrace.getVersion().getName()), getTranslation(Messages.REGRESSION_MAIL_SUBJECT, app.getName()));
+            sendMessage(regressionReceiver, getTranslation(Messages.REGRESSION_MAIL_TEMPLATE, configuration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), r.getBrand(), bug.getSolvedVersion().getName(), r.getPhoneModel(), r.getAndroidVersion(), app.getName(), stacktrace.getVersion().getName()), getTranslation(Messages.REGRESSION_MAIL_SUBJECT, app.getName()));
             bug.setSolvedVersion(null);
             entityManager.merge(bug);
-        } else if (!spikeReceiver.isEmpty() && false) {
-            //TODO
+        } else if(!spikeReceiver.isEmpty()){
+            long reportCount = fetchReportCountOnDay(0);
+            double averageCount = LongStream.range(1, 3).map(this::fetchReportCountOnDay).average().orElse(Double.MAX_VALUE);
+            if (reportCount > 1.2 * averageCount && reportCount - 1 <= 1.2 * averageCount) {
+                sendMessage(regressionReceiver, getTranslation(Messages.SPIKE_MAIL_TEMPLATE, configuration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), stacktrace.getVersion().getName(), reportCount), getTranslation(Messages.SPIKE_MAIL_SUBJECT, app.getName()));
+            }
         }
+    }
+
+    private List<User> getUserBy(List<MailSettings> list, Predicate<MailSettings> predicate) {
+        return list.stream().filter(predicate).map(MailSettings::getUser).collect(Collectors.toList());
+    }
+
+    private long fetchReportCountOnDay(long subtractDays) {
+        ZonedDateTime today = ZonedDateTime.now().truncatedTo(ChronoUnit.DAYS);
+        return new JPAQuery<>(entityManager).from(report).where(report.stacktrace.bug.eq(bug).and(report.date.between(today.minus(subtractDays, ChronoUnit.DAYS), today.minus(subtractDays - 1, ChronoUnit.DAYS)))).select(report.count()).fetchCount();
     }
 
     @Scheduled(cron = "0 0 0 * * SUN")
