@@ -61,6 +61,8 @@ public class AccountView extends Composite<FlexLayout> implements HasRoute {
         getContent().removeAll();
         User user = userService.getUser(SecurityUtils.getUsername());
         assert user != null;
+        Translatable<TextField> username = Translatable.createTextField(user.getUsername(), Messages.USERNAME);
+        username.getContent().setEnabled(false);
         Translatable<TextField> email = Translatable.createTextField(user.getMail(), Messages.EMAIL);
         Translatable<PasswordField> oldPassword = Translatable.createPasswordField(Messages.OLD_PASSWORD);
         getContent().add(oldPassword);
@@ -68,7 +70,7 @@ public class AccountView extends Composite<FlexLayout> implements HasRoute {
         getContent().add(newPassword);
         Translatable<PasswordField> repeatPassword = Translatable.createPasswordField(Messages.REPEAT_PASSWORD);
         getContent().add(repeatPassword);
-        FlexLayout layout = new FlexLayout(email, oldPassword, newPassword, repeatPassword, Translatable.createButton(e -> {
+        FlexLayout layout = new FlexLayout(username, email, oldPassword, newPassword, repeatPassword, Translatable.createButton(e -> {
             boolean success = true;
             String mail = email.getContent().getValue();
             if(mail.isEmpty()) mail = null;
