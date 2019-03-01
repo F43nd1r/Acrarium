@@ -83,7 +83,7 @@ public class Overview extends VerticalLayout implements ComponentEventListener<A
                 Translatable<TextField> host = Translatable.createTextField("localhost", Messages.HOST);
                 NumberInput port = new NumberInput(5984, 0, 65535);
                 Translatable<Checkbox> ssl = Translatable.createCheckbox(false, Messages.SSL);
-                Translatable<TextField> databaseName = Translatable.createTextField("acra-myapp", Messages.DATABASE_NAME);
+                Translatable.Value<TextField> databaseName = Translatable.createTextField("acra-myapp", Messages.DATABASE_NAME);
                 new Popup().setTitle(Messages.IMPORT_ACRALYZER)
                         .addComponent(host)
                         .addComponent(port)

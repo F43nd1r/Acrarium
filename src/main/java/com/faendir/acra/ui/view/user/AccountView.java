@@ -23,22 +23,18 @@ import com.faendir.acra.service.UserService;
 import com.faendir.acra.ui.base.HasRoute;
 import com.faendir.acra.ui.base.Path;
 import com.faendir.acra.ui.component.FlexLayout;
-import com.faendir.acra.ui.component.Translatable;
+import com.faendir.acra.ui.component.UserEditor;
 import com.faendir.acra.ui.view.MainView;
 import com.faendir.acra.ui.view.Overview;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
-
-import java.util.Objects;
 
 /**
  * @author lukas
@@ -61,57 +57,8 @@ public class AccountView extends Composite<FlexLayout> implements HasRoute {
         getContent().removeAll();
         User user = userService.getUser(SecurityUtils.getUsername());
         assert user != null;
-        Translatable<TextField> username = Translatable.createTextField(user.getUsername(), Messages.USERNAME);
-        username.getContent().setEnabled(false);
-        Translatable<TextField> email = Translatable.createTextField(user.getMail(), Messages.EMAIL);
-        Translatable<PasswordField> oldPassword = Translatable.createPasswordField(Messages.OLD_PASSWORD);
-        getContent().add(oldPassword);
-        Translatable<PasswordField> newPassword = Translatable.createPasswordField(Messages.NEW_PASSWORD);
-        getContent().add(newPassword);
-        Translatable<PasswordField> repeatPassword = Translatable.createPasswordField(Messages.REPEAT_PASSWORD);
-        getContent().add(repeatPassword);
-        FlexLayout layout = new FlexLayout(username, email, oldPassword, newPassword, repeatPassword, Translatable.createButton(e -> {
-            boolean success = true;
-            String mail = email.getContent().getValue();
-            if(mail.isEmpty()) mail = null;
-            if(!Objects.equals(mail, user.getMail())) {
-                if(!userService.changeMail(user, mail)) {
-                    success = false;
-                    email.getContent().setErrorMessage(getTranslation(Messages.INVALID_MAIL));
-                    email.getContent().setInvalid(true);
-                    email.getContent().addValueChangeListener(event -> {
-                        email.getContent().setInvalid(false);
-                        event.unregisterListener();
-                    });
-                }
-            }
-            if (!oldPassword.getContent().getValue().isEmpty()) {
-                if (newPassword.getContent().getValue().equals(repeatPassword.getContent().getValue())) {
-                    if (!userService.changePassword(user, oldPassword.getContent().getValue(), newPassword.getContent().getValue())) {
-                        success = false;
-                        oldPassword.getContent().setErrorMessage(getTranslation(Messages.INCORRECT_PASSWORD));
-                        oldPassword.getContent().setInvalid(true);
-                        oldPassword.getContent().addValueChangeListener(event -> {
-                            oldPassword.getContent().setInvalid(false);
-                            event.unregisterListener();
-                        });
-                    }
-                } else {
-                    success = false;
-                    repeatPassword.getContent().setErrorMessage(getTranslation(Messages.PASSWORDS_NOT_MATCHING));
-                    repeatPassword.getContent().setInvalid(true);
-                    repeatPassword.getContent().addValueChangeListener(event -> {
-                        repeatPassword.getContent().setInvalid(false);
-                        event.unregisterListener();
-                    });
-                }
-            }
-            if(success) {
-                Notification.show(getTranslation(Messages.SUCCESS));
-            }
-        }, Messages.CONFIRM));
-        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
-        getContent().add(layout);
+        UserEditor userEditor = new UserEditor(userService, user, () -> Notification.show(getTranslation(Messages.SUCCESS)));
+        getContent().add(userEditor);
         getContent().setSizeFull();
         getContent().setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         getContent().setAlignItems(FlexComponent.Alignment.CENTER);

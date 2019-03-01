@@ -19,12 +19,14 @@ package com.faendir.acra.ui.view;
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.User;
 import com.faendir.acra.security.SecurityUtils;
+import com.faendir.acra.service.UserService;
 import com.faendir.acra.ui.base.ParentLayout;
 import com.faendir.acra.ui.base.Path;
 import com.faendir.acra.ui.base.popup.Popup;
 import com.faendir.acra.ui.component.DropdownMenu;
 import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.Translatable;
+import com.faendir.acra.ui.component.UserEditor;
 import com.faendir.acra.ui.view.user.AccountView;
 import com.faendir.acra.ui.view.user.UserManager;
 import com.vaadin.flow.component.UI;
@@ -60,12 +62,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class MainView extends ParentLayout {
     private final AuthenticationManager authenticationManager;
     private final ApplicationContext applicationContext;
+    private final UserService userService;
     private ParentLayout layout;
 
     @Autowired
-    public MainView(AuthenticationManager authenticationManager, ApplicationContext applicationContext) {
+    public MainView(AuthenticationManager authenticationManager, ApplicationContext applicationContext, UserService userService) {
         this.authenticationManager = authenticationManager;
         this.applicationContext = applicationContext;
+        this.userService = userService;
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
         setSizeFull();
@@ -77,8 +81,10 @@ public class MainView extends ParentLayout {
         setRouterRoot(layout);
         if (SecurityUtils.isLoggedIn()) {
             showMain();
-        } else {
+        } else if (userService.hasAdmin()) {
             showLogin();
+        } else {
+            showFirstTimeSetup();
         }
     }
 
@@ -104,8 +110,8 @@ public class MainView extends ParentLayout {
         FlexLayout menuLayout = new FlexLayout(darkTheme, userManager, changePassword, logout, about);
         menuLayout.setFlexDirection(FlexDirection.COLUMN);
         //menuLayout.getChildren().forEach(c -> c.getElement().getStyle().set("margin", "0"));
-        menuLayout.getStyle().set("background","var(--lumo-contrast-5pct");
-        menuLayout.getStyle().set("padding","1rem");
+        menuLayout.getStyle().set("background", "var(--lumo-contrast-5pct");
+        menuLayout.getStyle().set("padding", "1rem");
         DropdownMenu menu = new DropdownMenu(menuLayout);
         menu.getStyle().set("padding", "1rem");
         menu.setLabel(SecurityUtils.getUsername());
@@ -134,7 +140,7 @@ public class MainView extends ParentLayout {
         loginForm.setForgotPasswordButtonVisible(false);
         loginForm.getElement().getStyle().set("padding", "0");
         loginForm.addLoginListener(event -> {
-            if(!login(event.getUsername(), event.getPassword())){
+            if (!login(event.getUsername(), event.getPassword())) {
                 event.getSource().setError(true);
             }
         });
@@ -142,6 +148,10 @@ public class MainView extends ParentLayout {
         layout.setFlexDirection(FlexDirection.COLUMN);
         layout.setSizeUndefined();
         setContent(layout);
+    }
+
+    private void showFirstTimeSetup() {
+        setContent(new UserEditor(userService, null, () -> UI.getCurrent().getPage().reload()));
     }
 
     private boolean login(@NonNull String username, @NonNull String password) {
@@ -159,7 +169,7 @@ public class MainView extends ParentLayout {
         }
     }
 
-    public void logout() {
+    private void logout() {
         SecurityContextHolder.clearContext();
         getUI().ifPresent(ui -> {
             ui.getPage().reload();

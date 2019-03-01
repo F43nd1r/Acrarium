@@ -17,7 +17,6 @@
 package com.faendir.acra.ui.base.popup;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import org.springframework.lang.NonNull;
@@ -54,10 +53,6 @@ public class ValidatedField<V, T extends Component> {
 
     public static <V, T extends Component & HasValue<?, V> & HasValidation> ValidatedField<V, T> of(T field) {
         return new ValidatedField<>(field, field::getValue, vConsumer -> field.addValueChangeListener(event -> vConsumer.accept(event.getValue())), field::setErrorMessage);
-    }
-
-    public static <V, C extends Composite<T>, T extends Component & HasValue<?, V> & HasValidation> ValidatedField<V, C> of(C field) {
-        return new ValidatedField<>(field, () -> field.getContent().getValue(), vConsumer -> field.getContent().addValueChangeListener(event -> vConsumer.accept(event.getValue())), m -> field.getContent().setErrorMessage(m));
     }
 
     public static <V, T extends Component & HasValue<?, V> & HasValidation> ValidatedField<V, T> of(T field, Supplier<V> valueSupplier, Consumer<Consumer<V>> listenerRegistration) {

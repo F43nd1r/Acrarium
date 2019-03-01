@@ -27,6 +27,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.Email;
 import java.util.Collection;
 import java.util.HashSet;
@@ -49,6 +50,8 @@ public class User implements UserDetails {
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<Permission> permissions;
     private String password;
+    @Transient
+    private String plainTextPassword;
     @Email
     private String mail;
 
@@ -61,6 +64,20 @@ public class User implements UserDetails {
         this.password = password;
         this.roles = new HashSet<>(roles);
         this.permissions = new HashSet<>();
+    }
+
+    public User(@NonNull String username, @NonNull String plainTextPassword, @NonNull String password, @NonNull Collection<Role> roles) {
+        this(username, password, roles);
+        this.plainTextPassword = plainTextPassword;
+    }
+
+    public User(User other) {
+        this.username = other.username;
+        this.roles = other.roles;
+        this.permissions = other.permissions;
+        this.password = other.password;
+        this.plainTextPassword = other.plainTextPassword;
+        this.mail = other.mail;
     }
 
     @NonNull
@@ -89,10 +106,30 @@ public class User implements UserDetails {
         this.password = password;
     }
 
+    public boolean hasPlainTextPassword() {
+        return plainTextPassword != null;
+    }
+
+    @NonNull
+    public String getPlainTextPassword() {
+        if(plainTextPassword == null) {
+            throw new IllegalStateException("Trying to access plain text password of persisted entity");
+        }
+        return plainTextPassword;
+    }
+
+    public void setPlainTextPassword(@NonNull String plainTextPassword) {
+        this.plainTextPassword = plainTextPassword;
+    }
+
     @NonNull
     @Override
     public String getUsername() {
         return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     @Override

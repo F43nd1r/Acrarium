@@ -16,11 +16,13 @@
 
 package com.faendir.acra.ui.component;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -34,10 +36,12 @@ import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.shared.Registration;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -88,13 +92,13 @@ public class Translatable<T extends Component> extends Composite<T> implements L
     }
 
     @NonNull
-    public static Translatable<TextField> createTextField(@Nullable String initialValue, @NonNull String captionId, @NonNull Object... params) {
-        return new Translatable<>(new TextField("", initialValue == null ? "" : initialValue, ""), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
+    public static Value<TextField> createTextField(@Nullable String initialValue, @NonNull String captionId, @NonNull Object... params) {
+        return new Value<>(new TextField("", initialValue == null ? "" : initialValue, ""), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
     }
 
     @NonNull
-    public static Translatable<PasswordField> createPasswordField(@NonNull String captionId, @NonNull Object... params) {
-        return new Translatable<>(new PasswordField(), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
+    public static Value<PasswordField> createPasswordField(@NonNull String captionId, @NonNull Object... params) {
+        return new Value<>(new PasswordField(), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
     }
 
     @NonNull
@@ -132,5 +136,72 @@ public class Translatable<T extends Component> extends Composite<T> implements L
             String translation = div.getTranslation(captionId, params);
             div.setText(translation);
         });
+    }
+
+    public static class Value<T extends Component & HasValue<AbstractField.ComponentValueChangeEvent<T, String>, String> & com.vaadin.flow.component.HasValidation> extends Translatable<T> implements HasValidation<T> {
+
+        protected Value(T t, Consumer<T> setter) {
+            super(t, setter);
+        }
+
+        public void setValue(String value) {
+            getContent().setValue(value);
+        }
+
+        public String getValue() {
+            return getContent().getValue();
+        }
+
+        public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<T, String>> listener) {
+            return getContent().addValueChangeListener(listener);
+        }
+
+        public String getEmptyValue() {
+            return getContent().getEmptyValue();
+        }
+
+        public Optional<String> getOptionalValue() {
+            return getContent().getOptionalValue();
+        }
+
+        public boolean isEmpty() {
+            return getContent().isEmpty();
+        }
+
+        public void clear() {
+            getContent().clear();
+        }
+
+        public void setReadOnly(boolean readOnly) {
+            getContent().setReadOnly(readOnly);
+        }
+
+        public boolean isReadOnly() {
+            return getContent().isReadOnly();
+        }
+
+        public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
+            getContent().setRequiredIndicatorVisible(requiredIndicatorVisible);
+        }
+
+        public boolean isRequiredIndicatorVisible() {
+            return getContent().isRequiredIndicatorVisible();
+        }
+
+        public void setErrorMessage(String errorMessage) {
+            getContent().setErrorMessage(errorMessage);
+        }
+
+        public String getErrorMessage() {
+            return getContent().getErrorMessage();
+        }
+
+        public void setInvalid(boolean invalid) {
+            getContent().setInvalid(invalid);
+        }
+
+        public boolean isInvalid() {
+            return getContent().isInvalid();
+        }
     }
 }

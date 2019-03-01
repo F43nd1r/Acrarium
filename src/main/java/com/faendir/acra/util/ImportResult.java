@@ -16,22 +16,24 @@
 
 package com.faendir.acra.util;
 
+import com.faendir.acra.model.User;
+
 /**
  * @author lukas
  * @since 15.08.18
  */
 public class ImportResult {
-    private final PlainTextUser user;
+    private final User user;
     private final int totalCount;
     private final int successCount;
 
-    public ImportResult(PlainTextUser user, int totalCount, int successCount) {
+    public ImportResult(User user, int totalCount, int successCount) {
         this.user = user;
         this.totalCount = totalCount;
         this.successCount = successCount;
     }
 
-    public PlainTextUser getUser() {
+    public User getUser() {
         return user;
     }
 

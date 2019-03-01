@@ -30,7 +30,6 @@ import com.faendir.acra.model.view.VApp;
 import com.faendir.acra.model.view.VBug;
 import com.faendir.acra.model.view.WhereExpressions;
 import com.faendir.acra.util.ImportResult;
-import com.faendir.acra.util.PlainTextUser;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Predicate;
@@ -203,8 +202,8 @@ public class DataService implements Serializable {
     @Transactional
     @NonNull
     @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
-    public PlainTextUser createNewApp(@NonNull String name) {
-        PlainTextUser user = userService.createReporterUser();
+    public User createNewApp(@NonNull String name) {
+        User user = userService.createReporterUser();
         store(new App(name, user));
         return user;
     }
@@ -212,8 +211,8 @@ public class DataService implements Serializable {
     @Transactional
     @NonNull
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).ADMIN)")
-    public PlainTextUser recreateReporterUser(@NonNull App app) {
-        PlainTextUser user = userService.createReporterUser();
+    public User recreateReporterUser(@NonNull App app) {
+        User user = userService.createReporterUser();
         app.setReporter(user);
         store(app);
         return user;
@@ -447,7 +446,7 @@ public class DataService implements Serializable {
     public ImportResult importFromAcraStorage(String host, int port, boolean ssl, String database) {
         HttpClient httpClient = new StdHttpClient.Builder().host(host).port(port).enableSSL(ssl).build();
         CouchDbConnector db = new StdCouchDbConnector(database, new StdCouchDbInstance(httpClient));
-        PlainTextUser user = createNewApp(database.replaceFirst("acra-", ""));
+        User user = createNewApp(database.replaceFirst("acra-", ""));
         int total = 0;
         int success = 0;
         for (String id : db.getAllDocIds()) {
