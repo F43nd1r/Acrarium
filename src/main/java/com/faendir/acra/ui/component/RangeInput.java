@@ -16,19 +16,66 @@
 
 package com.faendir.acra.ui.component;
 
+import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.PropertyDescriptor;
+import com.vaadin.flow.component.PropertyDescriptors;
+import com.vaadin.flow.component.Tag;
+
 /**
  * @author lukas
  * @since 29.11.18
  */
-public class RangeInput extends AbstractNumberInput {
+@Tag(Tag.INPUT)
+public class RangeInput extends AbstractSinglePropertyField<RangeInput, Double> implements Focusable<RangeInput>, HasSize, HasStyle {
+    private static final PropertyDescriptor<Double, Double> MIN_DESCRIPTOR = PropertyDescriptors.propertyWithDefault("min", 0d);
+    private static final PropertyDescriptor<Double, Double> MAX_DESCRIPTOR = PropertyDescriptors.propertyWithDefault("max", 100d);
+    private static final PropertyDescriptor<Double, Double> STEP_DESCRIPTOR = PropertyDescriptors.propertyWithDefault("step", 1d);
+    private static final PropertyDescriptor<String, String> TYPE_DESCRIPTOR = PropertyDescriptors.attributeWithDefault("type", "text");
+
     public RangeInput() {
+        super("value", 0d, false);
+        setSynchronizedEvent("change");
         setType("range");
     }
 
     public RangeInput(double min, double max, double defaultValue) {
         this();
+        setSynchronizedEvent("change");
         setMin(min);
         setMax(max);
         setValue(defaultValue);
+    }
+
+    public void setMin(double min) {
+        set(MIN_DESCRIPTOR, min);
+    }
+
+    public double getMin() {
+        return get(MIN_DESCRIPTOR);
+    }
+
+    public void setMax(double max) {
+        set(MAX_DESCRIPTOR, max);
+    }
+
+    public double getMax() {
+        return get(MAX_DESCRIPTOR);
+    }
+
+    public void setStep(double step) {
+        set(STEP_DESCRIPTOR, step);
+    }
+
+    public double getStep() {
+        return get(STEP_DESCRIPTOR);
+    }
+
+    public void setType(String type) {
+        set(TYPE_DESCRIPTOR, type);
+    }
+
+    public String getType() {
+        return get(TYPE_DESCRIPTOR);
     }
 }

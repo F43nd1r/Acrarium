@@ -30,7 +30,6 @@ import com.faendir.acra.ui.base.MyGrid;
 import com.faendir.acra.ui.base.Path;
 import com.faendir.acra.ui.base.popup.Popup;
 import com.faendir.acra.ui.base.popup.ValidatedField;
-import com.faendir.acra.ui.component.NumberInput;
 import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.view.app.tabs.BugTab;
 import com.faendir.acra.util.ImportResult;
@@ -40,6 +39,7 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -81,7 +81,10 @@ public class Overview extends VerticalLayout implements ComponentEventListener<A
                 }).show();
             }, Messages.NEW_APP), Translatable.createButton(e -> {
                 Translatable<TextField> host = Translatable.createTextField("localhost", Messages.HOST);
-                NumberInput port = new NumberInput(5984, 0, 65535);
+                NumberField port = new NumberField();
+                port.setValue(5984d);
+                port.setMin(0);
+                port.setMax(65535);
                 Translatable<Checkbox> ssl = Translatable.createCheckbox(false, Messages.SSL);
                 Translatable.Value<TextField> databaseName = Translatable.createTextField("acra-myapp", Messages.DATABASE_NAME);
                 new Popup().setTitle(Messages.IMPORT_ACRALYZER)

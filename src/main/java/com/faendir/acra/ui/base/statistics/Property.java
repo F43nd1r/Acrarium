@@ -29,9 +29,9 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import org.springframework.lang.Nullable;
 
@@ -96,13 +96,11 @@ class Property<F, C extends Component & HasValue<?, F> & HasEnabled & HasSize & 
 
         Property<?, ?, ?> createStringProperty(App app, ComparableExpressionBase<String> stringExpression, String filterTextId, String chartTitleId) {
             List<String> list = dataService.getFromReports(app, expression, stringExpression);
-            ComboBox<String> comboBox = new ComboBox<>(null, list);
-            comboBox.setAllowCustomValue(false);
-            comboBox.setRequired(true);
+            Select<String> select = new Select<>(list.toArray(new String[0]));
             if(!list.isEmpty()) {
-                comboBox.setValue(list.get(0));
+                select.setValue(list.get(0));
             }
-            return new Property<>(app, comboBox, stringExpression::eq, new PieChart(chartTitleId), dataService, stringExpression, filterTextId);
+            return new Property<>(app, select, stringExpression::eq, new PieChart(chartTitleId), dataService, stringExpression, filterTextId);
         }
 
         Property<?, ?, ?> createAgeProperty(App app, DateTimePath<ZonedDateTime> dateTimeExpression, String filterTextId, String chartTitleId) {

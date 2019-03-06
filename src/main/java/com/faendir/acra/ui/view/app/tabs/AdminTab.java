@@ -35,7 +35,6 @@ import com.faendir.acra.ui.component.CssGrid;
 import com.faendir.acra.ui.component.DownloadButton;
 import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.HasSize;
-import com.faendir.acra.ui.component.NumberInput;
 import com.faendir.acra.ui.component.RangeInput;
 import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.view.Overview;
@@ -50,6 +49,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
@@ -111,7 +111,12 @@ public class AdminTab extends AppTab<Div> {
             }, true).show())));
             versionGrid.appendFooterRow().getCell(versionGrid.getColumns().get(0)).setComponent(Translatable.createButton(e -> {
                 TextField name = new TextField();
-                NumberInput version = new NumberInput(getDataService().getMaxVersion(app).map(i -> i + 1).orElse(1));//, Messages.VERSION_CODE);
+                NumberField version = new NumberField();//, Messages.VERSION_CODE);
+                version.setValue(getDataService().getMaxVersion(app).map(i -> i + 1d).orElse(1d));
+                version.setStep(1d);
+                version.setMin(1d);
+                version.setPreventInvalidInput(true);
+                version.setHasControls(true);
                 MemoryBuffer buffer = new MemoryBuffer();
                 Upload upload = new Upload(buffer);
                 new Popup().setTitle(Messages.NEW_MAPPING)
@@ -197,15 +202,21 @@ public class AdminTab extends AppTab<Div> {
                     .show();
         }, Messages.NEW_BUG_CONFIG);
         matchingButton.setWidthFull();
-        NumberInput age = new NumberInput(30);
+        NumberField age = new NumberField();
+        age.setStep(1d);
+        age.setMin(1d);
+        age.setValue(30d);
+        age.setPreventInvalidInput(true);
+        age.setHasControls(true);
         age.setWidthFull();
+        age.setSuffixComponent(Translatable.createLabel(Messages.REPORTS_OLDER_THAN2));
         FlexLayout purgeAge = new FlexLayout();
         purgeAge.setWidthFull();
         purgeAge.preventWhiteSpaceBreaking();
         purgeAge.setAlignItems(FlexComponent.Alignment.CENTER);
         purgeAge.add(Translatable.createButton(e -> getDataService().deleteReportsOlderThanDays(app, age.getValue().intValue()), Messages.PURGE),
                 Translatable.createLabel(Messages.REPORTS_OLDER_THAN1),
-                age, Translatable.createLabel(Messages.REPORTS_OLDER_THAN2));
+                age );
         purgeAge.expand(age);
         ComboBox<Integer> versionBox = new ComboBox<>(null, getDataService().getFromReports(app, null, QReport.report.stacktrace.version.code));
         versionBox.setWidth("100%");
