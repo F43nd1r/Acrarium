@@ -19,13 +19,16 @@ package com.faendir.acra.ui.view;
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.User;
 import com.faendir.acra.security.SecurityUtils;
+import com.faendir.acra.service.UserService;
 import com.faendir.acra.ui.base.ParentLayout;
 import com.faendir.acra.ui.base.Path;
 import com.faendir.acra.ui.base.popup.Popup;
 import com.faendir.acra.ui.component.DropdownMenu;
 import com.faendir.acra.ui.component.FlexLayout;
+import com.faendir.acra.ui.component.Label;
 import com.faendir.acra.ui.component.Translatable;
-import com.faendir.acra.ui.view.user.ChangePasswordView;
+import com.faendir.acra.ui.component.UserEditor;
+import com.faendir.acra.ui.view.user.AccountView;
 import com.faendir.acra.ui.view.user.UserManager;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -34,9 +37,8 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.login.LoginForm;
+import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
@@ -61,12 +63,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class MainView extends ParentLayout {
     private final AuthenticationManager authenticationManager;
     private final ApplicationContext applicationContext;
+    private final UserService userService;
     private ParentLayout layout;
 
     @Autowired
-    public MainView(AuthenticationManager authenticationManager, ApplicationContext applicationContext) {
+    public MainView(AuthenticationManager authenticationManager, ApplicationContext applicationContext, UserService userService) {
         this.authenticationManager = authenticationManager;
         this.applicationContext = applicationContext;
+        this.userService = userService;
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
         setSizeFull();
@@ -78,8 +82,10 @@ public class MainView extends ParentLayout {
         setRouterRoot(layout);
         if (SecurityUtils.isLoggedIn()) {
             showMain();
-        } else {
+        } else if (userService.hasAdmin()) {
             showLogin();
+        } else {
+            showFirstTimeSetup();
         }
     }
 
@@ -89,7 +95,7 @@ public class MainView extends ParentLayout {
         Translatable<Button> userManager = Translatable.createButton(e -> UI.getCurrent().navigate(UserManager.class), Messages.USER_MANAGER);
         userManager.setDefaultTextStyle();
         userManager.getContent().addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        Translatable<Button> changePassword = Translatable.createButton(e -> UI.getCurrent().navigate(ChangePasswordView.class), Messages.CHANGE_PASSWORD);
+        Translatable<Button> changePassword = Translatable.createButton(e -> UI.getCurrent().navigate(AccountView.class), Messages.ACCOUNT);
         changePassword.setDefaultTextStyle();
         changePassword.getContent().addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         Translatable<Button> logout = Translatable.createButton(e -> logout(), Messages.LOGOUT);
@@ -105,8 +111,8 @@ public class MainView extends ParentLayout {
         FlexLayout menuLayout = new FlexLayout(darkTheme, userManager, changePassword, logout, about);
         menuLayout.setFlexDirection(FlexDirection.COLUMN);
         //menuLayout.getChildren().forEach(c -> c.getElement().getStyle().set("margin", "0"));
-        menuLayout.getStyle().set("background","var(--lumo-contrast-5pct");
-        menuLayout.getStyle().set("padding","1rem");
+        menuLayout.getStyle().set("background", "var(--lumo-contrast-5pct");
+        menuLayout.getStyle().set("padding", "1rem");
         DropdownMenu menu = new DropdownMenu(menuLayout);
         menu.getStyle().set("padding", "1rem");
         menu.setLabel(SecurityUtils.getUsername());
@@ -129,17 +135,43 @@ public class MainView extends ParentLayout {
         logo.setPadding(1, Unit.REM);
         FlexLayout logoWrapper = new FlexLayout(logo);
         logoWrapper.expand(logo);
-        TextField username = new TextField();
-        PasswordField password = new PasswordField();
-        Translatable<Button> login = Translatable.createButton(event -> login(username.getValue(), password.getValue()), Messages.LOGIN);
-        login.setWidthFull();
-        FlexLayout loginForm = new FlexLayout(logoWrapper, username, password, login);
-        loginForm.setFlexDirection(FlexDirection.COLUMN);
-        loginForm.setSizeUndefined();
-        setContent(loginForm);
+        LoginI18n loginI18n = LoginI18n.createDefault();
+        loginI18n.getForm().setTitle("");
+        LoginForm loginForm = new LoginForm(loginI18n);
+        loginForm.setForgotPasswordButtonVisible(false);
+        loginForm.getElement().getStyle().set("padding", "0");
+        loginForm.addLoginListener(event -> {
+            if (!login(event.getUsername(), event.getPassword())) {
+                event.getSource().setError(true);
+            }
+        });
+        FlexLayout layout = new FlexLayout(logoWrapper, loginForm);
+        layout.setFlexDirection(FlexDirection.COLUMN);
+        layout.setSizeUndefined();
+        setContent(layout);
     }
 
-    private void login(@NonNull String username, @NonNull String password) {
+    private void showFirstTimeSetup() {
+        Translatable<Image> logo = Translatable.createImage("frontend/logo.png", Messages.ACRARIUM);
+        logo.setWidthFull();
+        logo.setPaddingTop(0.5, Unit.REM);
+        logo.setPaddingBottom(1, Unit.REM);
+        Translatable<Label> welcomeLabel = Translatable.createLabel(Messages.WELCOME);
+        welcomeLabel.getStyle().set("font-size", "var(--lumo-font-size-xxl");
+        FlexLayout header = new FlexLayout(welcomeLabel, logo, Translatable.createLabel(Messages.CREATE_ADMIN));
+        header.setFlexDirection(FlexDirection.COLUMN);
+        header.setAlignSelf(Alignment.CENTER, welcomeLabel);
+        header.setWidth(0, Unit.PIXEL);
+        FlexLayout wrapper = new FlexLayout(header);
+        wrapper.expand(header);
+        UserEditor userEditor = new UserEditor(userService, null, () -> UI.getCurrent().getPage().reload());
+        FlexLayout layout = new FlexLayout(wrapper, userEditor);
+        layout.setFlexDirection(FlexDirection.COLUMN);
+        layout.setSizeUndefined();
+        setContent(layout);
+    }
+
+    private boolean login(@NonNull String username, @NonNull String password) {
         try {
             Authentication token = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username.toLowerCase(), password));
             if (!token.getAuthorities().contains(User.Role.USER)) {
@@ -148,12 +180,13 @@ public class MainView extends ParentLayout {
             VaadinService.reinitializeSession(VaadinService.getCurrentRequest());
             SecurityContextHolder.getContext().setAuthentication(token);
             UI.getCurrent().getPage().reload();
+            return true;
         } catch (AuthenticationException ex) {
-            Notification.show(getTranslation(Messages.LOGIN_FAILED), 5000, Notification.Position.MIDDLE);
+            return false;
         }
     }
 
-    public void logout() {
+    private void logout() {
         SecurityContextHolder.clearContext();
         getUI().ifPresent(ui -> {
             ui.getPage().reload();

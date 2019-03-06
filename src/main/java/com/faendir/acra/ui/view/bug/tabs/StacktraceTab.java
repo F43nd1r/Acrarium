@@ -18,7 +18,6 @@ package com.faendir.acra.ui.view.bug.tabs;
 
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.Bug;
-import com.faendir.acra.model.ProguardMapping;
 import com.faendir.acra.model.Stacktrace;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.component.Card;
@@ -31,8 +30,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
-
-import java.util.Optional;
 
 /**
  * @author lukas
@@ -52,10 +49,10 @@ public class StacktraceTab extends BugTab<Div> implements HasSize {
     protected void init(Bug bug) {
         getContent().removeAll();
         for (Stacktrace stacktrace : getDataService().getStacktraces(bug)) {
-            Optional<ProguardMapping> mapping = getDataService().findMapping(bug.getApp(), stacktrace.getVersion().getCode());
+            String mapping = stacktrace.getVersion().getMappings();
             String trace = stacktrace.getStacktrace();
-            if (mapping.isPresent()) {
-                trace = Utils.retrace(trace, mapping.get().getMappings());
+            if (mapping != null) {
+                trace = Utils.retrace(trace, mapping);
             }
             Card card = new Card(new Label(trace).honorWhitespaces());
             card.setAllowCollapse(true);

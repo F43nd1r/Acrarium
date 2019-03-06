@@ -28,6 +28,7 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfigurati
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
@@ -36,6 +37,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.sql.DataSource;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.util.List;
 
 /**
@@ -63,5 +66,9 @@ public abstract class LiquibaseTest {
     @Configuration
     @ComponentScan("com.faendir.acra.liquibase.change")
     public static class Config {
+        @Bean
+        public Validator validator(){
+            return Validation.buildDefaultValidatorFactory().getValidator();
+        }
     }
 }

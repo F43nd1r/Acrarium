@@ -15,13 +15,12 @@
  */
 package com.faendir.acra.service;
 
-import com.faendir.acra.config.AcraConfiguration;
 import com.faendir.acra.dataprovider.QueryDslDataProvider;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Permission;
 import com.faendir.acra.model.QUser;
 import com.faendir.acra.model.User;
-import com.faendir.acra.util.PlainTextUser;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.apache.commons.text.RandomStringGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +32,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.validation.Validator;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -45,27 +44,27 @@ import java.util.Optional;
 @Service
 public class UserService implements Serializable {
     private static final QUser USER = QUser.user;
-    @NonNull private final AcraConfiguration acraConfiguration;
-    @NonNull private final PasswordEncoder passwordEncoder;
-    @NonNull private final RandomStringGenerator randomStringGenerator;
-    @NonNull private final EntityManager entityManager;
+    @NonNull
+    private final PasswordEncoder passwordEncoder;
+    @NonNull
+    private final RandomStringGenerator randomStringGenerator;
+    @NonNull
+    private final EntityManager entityManager;
+    @NonNull
+    private final Validator validator;
 
     @Autowired
-    public UserService(@NonNull PasswordEncoder passwordEncoder, @NonNull AcraConfiguration acraConfiguration, @NonNull RandomStringGenerator randomStringGenerator,
-            @NonNull EntityManager entityManager) {
+    public UserService(@NonNull PasswordEncoder passwordEncoder, @NonNull RandomStringGenerator randomStringGenerator,
+                       @NonNull EntityManager entityManager, @NonNull Validator validator) {
         this.passwordEncoder = passwordEncoder;
-        this.acraConfiguration = acraConfiguration;
         this.randomStringGenerator = randomStringGenerator;
         this.entityManager = entityManager;
+        this.validator = validator;
     }
 
     @Nullable
     public User getUser(@NonNull String username) {
-        User user = new JPAQuery<>(entityManager).from(USER).where(USER.username.eq(username)).select(USER).fetchOne();
-        if (user == null && acraConfiguration.getUser().getName().equals(username)) {
-            user = getDefaultUser();
-        }
-        return user;
+        return new JPAQuery<>(entityManager).from(USER).where(USER.username.eq(username)).select(USER).fetchOne();
     }
 
     @Transactional
@@ -76,20 +75,32 @@ public class UserService implements Serializable {
         }
         entityManager.persist(new User(username, passwordEncoder.encode(password), Collections.singleton(User.Role.USER)));
     }
-
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
-    public PlainTextUser createReporterUser() {
+    public User createReporterUser() {
         String username;
         do {
             username = randomStringGenerator.generate(16);
         } while (new JPAQuery<>(entityManager).from(USER).where(USER.username.eq(username)).fetchFirst() != null);
         String password = randomStringGenerator.generate(16);
-        return new PlainTextUser(username, password, passwordEncoder.encode(password), Collections.singleton(User.Role.REPORTER));
+        return new User(username, password, passwordEncoder.encode(password), Collections.singleton(User.Role.REPORTER));
     }
 
     public boolean checkPassword(@Nullable User user, @NonNull String password) {
         return user != null && passwordEncoder.matches(password, user.getPassword());
     }
+
+    @Transactional
+    public User store(@NonNull User user) {
+        if(user.hasPlainTextPassword()) {
+            user.setPassword(passwordEncoder.encode(user.getPlainTextPassword()));
+        }
+        return entityManager.merge(user);
+    }
+
+    public boolean hasAdmin() {
+        return new JPAQuery<>(entityManager).from(USER).where(USER.roles.contains(User.Role.ADMIN)).select(Expressions.ONE).fetchOne() != null;
+    }
+
 
     @Transactional
     @PreAuthorize("authentication.name == #user.username")
@@ -101,6 +112,20 @@ public class UserService implements Serializable {
         }
         return false;
     }
+
+    @Transactional
+    @PreAuthorize("authentication.name == #user.username")
+    public boolean changeMail(@NonNull User user, @Nullable String mail) {
+        String oldMail = user.getMail();
+        user.setMail(mail);
+        if (!validator.validate(user).isEmpty()) {
+            user.setMail(oldMail);
+            return false;
+        }
+        entityManager.merge(user);
+        return true;
+    }
+
 
     @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
@@ -138,13 +163,6 @@ public class UserService implements Serializable {
             user.getPermissions().add(new Permission(app, level));
         }
         entityManager.merge(user);
-    }
-
-    @NonNull
-    private User getDefaultUser() {
-        return new User(acraConfiguration.getUser().getName(),
-                passwordEncoder.encode(acraConfiguration.getUser().getPassword()),
-                Arrays.asList(User.Role.USER, User.Role.ADMIN));
     }
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")

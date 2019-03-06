@@ -19,17 +19,17 @@ import com.faendir.acra.dataprovider.QueryDslDataProvider;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Attachment;
 import com.faendir.acra.model.Bug;
-import com.faendir.acra.model.ProguardMapping;
+import com.faendir.acra.model.MailSettings;
 import com.faendir.acra.model.QApp;
 import com.faendir.acra.model.Report;
 import com.faendir.acra.model.Stacktrace;
+import com.faendir.acra.model.User;
 import com.faendir.acra.model.Version;
 import com.faendir.acra.model.view.Queries;
 import com.faendir.acra.model.view.VApp;
 import com.faendir.acra.model.view.VBug;
 import com.faendir.acra.model.view.WhereExpressions;
 import com.faendir.acra.util.ImportResult;
-import com.faendir.acra.util.PlainTextUser;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Predicate;
@@ -50,6 +50,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -60,13 +61,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
-import javax.validation.constraints.Size;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -79,9 +78,10 @@ import java.util.stream.StreamSupport;
 import static com.faendir.acra.model.QApp.app;
 import static com.faendir.acra.model.QAttachment.attachment;
 import static com.faendir.acra.model.QBug.bug;
-import static com.faendir.acra.model.QProguardMapping.proguardMapping;
+import static com.faendir.acra.model.QMailSettings.mailSettings;
 import static com.faendir.acra.model.QReport.report;
 import static com.faendir.acra.model.QStacktrace.stacktrace1;
+import static com.faendir.acra.model.QVersion.version;
 
 /**
  * @author lukas
@@ -96,14 +96,14 @@ public class DataService implements Serializable {
     @NonNull
     private final EntityManager entityManager;
     @NonNull
-    private final BugMerger bugMerger;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final Object stacktraceLock = new Object();
 
     @Autowired
-    public DataService(@NonNull UserService userService, @NonNull EntityManager entityManager, @NonNull BugMerger bugMerger) {
+    public DataService(@NonNull UserService userService, @NonNull EntityManager entityManager, @NonNull ApplicationEventPublisher applicationEventPublisher) {
         this.userService = userService;
         this.entityManager = entityManager;
-        this.bugMerger = bugMerger;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @NonNull
@@ -120,7 +120,7 @@ public class DataService implements Serializable {
     @NonNull
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
     public QueryDslDataProvider<VBug> getBugProvider(@NonNull App app, BooleanSupplier onlyNonSolvedProvider) {
-        Supplier<BooleanExpression> whereSupplier = () -> onlyNonSolvedProvider.getAsBoolean() ? bug.app.eq(app).and(bug.solved.eq(false)) : bug.app.eq(app);
+        Supplier<BooleanExpression> whereSupplier = () -> onlyNonSolvedProvider.getAsBoolean() ? bug.app.eq(app).and(bug.solvedVersion.isNull()) : bug.app.eq(app);
         return new QueryDslDataProvider<>(() -> Queries.selectVBug(entityManager).where(whereSupplier.get()),
                 () -> new JPAQuery<>(entityManager).from(bug).where(whereSupplier.get()));
     }
@@ -179,8 +179,8 @@ public class DataService implements Serializable {
 
     @NonNull
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public QueryDslDataProvider<ProguardMapping> getMappingProvider(@NonNull App app) {
-        return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(proguardMapping).where(proguardMapping.app.eq(app)).select(proguardMapping));
+    public QueryDslDataProvider<Version> getVersionProvider(@NonNull App app) {
+        return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(version).where(version.app.eq(app)).select(version));
     }
 
     @Transactional
@@ -202,8 +202,8 @@ public class DataService implements Serializable {
     @Transactional
     @NonNull
     @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
-    public PlainTextUser createNewApp(@NonNull String name) {
-        PlainTextUser user = userService.createReporterUser();
+    public User createNewApp(@NonNull String name) {
+        User user = userService.createReporterUser();
         store(new App(name, user));
         return user;
     }
@@ -211,16 +211,11 @@ public class DataService implements Serializable {
     @Transactional
     @NonNull
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).ADMIN)")
-    public PlainTextUser recreateReporterUser(@NonNull App app) {
-        PlainTextUser user = userService.createReporterUser();
+    public User recreateReporterUser(@NonNull App app) {
+        User user = userService.createReporterUser();
         app.setReporter(user);
         store(app);
         return user;
-    }
-
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bugs[0].app, T(com.faendir.acra.model.Permission$Level).EDIT)")
-    public void mergeBugs(@NonNull @Size(min = 2) Collection<Bug> bugs, @NonNull String title) {
-        bugMerger.mergeBugs(bugs, title);
     }
 
     @Transactional
@@ -232,19 +227,19 @@ public class DataService implements Serializable {
 
     @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission$Level).EDIT)")
-    public void setBugSolved(@NonNull Bug bug, boolean solved) {
-        bug.setSolved(solved);
+    public void setBugSolved(@NonNull Bug bug, Version solved) {
+        bug.setSolvedVersion(solved);
         store(bug);
     }
 
-    @NonNull
+    /*@NonNull
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
     public Optional<ProguardMapping> findMapping(@NonNull App app, int versionCode) {
         return Optional.ofNullable(new JPAQuery<>(entityManager).from(proguardMapping)
                 .where(proguardMapping.app.eq(app).and(proguardMapping.versionCode.eq(versionCode)))
                 .select(proguardMapping)
                 .fetchOne());
-    }
+    }*/
 
     @NonNull
     @PostAuthorize("!returnObject.isPresent() || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.get().stacktrace.bug.app, T(com.faendir.acra.model.Permission$Level).VIEW)")
@@ -259,16 +254,6 @@ public class DataService implements Serializable {
                 .where(report.id.eq(id))
                 .select(report)
                 .fetchOne());
-    }
-
-    @NonNull
-    @PostAuthorize("!returnObject.isPresent() || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.get().app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public Optional<Bug> findBug(@NonNull String encodedId) {
-        try {
-            return findBug(Integer.parseInt(encodedId));
-        } catch (NumberFormatException e) {
-            return Optional.empty();
-        }
     }
 
     @NonNull
@@ -327,10 +312,26 @@ public class DataService implements Serializable {
                 .fetchFirst());
     }
 
+    @NonNull
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
+    public List<Version> findAllVersions(@NonNull App app) {
+        return new JPAQuery<>(entityManager).from(version).where(version.app.eq(app)).select(version).fetch();
+    }
+
+    @NonNull
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
+    public Optional<MailSettings> findMailSettings(@NonNull App app, @NonNull User user) {
+        return Optional.ofNullable(new JPAQuery<>(entityManager).from(mailSettings).where(mailSettings.app.eq(app).and(mailSettings.user.eq(user))).select(mailSettings).fetchOne());
+    }
+
     @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).EDIT)")
     public void changeConfiguration(@NonNull App app, @NonNull App.Configuration configuration) {
-        bugMerger.changeConfiguration(app, configuration);
+        app.setConfiguration(configuration);
+        app = store(app);
+        entityManager.flush();
+        applicationEventPublisher.publishEvent(new ConfigurationUpdateEvent(this, app));
+
     }
 
     @Transactional
@@ -338,7 +339,7 @@ public class DataService implements Serializable {
     public void deleteReportsOlderThanDays(@NonNull App app, @NonNull int days) {
         new JPADeleteClause(entityManager, report).where(report.stacktrace.bug.app.eq(app).and(report.date.before(ZonedDateTime.now().minus(days, ChronoUnit.DAYS))));
         entityManager.flush();
-        bugMerger.deleteOrphanBugs();
+        applicationEventPublisher.publishEvent(new ReportsDeleteEvent(this));
     }
 
     @Transactional
@@ -346,7 +347,7 @@ public class DataService implements Serializable {
     public void deleteReportsBeforeVersion(@NonNull App app, int versionCode) {
         new JPADeleteClause(entityManager, report).where(report.stacktrace.bug.app.eq(app).and(report.stacktrace.version.code.lt(versionCode)));
         entityManager.flush();
-        bugMerger.deleteOrphanBugs();
+        applicationEventPublisher.publishEvent(new ReportsDeleteEvent(this));
     }
 
     @Transactional
@@ -356,7 +357,7 @@ public class DataService implements Serializable {
         if (app != null) {
             JSONObject jsonObject = new JSONObject(content);
             String trace = jsonObject.optString(ReportField.STACK_TRACE.name());
-            Version version = getVersion(jsonObject);
+            Version version = getVersion(app, jsonObject);
             Stacktrace stacktrace = findStacktrace(app, trace, version.getCode()).orElseGet(() -> {
                 synchronized (stacktraceLock) {
                     return findStacktrace(app, trace, version.getCode()).orElseGet(() -> store(new Stacktrace(findBug(app, trace).orElseGet(() -> new Bug(app, trace)), trace, version)));
@@ -372,11 +373,12 @@ public class DataService implements Serializable {
                     log.warn("Failed to load attachment with name " + multipartFile.getName(), e);
                 }
             });
-            bugMerger.checkAutoMerge(report.getStacktrace());
+            entityManager.flush();
+            applicationEventPublisher.publishEvent(new NewReportEvent(this, report));
         }
     }
 
-    private Version getVersion(JSONObject jsonObject) {
+    private Version getVersion(App app, JSONObject jsonObject) {
         JSONObject buildConfig = jsonObject.optJSONObject(ReportField.BUILD_CONFIG.name());
         Integer versionCode = null;
         String versionName = null;
@@ -396,7 +398,7 @@ public class DataService implements Serializable {
         if (versionName == null) {
             versionName = jsonObject.optString(ReportField.APP_VERSION_NAME.name(), "N/A");
         }
-        return new Version(versionCode, versionName);
+        return new Version(app, versionCode, versionName);
     }
 
     @NonNull
@@ -435,8 +437,8 @@ public class DataService implements Serializable {
 
     @NonNull
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public Optional<Integer> getMaximumMappingVersion(@NonNull App app) {
-        return Optional.ofNullable(new JPAQuery<>(entityManager).from(proguardMapping).where(proguardMapping.app.eq(app)).select(proguardMapping.versionCode.max()).fetchOne());
+    public Optional<Integer> getMaxVersion(@NonNull App app) {
+        return Optional.ofNullable(new JPAQuery<>(entityManager).from(version).where(version.app.eq(app)).select(version.code.max()).fetchOne());
     }
 
     @Transactional
@@ -444,7 +446,7 @@ public class DataService implements Serializable {
     public ImportResult importFromAcraStorage(String host, int port, boolean ssl, String database) {
         HttpClient httpClient = new StdHttpClient.Builder().host(host).port(port).enableSSL(ssl).build();
         CouchDbConnector db = new StdCouchDbConnector(database, new StdCouchDbInstance(httpClient));
-        PlainTextUser user = createNewApp(database.replaceFirst("acra-", ""));
+        User user = createNewApp(database.replaceFirst("acra-", ""));
         int total = 0;
         int success = 0;
         for (String id : db.getAllDocIds()) {

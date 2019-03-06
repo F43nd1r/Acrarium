@@ -18,16 +18,20 @@ package com.faendir.acra.ui.view.app.tabs;
 
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
+import com.faendir.acra.model.MailSettings;
 import com.faendir.acra.model.Permission;
-import com.faendir.acra.model.ProguardMapping;
-import com.faendir.acra.model.QProguardMapping;
 import com.faendir.acra.model.QReport;
+import com.faendir.acra.model.QVersion;
+import com.faendir.acra.model.User;
+import com.faendir.acra.model.Version;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.DataService;
+import com.faendir.acra.service.UserService;
 import com.faendir.acra.ui.base.ConfigurationLabel;
 import com.faendir.acra.ui.base.MyGrid;
 import com.faendir.acra.ui.base.popup.Popup;
 import com.faendir.acra.ui.component.Card;
+import com.faendir.acra.ui.component.CssGrid;
 import com.faendir.acra.ui.component.DownloadButton;
 import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.HasSize;
@@ -37,13 +41,16 @@ import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.view.Overview;
 import com.faendir.acra.ui.view.app.AppView;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -52,6 +59,7 @@ import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.util.StreamUtils;
 
 import java.io.ByteArrayInputStream;
@@ -70,51 +78,88 @@ import static com.faendir.acra.model.QReport.report;
 @SpringComponent
 @Route(value = "admin", layout = AppView.class)
 public class AdminTab extends AppTab<Div> {
+    @NonNull
+    private final UserService userService;
+    private final FlexLayout layout;
+
     @Autowired
-    public AdminTab(DataService dataService) {
+    public AdminTab(DataService dataService, @NonNull UserService userService) {
         super(dataService);
+        this.userService = userService;
         getContent().setSizeFull();
+        layout = new FlexLayout();
+        layout.setWidthFull();
+        layout.setFlexWrap(FlexLayout.FlexWrap.WRAP);
+        layout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        getContent().add(layout);
     }
 
     @Override
     protected void init(App app) {
-        getContent().removeAll();
-        FlexLayout layout = new FlexLayout();
-        layout.setFlexWrap(FlexLayout.FlexWrap.WRAP);
-        layout.setWidthFull();
-        MyGrid<ProguardMapping> mappingGrid = new MyGrid<>(getDataService().getMappingProvider(app));
-        mappingGrid.setHeightToRows();
-        mappingGrid.addColumn(ProguardMapping::getVersionCode, QProguardMapping.proguardMapping.versionCode, Messages.VERSION).setFlexGrow(1);
-        mappingGrid.setHeight("");
-        Card mappingCard = new Card(mappingGrid);
-        mappingCard.setHeader(Translatable.createText(Messages.DE_OBFUSCATION));
-        mappingCard.setWidth(500, HasSize.Unit.PIXEL);
+        layout.removeAll();
+        MyGrid<Version> versionGrid = new MyGrid<>(getDataService().getVersionProvider(app));
+        versionGrid.setHeightToRows();
+        versionGrid.addColumn(Version::getCode, QVersion.version.code, Messages.VERSION_CODE).setFlexGrow(1);
+        versionGrid.addColumn(Version::getName, QVersion.version.name, Messages.VERSION).setFlexGrow(1);
+        versionGrid.setHeight("");
+        Card versionCard = createCard(versionGrid);
+        versionCard.setHeader(Translatable.createText(Messages.VERSIONS));
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-            mappingGrid.addColumn(new ComponentRenderer<>(mapping -> new Button(new Icon(VaadinIcon.TRASH), e -> new Popup().addComponent(Translatable.createText(Messages.DELETE_MAPPING_CONFIRM, mapping.getVersionCode())).addYesNoButtons(p -> {
-                getDataService().delete(mapping);
-                mappingGrid.getDataProvider().refreshAll();
+            versionGrid.addColumn(new ComponentRenderer<>(v -> new Button(new Icon(VaadinIcon.TRASH), e -> new Popup().addComponent(Translatable.createText(Messages.DELETE_MAPPING_CONFIRM, v.getCode())).addYesNoButtons(p -> {
+                getDataService().delete(v);
+                versionGrid.getDataProvider().refreshAll();
             }, true).show())));
-            mappingGrid.appendFooterRow().getCell(mappingGrid.getColumns().get(0)).setComponent(Translatable.createButton(e -> {
-                NumberInput version = new NumberInput(getDataService().getMaximumMappingVersion(app).map(i -> i + 1).orElse(1));//, Messages.VERSION_CODE);
+            versionGrid.appendFooterRow().getCell(versionGrid.getColumns().get(0)).setComponent(Translatable.createButton(e -> {
+                TextField name = new TextField();
+                NumberInput version = new NumberInput(getDataService().getMaxVersion(app).map(i -> i + 1).orElse(1));//, Messages.VERSION_CODE);
                 MemoryBuffer buffer = new MemoryBuffer();
                 Upload upload = new Upload(buffer);
-                new Popup()
-                        .setTitle(Messages.NEW_MAPPING)
+                new Popup().setTitle(Messages.NEW_MAPPING)
+                        .addComponent(name)
                         .addComponent(version)
                         .addComponent(upload)
                         .addCreateButton(popup -> {
                             try {
-                                getDataService().store(new ProguardMapping(app, version.getValue().intValue(), StreamUtils.copyToString(buffer.getInputStream(), Charset.defaultCharset())));
+                                getDataService().store(new Version(app, version.getValue().intValue(), name.getValue(), StreamUtils.copyToString(buffer.getInputStream(), Charset.defaultCharset())));
                             } catch (Exception ex) {
                                 //TODO
                             }
-                            mappingGrid.getDataProvider().refreshAll();
-                        }, true)
-                        .show();
-            }, Messages.NEW_FILE));
+                            versionGrid.getDataProvider().refreshAll();
+                        }, true).show();
+            }, Messages.NEW_VERSION));
         }
-        layout.add(mappingCard);
-        layout.expand(mappingCard);
+
+        CssGrid notificationLayout = new CssGrid();
+        notificationLayout.setTemplateColumns("auto max-content");
+        notificationLayout.setWidthFull();
+        User user = userService.getUser(SecurityUtils.getUsername());
+        MailSettings settings = getDataService().findMailSettings(app, user).orElse(new MailSettings(app, user));
+        notificationLayout.add(Translatable.createLabel(Messages.NEW_BUG_MAIL_LABEL), new Checkbox("", event -> {
+            settings.setNewBug(event.getValue());
+            getDataService().store(settings);
+        }));
+        notificationLayout.add(Translatable.createLabel(Messages.REGRESSION_MAIL_LABEL), new Checkbox("", event -> {
+            settings.setRegression(event.getValue());
+            getDataService().store(settings);
+        }));
+        notificationLayout.add(Translatable.createLabel(Messages.SPIKE_MAIL_LABEL), new Checkbox("", event -> {
+            settings.setSpike(event.getValue());
+            getDataService().store(settings);
+        }));
+        notificationLayout.add(Translatable.createLabel(Messages.WEEKLY_MAIL_LABEL), new Checkbox("", event -> {
+            settings.setSummary(event.getValue());
+            getDataService().store(settings);
+        }));
+        if(user.getMail() == null) {
+            Icon icon = VaadinIcon.WARNING.create();
+            icon.getStyle().set("height", "var(--lumo-font-size-m)");
+            Div div = new Div(icon, Translatable.createText(Messages.NO_MAIL_SET));
+            div.getStyle().set("color","var(--lumo-error-color)");
+            div.getStyle().set("font-style", "italic");
+            notificationLayout.add(div);
+        }
+        Card notificationCard = createCard(notificationLayout);
+        notificationCard.setHeader(Translatable.createText(Messages.NOTIFICATIONS));
 
         Translatable<ComboBox<String>> mailBox = Translatable.createComboBox(getDataService().getFromReports(app, null, QReport.report.userEmail), Messages.BY_MAIL);
         mailBox.setWidthFull();
@@ -136,11 +181,8 @@ public class AdminTab extends AppTab<Div> {
             return new ByteArrayInputStream(getDataService().getFromReports(app, where, report.content, report.id).stream().collect(Collectors.joining(", ", "[", "]")).getBytes(StandardCharsets.UTF_8));
         }), Messages.DOWNLOAD);
         download.setSizeFull();
-        Card exportCard = new Card(mailBox, idBox, download);
+        Card exportCard = createCard(mailBox, idBox, download);
         exportCard.setHeader(Translatable.createText(Messages.EXPORT));
-        exportCard.setWidth(500, HasSize.Unit.PIXEL);
-        layout.add(exportCard);
-        layout.expand(exportCard);
 
         Translatable<Button> configButton = Translatable.createButton(e -> new Popup().setTitle(Messages.NEW_ACRA_CONFIG_CONFIRM)
                 .addYesNoButtons(popup -> popup.clear().addComponent(new ConfigurationLabel(getDataService().recreateReporterUser(app))).addCloseButton().show())
@@ -182,12 +224,17 @@ public class AdminTab extends AppTab<Div> {
             UI.getCurrent().navigate(Overview.class);
         }, true).show(), Messages.DELETE_APP);
         deleteButton.setWidthFull();
-        Card dangerCard = new Card(configButton, matchingButton, purgeAge, purgeVersion, deleteButton);
+        Card dangerCard = createCard(configButton, matchingButton, purgeAge, purgeVersion, deleteButton);
         dangerCard.setHeader(Translatable.createText(Messages.DANGER_ZONE));
         dangerCard.setHeaderColor("var(----lumo-error-text-color)", "var(--lumo-error-color)");
-        dangerCard.setWidth(500, HasSize.Unit.PIXEL);
-        layout.add(dangerCard);
-        layout.expand(dangerCard);
-        getContent().add(layout);
+    }
+
+    private Card createCard(Component... content) {
+        Card card = new Card(content);
+        card.setWidth(500, HasSize.Unit.PIXEL);
+        card.setMaxWidth(1000, HasSize.Unit.PIXEL);
+        layout.add(card);
+        layout.expand(card);
+        return card;
     }
 }

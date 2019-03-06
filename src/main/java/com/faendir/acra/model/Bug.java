@@ -23,6 +23,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -30,6 +31,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 /**
@@ -44,7 +46,10 @@ public class Bug {
     @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, optional = false, fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private App app;
-    private boolean solved;
+    @Nullable
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
+    @JoinColumn(name = "solved_version")
+    private Version solvedVersion;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -67,14 +72,6 @@ public class Bug {
         return app;
     }
 
-    public boolean isSolved() {
-        return solved;
-    }
-
-    public void setSolved(boolean solved) {
-        this.solved = solved;
-    }
-
     @NonNull
     public String getTitle() {
         return title;
@@ -82,6 +79,15 @@ public class Bug {
 
     public void setTitle(@NonNull String title) {
         this.title = title;
+    }
+
+    @Nullable
+    public Version getSolvedVersion() {
+        return solvedVersion;
+    }
+
+    public void setSolvedVersion(@Nullable Version solvedVersion) {
+        this.solvedVersion = solvedVersion;
     }
 
     @Override
