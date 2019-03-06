@@ -29,6 +29,7 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -92,12 +93,12 @@ public class Translatable<T extends Component> extends Composite<T> implements L
     }
 
     @NonNull
-    public static Value<TextField> createTextField(@Nullable String initialValue, @NonNull String captionId, @NonNull Object... params) {
+    public static Value<TextField, String> createTextField(@Nullable String initialValue, @NonNull String captionId, @NonNull Object... params) {
         return new Value<>(new TextField("", initialValue == null ? "" : initialValue, ""), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
     }
 
     @NonNull
-    public static Value<PasswordField> createPasswordField(@NonNull String captionId, @NonNull Object... params) {
+    public static Value<PasswordField, String> createPasswordField(@NonNull String captionId, @NonNull Object... params) {
         return new Value<>(new PasswordField(), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
     }
 
@@ -131,6 +132,14 @@ public class Translatable<T extends Component> extends Composite<T> implements L
         return new Translatable<>(new Image(src, ""), image -> image.setAlt(image.getTranslation(captionId, params)));
     }
 
+    public static Value<NumberField, Double> createNumberField(double initialValue, @NonNull String captionId, @NonNull Object... params) {
+        return new Value<>(new NumberField(null, initialValue, null), numberField -> numberField.setLabel(numberField.getTranslation(captionId, params)));
+    }
+
+    public static Value<UploadField, String> createUploadField(@NonNull String captionId, @NonNull Object... params) {
+        return new Value<>(new UploadField(), uploadField -> uploadField.setLabel(uploadField.getTranslation(captionId, params)));
+    }
+
     public static Translatable<Div> createDiv(@NonNull String captionId, @NonNull Object... params) {
         return new Translatable<>(new Div(), div -> {
             String translation = div.getTranslation(captionId, params);
@@ -138,29 +147,29 @@ public class Translatable<T extends Component> extends Composite<T> implements L
         });
     }
 
-    public static class Value<T extends Component & HasValue<AbstractField.ComponentValueChangeEvent<T, String>, String> & com.vaadin.flow.component.HasValidation> extends Translatable<T> implements HasValidation<T> {
+    public static class Value<T extends Component & HasValue<? extends AbstractField.ComponentValueChangeEvent<? super T, V>, V> & com.vaadin.flow.component.HasValidation, V> extends Translatable<T> implements HasValidation<T, V> {
 
         protected Value(T t, Consumer<T> setter) {
             super(t, setter);
         }
 
-        public void setValue(String value) {
+        public void setValue(V value) {
             getContent().setValue(value);
         }
 
-        public String getValue() {
+        public V getValue() {
             return getContent().getValue();
         }
 
-        public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<T, String>> listener) {
+        public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<? super T, V>> listener) {
             return getContent().addValueChangeListener(listener);
         }
 
-        public String getEmptyValue() {
+        public V getEmptyValue() {
             return getContent().getEmptyValue();
         }
 
-        public Optional<String> getOptionalValue() {
+        public Optional<V> getOptionalValue() {
             return getContent().getOptionalValue();
         }
 
@@ -202,6 +211,11 @@ public class Translatable<T extends Component> extends Composite<T> implements L
 
         public boolean isInvalid() {
             return getContent().isInvalid();
+        }
+
+        @Override
+        public Value<T, V> with(Consumer<T> consumer) {
+            return (Value<T, V>) super.with(consumer);
         }
     }
 }

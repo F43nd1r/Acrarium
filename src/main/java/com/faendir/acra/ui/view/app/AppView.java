@@ -38,7 +38,7 @@ import com.vaadin.flow.spring.annotation.UIScope;
 @com.vaadin.flow.router.ParentLayout(MainView.class)
 public class AppView extends TabView<AppTab<?>, Integer> {
     public AppView() {
-        super( new TabInfo<>(BugTab.class, Messages.BUGS),
+        super(new TabInfo<>(BugTab.class, Messages.BUGS),
                 new TabInfo<>(ReportTab.class, Messages.REPORTS),
                 new TabInfo<>(StatisticsTab.class, Messages.STATISTICS),
                 new TabInfo<>(AdminTab.class, Messages.ADMIN));

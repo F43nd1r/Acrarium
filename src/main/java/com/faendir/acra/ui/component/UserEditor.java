@@ -48,7 +48,7 @@ public class UserEditor extends Composite<FlexLayout> {
         boolean newUser = u == null;
         this.user = newUser ? new User("", "", Arrays.asList(User.Role.ADMIN, User.Role.USER)) : u;
         Binder<User> binder = new Binder<>();
-        Translatable.Value<TextField> username = Translatable.createTextField(user.getUsername(), Messages.USERNAME);
+        Translatable.Value<TextField, String> username = Translatable.createTextField(user.getUsername(), Messages.USERNAME);
         exposeInput(username);
         username.setWidthFull();
         Binder.BindingBuilder<User, String> usernameBindingBuilder = binder.forField(username);
@@ -58,7 +58,7 @@ public class UserEditor extends Composite<FlexLayout> {
         usernameBindingBuilder.withValidator(uName -> uName.equals(user.getUsername()) || userService.getUser(uName) == null, getTranslation(Messages.USERNAME_TAKEN))
                 .bind(User::getUsername, newUser ? User::setUsername : null);
         getContent().add(username);
-        Translatable.Value<TextField> mail = Translatable.createTextField(user.getMail(), Messages.EMAIL);
+        Translatable.Value<TextField, String> mail = Translatable.createTextField(user.getMail(), Messages.EMAIL);
         mail.setWidthFull();
         EmailValidator emailValidator = new EmailValidator(getTranslation(Messages.INVALID_MAIL));
         binder.forField(mail).withValidator((m, c) -> {
@@ -68,14 +68,14 @@ public class UserEditor extends Composite<FlexLayout> {
             return emailValidator.apply(m, c);
         }).bind(User::getMail, User::setMail);
         getContent().add(mail);
-        Translatable.Value<PasswordField> newPassword = Translatable.createPasswordField(Messages.NEW_PASSWORD);
+        Translatable.Value<PasswordField, String> newPassword = Translatable.createPasswordField(Messages.NEW_PASSWORD);
         exposeInput(newPassword);
         newPassword.setWidthFull();
-        Translatable.Value<PasswordField> repeatPassword = Translatable.createPasswordField(Messages.REPEAT_PASSWORD);
+        Translatable.Value<PasswordField, String> repeatPassword = Translatable.createPasswordField(Messages.REPEAT_PASSWORD);
         exposeInput(repeatPassword);
         repeatPassword.setWidthFull();
         if (!newUser) {
-            Translatable.Value<PasswordField> oldPassword = Translatable.createPasswordField(Messages.OLD_PASSWORD);
+            Translatable.Value<PasswordField, String> oldPassword = Translatable.createPasswordField(Messages.OLD_PASSWORD);
             exposeInput(oldPassword);
             oldPassword.setWidthFull();
             Binder.Binding<User, String> oldPasswordBinding = binder.forField(oldPassword).withValidator(p -> {
@@ -126,7 +126,7 @@ public class UserEditor extends Composite<FlexLayout> {
      * @param field the field which should be visible to password managers
      * @param <T> the type of the field
      */
-    private <T extends Component & HasValue<AbstractField.ComponentValueChangeEvent<T, String>, String> & com.vaadin.flow.component.HasValidation> void exposeInput(Translatable.Value<T> field) {
+    private <T extends Component & HasValue<AbstractField.ComponentValueChangeEvent<T, V>, V> & com.vaadin.flow.component.HasValidation, V> void exposeInput(Translatable.Value<T, V> field) {
         Element input = ElementFactory.createInput();
         input.setAttribute("slot", "input");
         field.getElement().appendChild(input);

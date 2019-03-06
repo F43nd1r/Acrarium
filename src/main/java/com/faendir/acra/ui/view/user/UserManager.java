@@ -106,8 +106,8 @@ public class UserManager extends Composite<FlexLayout> implements HasRoute {
             }), Messages.ACCESS_PERMISSION, app.getName());
         }
         Translatable<Button> newUser = Translatable.createButton(e -> {
-            Translatable.Value<TextField> name = Translatable.createTextField("", Messages.USERNAME);
-            Translatable.Value<PasswordField> password = Translatable.createPasswordField(Messages.PASSWORD);
+            Translatable.Value<TextField, String> name = Translatable.createTextField("", Messages.USERNAME);
+            Translatable.Value<PasswordField, String> password = Translatable.createPasswordField(Messages.PASSWORD);
             new Popup().setTitle(Messages.NEW_USER)
                     .addValidatedField(ValidatedField.of(name).addValidator(s -> !s.isEmpty(), Messages.USERNAME_EMPTY))
                     .addValidatedField(ValidatedField.of(password).addValidator(s -> !s.isEmpty(), Messages.PASSWORD_EMPTY))

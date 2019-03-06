@@ -37,6 +37,7 @@ import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.HasSize;
 import com.faendir.acra.ui.component.RangeInput;
 import com.faendir.acra.ui.component.Translatable;
+import com.faendir.acra.ui.component.UploadField;
 import com.faendir.acra.ui.view.Overview;
 import com.faendir.acra.ui.view.app.AppView;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -51,8 +52,6 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
@@ -60,10 +59,8 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
-import org.springframework.util.StreamUtils;
 
 import java.io.ByteArrayInputStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
@@ -110,22 +107,23 @@ public class AdminTab extends AppTab<Div> {
                 versionGrid.getDataProvider().refreshAll();
             }, true).show())));
             versionGrid.appendFooterRow().getCell(versionGrid.getColumns().get(0)).setComponent(Translatable.createButton(e -> {
-                TextField name = new TextField();
-                NumberField version = new NumberField();//, Messages.VERSION_CODE);
-                version.setValue(getDataService().getMaxVersion(app).map(i -> i + 1d).orElse(1d));
-                version.setStep(1d);
-                version.setMin(1d);
-                version.setPreventInvalidInput(true);
-                version.setHasControls(true);
-                MemoryBuffer buffer = new MemoryBuffer();
-                Upload upload = new Upload(buffer);
-                new Popup().setTitle(Messages.NEW_MAPPING)
+                Translatable.Value<TextField, String> name = Translatable.createTextField("", Messages.VERSION_NAME);
+                name.getContent().setRequired(true);
+                Translatable.Value<NumberField, Double> version = Translatable.createNumberField(getDataService().getMaxVersion(app).map(i -> i + 1d).orElse(1d), Messages.VERSION_CODE)
+                        .with(n -> {
+                            n.setStep(1d);
+                            n.setMin(1d);
+                            n.setPreventInvalidInput(true);
+                            n.setHasControls(true);
+                        });
+                Translatable.Value<UploadField, String> upload = Translatable.createUploadField(Messages.MAPPING_FILE);
+                new Popup().setTitle(Messages.NEW_VERSION)
                         .addComponent(name)
                         .addComponent(version)
                         .addComponent(upload)
                         .addCreateButton(popup -> {
                             try {
-                                getDataService().store(new Version(app, version.getValue().intValue(), name.getValue(), StreamUtils.copyToString(buffer.getInputStream(), Charset.defaultCharset())));
+                                getDataService().store(new Version(app, version.getValue().intValue(), name.getValue(), upload.getValue()));
                             } catch (Exception ex) {
                                 //TODO
                             }
@@ -155,11 +153,11 @@ public class AdminTab extends AppTab<Div> {
             settings.setSummary(event.getValue());
             getDataService().store(settings);
         }));
-        if(user.getMail() == null) {
+        if (user.getMail() == null) {
             Icon icon = VaadinIcon.WARNING.create();
             icon.getStyle().set("height", "var(--lumo-font-size-m)");
             Div div = new Div(icon, Translatable.createText(Messages.NO_MAIL_SET));
-            div.getStyle().set("color","var(--lumo-error-color)");
+            div.getStyle().set("color", "var(--lumo-error-color)");
             div.getStyle().set("font-style", "italic");
             notificationLayout.add(div);
         }
@@ -216,7 +214,7 @@ public class AdminTab extends AppTab<Div> {
         purgeAge.setAlignItems(FlexComponent.Alignment.CENTER);
         purgeAge.add(Translatable.createButton(e -> getDataService().deleteReportsOlderThanDays(app, age.getValue().intValue()), Messages.PURGE),
                 Translatable.createLabel(Messages.REPORTS_OLDER_THAN1),
-                age );
+                age);
         purgeAge.expand(age);
         ComboBox<Integer> versionBox = new ComboBox<>(null, getDataService().getFromReports(app, null, QReport.report.stacktrace.version.code));
         versionBox.setWidth("100%");
