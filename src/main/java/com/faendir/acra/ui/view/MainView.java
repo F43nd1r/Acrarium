@@ -25,6 +25,7 @@ import com.faendir.acra.ui.base.Path;
 import com.faendir.acra.ui.base.popup.Popup;
 import com.faendir.acra.ui.component.DropdownMenu;
 import com.faendir.acra.ui.component.FlexLayout;
+import com.faendir.acra.ui.component.Label;
 import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.component.UserEditor;
 import com.faendir.acra.ui.view.user.AccountView;
@@ -151,7 +152,23 @@ public class MainView extends ParentLayout {
     }
 
     private void showFirstTimeSetup() {
-        setContent(new UserEditor(userService, null, () -> UI.getCurrent().getPage().reload()));
+        Translatable<Image> logo = Translatable.createImage("frontend/logo.png", Messages.ACRARIUM);
+        logo.setWidthFull();
+        logo.setPaddingTop(0.5, Unit.REM);
+        logo.setPaddingBottom(1, Unit.REM);
+        Translatable<Label> welcomeLabel = Translatable.createLabel(Messages.WELCOME);
+        welcomeLabel.getStyle().set("font-size", "var(--lumo-font-size-xxl");
+        FlexLayout header = new FlexLayout(welcomeLabel, logo, Translatable.createLabel(Messages.CREATE_ADMIN));
+        header.setFlexDirection(FlexDirection.COLUMN);
+        header.setAlignSelf(Alignment.CENTER, welcomeLabel);
+        header.setWidth(0, Unit.PIXEL);
+        FlexLayout wrapper = new FlexLayout(header);
+        wrapper.expand(header);
+        UserEditor userEditor = new UserEditor(userService, null, () -> UI.getCurrent().getPage().reload());
+        FlexLayout layout = new FlexLayout(wrapper, userEditor);
+        layout.setFlexDirection(FlexDirection.COLUMN);
+        layout.setSizeUndefined();
+        setContent(layout);
     }
 
     private boolean login(@NonNull String username, @NonNull String password) {

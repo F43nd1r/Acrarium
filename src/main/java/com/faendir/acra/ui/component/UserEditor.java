@@ -19,13 +19,18 @@ package com.faendir.acra.ui.component;
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.User;
 import com.faendir.acra.service.UserService;
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.validator.EmailValidator;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.ElementFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -44,6 +49,8 @@ public class UserEditor extends Composite<FlexLayout> {
         this.user = newUser ? new User("", "", Arrays.asList(User.Role.ADMIN, User.Role.USER)) : u;
         Binder<User> binder = new Binder<>();
         Translatable.Value<TextField> username = Translatable.createTextField(user.getUsername(), Messages.USERNAME);
+        exposeInput(username);
+        username.setWidthFull();
         Binder.BindingBuilder<User, String> usernameBindingBuilder = binder.forField(username);
         if (newUser) {
             usernameBindingBuilder.asRequired(getTranslation(Messages.USERNAME_REQUIRED));
@@ -52,6 +59,7 @@ public class UserEditor extends Composite<FlexLayout> {
                 .bind(User::getUsername, newUser ? User::setUsername : null);
         getContent().add(username);
         Translatable.Value<TextField> mail = Translatable.createTextField(user.getMail(), Messages.EMAIL);
+        mail.setWidthFull();
         EmailValidator emailValidator = new EmailValidator(getTranslation(Messages.INVALID_MAIL));
         binder.forField(mail).withValidator((m, c) -> {
             if (m.isEmpty()) {
@@ -61,9 +69,15 @@ public class UserEditor extends Composite<FlexLayout> {
         }).bind(User::getMail, User::setMail);
         getContent().add(mail);
         Translatable.Value<PasswordField> newPassword = Translatable.createPasswordField(Messages.NEW_PASSWORD);
+        exposeInput(newPassword);
+        newPassword.setWidthFull();
         Translatable.Value<PasswordField> repeatPassword = Translatable.createPasswordField(Messages.REPEAT_PASSWORD);
+        exposeInput(repeatPassword);
+        repeatPassword.setWidthFull();
         if (!newUser) {
             Translatable.Value<PasswordField> oldPassword = Translatable.createPasswordField(Messages.OLD_PASSWORD);
+            exposeInput(oldPassword);
+            oldPassword.setWidthFull();
             Binder.Binding<User, String> oldPasswordBinding = binder.forField(oldPassword).withValidator(p -> {
                 if (!newPassword.getValue().isEmpty() || !oldPassword.getValue().isEmpty()) {
                     return userService.checkPassword(user, p);
@@ -76,12 +90,14 @@ public class UserEditor extends Composite<FlexLayout> {
             repeatPassword.addValueChangeListener(e -> oldPasswordBinding.validate());
         }
         Binder.BindingBuilder<User, String> newPasswordBindingBuilder = binder.forField(newPassword);
+        Binder.BindingBuilder<User, String> repeatPasswordBindingBuilder = binder.forField(repeatPassword);
         if (newUser) {
             newPasswordBindingBuilder.asRequired(getTranslation(Messages.PASSWORD_REQUIRED));
+            repeatPasswordBindingBuilder.asRequired(getTranslation(Messages.PASSWORD_REQUIRED));
         }
         newPasswordBindingBuilder.bind(user1 -> "", User::setPlainTextPassword);
         getContent().add(newPassword);
-        Binder.Binding<User, String> repeatPasswordBinding = binder.forField(repeatPassword).withValidator(p -> p.equals(newPassword.getValue()), getTranslation(Messages.PASSWORDS_NOT_MATCHING)).bind(user1 -> "", (user1, s) -> doNothing());
+        Binder.Binding<User, String> repeatPasswordBinding = repeatPasswordBindingBuilder.withValidator(p -> p.equals(newPassword.getValue()), getTranslation(Messages.PASSWORDS_NOT_MATCHING)).bind(user1 -> "", (user1, s) -> doNothing());
         newPassword.addValueChangeListener(e -> {
             if (!repeatPassword.getValue().isEmpty()) {
                 repeatPasswordBinding.validate();
@@ -96,10 +112,24 @@ public class UserEditor extends Composite<FlexLayout> {
                 onSuccess.run();
             }
         }, Messages.CONFIRM);
+        button.setWidthFull();
         button.getContent().setEnabled(false);
         binder.addStatusChangeListener(e -> button.getContent().setEnabled(e.getBinder().hasChanges()));
         getContent().add(button);
         getContent().setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+        getContent().setMaxWidthFull();
+        getContent().setWidth("calc(var(--lumo-size-m) * 10)");
+    }
+
+    /**
+     * password managers need an input outside the shadow dom, which we add here.
+     * @param field the field which should be visible to password managers
+     * @param <T> the type of the field
+     */
+    private <T extends Component & HasValue<AbstractField.ComponentValueChangeEvent<T, String>, String> & com.vaadin.flow.component.HasValidation> void exposeInput(Translatable.Value<T> field) {
+        Element input = ElementFactory.createInput();
+        input.setAttribute("slot", "input");
+        field.getElement().appendChild(input);
     }
 
     private void doNothing() {
