@@ -48,7 +48,7 @@ public class VersionChange extends BaseChange {
             int versionCode = (int) result[0];
             String versioName = (String) result[1];
             int appId = (int) result[2];
-            List<Integer> stacktraces = Stream.of((String) result[3]).map(Integer::parseInt).collect(Collectors.toList());
+            List<Integer> stacktraces = Stream.of(((String) result[3]).split(",")).map(Integer::parseInt).collect(Collectors.toList());
             List<Object> list = entityManager.createNativeQuery("SELECT " + quote("mappings") + " FROM " + quote("proguard_mapping") + " WHERE " + quote("version_code") + " = ?1 AND " + quote("app_id") + " = ?2")
                     .setParameter(1, versionCode)
                     .setParameter(2, appId)
