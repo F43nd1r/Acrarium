@@ -304,6 +304,14 @@ public class DataService implements Serializable {
     }
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
+    public Optional<Version> findVersion(@NonNull App app, int versionCode) {
+        return Optional.ofNullable(new JPAQuery<>(entityManager).from(version)
+                .where(version.code.eq(versionCode).and(version.app.eq(app)))
+                .select(version)
+                .fetchOne());
+    }
+
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
     private Optional<Bug> findBug(@NonNull App app, @NonNull String stacktrace) {
         return Optional.ofNullable(new JPAQuery<>(entityManager).from(stacktrace1)
                 .join(stacktrace1.bug, bug)
@@ -398,7 +406,7 @@ public class DataService implements Serializable {
         if (versionName == null) {
             versionName = jsonObject.optString(ReportField.APP_VERSION_NAME.name(), "N/A");
         }
-        return new Version(app, versionCode, versionName);
+        return findVersion(app, versionCode).orElse(new Version(app, versionCode, versionName));
     }
 
     @NonNull
