@@ -42,7 +42,11 @@ public class AvatarService {
 
     //@Cacheable(cacheNames = "avatars", key = "#report.installationId")
     public Component getAvatar(@NonNull Report report) {
-        byte[] bytes = avatar.createAsPngBytes(report.getInstallationId().hashCode());
-        return new Image(new StreamResource("", () -> new ByteArrayInputStream(bytes)), "");
+        return new Image(getAvatar(report.getInstallationId()), "");
+    }
+
+    public StreamResource getAvatar(@NonNull String installationId) {
+        byte[] bytes = avatar.createAsPngBytes(installationId.hashCode());
+        return new StreamResource("", () -> new ByteArrayInputStream(bytes));
     }
 }

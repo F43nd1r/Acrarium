@@ -25,20 +25,17 @@ import com.faendir.acra.ui.base.HasSecureStringParameter;
 import com.faendir.acra.ui.base.Path;
 import com.faendir.acra.ui.component.Card;
 import com.faendir.acra.ui.component.CssGrid;
-import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.HasSize;
+import com.faendir.acra.ui.component.InstallationView;
 import com.faendir.acra.ui.component.Label;
 import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.view.MainView;
 import com.faendir.acra.ui.view.bug.tabs.ReportTab;
 import com.faendir.acra.util.Utils;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.InputStreamFactory;
@@ -47,11 +44,13 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+import org.xbib.time.pretty.PrettyTime;
 
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -64,14 +63,46 @@ import java.util.Optional;
 @Route(value = "report", layout = MainView.class)
 public class ReportView extends Composite<Div> implements HasSecureStringParameter, HasRoute {
     private final DataService dataService;
-    private final AvatarService avatarService;
+    private final Label version;
+    private final Label date;
+    private final InstallationView installation;
+    private final Label email;
+    private final Label comment;
+    private final Translatable<Label> mappedStacktraceLabel;
+    private final Translatable<Label> unmappedStacktraceLabel;
+    private final Label stacktrace;
+    private final Div attachments;
+    private final Card details;
     private Report report;
+    private PrettyTime prettyTime;
 
     @Autowired
     public ReportView(@NonNull DataService dataService, @NonNull AvatarService avatarService) {
         this.dataService = dataService;
-        this.avatarService = avatarService;
+        prettyTime = new PrettyTime(Locale.US);
         getElement().getStyle().set("overflow", "auto");
+        CssGrid summaryLayout = new CssGrid();
+        summaryLayout.setTemplateColumns("auto auto");
+        summaryLayout.setColumnGap(1, HasSize.Unit.EM);
+        summaryLayout.setJustifyItems(CssGrid.JustifyMode.START);
+        summaryLayout.setAlignItems(CssGrid.AlignMode.FIRST_BASELINE);
+        Translatable<Label> installationLabel = Translatable.createLabel(Messages.USER).with(Label::secondary);
+        version = new Label();
+        date = new Label();
+        installation = new InstallationView(avatarService);
+        email = new Label();
+        comment = new Label();
+        mappedStacktraceLabel = Translatable.createLabel(Messages.DE_OBFUSCATED_STACKTRACE).with(Label::secondary);
+        unmappedStacktraceLabel = Translatable.createLabel(Messages.NO_MAPPING_STACKTRACE).with(Label::secondary);
+        stacktrace = new Label().honorWhitespaces();
+        attachments = new Div();
+        summaryLayout.add(Translatable.createLabel(Messages.VERSION).with(Label::secondary), version, Translatable.createLabel(Messages.DATE).with(Label::secondary), date, installationLabel, installation, Translatable.createLabel(Messages.EMAIL).with(Label::secondary), email, Translatable.createLabel(Messages.COMMENT).with(Label::secondary), comment, mappedStacktraceLabel, unmappedStacktraceLabel, stacktrace, Translatable.createLabel(Messages.ATTACHMENTS).with(Label::secondary));
+        summaryLayout.alignItems(CssGrid.AlignMode.CENTER, installationLabel);
+        Card summary = new Card(summaryLayout);
+        summary.setHeader(Translatable.createText(Messages.SUMMARY));
+        details = new Card();
+        details.setHeader(Translatable.createText(Messages.DETAILS));
+        getContent().add(summary, details);
     }
 
     @Override
@@ -79,50 +110,32 @@ public class ReportView extends Composite<Div> implements HasSecureStringParamet
         Optional<Report> r = dataService.findReport(parameter);
         if (r.isPresent()) {
             report = r.get();
+            version.setText(report.getStacktrace().getVersion().getName());
+            date.setText(prettyTime.formatUnrounded(report.getDate().toLocalDateTime()));
+            installation.setInstallationId(report.getInstallationId());
+            email.setText(report.getUserEmail());
+            comment.setText(report.getUserComment());
+            Optional<String> mapping = Optional.ofNullable(report.getStacktrace().getVersion().getMappings());
+            stacktrace.setText(mapping.map(m -> Utils.retrace(report.getStacktrace().getStacktrace(), m)).orElse(report.getStacktrace().getStacktrace()));
+            mappedStacktraceLabel.getStyle().set("display", mapping.isPresent() ? null : "none");
+            unmappedStacktraceLabel.getStyle().set("display", mapping.isPresent() ? "none" : null);
+            attachments.removeAll();
+            attachments.add(dataService.findAttachments(report).stream().map(attachment -> {
+                Anchor anchor = new Anchor(new StreamResource(attachment.getFilename(), (InputStreamFactory) () -> {
+                    try {
+                        return attachment.getContent().getBinaryStream();
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e); //TODO
+                    }
+                }), attachment.getFilename());
+                anchor.getElement().setAttribute("download", true);
+                return anchor;
+            }).toArray(Component[]::new));
+            details.removeAll();
+            details.add(getLayoutForMap(report.getJsonObject().toMap()));
         } else {
             event.rerouteToError(IllegalArgumentException.class);
         }
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        getContent().removeAll();
-        CssGrid summaryLayout = new CssGrid();
-        summaryLayout.setTemplateColumns("auto auto");
-        summaryLayout.setColumnGap(1, HasSize.Unit.EM);
-        summaryLayout.setJustifyItems(CssGrid.JustifyMode.START);
-        summaryLayout.setAlignItems(CssGrid.AlignMode.FIRST_BASELINE);
-        summaryLayout.add(Translatable.createLabel(Messages.VERSION).with(Label::secondary), new Label(report.getStacktrace().getVersion().getName()));
-        FlexLayout userLayout = new FlexLayout(avatarService.getAvatar(report), new Text(report.getInstallationId()));
-        userLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        Translatable<Label> userLabel = Translatable.createLabel(Messages.USER).with(Label::secondary);
-        summaryLayout.alignItems(CssGrid.AlignMode.CENTER, userLabel);
-        summaryLayout.add(userLabel, userLayout);
-        summaryLayout.add(Translatable.createLabel(Messages.EMAIL).with(Label::secondary), new Label(report.getUserEmail()));
-        summaryLayout.add(Translatable.createLabel(Messages.COMMENT).with(Label::secondary), new Label(report.getUserComment()));
-        Optional<String> mapping = Optional.ofNullable(report.getStacktrace().getVersion().getMappings());
-        Label stacktrace = new Label(mapping.map(m -> Utils.retrace(report.getStacktrace().getStacktrace(), m)).orElse(report.getStacktrace().getStacktrace()));
-        stacktrace.honorWhitespaces();
-        summaryLayout.add(Translatable.createLabel(mapping.isPresent() ? Messages.DE_OBFUSCATED_STACKTRACE : Messages.NO_MAPPING_STACKTRACE).with(Label::secondary), stacktrace);
-        summaryLayout.add(Translatable.createLabel(Messages.ATTACHMENTS).with(Label::secondary), new Div(dataService.findAttachments(report).stream().map(attachment -> {
-            Anchor anchor = new Anchor(new StreamResource(attachment.getFilename(), (InputStreamFactory) () -> {
-                try {
-                    return attachment.getContent().getBinaryStream();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e); //TODO
-                }
-            }), attachment.getFilename());
-            anchor.getElement().setAttribute("download", true);
-            return anchor;
-        }).toArray(Component[]::new)));
-        Card summaryCard = new Card(summaryLayout);
-        summaryCard.setHeader(Translatable.createText(Messages.SUMMARY));
-        getContent().add(summaryCard);
-
-        Card detailCard = new Card(getLayoutForMap(report.getJsonObject().toMap()));
-        detailCard.setHeader(Translatable.createText(Messages.DETAILS));
-        getContent().add(detailCard);
     }
 
     @NonNull
@@ -159,7 +172,7 @@ public class ReportView extends Composite<Div> implements HasSecureStringParamet
     @NonNull
     @Override
     public Path.Element<?> getPathElement() {
-        return new Path.ParametrizedTextElement<>(getClass(), report.getId(), Messages.ONE_ARG, report.getId());
+        return new Path.ParametrizedTextElement<>(getClass(), report.getId(), Messages.REPORT_FROM, prettyTime.formatUnrounded(report.getDate().toLocalDateTime()));
     }
 
     @Override

@@ -20,7 +20,7 @@ package com.faendir.acra.ui.component;
  * @author lukas
  * @since 19.11.18
  */
-public class Label extends com.vaadin.flow.component.html.Label {
+public class Label extends com.vaadin.flow.component.html.Label implements HasStyle {
     public Label() {
     }
 
