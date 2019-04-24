@@ -76,6 +76,14 @@ public class Version implements Comparable<Version>{
         return mappings;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setMappings(@Nullable String mappings) {
+        this.mappings = mappings;
+    }
+
     @Override
     public int compareTo(@NonNull Version o) {
         return Integer.compare(code, o.code);

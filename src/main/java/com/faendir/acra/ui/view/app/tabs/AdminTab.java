@@ -37,7 +37,7 @@ import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.HasSize;
 import com.faendir.acra.ui.component.RangeInput;
 import com.faendir.acra.ui.component.Translatable;
-import com.faendir.acra.ui.component.UploadField;
+import com.faendir.acra.ui.component.VersionEditorDialog;
 import com.faendir.acra.ui.view.Overview;
 import com.faendir.acra.ui.view.app.AppView;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -51,8 +51,8 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -96,41 +96,21 @@ public class AdminTab extends AppTab<Div> {
         layout.removeAll();
         MyGrid<Version> versionGrid = new MyGrid<>(getDataService().getVersionProvider(app));
         versionGrid.setHeightToRows();
+        versionGrid.setHeight("");
         versionGrid.addColumn(Version::getCode, QVersion.version.code, Messages.VERSION_CODE).setFlexGrow(1);
         versionGrid.addColumn(Version::getName, QVersion.version.name, Messages.VERSION).setFlexGrow(1);
-        versionGrid.setHeight("");
-        Card versionCard = createCard(versionGrid);
-        versionCard.setHeader(Translatable.createText(Messages.VERSIONS));
+        versionGrid.addColumn(new IconRenderer<>(v -> new Icon(v.getMappings() != null ? VaadinIcon.CHECK : VaadinIcon.CLOSE), v -> ""), QVersion.version.mappings.isNotNull(), Messages.PROGUARD_MAPPINGS);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-            versionGrid.addColumn(new ComponentRenderer<>(v -> new Button(new Icon(VaadinIcon.TRASH), e -> new Popup().addComponent(Translatable.createText(Messages.DELETE_MAPPING_CONFIRM, v.getCode())).addYesNoButtons(p -> {
+            versionGrid.addColumn(new ComponentRenderer<>(v -> new Button(new Icon(VaadinIcon.EDIT), e -> new VersionEditorDialog(getDataService(), app, () -> versionGrid.getDataProvider().refreshAll(), v).open())));
+            versionGrid.addColumn(new ComponentRenderer<>(v -> new Button(new Icon(VaadinIcon.TRASH), e -> new Popup().addComponent(Translatable.createText(Messages.DELETE_VERSION_CONFIRM, v.getCode())).addYesNoButtons(p -> {
                 getDataService().delete(v);
                 versionGrid.getDataProvider().refreshAll();
             }, true).show())));
-            versionGrid.appendFooterRow().getCell(versionGrid.getColumns().get(0)).setComponent(Translatable.createButton(e -> {
-                Translatable.Value<TextField, String> name = Translatable.createTextField("", Messages.VERSION_NAME);
-                name.getContent().setRequired(true);
-                Translatable.Value<NumberField, Double> version = Translatable.createNumberField(getDataService().getMaxVersion(app).map(i -> i + 1d).orElse(1d), Messages.VERSION_CODE)
-                        .with(n -> {
-                            n.setStep(1d);
-                            n.setMin(1d);
-                            n.setPreventInvalidInput(true);
-                            n.setHasControls(true);
-                        });
-                Translatable.Value<UploadField, String> upload = Translatable.createUploadField(Messages.MAPPING_FILE);
-                new Popup().setTitle(Messages.NEW_VERSION)
-                        .addComponent(name)
-                        .addComponent(version)
-                        .addComponent(upload)
-                        .addCreateButton(popup -> {
-                            try {
-                                getDataService().store(new Version(app, version.getValue().intValue(), name.getValue(), upload.getValue()));
-                            } catch (Exception ex) {
-                                //TODO
-                            }
-                            versionGrid.getDataProvider().refreshAll();
-                        }, true).show();
-            }, Messages.NEW_VERSION));
+            versionGrid.appendFooterRow().getCell(versionGrid.getColumns().get(0)).setComponent(Translatable.createButton(e -> new VersionEditorDialog(getDataService(), app, () -> versionGrid.getDataProvider().refreshAll(), null).open(), Messages.NEW_VERSION));
         }
+
+        Card versionCard = createCard(versionGrid);
+        versionCard.setHeader(Translatable.createText(Messages.VERSIONS));
 
         CssGrid notificationLayout = new CssGrid();
         notificationLayout.setTemplateColumns("auto max-content");
