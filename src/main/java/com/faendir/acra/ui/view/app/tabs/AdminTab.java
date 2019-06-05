@@ -35,7 +35,7 @@ import com.faendir.acra.ui.component.CssGrid;
 import com.faendir.acra.ui.component.DownloadButton;
 import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.HasSize;
-import com.faendir.acra.ui.component.RangeInput;
+import com.faendir.acra.ui.component.RangeField;
 import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.component.VersionEditorDialog;
 import com.faendir.acra.ui.view.Overview;
@@ -173,7 +173,11 @@ public class AdminTab extends AppTab<Div> {
         configButton.setWidthFull();
         Translatable<Button> matchingButton = Translatable.createButton(e -> {
             App.Configuration configuration = app.getConfiguration();
-            RangeInput score = new RangeInput(0, 100, configuration.getMinScore());
+            Translatable.Value<RangeField, Double> score = Translatable.createRangeField(Messages.SCORE).with(it -> {
+                it.setMin(0);
+                it.setMax(100);
+                it.setValue((double) configuration.getMinScore());
+            });
             new Popup().addComponent(score)
                     .setTitle(Messages.NEW_BUG_CONFIG_CONFIRM)
                     .addYesNoButtons(p -> getDataService().changeConfiguration(app, new App.Configuration(score.getValue().intValue())), true)

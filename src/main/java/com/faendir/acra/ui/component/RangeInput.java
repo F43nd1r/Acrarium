@@ -31,12 +31,11 @@ public class RangeInput extends AbstractSinglePropertyField<RangeInput, Double> 
     private static final PropertyDescriptor<Double, Double> MIN_DESCRIPTOR = PropertyDescriptors.propertyWithDefault("min", 0d);
     private static final PropertyDescriptor<Double, Double> MAX_DESCRIPTOR = PropertyDescriptors.propertyWithDefault("max", 100d);
     private static final PropertyDescriptor<Double, Double> STEP_DESCRIPTOR = PropertyDescriptors.propertyWithDefault("step", 1d);
-    private static final PropertyDescriptor<String, String> TYPE_DESCRIPTOR = PropertyDescriptors.attributeWithDefault("type", "text");
 
     public RangeInput() {
         super("value", 0d, false);
         setSynchronizedEvent("change");
-        setType("range");
+        getElement().setProperty("type", "range");
     }
 
     public RangeInput(double min, double max, double defaultValue) {
@@ -69,13 +68,5 @@ public class RangeInput extends AbstractSinglePropertyField<RangeInput, Double> 
 
     public double getStep() {
         return get(STEP_DESCRIPTOR);
-    }
-
-    public void setType(String type) {
-        set(TYPE_DESCRIPTOR, type);
-    }
-
-    public String getType() {
-        return get(TYPE_DESCRIPTOR);
     }
 }

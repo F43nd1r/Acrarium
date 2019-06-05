@@ -147,6 +147,10 @@ public class Translatable<T extends Component> extends Composite<T> implements L
         });
     }
 
+    public static Value<RangeField, Double> createRangeField(@NonNull String captionId, @NonNull Object... params) {
+        return new Value<>(new RangeField(), rangeField -> rangeField.setLabel(rangeField.getTranslation(captionId, params)));
+    }
+
     public static class Value<T extends Component & HasValue<? extends AbstractField.ComponentValueChangeEvent<? super T, V>, V> & com.vaadin.flow.component.HasValidation, V> extends Translatable<T> implements HasValidation<T, V> {
 
         protected Value(T t, Consumer<T> setter) {
