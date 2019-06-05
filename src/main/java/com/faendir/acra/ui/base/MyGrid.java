@@ -72,7 +72,7 @@ public class MyGrid<T> extends Composite<Grid<T>> implements LocaleChangeObserve
 
     @NonNull
     public Grid.Column<T> addColumn(@NonNull Renderer<T> renderer) {
-        return getContent().addColumn(renderer).setResizable(true).setFlexGrow(0);
+        return getContent().addColumn(renderer).setResizable(true).setAutoWidth(true);
     }
 
     @NonNull
@@ -87,7 +87,7 @@ public class MyGrid<T> extends Composite<Grid<T>> implements LocaleChangeObserve
 
     private Grid.Column<T> setupColumn(@NonNull Grid.Column<T> column, @NonNull String captionId, Object... params) {
         String caption = getTranslation(captionId, params);
-        column = column.setHeader(caption).setResizable(true).setFlexGrow(0);//.setWidth(Math.max(50, caption.length() * 10 + 20) + "px");
+        column = column.setHeader(caption).setResizable(true).setAutoWidth(true);
         columnCaptions.put(column, Pair.of(captionId, params));
         return column;
     }
