@@ -36,6 +36,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.FooterRow;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -93,10 +94,11 @@ public class BugTab extends AppTab<VerticalLayout> {
             }
         }, Messages.MERGE_BUGS);
         Grid.Column<VBug> countColumn = bugs.addColumn(VBug::getReportCount, QReport.report.count(), Messages.REPORTS);
-        bugs.addColumn(new TimeSpanRenderer<>(VBug::getLastReport), QReport.report.date.max(), Messages.LATEST_REPORT);
+        Grid.Column<VBug> dateColumn = bugs.addColumn(new TimeSpanRenderer<>(VBug::getLastReport), QReport.report.date.max(), Messages.LATEST_REPORT);
+        bugs.setInitialSort(GridSortOrder.desc(dateColumn).build());
         bugs.addColumn(VBug::getHighestVersionCode, QReport.report.stacktrace.version.code.max(), Messages.LATEST_VERSION);
         bugs.addColumn(VBug::getUserCount, QReport.report.installationId.countDistinct(), Messages.AFFECTED_USERS);
-        bugs.addColumn(bug -> bug.getBug().getTitle(), QBug.bug.title, Messages.TITLE).setFlexGrow(1);
+        bugs.addColumn(bug -> bug.getBug().getTitle(), QBug.bug.title, Messages.TITLE).setAutoWidth(false).setFlexGrow(1);
         List<Version> versions = getDataService().findAllVersions(app);
         Grid.Column<VBug> solvedColumn = bugs.addColumn(new ComponentRenderer<>((VBug bug) -> {
             Select<Version> versionSelect = new Select<>(versions.toArray(new Version[0]));

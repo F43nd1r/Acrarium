@@ -29,6 +29,7 @@ import com.faendir.acra.ui.view.report.ReportView;
 import com.faendir.acra.util.TimeSpanRenderer;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -45,11 +46,12 @@ public class ReportList extends MyGrid<Report>{
         super(dataProvider);
         setSelectionMode(Grid.SelectionMode.NONE);
         addColumn(new ComponentRenderer<>(avatarService::getAvatar) , QReport.report.installationId, Messages.USER);
-        addColumn(new TimeSpanRenderer<>(Report::getDate), QReport.report.date, Messages.DATE);
+        Grid.Column<Report> dateColumn = addColumn(new TimeSpanRenderer<>(Report::getDate), QReport.report.date, Messages.DATE);
+        setInitialSort(GridSortOrder.desc(dateColumn).build());
         addColumn(report -> report.getStacktrace().getVersion().getCode(), QReport.report.stacktrace.version.code, Messages.APP_VERSION);
         addColumn(Report::getAndroidVersion, QReport.report.androidVersion, Messages.ANDROID_VERSION);
         addColumn(Report::getPhoneModel, QReport.report.phoneModel, Messages.DEVICE);
-        addColumn(report -> report.getStacktrace().getStacktrace().split("\n", 2)[0], QReport.report.stacktrace.stacktrace, Messages.STACKTRACE).setFlexGrow(1);
+        addColumn(report -> report.getStacktrace().getStacktrace().split("\n", 2)[0], QReport.report.stacktrace.stacktrace, Messages.STACKTRACE).setAutoWidth(false).setFlexGrow(1);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
             addColumn(new ComponentRenderer<>(report -> new Button(new Icon(VaadinIcon.TRASH),
                     event -> new Popup().setTitle(Messages.DELETE_REPORT_CONFIRM).addYesNoButtons(p -> {

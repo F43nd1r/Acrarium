@@ -20,10 +20,15 @@ import com.faendir.acra.dataprovider.QueryDslDataProvider;
 import com.faendir.acra.ui.component.HasSize;
 import com.querydsl.core.types.Expression;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.grid.FooterRow;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.selection.SelectionListener;
@@ -72,7 +77,7 @@ public class MyGrid<T> extends Composite<Grid<T>> implements LocaleChangeObserve
 
     @NonNull
     public Grid.Column<T> addColumn(@NonNull Renderer<T> renderer) {
-        return getContent().addColumn(renderer).setResizable(true).setAutoWidth(true);
+        return getContent().addColumn(renderer).setResizable(true).setAutoWidth(true).setFlexGrow(0);
     }
 
     @NonNull
@@ -87,7 +92,7 @@ public class MyGrid<T> extends Composite<Grid<T>> implements LocaleChangeObserve
 
     private Grid.Column<T> setupColumn(@NonNull Grid.Column<T> column, @NonNull String captionId, Object... params) {
         String caption = getTranslation(captionId, params);
-        column = column.setHeader(caption).setResizable(true).setAutoWidth(true);
+        column = column.setHeader(caption).setResizable(true).setAutoWidth(true).setFlexGrow(0);
         columnCaptions.put(column, Pair.of(captionId, params));
         return column;
     }
@@ -141,5 +146,34 @@ public class MyGrid<T> extends Composite<Grid<T>> implements LocaleChangeObserve
     @Override
     public void localeChange(LocaleChangeEvent event) {
         columnCaptions.forEach((column, caption) -> column.setHeader(getTranslation(caption.getFirst(), caption.getSecond())));
+    }
+
+    public void setInitialSort(List<GridSortOrder<T>> order) {
+        addLoadingListener(e -> {
+            if(!e.isLoading()) {
+                getContent().sort(order);
+                e.unregisterListener();
+            }
+        });
+    }
+
+    private Registration addLoadingListener(
+            ComponentEventListener<LoadingChangedEvent> listener) {
+        return ComponentUtil.addListener(this, LoadingChangedEvent.class, listener);
+    }
+
+    @DomEvent("loading-changed")
+    public static class LoadingChangedEvent extends ComponentEvent<MyGrid<?>> {
+
+        private boolean loading;
+
+        public LoadingChangedEvent(MyGrid<?> source, boolean fromClient, @EventData("element.loading") boolean loading) {
+            super(source, fromClient);
+            this.loading = loading;
+        }
+
+        public boolean isLoading() {
+            return loading;
+        }
     }
 }
