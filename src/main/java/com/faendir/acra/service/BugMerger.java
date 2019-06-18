@@ -87,7 +87,7 @@ public class BugMerger {
                 Stacktrace s = iterator.next();
                 StacktraceMatch match = entityManager.merge(new StacktraceMatch(s, stacktrace, FuzzySearch.ratio(s.getStacktrace(), stacktrace.getStacktrace())));
                 if (match.getScore() >= b.getApp().getConfiguration().getMinScore()) {
-                    b = mergeBugs(Arrays.asList(b, s.getBug()), s.getBug().getTitle());
+                    b = mergeBugs(Arrays.asList(s.getBug(), b), s.getBug().getTitle());
                 }
             }
             iterator.close();
@@ -154,7 +154,8 @@ public class BugMerger {
         bug.setTitle(title);
         bug = entityManager.merge(bug);
         new JPAUpdateClause(entityManager, stacktrace1).set(stacktrace1.bug, bug).where(stacktrace1.bug.in(list)).execute();
-        list.forEach(entity -> entityManager.remove(entityManager.contains(entity) ? entity : entityManager.merge(entity)));
+        new JPADeleteClause(entityManager, QBug.bug).where(QBug.bug.in(list)).execute();
+        entityManager.flush();
         return bug;
     }
 
