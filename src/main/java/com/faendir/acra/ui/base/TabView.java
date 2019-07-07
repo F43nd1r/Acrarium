@@ -85,7 +85,7 @@ public class TabView<T extends Component & HasUrlParameter<P>, P> extends Parent
         }
     }
 
-    public abstract static class Tab<T extends Component, P> extends Composite<T> implements HasSecureIntParameter, HasRoute {
+    public abstract static class Tab<T extends Component, P> extends Composite<T> implements HasSecureParameter<Integer>, HasRoute {
         private final DataService dataService;
         private final BiFunction<DataService, Integer, Optional<P>> parameterGetter;
         private final Function<P, Integer> idGetter;

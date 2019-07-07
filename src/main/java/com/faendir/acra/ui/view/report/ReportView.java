@@ -21,7 +21,7 @@ import com.faendir.acra.model.Report;
 import com.faendir.acra.service.AvatarService;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.base.HasRoute;
-import com.faendir.acra.ui.base.HasSecureStringParameter;
+import com.faendir.acra.ui.base.HasSecureParameter;
 import com.faendir.acra.ui.base.Path;
 import com.faendir.acra.ui.component.Card;
 import com.faendir.acra.ui.component.CssGrid;
@@ -61,7 +61,7 @@ import java.util.Optional;
 @UIScope
 @SpringComponent
 @Route(value = "report", layout = MainView.class)
-public class ReportView extends Composite<Div> implements HasSecureStringParameter, HasRoute {
+public class ReportView extends Composite<Div> implements HasSecureParameter<String>, HasRoute {
     private final DataService dataService;
     private final Label version;
     private final Label date;

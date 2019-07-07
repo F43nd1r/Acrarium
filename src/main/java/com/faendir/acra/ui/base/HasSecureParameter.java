@@ -25,13 +25,13 @@ import com.vaadin.flow.router.HasUrlParameter;
  * @since 19.11.18
  */
 public
-interface HasSecureIntParameter extends HasUrlParameter<Integer> {
+interface HasSecureParameter<T> extends HasUrlParameter<T> {
     @Override
-    default void setParameter(BeforeEvent event, Integer parameter) {
+    default void setParameter(BeforeEvent event, T parameter) {
         if (SecurityUtils.isLoggedIn()) {
             setParameterSecure(event, parameter);
         }
     }
 
-    void setParameterSecure(BeforeEvent event, Integer parameter);
+    void setParameterSecure(BeforeEvent event, T parameter);
 }
