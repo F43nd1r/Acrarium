@@ -122,7 +122,7 @@ public class DataService implements Serializable {
     public QueryDslDataProvider<VBug> getBugProvider(@NonNull App app, BooleanSupplier onlyNonSolvedProvider) {
         Supplier<BooleanExpression> whereSupplier = () -> onlyNonSolvedProvider.getAsBoolean() ? bug.app.eq(app).and(bug.solvedVersion.isNull()) : bug.app.eq(app);
         return new QueryDslDataProvider<>(() -> Queries.selectVBug(entityManager).where(whereSupplier.get()),
-                () -> new JPAQuery<>(entityManager).from(bug).where(whereSupplier.get()));
+                () -> Queries.selectVBug(entityManager).where(whereSupplier.get()));
     }
 
     @NonNull
