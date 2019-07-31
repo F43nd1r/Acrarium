@@ -87,6 +87,7 @@ public class BugMerger {
                 Stacktrace s = iterator.next();
                 StacktraceMatch match = entityManager.merge(new StacktraceMatch(s, stacktrace, FuzzySearch.ratio(s.getStacktrace(), stacktrace.getStacktrace())));
                 if (match.getScore() >= b.getApp().getConfiguration().getMinScore()) {
+                    entityManager.flush();
                     b = mergeBugs(Arrays.asList(s.getBug(), b), s.getBug().getTitle());
                 }
             }
