@@ -80,7 +80,7 @@ public class ReportView extends Composite<Div> implements HasSecureParameter<Str
     public ReportView(@NonNull DataService dataService, @NonNull AvatarService avatarService) {
         this.dataService = dataService;
         prettyTime = new PrettyTime(Locale.US);
-        getElement().getStyle().set("overflow", "auto");
+        //getElement().getStyle().set("overflow", "auto");
         CssGrid summaryLayout = new CssGrid();
         summaryLayout.setTemplateColumns("auto auto");
         summaryLayout.setColumnGap(1, HasSize.Unit.EM);

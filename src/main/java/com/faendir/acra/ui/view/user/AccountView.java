@@ -20,12 +20,11 @@ import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.User;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.UserService;
-import com.faendir.acra.ui.base.HasRoute;
-import com.faendir.acra.ui.base.Path;
+import com.faendir.acra.ui.base.HasAcrariumTitle;
+import com.faendir.acra.ui.base.TranslatableText;
 import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.UserEditor;
 import com.faendir.acra.ui.view.MainView;
-import com.faendir.acra.ui.view.Overview;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.notification.Notification;
@@ -43,7 +42,7 @@ import org.springframework.lang.NonNull;
 @UIScope
 @SpringComponent
 @Route(value = "account", layout = MainView.class)
-public class AccountView extends Composite<FlexLayout> implements HasRoute {
+public class AccountView extends Composite<FlexLayout> implements HasAcrariumTitle {
     @NonNull
     private final UserService userService;
 
@@ -64,14 +63,8 @@ public class AccountView extends Composite<FlexLayout> implements HasRoute {
         getContent().setAlignItems(FlexComponent.Alignment.CENTER);
     }
 
-    @NonNull
     @Override
-    public Path.Element<?> getPathElement() {
-        return new Path.Element<>(getClass(), Messages.ACCOUNT);
-    }
-
-    @Override
-    public Parent<?> getLogicalParent() {
-        return new Parent<>(Overview.class);
+    public TranslatableText getTitle() {
+        return new TranslatableText(Messages.ACCOUNT);
     }
 }

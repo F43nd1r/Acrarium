@@ -16,59 +16,59 @@
 
 package com.faendir.acra.ui.base;
 
-import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.HasSize;
 import com.faendir.acra.ui.component.HasStyle;
+import com.faendir.acra.ui.component.SubTab;
 import com.faendir.acra.ui.component.Translatable;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationListener;
 import com.vaadin.flow.router.HasUrlParameter;
-import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.shared.Registration;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
  * @author lukas
  * @since 18.10.18
  */
-public class Path extends Composite<FlexLayout> implements AfterNavigationListener, HasStyle, HasSize {
+public class Path extends SubTab implements AfterNavigationListener, HasStyle, HasSize {
     private final ApplicationContext applicationContext;
+    private final Map<Tab, Runnable> actions = new HashMap<>();
     private Registration registration;
 
     public Path(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
-        getContent().setAlignItems(FlexComponent.Alignment.CENTER);
-        setWidth(0, Unit.PIXEL);
-        getStyle().set("overflow","hidden");
+        addSelectedChangeListener(e -> {
+            Runnable action = actions.get(e.getSelectedTab());
+            if(action != null) {
+                action.run();
+            }
+        });
     }
 
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
-        getContent().removeAll();
+        removeAll();
+        actions.clear();
         List<Element<?>> elements = event.getActiveChain().stream().filter(HasRoute.class::isInstance).map(HasRoute.class::cast).flatMap(e -> e.getPathElements(applicationContext, event).stream()).collect(Collectors.toList());
-        if (!elements.isEmpty()) {
-            Element<?> last = elements.remove(0);
-            Collections.reverse(elements);
-            for (Element<?> element : elements) {
-                Component component = element.toComponent();
-                component.getElement().getStyle().set("flex-shrink", "1");
-                getContent().add(component, VaadinIcon.CARET_RIGHT.create());
-            }
-            Component component = last.toComponent();
-            component.getElement().getStyle().set("flex-shrink", "0");
-            getContent().add(component);
+        Collections.reverse(elements);
+        for (Element<?> element : elements) {
+                Tab tab = element.toTab();
+                add(tab);
+                setSelectedTab(tab);
+                actions.put(tab, element.getAction());
+
         }
     }
 
@@ -85,44 +85,23 @@ public class Path extends Composite<FlexLayout> implements AfterNavigationListen
         super.onDetach(detachEvent);
     }
 
-    public static class Element<T extends Component> {
+    public static class Element<T extends Component> extends TranslatableText{
         final Class<T> target;
-        final String titleId;
-        final Object[] params;
 
         public Element(Class<T> target, String titleId, Object... params) {
+            super(titleId, params);
             this.target = target;
-            this.titleId = titleId;
-            this.params = params;
         }
 
-        protected RouterLink createRouterLink() {
-            return new RouterLink("", target);
+        public Tab toTab() {
+            Translatable<Div> div = Translatable.createDiv(getId(), getParams());
+            div.getStyle().set("overflow-wrap", "break-word");
+            div.getStyle().set("width", "100%");
+            return new Tab(div);
         }
 
-        protected Component createContent() {
-            Translatable<Div> p = Translatable.createDiv(titleId, params);
-            p.setMargin(0, HasSize.Unit.PIXEL);
-            p.getStyle().set("overflow", "hidden");
-            p.getStyle().set("text-overflow", "ellipsis");
-            p.getStyle().set("padding-top", "2px");
-            return p;
-        }
-
-        public Component toComponent() {
-            RouterLink routerLink = createRouterLink();
-            Component component = createContent();
-            routerLink.add(component);
-            routerLink.getStyle().set("line-height", "32px");
-            routerLink.getStyle().set("padding", "1rem");
-            routerLink.getStyle().set("font-size", "130%");
-            routerLink.getStyle().set("text-decoration","none");
-            routerLink.getStyle().set("color","inherit");
-            routerLink.getStyle().set("white-space", "pre");
-            routerLink.getStyle().set("overflow", "hidden");
-            routerLink.getStyle().set("text-overflow", "ellipsis");
-            routerLink.getStyle().set("cursor", "pointer");
-            return routerLink;
+        public Runnable getAction() {
+            return () -> UI.getCurrent().navigate(target);
         }
 
     }
@@ -136,24 +115,8 @@ public class Path extends Composite<FlexLayout> implements AfterNavigationListen
         }
 
         @Override
-        protected RouterLink createRouterLink() {
-            return new RouterLink("", target, parameter);
-        }
-    }
-
-    public static class ImageElement<T extends Component> extends Element<T> {
-        private final String src;
-
-        public ImageElement(Class<T> target, String src, String titleId, Object... params) {
-            super(target, titleId, params);
-            this.src = src;
-        }
-
-        @Override
-        protected Component createContent() {
-            Translatable<Image> image = Translatable.createImage(src, titleId, params);
-            image.setHeight(32, HasSize.Unit.PIXEL);
-            return image;
+        public Runnable getAction() {
+            return () -> UI.getCurrent().navigate(target, parameter);
         }
     }
 

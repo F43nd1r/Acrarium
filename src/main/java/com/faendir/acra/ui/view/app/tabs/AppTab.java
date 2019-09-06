@@ -19,7 +19,6 @@ package com.faendir.acra.ui.view.app.tabs;
 import com.faendir.acra.model.App;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.base.TabView;
-import com.faendir.acra.ui.view.Overview;
 import com.vaadin.flow.component.Component;
 
 /**
@@ -28,6 +27,6 @@ import com.vaadin.flow.component.Component;
  */
 public abstract class AppTab<T extends Component> extends TabView.Tab<T, App> {
     public AppTab(DataService dataService) {
-        super(dataService, DataService::findApp, App::getId, App::getName, app -> new Parent<>(Overview.class));
+        super(dataService, DataService::findApp, App::getId, App::getName, app -> null);
     }
 }

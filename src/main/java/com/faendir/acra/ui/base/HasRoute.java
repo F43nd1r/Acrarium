@@ -16,12 +16,9 @@
 
 package com.faendir.acra.ui.base;
 
-import com.faendir.acra.i18n.Messages;
-import com.faendir.acra.security.SecurityUtils;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.BeforeEvent;
-import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Location;
 import com.vaadin.flow.router.NavigationTrigger;
@@ -37,7 +34,7 @@ import java.util.List;
  * @author lukas
  * @since 18.10.18
  */
-public interface HasRoute extends HasDynamicTitle {
+public interface HasRoute extends HasAcrariumTitle {
     @NonNull
     Path.Element<?> getPathElement();
 
@@ -57,13 +54,8 @@ public interface HasRoute extends HasDynamicTitle {
     }
 
     @Override
-    default String getPageTitle() {
-        String result = getTranslation(Messages.ACRARIUM);
-        if(SecurityUtils.isLoggedIn()) {
-            Path.Element<?> element = getPathElement();
-            result = getTranslation(element.titleId, element.params) + " - " + result;
-        }
-        return result;
+    default TranslatableText getTitle() {
+        return getPathElement();
     }
 
     String getTranslation(String key, Object... params);

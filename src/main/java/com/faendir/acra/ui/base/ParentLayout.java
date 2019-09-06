@@ -42,8 +42,12 @@ public class ParentLayout extends FlexLayout implements RouterLayout {
         if (root == this) {
             this.content = content instanceof Component ? (Component) content : null;
         }
-        root.getElement().removeAllChildren();
-        root.getElement().appendChild(content.getElement());
+        if (root != this && root instanceof RouterLayout) {
+            ((RouterLayout) root).showRouterLayoutContent(content);
+        } else {
+            root.getElement().removeAllChildren();
+            root.getElement().appendChild(content.getElement());
+        }
     }
 
     public HasElement getContent() {

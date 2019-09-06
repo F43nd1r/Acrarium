@@ -24,15 +24,14 @@ import com.faendir.acra.model.User;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.service.UserService;
-import com.faendir.acra.ui.base.HasRoute;
+import com.faendir.acra.ui.base.HasAcrariumTitle;
 import com.faendir.acra.ui.base.MyGrid;
-import com.faendir.acra.ui.base.Path;
+import com.faendir.acra.ui.base.TranslatableText;
 import com.faendir.acra.ui.base.popup.Popup;
 import com.faendir.acra.ui.base.popup.ValidatedField;
 import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.view.MainView;
-import com.faendir.acra.ui.view.Overview;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.Button;
@@ -56,7 +55,7 @@ import java.util.Arrays;
 @UIScope
 @SpringComponent
 @Route(value = "user-manager", layout = MainView.class)
-public class UserManager extends Composite<FlexLayout> implements HasRoute {
+public class UserManager extends Composite<FlexLayout> implements HasAcrariumTitle {
     private final UserService userService;
     private final DataService dataService;
 
@@ -64,7 +63,7 @@ public class UserManager extends Composite<FlexLayout> implements HasRoute {
         this.userService = userService;
         this.dataService = dataService;
         getContent().setFlexDirection(FlexLayout.FlexDirection.COLUMN);
-        getContent().setWidthFull();
+        getContent().setSizeFull();
     }
 
     @Override
@@ -122,14 +121,8 @@ public class UserManager extends Composite<FlexLayout> implements HasRoute {
         getContent().add(userGrid);
     }
 
-    @NonNull
     @Override
-    public Path.Element<?> getPathElement() {
-        return new Path.Element<>(getClass(), Messages.USER_MANAGER);
-    }
-
-    @Override
-    public Parent<?> getLogicalParent() {
-        return new Parent<>(Overview.class);
+    public TranslatableText getTitle() {
+        return new TranslatableText(Messages.USER_MANAGER);
     }
 }

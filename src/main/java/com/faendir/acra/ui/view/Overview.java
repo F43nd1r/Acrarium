@@ -25,9 +25,9 @@ import com.faendir.acra.model.view.VApp;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.base.ConfigurationLabel;
-import com.faendir.acra.ui.base.HasRoute;
+import com.faendir.acra.ui.base.HasAcrariumTitle;
 import com.faendir.acra.ui.base.MyGrid;
-import com.faendir.acra.ui.base.Path;
+import com.faendir.acra.ui.base.TranslatableText;
 import com.faendir.acra.ui.base.popup.Popup;
 import com.faendir.acra.ui.base.popup.ValidatedField;
 import com.faendir.acra.ui.component.Translatable;
@@ -45,7 +45,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.NonNull;
 
 /**
  * @author lukas
@@ -54,7 +53,7 @@ import org.springframework.lang.NonNull;
 @UIScope
 @SpringComponent
 @Route(value = "", layout = MainView.class)
-public class Overview extends VerticalLayout implements ComponentEventListener<AttachEvent>, HasRoute {
+public class Overview extends VerticalLayout implements ComponentEventListener<AttachEvent>, HasAcrariumTitle {
     private final DataService dataService;
 
     @Autowired
@@ -109,8 +108,7 @@ public class Overview extends VerticalLayout implements ComponentEventListener<A
     }
 
     @Override
-    @NonNull
-    public Path.Element<?> getPathElement() {
-        return new Path.ImageElement<>(getClass(), "frontend/logo.png", Messages.OVERVIEW);
+    public TranslatableText getTitle() {
+        return new TranslatableText(Messages.ACRARIUM);
     }
 }
