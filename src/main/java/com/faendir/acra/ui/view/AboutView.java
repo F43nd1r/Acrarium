@@ -17,6 +17,8 @@
 package com.faendir.acra.ui.view;
 
 import com.faendir.acra.i18n.Messages;
+import com.faendir.acra.ui.base.HasAcrariumTitle;
+import com.faendir.acra.ui.base.TranslatableText;
 import com.faendir.acra.ui.component.FlexLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
@@ -30,7 +32,7 @@ import com.vaadin.flow.spring.annotation.UIScope;
 @UIScope
 @SpringComponent
 @Route(value = "about", layout = MainView.class)
-public class AboutView extends FlexLayout {
+public class AboutView extends FlexLayout implements HasAcrariumTitle {
     public AboutView() {
         setSizeFull();
         setJustifyContentMode(JustifyContentMode.CENTER);
@@ -38,5 +40,10 @@ public class AboutView extends FlexLayout {
         Div div = new Div();
         div.getElement().setProperty("innerHTML", getTranslation(Messages.FOOTER));
         add(div);
+    }
+
+    @Override
+    public TranslatableText getTitle() {
+        return new TranslatableText(Messages.ABOUT);
     }
 }

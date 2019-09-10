@@ -29,6 +29,7 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -109,6 +110,15 @@ public class Translatable<T extends Component> extends Composite<T> implements L
 
     public static <T> Translatable<ComboBox<T>> createComboBox(@NonNull Collection<T> items, @NonNull String captionId, @NonNull Object... params) {
         return new Translatable<>(new ComboBox<>("", items), tComboBox -> tComboBox.setLabel(tComboBox.getTranslation(captionId, params)));
+    }
+
+    public static <T> Translatable<Select<T>> createSelect(@NonNull Collection<T> items, @NonNull String captionId, @NonNull Object... params) {
+        Select<T> s = new Select<>();
+        s.setItems(items);
+        return new Translatable<>(s, select -> {
+            select.setLabel(select.getTranslation(captionId, params));
+            select.setRenderer(select.getItemRenderer());
+        });
     }
 
     @NonNull

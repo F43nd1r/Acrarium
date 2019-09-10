@@ -30,11 +30,11 @@ import com.vaadin.flow.shared.Registration;
  * @author lukas
  * @since 06.09.19
  */
-public class SubTab extends Tab implements HasComponents {
+public class SubTabs extends Tab implements HasComponents {
     private final Tabs content;
     private Registration registration;
 
-    public SubTab(Tab... tabs) {
+    public SubTabs(Tab... tabs) {
         content = new Tabs(false, tabs);
         content.setOrientation(Tabs.Orientation.VERTICAL);
         content.addSelectedChangeListener(e -> getParent().ifPresent(parent -> {
@@ -52,10 +52,12 @@ public class SubTab extends Tab implements HasComponents {
         getParent().ifPresent(parent -> {
             if (parent instanceof Tabs) {
                 registration = ((Tabs) parent).addSelectedChangeListener(e -> {
-                    if (e.getSelectedTab() == this) {
-                        content.setSelectedIndex(0);
-                    } else if (e.getSelectedTab() != null) {
-                        content.setSelectedIndex(-1);
+                    if(isVisible()) {
+                        if (e.getSelectedTab() == this) {
+                            content.setSelectedIndex(0);
+                        } else if (e.getSelectedTab() != null) {
+                            content.setSelectedIndex(-1);
+                        }
                     }
                 });
             }

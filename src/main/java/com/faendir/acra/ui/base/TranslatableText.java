@@ -16,12 +16,9 @@
 
 package com.faendir.acra.ui.base;
 
-import com.vaadin.flow.component.UI;
+import com.faendir.acra.util.LocalSettings;
 import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.server.VaadinService;
-
-import java.util.List;
-import java.util.Locale;
 
 /**
  * @author lukas
@@ -45,24 +42,10 @@ public class TranslatableText {
     }
 
     public String translate() {
-        return getI18NProvider().getTranslation(id, getLocale(), params);
+        return getI18NProvider().getTranslation(id, LocalSettings.getCurrentLocale(), params);
     }
 
     private I18NProvider getI18NProvider() {
         return VaadinService.getCurrent().getInstantiator().getI18NProvider();
-    }
-
-    private Locale getLocale() {
-        UI ui = UI.getCurrent();
-        Locale locale = ui == null ? null : ui.getLocale();
-        if (locale == null) {
-            List<Locale> locales = getI18NProvider().getProvidedLocales();
-            if (locales != null && !locales.isEmpty()) {
-                locale = locales.get(0);
-            } else {
-                locale = Locale.getDefault();
-            }
-        }
-        return locale;
     }
 }

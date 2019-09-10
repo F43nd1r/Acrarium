@@ -18,13 +18,16 @@ package com.faendir.acra.ui.base;
 
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.security.SecurityUtils;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.i18n.LocaleChangeEvent;
+import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.router.HasDynamicTitle;
 
 /**
  * @author lukas
  * @since 06.09.19
  */
-public interface HasAcrariumTitle extends HasDynamicTitle {
+public interface HasAcrariumTitle extends HasDynamicTitle, LocaleChangeObserver {
 
     TranslatableText getTitle();
 
@@ -35,5 +38,10 @@ public interface HasAcrariumTitle extends HasDynamicTitle {
             result = getTitle().translate() + " - " + result;
         }
         return result;
+    }
+
+    @Override
+    default void localeChange(LocaleChangeEvent event) {
+        UI.getCurrent().getPage().setTitle(getPageTitle());
     }
 }

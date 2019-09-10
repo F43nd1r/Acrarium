@@ -29,7 +29,9 @@ import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.component.UserEditor;
 import com.faendir.acra.ui.view.user.AccountView;
 import com.faendir.acra.ui.view.user.UserManager;
+import com.faendir.acra.util.LocalSettings;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -45,6 +47,7 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
+import com.vaadin.flow.theme.lumo.Lumo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.NonNull;
@@ -70,20 +73,23 @@ public class MainView extends ParentLayout {
     private final ApplicationContext applicationContext;
     private final UserService userService;
     private AppLayout layout;
+    private Map<com.vaadin.flow.component.tabs.Tab, Class<? extends Component>> targets;
+    private Tabs tabs;
 
     @Autowired
-    public MainView(AuthenticationManager authenticationManager, ApplicationContext applicationContext, UserService userService) {
+    public MainView(AuthenticationManager authenticationManager, ApplicationContext applicationContext, UserService userService, LocalSettings localSettings) {
         this.authenticationManager = authenticationManager;
         this.applicationContext = applicationContext;
         this.userService = userService;
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
         setSizeFull();
-        getStyle().set("flex-direction", "column");
         layout = new AppLayout();
         layout.getElement().getStyle().set("width", "100%");
         layout.getElement().getStyle().set("height", "100%");
         setRouterRoot(layout);
+        UI.getCurrent().getElement().setAttribute("theme", localSettings.getDarkTheme() ? Lumo.DARK : Lumo.LIGHT);
+        UI.getCurrent().setLocale(localSettings.getLocale());
         if (SecurityUtils.isLoggedIn()) {
             showMain();
         } else if (userService.hasAdmin()) {
@@ -93,17 +99,27 @@ public class MainView extends ParentLayout {
         }
     }
 
+    @Override
+    public void showRouterLayoutContent(HasElement content) {
+        super.showRouterLayoutContent(content);
+        if (targets != null) {
+            Class<?> clazz = content.getClass();
+            targets.entrySet().stream().filter(e -> clazz.equals(e.getValue())).findAny().ifPresent(e -> tabs.setSelectedTab(e.getKey()));
+        }
+    }
+
     private void showMain() {
         layout.setPrimarySection(AppLayout.Section.DRAWER);
-        Map<com.vaadin.flow.component.tabs.Tab, Class<? extends Component>> targets = new LinkedHashMap<>();
+        targets = new LinkedHashMap<>();
         targets.put(new Tab(Messages.HOME), Overview.class);
         targets.put(new Path(applicationContext), Component.class);
         targets.put(new Tab(Messages.ACCOUNT), AccountView.class);
         if (SecurityUtils.hasRole(User.Role.ADMIN)) {
             targets.put(new Tab(Messages.USER_MANAGER), UserManager.class);
         }
+        targets.put(new Tab(Messages.SETTINGS), SettingsView.class);
         targets.put(new Tab(Messages.ABOUT), AboutView.class);
-        Tabs tabs = new Tabs(targets.keySet().toArray(new com.vaadin.flow.component.tabs.Tab[0]));
+        tabs = new Tabs(targets.keySet().toArray(new com.vaadin.flow.component.tabs.Tab[0]));
         tabs.setOrientation(Tabs.Orientation.VERTICAL);
         tabs.addSelectedChangeListener(e -> {
             Class<? extends Component> target = targets.get(e.getSelectedTab());

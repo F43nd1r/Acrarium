@@ -20,15 +20,10 @@ import com.vaadin.flow.i18n.I18NProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
-import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -43,7 +38,6 @@ public class ResourceBundleI18NProvider implements I18NProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceBundleI18NProvider.class);
 
     private final String baseName;
-    private final String encoding;
 
     /**
      * Creates a new {@code ResourceBundleI18NProvider} with the given base name and UTF-8 encoding.
@@ -51,25 +45,16 @@ public class ResourceBundleI18NProvider implements I18NProvider {
      * @param baseName the base name to use, must not be {@code null}.
      */
     public ResourceBundleI18NProvider(String baseName) {
-        this(baseName, "UTF-8");
-    }
-
-    /**
-     * Creates a new {@code ResourceBundleI18NProvider} with the given base name and encoding.
-     *
-     * @param baseName the base name to use, must not be {@code null}.
-     * @param encoding the encoding to use when reading the resource bundle, must not be {@code null}.
-     */
-    public ResourceBundleI18NProvider(String baseName, String encoding) {
         this.baseName = baseName;
-        this.encoding = encoding;
     }
 
-    private ResourceBundle getResourceBundle(Locale locale) {
+    private ResourceBundle getResourceBundle(Locale locale, boolean withFallback) {
         try {
-            return ResourceBundle.getBundle(baseName, locale, this.getClass().getClassLoader(), new MessageControl());
+            return ResourceBundle.getBundle(baseName, locale, this.getClass().getClassLoader(), new MessageControl(withFallback));
         } catch (MissingResourceException ex) {
-            LOGGER.warn("No message bundle with basename [{}] found for locale [{}]", baseName, locale);
+            if(withFallback) {
+                LOGGER.warn("No message bundle with basename [{}] found for locale [{}]", baseName, locale);
+            }
             return null;
         }
     }
@@ -87,35 +72,37 @@ public class ResourceBundleI18NProvider implements I18NProvider {
 
     @Override
     public List<Locale> getProvidedLocales() {
-        return Stream.of(Locale.getAvailableLocales()).filter(locale -> getResourceBundle(locale) != null).collect(Collectors.toList());
+        return Stream.of(Locale.getAvailableLocales()).filter(locale -> getResourceBundle(locale, false) != null).collect(Collectors.toList());
     }
 
     @Override
     public String getTranslation(String key, Locale locale, Object... params) {
-        final ResourceBundle resourceBundle = getResourceBundle(locale);
+        final ResourceBundle resourceBundle = getResourceBundle(locale, true);
         final String message = getString(resourceBundle, key);
         return message == null ? null : String.format(message, params);
     }
 
-    private class MessageControl extends ResourceBundle.Control {
+    private static class MessageControl extends ResourceBundle.Control {
+        private final boolean allowFallback;
+
+        private MessageControl(boolean allowFallback) {
+            this.allowFallback = allowFallback;
+        }
+
         @Override
-        public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader,
-                                        boolean reload) throws IllegalAccessException, InstantiationException, IOException {
-            if ("java.properties".equals(format)) {
-                final String resourceName = toResourceName(toBundleName(baseName, locale), "properties");
-                final InputStream stream = loader.getResourceAsStream(resourceName);
-                if (stream == null) {
-                    return null; // Not found
-                }
-                try (Reader reader = new InputStreamReader(stream, encoding)) {
-                    return new PropertyResourceBundle(reader);
-                } catch (UnsupportedEncodingException ex) {
-                    stream.close();
-                    throw ex;
-                }
-            } else {
-                return super.newBundle(baseName, locale, format, loader, reload);
+        public Locale getFallbackLocale(String baseName, Locale locale) {
+            if(allowFallback) {
+                return super.getFallbackLocale(baseName, locale);
             }
+            return null;
+        }
+
+        @Override
+        public List<Locale> getCandidateLocales(String baseName, Locale locale) {
+            if(allowFallback) {
+                return super.getCandidateLocales(baseName, locale);
+            }
+            return Arrays.asList(locale, Locale.ROOT);
         }
     }
 }

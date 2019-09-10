@@ -18,7 +18,7 @@ package com.faendir.acra.ui.base;
 
 import com.faendir.acra.ui.component.HasSize;
 import com.faendir.acra.ui.component.HasStyle;
-import com.faendir.acra.ui.component.SubTab;
+import com.faendir.acra.ui.component.SubTabs;
 import com.faendir.acra.ui.component.Translatable;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  * @author lukas
  * @since 18.10.18
  */
-public class Path extends SubTab implements AfterNavigationListener, HasStyle, HasSize {
+public class Path extends SubTabs implements AfterNavigationListener, HasStyle, HasSize {
     private final ApplicationContext applicationContext;
     private final Map<Tab, Runnable> actions = new HashMap<>();
     private Registration registration;
