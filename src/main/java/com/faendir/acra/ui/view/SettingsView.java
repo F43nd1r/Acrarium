@@ -50,7 +50,7 @@ public class SettingsView extends FlexLayout implements HasAcrariumTitle {
             localSettings.setDarkTheme(e.getValue());
             VaadinSession.getCurrent().getUIs().forEach(ui -> ui.getElement().setAttribute("theme", e.getValue() ? Lumo.DARK : Lumo.LIGHT));
         })), Translatable.createSelect(LocalSettings.getI18NProvider().getProvidedLocales(), Messages.LOCALE).with(select -> {
-            select.setTextRenderer(locale -> locale.getDisplayName(localSettings.getLocale()));
+            select.setItemLabelGenerator(locale -> locale.getDisplayName(localSettings.getLocale()));
             select.setValue(localSettings.getLocale());
             select.addValueChangeListener(e -> {
                 localSettings.setLocale(e.getValue());

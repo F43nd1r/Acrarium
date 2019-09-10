@@ -117,7 +117,8 @@ public class Translatable<T extends Component> extends Composite<T> implements L
         s.setItems(items);
         return new Translatable<>(s, select -> {
             select.setLabel(select.getTranslation(captionId, params));
-            select.setRenderer(select.getItemRenderer());
+            //TODO enable this when https://github.com/vaadin/vaadin-select-flow/issues/41 is fixed
+            //select.setItemLabelGenerator(select.getItemLabelGenerator());
         });
     }
 
