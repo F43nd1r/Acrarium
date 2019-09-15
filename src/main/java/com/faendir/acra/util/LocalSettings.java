@@ -26,6 +26,7 @@ import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import org.springframework.lang.NonNull;
 
 import javax.servlet.http.Cookie;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -37,7 +38,7 @@ import java.util.Optional;
  */
 @SpringComponent
 @VaadinSessionScope
-public class LocalSettings {
+public class LocalSettings implements Serializable {
     private static final String DARK_THEME = "theme";
     private static final String LOCALE = "locale";
 

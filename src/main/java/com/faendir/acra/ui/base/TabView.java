@@ -27,6 +27,7 @@ import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import org.springframework.lang.NonNull;
 
+import java.io.Serializable;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -67,7 +68,7 @@ public class TabView<T extends Component & HasUrlParameter<P>, P> extends Parent
         }
     }
 
-    public static class TabInfo<T extends HasUrlParameter<P>, P> {
+    public static class TabInfo<T extends HasUrlParameter<P>, P> implements Serializable {
         private final Class<T> tabClass;
         private final String labelId;
 
