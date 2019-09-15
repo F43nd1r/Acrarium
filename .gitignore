@@ -3,6 +3,9 @@
 !gradle/wrapper/gradle-wrapper.jar
 /src/main/resources/VAADIN/widgetsets/
 *.css*
+application.properties
+local.properties
+
 
 ### STS ###
 .apt_generated
@@ -17,6 +20,7 @@
 *.iws
 *.iml
 *.ipr
+**/out
 
 ### NetBeans ###
 nbproject/private/
@@ -25,3 +29,11 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+
+### NPM ###
+/node_modules
+/target
+package-lock.json
+package.json
+webpack.config.js
+webpack.generated.js
