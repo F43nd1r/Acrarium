@@ -50,7 +50,7 @@ public class LocalSettings implements Serializable {
         }
 
         VaadinRequest request = VaadinRequest.getCurrent();
-        if (request != null) {
+        if (request != null && request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if (id.equals(cookie.getName())) {
                     cache.put(id, cookie.getValue());

@@ -21,6 +21,7 @@ import com.faendir.acra.model.QReport;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.base.statistics.Statistics;
 import com.faendir.acra.ui.view.bug.BugView;
+import com.faendir.acra.util.LocalSettings;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -36,15 +37,18 @@ import org.springframework.lang.NonNull;
 @SpringComponent("bugStatisticsTab")
 @Route(value = "statistics", layout = BugView.class)
 public class StatisticsTab extends BugTab<Div> {
+    private final LocalSettings localSettings;
+
     @Autowired
-    public StatisticsTab(@NonNull DataService dataService) {
+    public StatisticsTab(@NonNull DataService dataService, @NonNull LocalSettings localSettings) {
         super(dataService);
+        this.localSettings = localSettings;
         getContent().setSizeFull();
     }
 
     @Override
     protected void init(Bug bug) {
         getContent().removeAll();
-        getContent().add(new Statistics(bug.getApp(), QReport.report.stacktrace.bug.eq(bug), getDataService()));
+        getContent().add(new Statistics(bug.getApp(), QReport.report.stacktrace.bug.eq(bug), getDataService(), localSettings));
     }
 }

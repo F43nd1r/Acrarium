@@ -24,10 +24,12 @@ import com.faendir.acra.ui.component.Card;
 import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.HasSize;
 import com.faendir.acra.ui.component.Translatable;
+import com.faendir.acra.util.LocalSettings;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.awt.*;
@@ -40,14 +42,14 @@ import java.util.List;
  */
 public class Statistics extends Composite<FlexLayout> {
     static final Color BLUE = new Color(0x197de1); //vaadin blue
-    static final Color FOREGROUND_DARK = new Color(0xcacecf);
-    static final Color FOREGROUND_LIGHT = new Color(0x464646);
+    static final String FOREGROUND_DARK = "0xcacecf";
+    static final String FOREGROUND_LIGHT = "0x464646";
     static final Font LABEL_FONT = new Font("Roboto", Font.PLAIN, 18);
     @Nullable
     private final BooleanExpression baseExpression;
     private final List<Property<?, ?, ?>> properties;
 
-    public Statistics(App app, @Nullable BooleanExpression baseExpression, DataService dataService) {
+    public Statistics(App app, @Nullable BooleanExpression baseExpression, DataService dataService, @NonNull LocalSettings localSettings) {
         this.baseExpression = baseExpression;
         properties = new ArrayList<>();
         FormLayout filterLayout = new FormLayout();
@@ -60,11 +62,11 @@ public class Statistics extends Composite<FlexLayout> {
         TextField dayStepper = new TextField();
         dayStepper.setValue("30");
         Property.Factory factory = new Property.Factory(dataService, baseExpression);
-        properties.add(factory.createAgeProperty(app, QReport.report.date, Messages.LAST_X_DAYS, Messages.REPORTS_OVER_TIME));
-        properties.add(factory.createStringProperty(app, QReport.report.androidVersion, Messages.ANDROID_VERSION, Messages.REPORTS_PER_ANDROID_VERSION));
-        properties.add(factory.createStringProperty(app, QReport.report.stacktrace.version.name, Messages.APP_VERSION, Messages.REPORTS_PER_APP_VERSION));
-        properties.add(factory.createStringProperty(app, QReport.report.phoneModel, Messages.PHONE_MODEL, Messages.REPORTS_PER_PHONE_MODEL));
-        properties.add(factory.createStringProperty(app, QReport.report.brand, Messages.PHONE_BRAND, Messages.REPORTS_PER_BRAND));
+        properties.add(factory.createAgeProperty(localSettings, app, QReport.report.date, Messages.LAST_X_DAYS, Messages.REPORTS_OVER_TIME));
+        properties.add(factory.createStringProperty(localSettings, app, QReport.report.androidVersion, Messages.ANDROID_VERSION, Messages.REPORTS_PER_ANDROID_VERSION));
+        properties.add(factory.createStringProperty(localSettings, app, QReport.report.stacktrace.version.name, Messages.APP_VERSION, Messages.REPORTS_PER_APP_VERSION));
+        properties.add(factory.createStringProperty(localSettings, app, QReport.report.phoneModel, Messages.PHONE_MODEL, Messages.REPORTS_PER_PHONE_MODEL));
+        properties.add(factory.createStringProperty(localSettings, app, QReport.report.brand, Messages.PHONE_BRAND, Messages.REPORTS_PER_BRAND));
 
         getContent().setFlexWrap(FlexLayout.FlexWrap.WRAP);
         getContent().setWidthFull();

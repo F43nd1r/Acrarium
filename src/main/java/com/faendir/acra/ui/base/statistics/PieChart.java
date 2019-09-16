@@ -16,21 +16,17 @@
 
 package com.faendir.acra.ui.base.statistics;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
-import org.jfree.chart.plot.PieLabelLinkStyle;
-import org.jfree.chart.plot.PiePlot;
-import org.jfree.chart.util.SortOrder;
-import org.jfree.data.general.DefaultPieDataset;
+import com.faendir.acra.util.LocalSettings;
+import com.github.appreciated.apexcharts.ApexCharts;
+import com.github.appreciated.apexcharts.config.builder.ChartBuilder;
+import com.github.appreciated.apexcharts.config.chart.Type;
+import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
 
-import java.awt.*;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author lukas
@@ -38,13 +34,22 @@ import java.util.Map;
  */
 class PieChart extends Chart<String> {
     private static final int MAX_PARTS = 4;
-    PieChart(@NonNull String captionId, @NonNull Object... params) {
-        super(captionId, params);
+    PieChart(@NonNull LocalSettings localSettings, @NonNull String captionId, @NonNull Object... params) {
+        super(localSettings, captionId, params);
     }
 
     @Override
-    public JFreeChart createChart(@NonNull Map<String, Long> map) {
-        List<Map.Entry<String, Long>> values = new ArrayList<>(map.entrySet());
+    public ApexCharts createChart(@NonNull Map<String, Long> map) {
+        List<Pair<String, Long>> list = map.entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue())).sorted(Comparator.comparing(Pair::getSecond)).collect(Collectors.toList());
+        if(list.size() > MAX_PARTS) {
+
+        }
+        ApexCharts chart = new ApexCharts()
+                .withChart(ChartBuilder.get().withType(Type.pie).withBackground("transparent").build())
+                //.withTheme(ThemeBuilder.get().withMode(isDarkTheme() ? Mode.dark : Mode.light).build())
+                .withLabels(list.stream().map(Pair::getFirst).toArray(String[]::new))
+                .withSeries(list.stream().map(p -> p.getSecond().doubleValue()).toArray(Double[]::new));
+        /*List<Map.Entry<String, Long>> values = new ArrayList<>(map.entrySet());
         values.sort((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()));
         DefaultPieDataset dataset = new DefaultPieDataset();
         values.subList(0, Math.min(MAX_PARTS, values.size())).forEach(e -> dataset.insertValue(0, e.getKey(), e.getValue()));
@@ -69,7 +74,7 @@ class PieChart extends Chart<String> {
         plot.setLabelLinkStyle(PieLabelLinkStyle.QUAD_CURVE);
         plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0} ({2})", NumberFormat.getNumberInstance(), new DecimalFormat("0.0%")));
         //noinspection unchecked
-        ((List<String>) dataset.getKeys()).forEach(key -> plot.setExplodePercent(key, 0.01));
+        ((List<String>) dataset.getKeys()).forEach(key -> plot.setExplodePercent(key, 0.01));*/
         return chart;
     }
 }

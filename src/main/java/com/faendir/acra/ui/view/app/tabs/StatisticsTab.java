@@ -20,6 +20,7 @@ import com.faendir.acra.model.App;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.base.statistics.Statistics;
 import com.faendir.acra.ui.view.app.AppView;
+import com.faendir.acra.util.LocalSettings;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -35,15 +36,18 @@ import org.springframework.lang.NonNull;
 @SpringComponent
 @Route(value = "statistics", layout = AppView.class)
 public class StatisticsTab extends AppTab<Div> {
+    private final LocalSettings localSettings;
+
     @Autowired
-    public StatisticsTab(@NonNull DataService dataService) {
+    public StatisticsTab(@NonNull DataService dataService, @NonNull LocalSettings localSettings) {
         super(dataService);
+        this.localSettings = localSettings;
         getContent().setSizeFull();
     }
 
     @Override
     protected void init(App app) {
         getContent().removeAll();
-        getContent().add(new Statistics(app, null, getDataService()));
+        getContent().add(new Statistics(app, null, getDataService(), localSettings));
     }
 }

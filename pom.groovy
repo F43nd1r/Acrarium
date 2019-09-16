@@ -156,7 +156,8 @@ project {
         dependency 'me.xdrop:fuzzywuzzy:1.2.0'
         dependency 'com.talanlabs:avatar-generator:1.1.0'
         dependency 'org.ektorp:org.ektorp.spring:1.5.0'
-        dependency 'org.slf4j:slf4j-log4j12:1.6.1'
+        dependency 'com.github.appreciated:apexcharts:2.0.0.beta4'
+        dependency 'javax.servlet:javax.servlet-api:4.0.1'
         dependency {
             groupId 'org.springframework.boot'
             artifactId 'spring-boot-starter-test'

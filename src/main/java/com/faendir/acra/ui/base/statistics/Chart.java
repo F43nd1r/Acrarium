@@ -18,12 +18,11 @@ package com.faendir.acra.ui.base.statistics;
 import com.faendir.acra.ui.component.Card;
 import com.faendir.acra.ui.component.HasSize;
 import com.faendir.acra.ui.component.Translatable;
+import com.faendir.acra.util.LocalSettings;
+import com.github.appreciated.apexcharts.ApexCharts;
 import com.vaadin.flow.component.Composite;
-import org.jfree.chart.JFreeChart;
 import org.springframework.lang.NonNull;
-import org.vaadin.addon.JFreeChartWrapper;
 
-import java.awt.*;
 import java.util.Map;
 
 /**
@@ -31,26 +30,23 @@ import java.util.Map;
  * @since 01.06.18
  */
 abstract class Chart<T> extends Composite<Card> {
-    private final JFreeChartWrapper content;
+    private final LocalSettings localSettings;
 
-    Chart(@NonNull String captionId, @NonNull Object... params) {
+    Chart(@NonNull LocalSettings localSettings, @NonNull String captionId, @NonNull Object... params) {
+        this.localSettings = localSettings;
         getContent().setWidth(500, HasSize.Unit.PIXEL);
         getContent().setMaxWidthFull();
         getContent().setHeader(Translatable.createText(captionId, params));
-        content = new JFreeChartWrapper();
-        content.setSvgAspectRatio("xMidYMid");
-        content.setWidth("100%");
-        getContent().removeAll();
-        getContent().add(content);
     }
 
     public void setContent(@NonNull Map<T, Long> map) {
-        content.setChart(createChart(map));
+        getContent().removeAll();
+        getContent().add(createChart(map));
     }
 
-    Paint getForegroundColor() {
-        return /*UI.getCurrent().getTheme().toLowerCase().contains("dark")*/false ? Statistics.FOREGROUND_DARK : Statistics.FOREGROUND_LIGHT;
+    boolean isDarkTheme() {
+        return localSettings.getDarkTheme();
     }
 
-    protected abstract JFreeChart createChart(@NonNull Map<T, Long> map);
+    protected abstract ApexCharts createChart(@NonNull Map<T, Long> map);
 }

@@ -15,35 +15,46 @@
  */
 package com.faendir.acra.ui.base.statistics;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.NumberTickUnitSource;
-import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.StandardXYBarPainter;
-import org.jfree.chart.renderer.xy.XYBarRenderer;
-import org.jfree.data.time.Day;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.time.TimeSeriesCollection;
+import com.faendir.acra.i18n.Messages;
+import com.faendir.acra.util.LocalSettings;
+import com.github.appreciated.apexcharts.ApexCharts;
+import com.github.appreciated.apexcharts.config.builder.ChartBuilder;
+import com.github.appreciated.apexcharts.config.builder.XAxisBuilder;
+import com.github.appreciated.apexcharts.config.chart.Type;
+import com.github.appreciated.apexcharts.config.xaxis.XAxisType;
+import com.github.appreciated.apexcharts.helper.Series;
+import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
 
-import java.awt.*;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author lukas
  * @since 01.06.18
  */
 class TimeChart extends Chart<Date> {
-    TimeChart(@NonNull String captionId, @NonNull Object... params) {
-        super(captionId, params);
+    TimeChart(@NonNull LocalSettings localSettings, @NonNull String captionId, @NonNull Object... params) {
+        super(localSettings, captionId, params);
     }
 
     @Override
-    public JFreeChart createChart(@NonNull Map<Date, Long> map) {
-        TimeSeries series = new TimeSeries("Date");
+    public ApexCharts createChart(@NonNull Map<Date, Long> map) {
+        List<Pair<Date, Long>> list = map.entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue())).sorted(Comparator.comparing(Pair::getFirst)).collect(Collectors.toList());
+        ApexCharts chart = new ApexCharts()
+                .withChart(ChartBuilder.get().withType(Type.bar).withBackground("transparent").build())
+                .withXaxis(XAxisBuilder.get().withType(XAxisType.datetime).build())
+                .withSeries(new Series<>(list.stream().map(p -> new Object[]{p.getFirst(), p.getSecond()}).toArray(Object[][]::new)))
+                /*.withTheme(ThemeBuilder.get()
+                        .withMode(isDarkTheme() ? Mode.dark : Mode.light)
+                        .withPalette("palette1")
+                        .withMonochrome(MonochromeBuilder.get().withColor("0x197de1").withEnabled(true).withShadeIntensity(0.1).withShadeTo(ShadeTo.light).build())
+                        .build())*/
+                .withLabels(getTranslation(Messages.REPORTS));
+        /*TimeSeries series = new TimeSeries("Date");
         series.add(new Day(new Date()), 0);
         map.forEach((date, count) -> series.addOrUpdate(new Day(date), count));
         JFreeChart chart = ChartFactory.createXYBarChart("",
@@ -81,7 +92,7 @@ class TimeChart extends Chart<Date> {
         barRenderer.setBarPainter(new StandardXYBarPainter());
         barRenderer.setSeriesPaint(0, Statistics.BLUE);
         barRenderer.setBarAlignmentFactor(0.5);
-        barRenderer.setMargin(0.2);
+        barRenderer.setMargin(0.2);*/
         return chart;
     }
 }

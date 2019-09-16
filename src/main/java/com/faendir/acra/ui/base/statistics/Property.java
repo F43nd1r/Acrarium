@@ -18,6 +18,7 @@ package com.faendir.acra.ui.base.statistics;
 import com.faendir.acra.model.App;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.component.Translatable;
+import com.faendir.acra.util.LocalSettings;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
@@ -33,6 +34,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.time.ZonedDateTime;
@@ -94,21 +96,21 @@ class Property<F, C extends Component & HasValue<?, F> & HasEnabled & HasSize & 
             this.expression = expression;
         }
 
-        Property<?, ?, ?> createStringProperty(App app, ComparableExpressionBase<String> stringExpression, String filterTextId, String chartTitleId) {
+        Property<?, ?, ?> createStringProperty(@NonNull LocalSettings localSettings, App app, ComparableExpressionBase<String> stringExpression, String filterTextId, String chartTitleId) {
             List<String> list = dataService.getFromReports(app, expression, stringExpression);
             Select<String> select = new Select<>(list.toArray(new String[0]));
             if(!list.isEmpty()) {
                 select.setValue(list.get(0));
             }
-            return new Property<>(app, select, stringExpression::eq, new PieChart(chartTitleId), dataService, stringExpression, filterTextId);
+            return new Property<>(app, select, stringExpression::eq, new PieChart(localSettings, chartTitleId), dataService, stringExpression, filterTextId);
         }
 
-        Property<?, ?, ?> createAgeProperty(App app, DateTimePath<ZonedDateTime> dateTimeExpression, String filterTextId, String chartTitleId) {
+        Property<?, ?, ?> createAgeProperty(@NonNull LocalSettings localSettings, App app, DateTimePath<ZonedDateTime> dateTimeExpression, String filterTextId, String chartTitleId) {
             TextField stepper = new TextField();
             stepper.setValue("30");
             return new Property<>(app, stepper,
                     days -> dateTimeExpression.after(ZonedDateTime.now().minus(Integer.parseInt(days), ChronoUnit.DAYS)),
-                    new TimeChart(chartTitleId),
+                    new TimeChart(localSettings, chartTitleId),
                     dataService,
                     SQLExpressions.date(Date.class, dateTimeExpression),
                     filterTextId);
