@@ -28,7 +28,7 @@ project {
         'project.reporting.outputEncoding' 'UTF-8'
         'drivers.dir' '${project.basedir}/drivers'
         'drivers.downloader.phase' 'pre-integration-test'
-        'vaadin.version' '14.0.5'
+        'vaadin.version' '14.0.4'
         'querydsl.version' '4.2.1'
     }
 
