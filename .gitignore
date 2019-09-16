@@ -40,5 +40,3 @@ webpack.generated.js
 
 ### Maven ###
 **/target
-**/.polyglot.pom.groovy
-.polyglot.pom.groovy
