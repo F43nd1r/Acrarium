@@ -51,7 +51,7 @@ project {
                         id 'attach-javadocs'
                         goals 'jar'
                         configuration {
-                            additionalparam '-Xdoclint:none'
+                            doclint 'none'
                         }
                     }
                 }
