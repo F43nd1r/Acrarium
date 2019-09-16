@@ -21,6 +21,7 @@
         <artifactId>maven-release-plugin</artifactId>
         <version>2.5.3</version>
         <configuration>
+          <goals>install</goals>
           <tagNameFormat>v@{project.version}</tagNameFormat>
         </configuration>
       </plugin>
