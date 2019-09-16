@@ -19,6 +19,7 @@ project {
     groupId 'com.faendir'
     artifactId 'parent'
     version '0.9.0-SNAPSHOT'
+    scm 'scm:git:ssh://github.com:F43nd1r/Acrarium.git'
 
     modules {
         module 'message-generator-maven-plugin'
