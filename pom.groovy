@@ -60,14 +60,21 @@ project {
             id 'Vaadin Directory'
             url 'https://maven.vaadin.com/vaadin-addons'
             snapshots {
-                enabled 'false'
+                enabled false
             }
         }
         repository {
             id 'Google'
             url 'https://maven.google.com'
             snapshots {
-                enabled 'false'
+                enabled false
+            }
+        }
+        repository {
+            id 'jcenter'
+            url 'https://jcenter.bintray.com'
+            snapshots {
+                enabled false
             }
         }
         /*repository {
@@ -75,7 +82,7 @@ project {
             url 'https://maven.oracle.com'
             layout 'default'
             snapshots {
-                enabled 'false'
+                enabled false
             }
         }*/
     }
