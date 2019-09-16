@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.faendir</groupId>
   <artifactId>parent</artifactId>
-  <version>0.9.0-SNAPSHOT</version>
+  <version>0.9.4</version>
   <packaging>pom</packaging>
   <modules>
     <module>message-generator-maven-plugin</module>
@@ -14,6 +13,7 @@
     <connection>scm:git:git://github.com:F43nd1r/Acrarium.git</connection>
     <developerConnection>scm:git:git@github.com:F43nd1r/Acrarium.git</developerConnection>
     <url>https://github.com/F43nd1r/Acrarium</url>
+    <tag>v0.9.4</tag>
   </scm>
   <build>
     <plugins>
