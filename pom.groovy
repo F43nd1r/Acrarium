@@ -18,10 +18,24 @@ project {
     packaging 'pom'
     groupId 'com.faendir'
     artifactId 'parent'
-    version '1.0-SNAPSHOT'
+    version '0.9.0-SNAPSHOT'
 
     modules {
         module 'message-generator-maven-plugin'
         module 'acrarium'
+    }
+
+    build {
+        plugins {
+            plugin {
+                artifactId 'maven-release-plugin'
+                version '2.5.3'
+                configuration {
+                    autoVersionSubModules true
+                    tagNameFormat 'v@{project.version}'
+                    releaseProfile 'release'
+                }
+            }
+        }
     }
 }
