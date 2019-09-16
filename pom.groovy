@@ -70,14 +70,14 @@ project {
                 enabled 'false'
             }
         }
-        repository {
+        /*repository {
             id 'maven.oracle.com'
             url 'https://maven.oracle.com'
             layout 'default'
             snapshots {
                 enabled 'false'
             }
-        }
+        }*/
     }
 
     dependencyManagement {
@@ -173,12 +173,12 @@ project {
             artifactId 'h2'
             scope 'test'
         }
-        dependency {
+        /*dependency {
             groupId 'com.oracle.weblogic'
             artifactId 'ojdbc7'
             version '12.1.3-0-0'
             scope 'test'
-        }
+        }*/
     }
 
     build {

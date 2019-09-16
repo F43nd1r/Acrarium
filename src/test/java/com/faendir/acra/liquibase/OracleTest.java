@@ -15,12 +15,14 @@
  */
 package com.faendir.acra.liquibase;
 
+import org.junit.Ignore;
 import org.springframework.test.context.TestPropertySource;
 
 /**
  * @author lukas
  * @since 25.06.18
  */
+@Ignore
 @TestPropertySource("classpath:application-oracle.properties")
 public class OracleTest extends LiquibaseTest {
 }
