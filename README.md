@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/F43nd1r/Acrarium.svg?branch=master)](https://travis-ci.org/F43nd1r/Acrarium)
 
 <h1 align=center>
-<img src="src/main/webapp/frontend/logo.png" width=50%>
+<img src="acrarium/src/main/webapp/frontend/logo.png" width=50%>
 </h1>
 A Backend for ACRA written in Java using Spring Boot, Vaadin and MySQL
 
