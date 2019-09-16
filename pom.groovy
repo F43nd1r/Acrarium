@@ -42,6 +42,20 @@ project {
                     releaseProfile 'release'
                 }
             }
+            plugin {
+                groupId 'org.apache.maven.plugins'
+                artifactId 'maven-javadoc-plugin'
+                version '3.1.1'
+                executions {
+                    execution {
+                        id 'attach-javadocs'
+                        goals 'jar'
+                        configuration {
+                            additionalparam '-Xdoclint:none'
+                        }
+                    }
+                }
+            }
         }
     }
 }

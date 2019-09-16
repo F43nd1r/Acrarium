@@ -240,6 +240,7 @@ project {
             plugin {
                 groupId 'com.faendir'
                 artifactId 'message-generator-maven-plugin'
+                version '1.0-SNAPSHOT'
                 executions {
                     execution {
                         goals 'generate'
