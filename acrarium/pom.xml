@@ -8,7 +8,7 @@
   </parent>
   <groupId>com.faendir</groupId>
   <artifactId>acrarium</artifactId>
-  <version>0.9.6-SNAPSHOT</version>
+  <version>0.9.6</version>
   <packaging>war</packaging>
   <name>Acrarium</name>
   <properties>
@@ -304,7 +304,7 @@
       <plugin>
         <groupId>com.faendir</groupId>
         <artifactId>message-generator-maven-plugin</artifactId>
-        <version>0.9.6-SNAPSHOT</version>
+        <version>0.9.6</version>
         <executions>
           <execution>
             <goals>
@@ -357,4 +357,8 @@
       </dependencies>
     </profile>
   </profiles>
+
+  <scm>
+    <tag>v0.9.6</tag>
+  </scm>
 </project>
