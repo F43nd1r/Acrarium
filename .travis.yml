@@ -1,5 +1,5 @@
 language: java
-install: ./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -Pproduction-mode
+install: ./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -Pproduction
 deploy:
   provider: releases
   api_key:

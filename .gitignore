@@ -31,8 +31,7 @@ nbdist/
 .nb-gradle/
 
 ### NPM ###
-/node_modules
-/target
+**/node_modules
 package-lock.json
 package.json
 webpack.config.js
@@ -40,3 +39,4 @@ webpack.generated.js
 
 ### Maven ###
 **/target
+/target
