@@ -19,6 +19,7 @@ package com.faendir.acra.ui.component;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasText;
@@ -67,11 +68,16 @@ public class Translatable<T extends Component> extends Composite<T> implements L
     @Override
     public void localeChange(LocaleChangeEvent event) {
         setter.accept(getContent());
+        fireEvent(new TranslatedEvent(this, false));
     }
 
     public Translatable<T> with(Consumer<T> consumer) {
         consumer.accept(t);
         return this;
+    }
+
+    public Registration addTranslatedListener(ComponentEventListener<TranslatedEvent> listener) {
+        return addListener(TranslatedEvent.class, listener);
     }
 
     @NonNull
@@ -231,6 +237,13 @@ public class Translatable<T extends Component> extends Composite<T> implements L
         @Override
         public Value<T, V> with(Consumer<T> consumer) {
             return (Value<T, V>) super.with(consumer);
+        }
+    }
+
+    public static class TranslatedEvent extends ComponentEvent<Translatable<?>> {
+
+        public TranslatedEvent(Translatable<?> source, boolean fromClient) {
+            super(source, fromClient);
         }
     }
 }

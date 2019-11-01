@@ -95,6 +95,12 @@ public class Path extends SubTabs implements AfterNavigationListener, HasStyle, 
 
         public Tab toTab() {
             Translatable<Div> div = Translatable.createDiv(getId(), getParams());
+            div.addTranslatedListener(e -> {
+                String text = div.getContent().getText();
+                if(text != null) {
+                    div.getContent().getElement().setProperty("innerHTML", text.replace(".", ".<wbr>"));
+                }
+            });
             div.getStyle().set("overflow-wrap", "break-word");
             div.getStyle().set("width", "100%");
             return new Tab(div);
