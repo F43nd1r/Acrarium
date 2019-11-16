@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/F43nd1r/Acrarium.svg?branch=master)](https://travis-ci.org/F43nd1r/Acrarium)
+[![Actions Status](https://github.com/F43nd1r/Acrarium/workflows/tests/badge.svg)](https://github.com/Faendir/Acrarium/actions)
 
 <h1 align=center>
 <img src="acrarium/src/main/webapp/frontend/logo.png" width=50%>
