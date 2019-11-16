@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.faendir</groupId>
   <artifactId>parent</artifactId>
-  <version>0.9.8-SNAPSHOT</version>
+  <version>0.9.8</version>
   <packaging>pom</packaging>
   <modules>
     <module>message-generator-maven-plugin</module>
@@ -13,7 +13,7 @@
     <connection>scm:git:git://github.com:F43nd1r/Acrarium.git</connection>
     <developerConnection>scm:git:git@github.com:F43nd1r/Acrarium.git</developerConnection>
     <url>https://github.com/F43nd1r/Acrarium</url>
-    <tag>HEAD</tag>
+    <tag>v0.9.8</tag>
   </scm>
   <build>
     <plugins>
