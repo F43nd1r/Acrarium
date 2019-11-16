@@ -16,4 +16,4 @@ jobs:
       with:
         java-version: ${{ matrix.java }}
     - name: Maven tests on Java ${{ matrix.java }}
-      run: mvn -B test
+      run: ./mvnw -B test
