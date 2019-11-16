@@ -1,4 +1,4 @@
-[![Actions Status](https://github.com/F43nd1r/Acrarium/workflows/tests/badge.svg)](https://github.com/Faendir/Acrarium/actions)
+[![Actions Status](https://github.com/F43nd1r/Acrarium/workflows/tests/badge.svg)](https://github.com/F43nd1r/Acrarium/actions)
 
 <h1 align=center>
 <img src="acrarium/src/main/webapp/frontend/logo.png" width=50%>
