@@ -19,7 +19,7 @@ jobs:
       run: ./mvnw -B clean package
     - name: Extract version
       id: version
-      run: echo ::set-output ./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -Ev '(^\[|Download\w+:)'
+      run: echo ::set-output name=value::$(./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -Ev '(^\[|Download\w+:)')
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -37,6 +37,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./acrarium/target/acrarium-${{ steps.version.output }}.war
-        asset_name: acrarium-${{ steps.version.output }}.war
+        asset_path: ./acrarium/target/acrarium-${{ steps.version.outputs.value }}.war
+        asset_name: acrarium-${{ steps.version.outputs.value }}.war
         asset_content_type: application/zip  
