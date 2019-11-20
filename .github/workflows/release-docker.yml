@@ -20,7 +20,7 @@ jobs:
       - name: Build image
         run: ./mvnw -B dockerfile:build -Pproduction -pl acrarium
       - name: Publish to hub
-        uses: elgohr/Publish-Docker-Github-Action
+        uses: elgohr/Publish-Docker-Github-Action@master
         with:
           name: f43nd1r/acrarium
           username: ${{ secrets.DOCKER_USERNAME }}
