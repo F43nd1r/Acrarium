@@ -16,4 +16,6 @@ jobs:
         with:
           java-version: '1.13'
       - name: Build and push release
-        run: ./mvnw -B clean package dockerfile:build dockerfile:push -Pproduction
+        run: |
+          ./mvnw -B clean package -Pproduction
+          ./mvnw -B dockerfile:build dockerfile:push -Pproduction -pl acrarium
