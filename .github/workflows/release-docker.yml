@@ -21,7 +21,7 @@ jobs:
         run: ./mvnw -B dockerfile:build -Pproduction -pl acrarium
       - name: Publish to hub
         uses: elgohr/Publish-Docker-Github-Action
-          with:
-            name: f43nd1r/acrarium
-            username: ${{ secrets.DOCKER_USERNAME }}
-            password: ${{ secrets.DOCKER_PASSWORD }}
+        with:
+          name: f43nd1r/acrarium
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
