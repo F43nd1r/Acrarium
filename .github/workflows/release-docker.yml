@@ -15,7 +15,13 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: '1.13'
-      - name: Build and push release
-        run: |
-          ./mvnw -B clean package -Pproduction
-          ./mvnw -B dockerfile:build dockerfile:push -Pproduction -pl acrarium
+      - name: Build release
+        run: ./mvnw -B clean package -Pproduction
+      - name: Build image
+        run: ./mvnw -B dockerfile:build -Pproduction -pl acrarium
+      - name: Publish to hub
+        uses: elgohr/Publish-Docker-Github-Action
+          with:
+            name: f43nd1r/acrarium
+            username: ${{ secrets.DOCKER_USERNAME }}
+            password: ${{ secrets.DOCKER_PASSWORD }}
