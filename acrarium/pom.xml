@@ -20,6 +20,7 @@
     <querydsl.version>4.2.1</querydsl.version>
     <maven.compiler.target>1.8</maven.compiler.target>
     <drivers.downloader.phase>pre-integration-test</drivers.downloader.phase>
+    <docker.image.prefix>f43nd1r</docker.image.prefix>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -297,6 +298,38 @@
               <sources>
                 <source>${project.build.directory}/generated-sources/java</source>
               </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.spotify</groupId>
+        <artifactId>dockerfile-maven-plugin</artifactId>
+        <version>1.4.13</version>
+        <configuration>
+          <repository>${docker.image.prefix}/${project.artifactId}</repository>
+          <tag>${project.version}</tag>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <phase>package</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>${project.groupId}</groupId>
+                  <artifactId>${project.artifactId}</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                </artifactItem>
+              </artifactItems>
             </configuration>
           </execution>
         </executions>
