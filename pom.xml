@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.faendir</groupId>
   <artifactId>parent</artifactId>
-  <version>0.9.16-SNAPSHOT</version>
+  <version>0.9.15-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
     <module>message-generator-maven-plugin</module>
