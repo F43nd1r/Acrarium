@@ -95,7 +95,7 @@ public class BugTab extends AppTab<VerticalLayout> {
         }, Messages.MERGE_BUGS);
         Grid.Column<VBug> countColumn = bugs.addColumn(VBug::getReportCount, QReport.report.count(), Messages.REPORTS);
         Grid.Column<VBug> dateColumn = bugs.addColumn(new TimeSpanRenderer<>(VBug::getLastReport), QReport.report.date.max(), Messages.LATEST_REPORT);
-        bugs.setInitialSort(GridSortOrder.desc(dateColumn).build());
+        bugs.sort(GridSortOrder.desc(dateColumn).build());
         bugs.addColumn(VBug::getHighestVersionCode, QReport.report.stacktrace.version.code.max(), Messages.LATEST_VERSION);
         bugs.addColumn(VBug::getUserCount, QReport.report.installationId.countDistinct(), Messages.AFFECTED_USERS);
         bugs.addColumn(bug -> bug.getBug().getTitle(), QBug.bug.title, Messages.TITLE).setAutoWidth(false).setFlexGrow(1);

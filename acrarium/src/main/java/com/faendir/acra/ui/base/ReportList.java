@@ -47,7 +47,7 @@ public class ReportList extends MyGrid<Report>{
         setSelectionMode(Grid.SelectionMode.NONE);
         addColumn(new ComponentRenderer<>(avatarService::getAvatar) , QReport.report.installationId, Messages.USER);
         Grid.Column<Report> dateColumn = addColumn(new TimeSpanRenderer<>(Report::getDate), QReport.report.date, Messages.DATE);
-        setInitialSort(GridSortOrder.desc(dateColumn).build());
+        sort(GridSortOrder.desc(dateColumn).build());
         addColumn(report -> report.getStacktrace().getVersion().getCode(), QReport.report.stacktrace.version.code, Messages.APP_VERSION);
         addColumn(Report::getAndroidVersion, QReport.report.androidVersion, Messages.ANDROID_VERSION);
         addColumn(Report::getPhoneModel, QReport.report.phoneModel, Messages.DEVICE);

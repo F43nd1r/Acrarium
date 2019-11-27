@@ -20,12 +20,8 @@ import com.faendir.acra.dataprovider.QueryDslDataProvider;
 import com.faendir.acra.ui.component.HasSize;
 import com.querydsl.core.types.Expression;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.grid.FooterRow;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSortOrder;
@@ -148,32 +144,7 @@ public class MyGrid<T> extends Composite<Grid<T>> implements LocaleChangeObserve
         columnCaptions.forEach((column, caption) -> column.setHeader(getTranslation(caption.getFirst(), caption.getSecond())));
     }
 
-    public void setInitialSort(List<GridSortOrder<T>> order) {
-        addLoadingListener(e -> {
-            if(!e.isLoading()) {
-                getContent().sort(order);
-                e.unregisterListener();
-            }
-        });
-    }
-
-    private Registration addLoadingListener(
-            ComponentEventListener<LoadingChangedEvent> listener) {
-        return ComponentUtil.addListener(this, LoadingChangedEvent.class, listener);
-    }
-
-    @DomEvent("loading-changed")
-    public static class LoadingChangedEvent extends ComponentEvent<MyGrid<?>> {
-
-        private boolean loading;
-
-        public LoadingChangedEvent(MyGrid<?> source, boolean fromClient, @EventData("element.loading") boolean loading) {
-            super(source, fromClient);
-            this.loading = loading;
-        }
-
-        public boolean isLoading() {
-            return loading;
-        }
+    public void sort(List<GridSortOrder<T>> order) {
+        getContent().sort(order);
     }
 }
