@@ -18,6 +18,7 @@ package com.faendir.acra.ui.base.statistics;
 
 import com.faendir.acra.util.LocalSettings;
 import com.github.appreciated.apexcharts.ApexCharts;
+import com.github.appreciated.apexcharts.ApexChartsBuilder;
 import com.github.appreciated.apexcharts.config.builder.ChartBuilder;
 import com.github.appreciated.apexcharts.config.chart.Type;
 import org.springframework.data.util.Pair;
@@ -44,11 +45,12 @@ class PieChart extends Chart<String> {
         if(list.size() > MAX_PARTS) {
 
         }
-        ApexCharts chart = new ApexCharts()
+        ApexCharts chart = new ApexChartsBuilder()
                 .withChart(ChartBuilder.get().withType(Type.pie).withBackground("transparent").build())
                 //.withTheme(ThemeBuilder.get().withMode(isDarkTheme() ? Mode.dark : Mode.light).build())
                 .withLabels(list.stream().map(Pair::getFirst).toArray(String[]::new))
-                .withSeries(list.stream().map(p -> p.getSecond().doubleValue()).toArray(Double[]::new));
+                .withSeries(list.stream().map(p -> p.getSecond().doubleValue()).toArray(Double[]::new))
+                .build();
         /*List<Map.Entry<String, Long>> values = new ArrayList<>(map.entrySet());
         values.sort((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()));
         DefaultPieDataset dataset = new DefaultPieDataset();

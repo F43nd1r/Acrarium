@@ -18,6 +18,7 @@ package com.faendir.acra.ui.base.statistics;
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.util.LocalSettings;
 import com.github.appreciated.apexcharts.ApexCharts;
+import com.github.appreciated.apexcharts.ApexChartsBuilder;
 import com.github.appreciated.apexcharts.config.builder.ChartBuilder;
 import com.github.appreciated.apexcharts.config.builder.XAxisBuilder;
 import com.github.appreciated.apexcharts.config.chart.Type;
@@ -44,7 +45,7 @@ class TimeChart extends Chart<Date> {
     @Override
     public ApexCharts createChart(@NonNull Map<Date, Long> map) {
         List<Pair<Date, Long>> list = map.entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue())).sorted(Comparator.comparing(Pair::getFirst)).collect(Collectors.toList());
-        ApexCharts chart = new ApexCharts()
+        ApexCharts chart = new ApexChartsBuilder()
                 .withChart(ChartBuilder.get().withType(Type.bar).withBackground("transparent").build())
                 .withXaxis(XAxisBuilder.get().withType(XAxisType.datetime).build())
                 .withSeries(new Series<>(list.stream().map(p -> new Object[]{p.getFirst(), p.getSecond()}).toArray(Object[][]::new)))
@@ -53,7 +54,8 @@ class TimeChart extends Chart<Date> {
                         .withPalette("palette1")
                         .withMonochrome(MonochromeBuilder.get().withColor("0x197de1").withEnabled(true).withShadeIntensity(0.1).withShadeTo(ShadeTo.light).build())
                         .build())*/
-                .withLabels(getTranslation(Messages.REPORTS));
+                .withLabels(getTranslation(Messages.REPORTS))
+                .build();
         /*TimeSeries series = new TimeSeries("Date");
         series.add(new Day(new Date()), 0);
         map.forEach((date, count) -> series.addOrUpdate(new Day(date), count));
