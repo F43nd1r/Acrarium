@@ -26,6 +26,7 @@ import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -96,7 +97,9 @@ public class Translatable<T extends Component> extends Composite<T> implements L
 
     @NonNull
     public static Translatable<Button> createButton(@NonNull ComponentEventListener<ClickEvent<Button>> clickListener, @NonNull String captionId, @NonNull Object... params) {
-        return create(new Button("", clickListener), captionId, params);
+        Button button = new Button("", clickListener);
+        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        return create(button, captionId, params);
     }
 
     @NonNull

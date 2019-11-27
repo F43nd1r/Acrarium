@@ -37,7 +37,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -72,7 +72,7 @@ public class Overview extends VerticalLayout implements ComponentEventListener<A
         grid.addColumn(VApp::getReportCount, QReport.report.count(), Messages.REPORTS);
         grid.addOnClickNavigation(BugTab.class, VApp::getId);
         if (SecurityUtils.hasRole(User.Role.ADMIN)) {
-            grid.appendFooterRow().getCell(appColumn).setComponent(new Div(Translatable.createButton(e -> {
+            grid.appendFooterRow().getCell(appColumn).setComponent(new HorizontalLayout(Translatable.createButton(e -> {
                 Translatable<TextField> name = Translatable.createTextField("", Messages.NAME);
                 new Popup().setTitle(Messages.NEW_APP).addComponent(name).addCreateButton(popup -> {
                     popup.clear().addComponent(new ConfigurationLabel(dataService.createNewApp(name.getContent().getValue()))).addCloseButton().show();

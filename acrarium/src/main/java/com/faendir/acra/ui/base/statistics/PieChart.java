@@ -16,6 +16,7 @@
 
 package com.faendir.acra.ui.base.statistics;
 
+import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.util.LocalSettings;
 import com.github.appreciated.apexcharts.ApexCharts;
 import com.github.appreciated.apexcharts.ApexChartsBuilder;
@@ -41,42 +42,20 @@ class PieChart extends Chart<String> {
 
     @Override
     public ApexCharts createChart(@NonNull Map<String, Long> map) {
-        List<Pair<String, Long>> list = map.entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue())).sorted(Comparator.comparing(Pair::getSecond)).collect(Collectors.toList());
+        List<Pair<String, Long>> list = map.entrySet().stream()
+                .map(e -> Pair.of(e.getKey(), e.getValue()))
+                .sorted(Comparator.<Pair<String, Long>, Long>comparing(Pair::getSecond).reversed())
+                .collect(Collectors.toList());
         if(list.size() > MAX_PARTS) {
-
+            List<Pair<String, Long>> replace = list.subList(MAX_PARTS, list.size());
+            Pair<String, Long> other = Pair.of(getTranslation(Messages.OTHER), replace.stream().mapToLong(Pair::getSecond).sum());
+            replace.clear();
+            list.add(other);
         }
-        ApexCharts chart = new ApexChartsBuilder()
+        return ApexChartsBuilder.get()
                 .withChart(ChartBuilder.get().withType(Type.pie).withBackground("transparent").build())
-                //.withTheme(ThemeBuilder.get().withMode(isDarkTheme() ? Mode.dark : Mode.light).build())
                 .withLabels(list.stream().map(Pair::getFirst).toArray(String[]::new))
                 .withSeries(list.stream().map(p -> p.getSecond().doubleValue()).toArray(Double[]::new))
                 .build();
-        /*List<Map.Entry<String, Long>> values = new ArrayList<>(map.entrySet());
-        values.sort((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()));
-        DefaultPieDataset dataset = new DefaultPieDataset();
-        values.subList(0, Math.min(MAX_PARTS, values.size())).forEach(e -> dataset.insertValue(0, e.getKey(), e.getValue()));
-        dataset.sortByValues(SortOrder.DESCENDING);
-        if (values.size() > MAX_PARTS) {
-            dataset.insertValue(dataset.getItemCount(), "Other", values.subList(MAX_PARTS, values.size()).stream().mapToLong(Map.Entry::getValue).sum());
-        }
-        JFreeChart chart = ChartFactory.createPieChart("", dataset, false, false, false);
-        chart.setBackgroundPaint(null);
-        PiePlot plot = (PiePlot) chart.getPlot();
-        plot.setStartAngle(0);
-        plot.setShadowPaint(null);
-        plot.setBackgroundAlpha(0);
-        plot.setOutlineVisible(false);
-        plot.setLabelBackgroundPaint(null);
-        plot.setLabelOutlinePaint(null);
-        plot.setLabelShadowPaint(null);
-        Paint foregroundColor = getForegroundColor();
-        plot.setLabelPaint(foregroundColor);
-        plot.setLabelFont(Statistics.LABEL_FONT);
-        plot.setLabelLinkPaint(foregroundColor);
-        plot.setLabelLinkStyle(PieLabelLinkStyle.QUAD_CURVE);
-        plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0} ({2})", NumberFormat.getNumberInstance(), new DecimalFormat("0.0%")));
-        //noinspection unchecked
-        ((List<String>) dataset.getKeys()).forEach(key -> plot.setExplodePercent(key, 0.01));*/
-        return chart;
     }
 }

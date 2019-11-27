@@ -20,8 +20,12 @@ import com.faendir.acra.util.LocalSettings;
 import com.github.appreciated.apexcharts.ApexCharts;
 import com.github.appreciated.apexcharts.ApexChartsBuilder;
 import com.github.appreciated.apexcharts.config.builder.ChartBuilder;
+import com.github.appreciated.apexcharts.config.builder.DataLabelsBuilder;
 import com.github.appreciated.apexcharts.config.builder.XAxisBuilder;
 import com.github.appreciated.apexcharts.config.chart.Type;
+import com.github.appreciated.apexcharts.config.chart.builder.SelectionBuilder;
+import com.github.appreciated.apexcharts.config.chart.builder.ToolbarBuilder;
+import com.github.appreciated.apexcharts.config.chart.builder.ZoomBuilder;
 import com.github.appreciated.apexcharts.config.xaxis.XAxisType;
 import com.github.appreciated.apexcharts.helper.Series;
 import org.springframework.data.util.Pair;
@@ -45,56 +49,18 @@ class TimeChart extends Chart<Date> {
     @Override
     public ApexCharts createChart(@NonNull Map<Date, Long> map) {
         List<Pair<Date, Long>> list = map.entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue())).sorted(Comparator.comparing(Pair::getFirst)).collect(Collectors.toList());
-        ApexCharts chart = new ApexChartsBuilder()
-                .withChart(ChartBuilder.get().withType(Type.bar).withBackground("transparent").build())
+        return ApexChartsBuilder.get()
+                .withChart(ChartBuilder.get()
+                        .withType(Type.bar)
+                        .withBackground("transparent")
+                        .withToolbar(ToolbarBuilder.get().withShow(false).build())
+                        .withSelection(SelectionBuilder.get().withEnabled(false).build())
+                        .withZoom(ZoomBuilder.get().withEnabled(false).build())
+                        .build())
                 .withXaxis(XAxisBuilder.get().withType(XAxisType.datetime).build())
-                .withSeries(new Series<>(list.stream().map(p -> new Object[]{p.getFirst(), p.getSecond()}).toArray(Object[][]::new)))
-                /*.withTheme(ThemeBuilder.get()
-                        .withMode(isDarkTheme() ? Mode.dark : Mode.light)
-                        .withPalette("palette1")
-                        .withMonochrome(MonochromeBuilder.get().withColor("0x197de1").withEnabled(true).withShadeIntensity(0.1).withShadeTo(ShadeTo.light).build())
-                        .build())*/
+                .withSeries(new Series<>(getTranslation(Messages.REPORTS), list.stream().map(p -> new Object[]{p.getFirst(), p.getSecond()}).toArray(Object[][]::new)))
+                .withDataLabels(DataLabelsBuilder.get().withEnabled(false).build())
                 .withLabels(getTranslation(Messages.REPORTS))
                 .build();
-        /*TimeSeries series = new TimeSeries("Date");
-        series.add(new Day(new Date()), 0);
-        map.forEach((date, count) -> series.addOrUpdate(new Day(date), count));
-        JFreeChart chart = ChartFactory.createXYBarChart("",
-                "Date",
-                true,
-                "Reports",
-                new TimeSeriesCollection(series),
-                PlotOrientation.VERTICAL,
-                false,
-                false,
-                false);
-        chart.setBackgroundPaint(null);
-        XYPlot plot = chart.getXYPlot();
-        plot.getRangeAxis().setStandardTickUnits(new NumberTickUnitSource(true));
-        plot.setBackgroundAlpha(0);
-        plot.setDomainGridlinesVisible(false);
-        plot.setOutlineVisible(false);
-        Paint foregroundColor = getForegroundColor();
-        plot.setRangeGridlinePaint(foregroundColor);
-        ValueAxis domainAxis = plot.getDomainAxis();
-        domainAxis.setLabelPaint(foregroundColor);
-        domainAxis.setLabelFont(Statistics.LABEL_FONT);
-        domainAxis.setTickLabelFont(Statistics.LABEL_FONT);
-        domainAxis.setTickLabelPaint(foregroundColor);
-        domainAxis.setAxisLinePaint(foregroundColor);
-        domainAxis.setTickMarkPaint(foregroundColor);
-        ValueAxis rangeAxis = plot.getRangeAxis();
-        rangeAxis.setLabelPaint(foregroundColor);
-        rangeAxis.setLabelFont(Statistics.LABEL_FONT);
-        rangeAxis.setTickLabelFont(Statistics.LABEL_FONT);
-        rangeAxis.setTickLabelPaint(foregroundColor);
-        rangeAxis.setAxisLinePaint(foregroundColor);
-        rangeAxis.setTickMarkPaint(foregroundColor);
-        XYBarRenderer barRenderer = (XYBarRenderer) plot.getRenderer();
-        barRenderer.setBarPainter(new StandardXYBarPainter());
-        barRenderer.setSeriesPaint(0, Statistics.BLUE);
-        barRenderer.setBarAlignmentFactor(0.5);
-        barRenderer.setMargin(0.2);*/
-        return chart;
     }
 }

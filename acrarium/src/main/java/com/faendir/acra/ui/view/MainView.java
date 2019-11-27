@@ -129,9 +129,9 @@ public class MainView extends ParentLayout {
         });
         layout.addToDrawer(tabs);
         DrawerToggle drawerToggle = new DrawerToggle();
-        drawerToggle.setIcon(Translatable.createImage("favicon.ico", Messages.ACRARIUM));
         Translatable<Button> button = Translatable.createButton(e -> logout(), Messages.LOGOUT).with(b -> {
             b.setIcon(VaadinIcon.POWER_OFF.create());
+            b.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
             b.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         });
         button.setPaddingRight(10, Unit.PIXEL);
