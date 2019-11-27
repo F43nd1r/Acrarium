@@ -1,4 +1,4 @@
-<!--
+/*
   ~ (C) Copyright 2018 Lukas Morawietz (https://github.com/F43nd1r)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,28 +12,15 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
-<custom-style>
-    <style>
-        simple-dropdown {
-            --simple-dropdown-toggle: {
-                justify-content: right;
-            };
-            --simple-dropdown-menu: {
-                background: var(--lumo-base-color);
-            };
-            --simple-dropdown-offset: 0;
-        }
-    </style>
-</custom-style>
+ */
+import { registerStyles, css } from '@vaadin/vaadin-themable-mixin/register-styles.js';
 
-<dom-module id="my-login-form" theme-for="vaadin-login-form-wrapper">
-    <template>
-        <style>
+registerStyles("vaadin-login-form-wrapper", css`
             [part="form"] {
-                padding: 0 !important;
+                padding: 0;
             }
-        </style>
-    </template>
-</dom-module>
+            [part="form-title"] {
+                display: none;
+            }
+`);
 

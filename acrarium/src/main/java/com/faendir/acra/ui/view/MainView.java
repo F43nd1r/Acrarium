@@ -37,7 +37,7 @@ import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -65,7 +65,7 @@ import java.util.Map;
  * @author lukas
  * @since 13.07.18
  */
-@HtmlImport("frontend://styles/shared-styles.html")
+@JsModule("./styles/shared-styles.js")
 @UIScope
 @SpringComponent
 public class MainView extends ParentLayout {
@@ -147,7 +147,6 @@ public class MainView extends ParentLayout {
     private void showLogin() {
         Translatable<Image> logo = Translatable.createImage("frontend/logo.png", Messages.ACRARIUM);
         logo.setWidth(0, Unit.PIXEL);
-        logo.setPadding(1, Unit.REM);
         FlexLayout logoWrapper = new FlexLayout(logo);
         logoWrapper.expand(logo);
         LoginI18n loginI18n = LoginI18n.createDefault();

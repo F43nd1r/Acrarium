@@ -70,7 +70,6 @@ public class UserManager extends Composite<FlexLayout> implements HasAcrariumTit
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         getContent().removeAll();
-        getContent().add(Translatable.createLabel(Messages.USERS));
         MyGrid<User> userGrid = new MyGrid<>(userService.getUserProvider());
         userGrid.setWidthFull();
         userGrid.setSelectionMode(Grid.SelectionMode.NONE);
