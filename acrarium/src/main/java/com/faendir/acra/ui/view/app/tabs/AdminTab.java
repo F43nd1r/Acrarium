@@ -30,6 +30,7 @@ import com.faendir.acra.service.UserService;
 import com.faendir.acra.ui.base.ConfigurationLabel;
 import com.faendir.acra.ui.base.MyGrid;
 import com.faendir.acra.ui.base.popup.Popup;
+import com.faendir.acra.ui.component.Box;
 import com.faendir.acra.ui.component.Card;
 import com.faendir.acra.ui.component.CssGrid;
 import com.faendir.acra.ui.component.DownloadButton;
@@ -110,7 +111,7 @@ public class AdminTab extends AppTab<Div> {
         }
 
         Card versionCard = createCard(versionGrid);
-        versionCard.setHeader(Translatable.createText(Messages.VERSIONS));
+        versionCard.setHeader(Translatable.createLabel(Messages.VERSIONS));
 
         CssGrid notificationLayout = new CssGrid();
         notificationLayout.setTemplateColumns("auto max-content");
@@ -142,7 +143,7 @@ public class AdminTab extends AppTab<Div> {
             notificationLayout.add(div);
         }
         Card notificationCard = createCard(notificationLayout);
-        notificationCard.setHeader(Translatable.createText(Messages.NOTIFICATIONS));
+        notificationCard.setHeader(Translatable.createLabel(Messages.NOTIFICATIONS));
 
         Translatable<ComboBox<String>> mailBox = Translatable.createComboBox(getDataService().getFromReports(app, null, QReport.report.userEmail), Messages.BY_MAIL);
         mailBox.setWidthFull();
@@ -165,13 +166,14 @@ public class AdminTab extends AppTab<Div> {
         }), Messages.DOWNLOAD);
         download.setSizeFull();
         Card exportCard = createCard(mailBox, idBox, download);
-        exportCard.setHeader(Translatable.createText(Messages.EXPORT));
+        exportCard.setHeader(Translatable.createLabel(Messages.EXPORT));
 
-        Translatable<Button> configButton = Translatable.createButton(e -> new Popup().setTitle(Messages.NEW_ACRA_CONFIG_CONFIRM)
+        Box configBox = new Box(Translatable.createLabel(Messages.NEW_ACRA_CONFIG), Translatable.createLabel(Messages.NEW_ACRA_CONFIG_DETAILS),
+                Translatable.createButton(e -> new Popup().setTitle(Messages.NEW_ACRA_CONFIG_CONFIRM)
                 .addYesNoButtons(popup -> popup.clear().addComponent(new ConfigurationLabel(getDataService().recreateReporterUser(app))).addCloseButton().show())
-                .show(), Messages.NEW_ACRA_CONFIG);
-        configButton.setWidthFull();
-        Translatable<Button> matchingButton = Translatable.createButton(e -> {
+                .show(), Messages.CREATE));
+        Box matchingBox = new Box(Translatable.createLabel(Messages.NEW_BUG_CONFIG), Translatable.createLabel(Messages.NEW_BUG_CONFIG_DETAILS),
+                Translatable.createButton(e -> {
             App.Configuration configuration = app.getConfiguration();
             Translatable.Value<RangeField, Double> score = Translatable.createRangeField(Messages.SCORE).with(it -> {
                 it.setMin(0);
@@ -182,8 +184,7 @@ public class AdminTab extends AppTab<Div> {
                     .setTitle(Messages.NEW_BUG_CONFIG_CONFIRM)
                     .addYesNoButtons(p -> getDataService().changeConfiguration(app, new App.Configuration(score.getValue().intValue())), true)
                     .show();
-        }, Messages.NEW_BUG_CONFIG);
-        matchingButton.setWidthFull();
+        }, Messages.CONFIGURE));
         NumberField age = new NumberField();
         age.setStep(1d);
         age.setMin(1d);
@@ -217,8 +218,9 @@ public class AdminTab extends AppTab<Div> {
             UI.getCurrent().navigate(Overview.class);
         }, true).show(), Messages.DELETE_APP);
         deleteButton.setWidthFull();
-        Card dangerCard = createCard(configButton, matchingButton, purgeAge, purgeVersion, deleteButton);
-        dangerCard.setHeader(Translatable.createText(Messages.DANGER_ZONE));
+        Card dangerCard = createCard(configBox, matchingBox, purgeAge, purgeVersion, deleteButton);
+        dangerCard.setHeader(Translatable.createLabel(Messages.DANGER_ZONE));
+        dangerCard.enableDivider();
         dangerCard.setHeaderColor("var(----lumo-error-text-color)", "var(--lumo-error-color)");
     }
 

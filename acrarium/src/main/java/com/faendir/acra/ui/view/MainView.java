@@ -37,6 +37,7 @@ import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
@@ -66,6 +67,7 @@ import java.util.Map;
  * @since 13.07.18
  */
 @JsModule("./styles/shared-styles.js")
+@CssImport("./styles/box-style.css")
 @UIScope
 @SpringComponent
 public class MainView extends ParentLayout {

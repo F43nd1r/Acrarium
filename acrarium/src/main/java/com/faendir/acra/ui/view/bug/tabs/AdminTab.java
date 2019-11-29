@@ -64,7 +64,7 @@ public class AdminTab extends BugTab<Div> {
         }, Messages.SAVE);
         save.setWidthFull();
         Card propertiesCard = new Card(title, save);
-        propertiesCard.setHeader(Translatable.createText(Messages.PROPERTIES));
+        propertiesCard.setHeader(Translatable.createLabel(Messages.PROPERTIES));
         propertiesCard.setWidth(500, HasSize.Unit.PIXEL);
         layout.add(propertiesCard);
         layout.expand(propertiesCard);
@@ -80,7 +80,7 @@ public class AdminTab extends BugTab<Div> {
         }, true).show(), Messages.DELETE_BUG);
         deleteButton.setWidthFull();
         Card dangerCard = new Card(unmergeButton, deleteButton);
-        dangerCard.setHeader(Translatable.createText(Messages.DANGER_ZONE));
+        dangerCard.setHeader(Translatable.createLabel(Messages.DANGER_ZONE));
         dangerCard.setHeaderColor("var(----lumo-error-text-color)", "var(--lumo-error-color)");
         dangerCard.setWidth(500, HasSize.Unit.PIXEL);
         layout.add(dangerCard);

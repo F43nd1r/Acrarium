@@ -56,7 +56,7 @@ public class StacktraceTab extends BugTab<Div> implements HasSize {
             }
             Card card = new Card(new Label(trace).honorWhitespaces());
             card.setAllowCollapse(true);
-            card.setHeader(Translatable.createText( Messages.STACKTRACE_TITLE, stacktrace.getVersion().getName(), trace.split("\n", 2)[0]));
+            card.setHeader(Translatable.createLabel( Messages.STACKTRACE_TITLE, stacktrace.getVersion().getName(), trace.split("\n", 2)[0]));
             if(getContent().getChildren().findAny().isPresent()){
                 card.collapse();
             }

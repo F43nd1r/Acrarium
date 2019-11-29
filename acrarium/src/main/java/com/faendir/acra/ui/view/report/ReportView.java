@@ -99,9 +99,9 @@ public class ReportView extends Composite<Div> implements HasSecureParameter<Str
         summaryLayout.add(Translatable.createLabel(Messages.VERSION).with(Label::secondary), version, Translatable.createLabel(Messages.DATE).with(Label::secondary), date, installationLabel, installation, Translatable.createLabel(Messages.EMAIL).with(Label::secondary), email, Translatable.createLabel(Messages.COMMENT).with(Label::secondary), comment, mappedStacktraceLabel, unmappedStacktraceLabel, stacktrace, Translatable.createLabel(Messages.ATTACHMENTS).with(Label::secondary));
         summaryLayout.alignItems(CssGrid.AlignMode.CENTER, installationLabel);
         Card summary = new Card(summaryLayout);
-        summary.setHeader(Translatable.createText(Messages.SUMMARY));
+        summary.setHeader(Translatable.createLabel(Messages.SUMMARY));
         details = new Card();
-        details.setHeader(Translatable.createText(Messages.DETAILS));
+        details.setHeader(Translatable.createLabel(Messages.DETAILS));
         getContent().add(summary, details);
     }
 

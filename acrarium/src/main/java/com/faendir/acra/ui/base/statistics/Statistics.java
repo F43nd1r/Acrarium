@@ -56,7 +56,7 @@ public class Statistics extends Composite<FlexLayout> {
         filterLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 1));
         filterLayout.setWidth("100%");
         Card card = new Card(filterLayout);
-        card.setHeader(Translatable.createText(Messages.FILTER));
+        card.setHeader(Translatable.createLabel(Messages.FILTER));
         card.setWidth(500, HasSize.Unit.PIXEL);
 
         TextField dayStepper = new TextField();

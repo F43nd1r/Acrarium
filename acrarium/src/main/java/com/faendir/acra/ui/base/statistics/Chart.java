@@ -36,7 +36,7 @@ abstract class Chart<T> extends Composite<Card> {
         this.localSettings = localSettings;
         getContent().setWidth(500, HasSize.Unit.PIXEL);
         getContent().setMaxWidthFull();
-        getContent().setHeader(Translatable.createText(captionId, params));
+        getContent().setHeader(Translatable.createLabel(captionId, params));
     }
 
     public void setContent(@NonNull Map<T, Long> map) {
