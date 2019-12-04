@@ -8,6 +8,7 @@ class AcrariumBox extends PolymerElement {
                 :host {
                     display: flex;
                     flex-direction: row;
+                    align-items: center;
                 }
 
                 .acrarium-box-title {

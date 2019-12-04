@@ -97,7 +97,7 @@ public class AdminTab extends AppTab<Div> {
         layout.removeAll();
         MyGrid<Version> versionGrid = new MyGrid<>(getDataService().getVersionProvider(app));
         versionGrid.setHeightToRows();
-        versionGrid.setHeight("");
+        versionGrid.setMaxHeight(100, HasSize.Unit.PERCENTAGE);
         versionGrid.addColumn(Version::getCode, QVersion.version.code, Messages.VERSION_CODE).setFlexGrow(1);
         versionGrid.addColumn(Version::getName, QVersion.version.name, Messages.VERSION).setFlexGrow(1);
         versionGrid.addColumn(new IconRenderer<>(v -> new Icon(v.getMappings() != null ? VaadinIcon.CHECK : VaadinIcon.CLOSE), v -> ""), QVersion.version.mappings.isNotNull(), Messages.PROGUARD_MAPPINGS);
@@ -228,6 +228,7 @@ public class AdminTab extends AppTab<Div> {
         Card card = new Card(content);
         card.setWidth(500, HasSize.Unit.PIXEL);
         card.setMaxWidth(1000, HasSize.Unit.PIXEL);
+        card.setMaxHeight(500, HasSize.Unit.PIXEL);
         layout.add(card);
         layout.expand(card);
         return card;

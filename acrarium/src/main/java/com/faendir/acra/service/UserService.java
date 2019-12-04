@@ -98,7 +98,7 @@ public class UserService implements Serializable {
     }
 
     public boolean hasAdmin() {
-        return new JPAQuery<>(entityManager).from(USER).where(USER.roles.contains(User.Role.ADMIN)).select(Expressions.ONE).fetchOne() != null;
+        return new JPAQuery<>(entityManager).from(USER).where(USER.roles.contains(User.Role.ADMIN)).select(Expressions.ONE).fetchFirst() != null;
     }
 
 

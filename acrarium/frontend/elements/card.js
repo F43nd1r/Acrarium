@@ -9,8 +9,8 @@ class AcrariumCard extends PolymerElement {
                     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
                     border-radius: 2px;
                     margin: 1rem;
-                    display: inline-block;
-                    align-items: center;
+                    display: inline-flex;
+                    flex-direction: column;
                 }
 
                 .acrarium-card-header {
@@ -27,7 +27,8 @@ class AcrariumCard extends PolymerElement {
                     box-sizing: border-box;
                     display: inline-block;
                     width: 100%;
-                    height: 100%;
+                    flex: 1;
+                    min-height: 0;
                 }
 
                 .acrarium-card-content.collapse {
@@ -45,7 +46,7 @@ class AcrariumCard extends PolymerElement {
 
     getContentClass(collapse, divider) {
         let classes = "acrarium-card-content";
-        if (collapse) classes += "collapse";
+        if (collapse) classes += " collapse";
         if (divider) classes += " divider";
         return classes;
     }
