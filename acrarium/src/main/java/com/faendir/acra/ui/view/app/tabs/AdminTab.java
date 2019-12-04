@@ -170,37 +170,50 @@ public class AdminTab extends AppTab<Div> {
 
         Box configBox = new Box(Translatable.createLabel(Messages.NEW_ACRA_CONFIG), Translatable.createLabel(Messages.NEW_ACRA_CONFIG_DETAILS),
                 Translatable.createButton(e -> new Popup().setTitle(Messages.NEW_ACRA_CONFIG_CONFIRM)
-                .addYesNoButtons(popup -> popup.clear().addComponent(new ConfigurationLabel(getDataService().recreateReporterUser(app))).addCloseButton().show())
-                .show(), Messages.CREATE));
+                        .addYesNoButtons(popup -> popup.clear().addComponent(new ConfigurationLabel(getDataService().recreateReporterUser(app))).addCloseButton().show())
+                        .show(), Messages.CREATE));
         Box matchingBox = new Box(Translatable.createLabel(Messages.NEW_BUG_CONFIG), Translatable.createLabel(Messages.NEW_BUG_CONFIG_DETAILS),
                 Translatable.createButton(e -> {
-            App.Configuration configuration = app.getConfiguration();
-            Translatable.Value<RangeField, Double> score = Translatable.createRangeField(Messages.SCORE).with(it -> {
-                it.setMin(0);
-                it.setMax(100);
-                it.setValue((double) configuration.getMinScore());
-            });
-            new Popup().addComponent(score)
-                    .setTitle(Messages.NEW_BUG_CONFIG_CONFIRM)
-                    .addYesNoButtons(p -> getDataService().changeConfiguration(app, new App.Configuration(score.getValue().intValue())), true)
-                    .show();
-        }, Messages.CONFIGURE));
-        NumberField age = new NumberField();
-        age.setStep(1d);
-        age.setMin(1d);
-        age.setValue(30d);
-        age.setPreventInvalidInput(true);
-        age.setHasControls(true);
-        age.setWidthFull();
-        age.setSuffixComponent(Translatable.createLabel(Messages.REPORTS_OLDER_THAN2));
-        FlexLayout purgeAge = new FlexLayout();
-        purgeAge.setWidthFull();
-        purgeAge.preventWhiteSpaceBreaking();
-        purgeAge.setAlignItems(FlexComponent.Alignment.CENTER);
-        purgeAge.add(Translatable.createButton(e -> getDataService().deleteReportsOlderThanDays(app, age.getValue().intValue()), Messages.PURGE),
-                Translatable.createLabel(Messages.REPORTS_OLDER_THAN1),
-                age);
-        purgeAge.expand(age);
+                    App.Configuration configuration = app.getConfiguration();
+                    Translatable.Value<RangeField, Double> score = Translatable.createRangeField(Messages.SCORE).with(it -> {
+                        it.setMin(0);
+                        it.setMax(100);
+                        it.setValue((double) configuration.getMinScore());
+                    });
+                    new Popup().addComponent(score)
+                            .setTitle(Messages.NEW_BUG_CONFIG_CONFIRM)
+                            .addYesNoButtons(p -> getDataService().changeConfiguration(app, new App.Configuration(score.getValue().intValue())), true)
+                            .show();
+                }, Messages.CONFIGURE));
+        Box purgeAgeBox = new Box(Translatable.createLabel(Messages.PURGE_OLD), Translatable.createLabel(Messages.PURGE_OLD_DETAILS), Translatable.createButton(e -> {
+            Translatable.Value<NumberField, Double> age = Translatable.createNumberField(30d, Messages.REPORTS_OLDER_THAN1).with(it -> {
+                        it.setStep(1d);
+                        it.setMin(1d);
+                        it.setPreventInvalidInput(true);
+                        it.setHasControls(true);
+                        it.setWidthFull();
+                        it.setSuffixComponent(Translatable.createLabel(Messages.REPORTS_OLDER_THAN2));
+                    }
+            );
+            new Popup().addComponent(age)
+                    .addYesNoButtons(popup -> {
+                        getDataService().deleteReportsOlderThanDays(app, age.getValue().intValue());
+                    }, true).show();
+        }, Messages.PURGE));
+        Box purgeVersionBox = new Box(Translatable.createLabel(Messages.PURGE_VERSION), Translatable.createLabel(Messages.PURGE_VERSION_DETAILS), Translatable.createButton(e -> {
+            Translatable.Value<ComboBox<Integer>, Integer> versionBox = Translatable.createComboBox(getDataService().getFromReports(app, null, report.stacktrace.version.code), Messages.REPORTS_BEFORE_VERSION);
+            new Popup().addComponent(versionBox)
+                    .addYesNoButtons(popup -> {
+                        if (versionBox.getValue() != null) {
+                            getDataService().deleteReportsBeforeVersion(app, versionBox.getValue());
+                        }
+                    }, true).show();
+        }, Messages.PURGE));
+        Box deleteBox = new Box(Translatable.createLabel(Messages.DELETE_APP), Translatable.createLabel(Messages.DELETE_APP_DETAILS), Translatable.createButton(e ->
+                new Popup().setTitle(Messages.DELETE_APP_CONFIRM).addYesNoButtons(popup -> {
+                    getDataService().delete(app);
+                    UI.getCurrent().navigate(Overview.class);
+                }, true).show(), Messages.DELETE));
         ComboBox<Integer> versionBox = new ComboBox<>(null, getDataService().getFromReports(app, null, QReport.report.stacktrace.version.code));
         versionBox.setWidth("100%");
         FlexLayout purgeVersion = new FlexLayout();
@@ -218,7 +231,7 @@ public class AdminTab extends AppTab<Div> {
             UI.getCurrent().navigate(Overview.class);
         }, true).show(), Messages.DELETE_APP);
         deleteButton.setWidthFull();
-        Card dangerCard = createCard(configBox, matchingBox, purgeAge, purgeVersion, deleteButton);
+        Card dangerCard = createCard(configBox, matchingBox, purgeAgeBox, purgeVersionBox, deleteBox);
         dangerCard.setHeader(Translatable.createLabel(Messages.DANGER_ZONE));
         dangerCard.enableDivider();
         dangerCard.setHeaderColor("var(----lumo-error-text-color)", "var(--lumo-error-color)");

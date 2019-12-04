@@ -37,6 +37,7 @@ class AcrariumCard extends PolymerElement {
 
                 slot[class~="divider"]::slotted(:not(:first-child)) {
                     border-top: 1px solid var(--lumo-contrast-20pct);
+                    margin-top: 0.5em;
                 }
             </style>
             <slot name="header" class="acrarium-card-header" on-click="handleClick"></slot>

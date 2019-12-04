@@ -117,8 +117,8 @@ public class Translatable<T extends Component> extends Composite<T> implements L
         return new Translatable<>(new TextArea("", initialValue, ""), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
     }
 
-    public static <T> Translatable<ComboBox<T>> createComboBox(@NonNull Collection<T> items, @NonNull String captionId, @NonNull Object... params) {
-        return new Translatable<>(new ComboBox<>("", items), tComboBox -> tComboBox.setLabel(tComboBox.getTranslation(captionId, params)));
+    public static <T> Translatable.Value<ComboBox<T>, T> createComboBox(@NonNull Collection<T> items, @NonNull String captionId, @NonNull Object... params) {
+        return new Translatable.Value<>(new ComboBox<>("", items), tComboBox -> tComboBox.setLabel(tComboBox.getTranslation(captionId, params)));
     }
 
     public static <T> Translatable<Select<T>> createSelect(@NonNull Collection<T> items, @NonNull String captionId, @NonNull Object... params) {
