@@ -39,9 +39,6 @@ import java.util.stream.Collectors;
 
 /**
  * Mojo which generates a class with constants from message resource bundles
- *
- * @goal generate
- * @phase generate-sources
  */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class MessageGenerator extends AbstractMojo {
