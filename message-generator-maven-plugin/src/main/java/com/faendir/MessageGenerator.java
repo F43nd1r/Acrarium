@@ -1,7 +1,7 @@
 package com.faendir;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2019 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Goal which touches a timestamp file.
+ * Mojo which generates a class with constants from message resource bundles
  *
- * @goal touch
- * @phase process-sources
+ * @goal generate
+ * @phase generate-sources
  */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class MessageGenerator extends AbstractMojo {
