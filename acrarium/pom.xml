@@ -5,10 +5,10 @@
     <parent>
         <groupId>com.faendir</groupId>
         <artifactId>parent</artifactId>
-        <version>0.9.20-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
     <artifactId>acrarium</artifactId>
-    <version>0.9.20-SNAPSHOT</version>
+    <version>${revision}</version>
     <packaging>war</packaging>
     <name>Acrarium</name>
     <properties>
@@ -234,6 +234,14 @@
             <id>central</id>
             <url>https://repo1.maven.org/maven2/</url>
         </pluginRepository>
+        <pluginRepository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-f43nd1r-maven</id>
+            <name>bintray-plugins</name>
+            <url>https://dl.bintray.com/f43nd1r/maven</url>
+        </pluginRepository>
     </pluginRepositories>
     <build>
         <defaultGoal>spring-boot:run</defaultGoal>
@@ -321,9 +329,9 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>com.faendir</groupId>
-                <artifactId>message-generator-maven-plugin</artifactId>
-                <version>0.9.20-SNAPSHOT</version>
+                <groupId>com.faendir.maven</groupId>
+                <artifactId>resource-class-generator</artifactId>
+                <version>1.0.2</version>
                 <executions>
                     <execution>
                         <goals>
