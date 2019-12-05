@@ -67,7 +67,6 @@ import java.util.Map;
  * @since 13.07.18
  */
 @JsModule("./styles/shared-styles.js")
-@CssImport("./styles/box-style.css")
 @UIScope
 @SpringComponent
 public class MainView extends ParentLayout {
