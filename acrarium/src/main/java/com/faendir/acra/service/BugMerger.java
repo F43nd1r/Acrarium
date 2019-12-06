@@ -15,12 +15,7 @@
  */
 package com.faendir.acra.service;
 
-import com.faendir.acra.model.App;
-import com.faendir.acra.model.Bug;
-import com.faendir.acra.model.QBug;
-import com.faendir.acra.model.QStacktrace;
-import com.faendir.acra.model.Stacktrace;
-import com.faendir.acra.model.StacktraceMatch;
+import com.faendir.acra.model.*;
 import com.mysema.commons.lang.CloseableIterator;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.JPAExpressions;
@@ -46,6 +41,7 @@ import java.util.List;
 
 import static com.faendir.acra.model.QApp.app;
 import static com.faendir.acra.model.QBug.bug;
+import static com.faendir.acra.model.QReport.report;
 import static com.faendir.acra.model.QStacktrace.stacktrace1;
 import static com.faendir.acra.model.QStacktraceMatch.stacktraceMatch;
 
@@ -163,7 +159,13 @@ public class BugMerger {
     @EventListener
     @Transactional
     public void onReportsDeleted(ReportsDeleteEvent event) {
+        deleteOrphanStacktraces();
         deleteOrphanBugs();
+    }
+
+    @Transactional
+    public void deleteOrphanStacktraces() {
+        new JPADeleteClause(entityManager, stacktrace1).where(stacktrace1.notIn(JPAExpressions.select(report.stacktrace).from(report).distinct())).execute();
     }
 
     @Transactional
