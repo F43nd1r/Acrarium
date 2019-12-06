@@ -40,7 +40,7 @@ abstract class Chart<T> extends Composite<Card> {
     }
 
     public void setContent(@NonNull Map<T, Long> map) {
-        getContent().removeAll();
+        getContent().removeContent();
         getContent().add(createChart(map));
     }
 

@@ -76,6 +76,10 @@ public class Card extends PolymerTemplate<Card.CardModel> implements HasSize, Ha
         getStyle().set("--acrarium-card-header-color", backgroundColor);
     }
 
+    public void removeContent() {
+        getChildren().filter(component -> component.getElement().getAttribute("slot") == null).forEach(this::remove);
+    }
+
     public interface CardModel extends TemplateModel {
         void setCanCollapse(boolean collapse);
         boolean getCanCollapse();
