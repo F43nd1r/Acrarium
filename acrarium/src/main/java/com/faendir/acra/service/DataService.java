@@ -16,15 +16,7 @@
 package com.faendir.acra.service;
 
 import com.faendir.acra.dataprovider.QueryDslDataProvider;
-import com.faendir.acra.model.App;
-import com.faendir.acra.model.Attachment;
-import com.faendir.acra.model.Bug;
-import com.faendir.acra.model.MailSettings;
-import com.faendir.acra.model.QApp;
-import com.faendir.acra.model.Report;
-import com.faendir.acra.model.Stacktrace;
-import com.faendir.acra.model.User;
-import com.faendir.acra.model.Version;
+import com.faendir.acra.model.*;
 import com.faendir.acra.model.view.Queries;
 import com.faendir.acra.model.view.VApp;
 import com.faendir.acra.model.view.VBug;
@@ -35,6 +27,7 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPADeleteClause;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.acra.ReportField;
@@ -344,8 +337,9 @@ public class DataService implements Serializable {
 
     @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).EDIT)")
-    public void deleteReportsOlderThanDays(@NonNull App app, @NonNull int days) {
-        new JPADeleteClause(entityManager, report).where(report.stacktrace.bug.app.eq(app).and(report.date.before(ZonedDateTime.now().minus(days, ChronoUnit.DAYS))));
+    public void deleteReportsOlderThanDays(@NonNull App app, int days) {
+        new JPADeleteClause(entityManager, report).where(report.stacktrace.in(JPAExpressions.select(stacktrace1).from(stacktrace1).where(stacktrace1.bug.app.eq(app)))
+                .and(report.date.before(ZonedDateTime.now().minus(days, ChronoUnit.DAYS)))).execute();
         entityManager.flush();
         applicationEventPublisher.publishEvent(new ReportsDeleteEvent(this));
     }
@@ -353,7 +347,8 @@ public class DataService implements Serializable {
     @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).EDIT)")
     public void deleteReportsBeforeVersion(@NonNull App app, int versionCode) {
-        new JPADeleteClause(entityManager, report).where(report.stacktrace.bug.app.eq(app).and(report.stacktrace.version.code.lt(versionCode)));
+        new JPADeleteClause(entityManager, report).where(report.stacktrace.in(JPAExpressions.select(stacktrace1).from(stacktrace1).where(stacktrace1.bug.app.eq(app)
+                .and(stacktrace1.version.code.lt(versionCode))))).execute();
         entityManager.flush();
         applicationEventPublisher.publishEvent(new ReportsDeleteEvent(this));
     }
