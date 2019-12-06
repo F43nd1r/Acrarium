@@ -13,7 +13,7 @@
     <properties>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>1.8</java.version>
+        <java.version>13</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <vaadin.version>14.0.14</vaadin.version>
@@ -233,14 +233,6 @@
             <id>central</id>
             <url>https://repo1.maven.org/maven2/</url>
         </pluginRepository>
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-f43nd1r-maven</id>
-            <name>bintray-plugins</name>
-            <url>https://dl.bintray.com/f43nd1r/maven</url>
-        </pluginRepository>
     </pluginRepositories>
     <build>
         <defaultGoal>spring-boot:run</defaultGoal>
@@ -323,6 +315,22 @@
                                     <type>war</type>
                                 </artifactItem>
                             </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <doclint>none</doclint>
+                            <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
                         </configuration>
                     </execution>
                 </executions>
