@@ -39,3 +39,4 @@ webpack.generated.js
 ### Maven ###
 **/target
 /target
+.flattened-pom.xml

@@ -19,7 +19,7 @@ package com.faendir.acra.ui.view.bug.tabs;
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.Bug;
 import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.base.popup.Popup;
+import com.faendir.acra.ui.component.dialog.FluentDialog;
 import com.faendir.acra.ui.component.Card;
 import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.HasSize;
@@ -69,15 +69,15 @@ public class AdminTab extends BugTab<Div> {
         layout.add(propertiesCard);
         layout.expand(propertiesCard);
 
-        Translatable<Button> unmergeButton = Translatable.createButton(e -> new Popup().setTitle(Messages.UNMERGE_BUG_CONFIRM).addYesNoButtons(p -> {
+        Translatable<Button> unmergeButton = Translatable.createButton(e -> new FluentDialog().addText(Messages.UNMERGE_BUG_CONFIRM).addConfirmButtons(p -> {
             getDataService().unmergeBug(bug);
             UI.getCurrent().navigate(Overview.class);
-        }, true), Messages.UNMERGE_BUG);
+        }), Messages.UNMERGE_BUG);
         unmergeButton.setWidthFull();
-        Translatable<Button> deleteButton = Translatable.createButton(e -> new Popup().setTitle(Messages.DELETE_BUG_CONFIRM).addYesNoButtons(popup -> {
+        Translatable<Button> deleteButton = Translatable.createButton(e -> new FluentDialog().addText(Messages.DELETE_BUG_CONFIRM).addConfirmButtons(popup -> {
             getDataService().delete(bug);
             UI.getCurrent().navigate(Overview.class);
-        }, true).show(), Messages.DELETE_BUG);
+        }).show(), Messages.DELETE_BUG);
         deleteButton.setWidthFull();
         Card dangerCard = new Card(unmergeButton, deleteButton);
         dangerCard.setHeader(Translatable.createLabel(Messages.DANGER_ZONE));

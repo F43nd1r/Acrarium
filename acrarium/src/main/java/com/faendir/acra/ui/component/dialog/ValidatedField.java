@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.base.popup;
+package com.faendir.acra.ui.component.dialog;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValidation;

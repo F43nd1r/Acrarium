@@ -30,6 +30,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.NumberField;
@@ -146,6 +147,10 @@ public class Translatable<T extends Component> extends Composite<T> implements L
 
     public static Translatable<Label> createLabel(@NonNull String captionId, @NonNull Object... params) {
         return create(new Label(), captionId, params);
+    }
+
+    public static Translatable<H3> createH3(@NonNull String captionId, @NonNull Object... params) {
+        return create(new H3(), captionId, params);
     }
 
     public static Translatable<Image> createImage(@NonNull String src, @NonNull String captionId, @NonNull Object... params) {

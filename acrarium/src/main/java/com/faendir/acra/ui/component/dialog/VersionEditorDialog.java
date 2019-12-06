@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.component;
+package com.faendir.acra.ui.component.dialog;
 
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.App;
 import com.faendir.acra.model.Version;
 import com.faendir.acra.service.DataService;
-import com.vaadin.flow.component.button.Button;
+import com.faendir.acra.ui.component.FlexLayout;
+import com.faendir.acra.ui.component.Translatable;
+import com.faendir.acra.ui.component.UploadField;
+import com.faendir.acra.ui.component.dialog.AcrariumDialog;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import org.springframework.lang.NonNull;
@@ -30,10 +33,10 @@ import org.springframework.lang.Nullable;
  * @author lukas
  * @since 24.04.19
  */
-public class VersionEditorDialog extends CardDialog {
+public class VersionEditorDialog extends AcrariumDialog {
     public VersionEditorDialog(@NonNull DataService dataService, @NonNull App app, @Nullable Runnable onUpdate, @Nullable Version old) {
         boolean isNew = old == null;
-        setHeader(Translatable.createText(isNew ? Messages.NEW_VERSION : Messages.EDIT_VERSION));
+        setHeader(isNew ? Messages.NEW_VERSION : Messages.EDIT_VERSION);
         Translatable.Value<NumberField, Double> code = Translatable.createNumberField(isNew ? dataService.getMaxVersion(app).map(i -> i + 1d).orElse(1d) : old.getCode(), Messages.VERSION_CODE).with(n -> {
             n.setStep(1d);
             n.setMin(1d);
@@ -55,7 +58,7 @@ public class VersionEditorDialog extends CardDialog {
                 n.setValue(old.getMappings());
             }
         });
-        Translatable<Button> button = Translatable.createButton(e -> {
+        setPositive(e -> {
             if(isNew) {
                 dataService.store(new Version(app, code.getValue().intValue(), name.getValue(), upload.getValue()));
             } else  {
@@ -68,7 +71,8 @@ public class VersionEditorDialog extends CardDialog {
                 onUpdate.run();
             }
         },  isNew ? Messages.CREATE : Messages.SAVE);
-        FlexLayout layout = new FlexLayout(code, name, upload, button);
+        setNegative(Messages.CANCEL);
+        FlexLayout layout = new FlexLayout(code, name, upload);
         layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
         add(layout);
     }

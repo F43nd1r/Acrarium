@@ -27,7 +27,7 @@ import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.BugMerger;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.base.MyGrid;
-import com.faendir.acra.ui.base.popup.Popup;
+import com.faendir.acra.ui.component.dialog.FluentDialog;
 import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.view.app.AppView;
 import com.faendir.acra.ui.view.bug.tabs.ReportTab;
@@ -84,11 +84,11 @@ public class BugTab extends AppTab<VerticalLayout> {
                 RadioButtonGroup<String> titles = new RadioButtonGroup<>();
                 titles.setItems(selectedItems.stream().map(bug -> bug.getBug().getTitle()).collect(Collectors.toList()));
                 titles.setValue(selectedItems.get(0).getBug().getTitle());
-                new Popup().setTitle(Messages.CHOOSE_BUG_GROUP_TITLE).addComponent(titles).addCreateButton(p -> {
+                new FluentDialog().setTitle(Messages.CHOOSE_BUG_GROUP_TITLE).addComponent(titles).addCreateButton(p -> {
                     bugMerger.mergeBugs(selectedItems.stream().map(VBug::getBug).collect(Collectors.toList()), titles.getValue());
                     bugs.deselectAll();
                     bugs.getDataProvider().refreshAll();
-                }, true).show();
+                }).show();
             } else {
                 Notification.show(Messages.ONLY_ONE_BUG_SELECTED);
             }

@@ -27,8 +27,8 @@ import com.faendir.acra.service.UserService;
 import com.faendir.acra.ui.base.HasAcrariumTitle;
 import com.faendir.acra.ui.base.MyGrid;
 import com.faendir.acra.ui.base.TranslatableText;
-import com.faendir.acra.ui.base.popup.Popup;
-import com.faendir.acra.ui.base.popup.ValidatedField;
+import com.faendir.acra.ui.component.dialog.FluentDialog;
+import com.faendir.acra.ui.component.dialog.ValidatedField;
 import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.view.MainView;
@@ -106,14 +106,14 @@ public class UserManager extends Composite<FlexLayout> implements HasAcrariumTit
         Translatable<Button> newUser = Translatable.createButton(e -> {
             Translatable.Value<TextField, String> name = Translatable.createTextField("", Messages.USERNAME);
             Translatable.Value<PasswordField, String> password = Translatable.createPasswordField(Messages.PASSWORD);
-            new Popup().setTitle(Messages.NEW_USER)
+            new FluentDialog().setTitle(Messages.NEW_USER)
                     .addValidatedField(ValidatedField.of(name).addValidator(s -> !s.isEmpty(), Messages.USERNAME_EMPTY))
                     .addValidatedField(ValidatedField.of(password).addValidator(s -> !s.isEmpty(), Messages.PASSWORD_EMPTY))
                     .addValidatedField(ValidatedField.of(Translatable.createPasswordField(Messages.REPEAT_PASSWORD)).addValidator(s -> s.equals(password.getContent().getValue()), Messages.PASSWORDS_NOT_MATCHING))
                     .addCreateButton(popup -> {
                         userService.createUser(name.getContent().getValue().toLowerCase(), password.getContent().getValue());
                         userGrid.getDataProvider().refreshAll();
-                    }, true)
+                    })
                     .show();
         }, Messages.NEW_USER);
         userGrid.appendFooterRow().getCell(userGrid.getColumns().get(0)).setComponent(newUser);

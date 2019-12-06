@@ -29,7 +29,7 @@ import com.faendir.acra.service.DataService;
 import com.faendir.acra.service.UserService;
 import com.faendir.acra.ui.base.ConfigurationLabel;
 import com.faendir.acra.ui.base.MyGrid;
-import com.faendir.acra.ui.base.popup.Popup;
+import com.faendir.acra.ui.component.dialog.FluentDialog;
 import com.faendir.acra.ui.component.Box;
 import com.faendir.acra.ui.component.Card;
 import com.faendir.acra.ui.component.CssGrid;
@@ -38,7 +38,7 @@ import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.HasSize;
 import com.faendir.acra.ui.component.RangeField;
 import com.faendir.acra.ui.component.Translatable;
-import com.faendir.acra.ui.component.VersionEditorDialog;
+import com.faendir.acra.ui.component.dialog.VersionEditorDialog;
 import com.faendir.acra.ui.view.Overview;
 import com.faendir.acra.ui.view.app.AppView;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -103,10 +103,12 @@ public class AdminTab extends AppTab<Div> {
         versionGrid.addColumn(new IconRenderer<>(v -> new Icon(v.getMappings() != null ? VaadinIcon.CHECK : VaadinIcon.CLOSE), v -> ""), QVersion.version.mappings.isNotNull(), Messages.PROGUARD_MAPPINGS);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
             versionGrid.addColumn(new ComponentRenderer<>(v -> new Button(new Icon(VaadinIcon.EDIT), e -> new VersionEditorDialog(getDataService(), app, () -> versionGrid.getDataProvider().refreshAll(), v).open())));
-            versionGrid.addColumn(new ComponentRenderer<>(v -> new Button(new Icon(VaadinIcon.TRASH), e -> new Popup().addComponent(Translatable.createText(Messages.DELETE_VERSION_CONFIRM, v.getCode())).addYesNoButtons(p -> {
+            versionGrid.addColumn(new ComponentRenderer<>(v -> new Button(new Icon(VaadinIcon.TRASH), e -> new FluentDialog()
+                    .addComponent(Translatable.createText(Messages.DELETE_VERSION_CONFIRM, v.getCode()))
+                    .addConfirmButtons(p -> {
                 getDataService().delete(v);
                 versionGrid.getDataProvider().refreshAll();
-            }, true).show())));
+            }).show())));
             versionGrid.appendFooterRow().getCell(versionGrid.getColumns().get(0)).setComponent(Translatable.createButton(e -> new VersionEditorDialog(getDataService(), app, () -> versionGrid.getDataProvider().refreshAll(), null).open(), Messages.NEW_VERSION));
         }
 
@@ -169,8 +171,8 @@ public class AdminTab extends AppTab<Div> {
         exportCard.setHeader(Translatable.createLabel(Messages.EXPORT));
 
         Box configBox = new Box(Translatable.createLabel(Messages.NEW_ACRA_CONFIG), Translatable.createLabel(Messages.NEW_ACRA_CONFIG_DETAILS),
-                Translatable.createButton(e -> new Popup().setTitle(Messages.NEW_ACRA_CONFIG_CONFIRM)
-                        .addYesNoButtons(popup -> popup.clear().addComponent(new ConfigurationLabel(getDataService().recreateReporterUser(app))).addCloseButton().show())
+                Translatable.createButton(e -> new FluentDialog().addText(Messages.NEW_ACRA_CONFIG_CONFIRM)
+                        .addConfirmButtons(popup -> new FluentDialog().addComponent(new ConfigurationLabel(getDataService().recreateReporterUser(app))).addCloseButton().show())
                         .show(), Messages.CREATE));
         Box matchingBox = new Box(Translatable.createLabel(Messages.NEW_BUG_CONFIG), Translatable.createLabel(Messages.NEW_BUG_CONFIG_DETAILS),
                 Translatable.createButton(e -> {
@@ -180,9 +182,9 @@ public class AdminTab extends AppTab<Div> {
                         it.setMax(100);
                         it.setValue((double) configuration.getMinScore());
                     });
-                    new Popup().addComponent(score)
-                            .setTitle(Messages.NEW_BUG_CONFIG_CONFIRM)
-                            .addYesNoButtons(p -> getDataService().changeConfiguration(app, new App.Configuration(score.getValue().intValue())), true)
+                    new FluentDialog().addComponent(score)
+                            .addText(Messages.NEW_BUG_CONFIG_CONFIRM)
+                            .addConfirmButtons(p -> getDataService().changeConfiguration(app, new App.Configuration(score.getValue().intValue())))
                             .show();
                 }, Messages.CONFIGURE));
         Box purgeAgeBox = new Box(Translatable.createLabel(Messages.PURGE_OLD), Translatable.createLabel(Messages.PURGE_OLD_DETAILS), Translatable.createButton(e -> {
@@ -195,42 +197,27 @@ public class AdminTab extends AppTab<Div> {
                         it.setSuffixComponent(Translatable.createLabel(Messages.REPORTS_OLDER_THAN2));
                     }
             );
-            new Popup().addComponent(age)
-                    .addYesNoButtons(popup -> {
+            new FluentDialog().addComponent(age)
+                    .setTitle(Messages.PURGE)
+                    .addConfirmButtons(popup -> {
                         getDataService().deleteReportsOlderThanDays(app, age.getValue().intValue());
-                    }, true).show();
+                    }).show();
         }, Messages.PURGE));
         Box purgeVersionBox = new Box(Translatable.createLabel(Messages.PURGE_VERSION), Translatable.createLabel(Messages.PURGE_VERSION_DETAILS), Translatable.createButton(e -> {
             Translatable.Value<ComboBox<Integer>, Integer> versionBox = Translatable.createComboBox(getDataService().getFromReports(app, null, report.stacktrace.version.code), Messages.REPORTS_BEFORE_VERSION);
-            new Popup().addComponent(versionBox)
-                    .addYesNoButtons(popup -> {
+            new FluentDialog().addComponent(versionBox)
+                    .setTitle(Messages.PURGE)
+                    .addConfirmButtons(popup -> {
                         if (versionBox.getValue() != null) {
                             getDataService().deleteReportsBeforeVersion(app, versionBox.getValue());
                         }
-                    }, true).show();
+                    }).show();
         }, Messages.PURGE));
         Box deleteBox = new Box(Translatable.createLabel(Messages.DELETE_APP), Translatable.createLabel(Messages.DELETE_APP_DETAILS), Translatable.createButton(e ->
-                new Popup().setTitle(Messages.DELETE_APP_CONFIRM).addYesNoButtons(popup -> {
+                new FluentDialog().addText(Messages.DELETE_APP_CONFIRM).addConfirmButtons(popup -> {
                     getDataService().delete(app);
                     UI.getCurrent().navigate(Overview.class);
-                }, true).show(), Messages.DELETE));
-        ComboBox<Integer> versionBox = new ComboBox<>(null, getDataService().getFromReports(app, null, QReport.report.stacktrace.version.code));
-        versionBox.setWidth("100%");
-        FlexLayout purgeVersion = new FlexLayout();
-        purgeVersion.setWidthFull();
-        purgeVersion.preventWhiteSpaceBreaking();
-        purgeVersion.setAlignItems(FlexComponent.Alignment.CENTER);
-        purgeVersion.add(Translatable.createButton(e -> {
-            if (versionBox.getValue() != null) {
-                getDataService().deleteReportsBeforeVersion(app, versionBox.getValue());
-            }
-        }, Messages.PURGE), Translatable.createLabel(Messages.REPORTS_BEFORE_VERSION), versionBox);
-        purgeVersion.expand(versionBox);
-        Translatable<Button> deleteButton = Translatable.createButton(e -> new Popup().setTitle(Messages.DELETE_APP_CONFIRM).addYesNoButtons(popup -> {
-            getDataService().delete(app);
-            UI.getCurrent().navigate(Overview.class);
-        }, true).show(), Messages.DELETE_APP);
-        deleteButton.setWidthFull();
+                }).show(), Messages.DELETE));
         Card dangerCard = createCard(configBox, matchingBox, purgeAgeBox, purgeVersionBox, deleteBox);
         dangerCard.setHeader(Translatable.createLabel(Messages.DANGER_ZONE));
         dangerCard.enableDivider();

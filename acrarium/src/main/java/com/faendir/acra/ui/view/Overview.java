@@ -28,8 +28,8 @@ import com.faendir.acra.ui.base.ConfigurationLabel;
 import com.faendir.acra.ui.base.HasAcrariumTitle;
 import com.faendir.acra.ui.base.MyGrid;
 import com.faendir.acra.ui.base.TranslatableText;
-import com.faendir.acra.ui.base.popup.Popup;
-import com.faendir.acra.ui.base.popup.ValidatedField;
+import com.faendir.acra.ui.component.dialog.FluentDialog;
+import com.faendir.acra.ui.component.dialog.ValidatedField;
 import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.view.app.tabs.BugTab;
 import com.faendir.acra.util.ImportResult;
@@ -74,8 +74,8 @@ public class Overview extends VerticalLayout implements ComponentEventListener<A
         if (SecurityUtils.hasRole(User.Role.ADMIN)) {
             grid.appendFooterRow().getCell(appColumn).setComponent(new HorizontalLayout(Translatable.createButton(e -> {
                 Translatable<TextField> name = Translatable.createTextField("", Messages.NAME);
-                new Popup().setTitle(Messages.NEW_APP).addComponent(name).addCreateButton(popup -> {
-                    popup.clear().addComponent(new ConfigurationLabel(dataService.createNewApp(name.getContent().getValue()))).addCloseButton().show();
+                new FluentDialog().setTitle(Messages.NEW_APP).addComponent(name).addCreateButton(popup -> {
+                    new FluentDialog().addComponent(new ConfigurationLabel(dataService.createNewApp(name.getContent().getValue()))).addCloseButton().show();
                     grid.getDataProvider().refreshAll();
                 }).show();
             }, Messages.NEW_APP), Translatable.createButton(e -> {
@@ -86,15 +86,14 @@ public class Overview extends VerticalLayout implements ComponentEventListener<A
                 });
                 Translatable<Checkbox> ssl = Translatable.createCheckbox(false, Messages.SSL);
                 Translatable.Value<TextField, String> databaseName = Translatable.createTextField("acra-myapp", Messages.DATABASE_NAME);
-                new Popup().setTitle(Messages.IMPORT_ACRALYZER)
+                new FluentDialog().setTitle(Messages.IMPORT_ACRALYZER)
                         .addComponent(host)
                         .addComponent(port)
                         .addComponent(ssl)
                         .addValidatedField(ValidatedField.of(databaseName), true)
                         .addCreateButton(popup -> {
                             ImportResult importResult = dataService.importFromAcraStorage(host.getContent().getValue(), port.getValue().intValue(), ssl.getContent().getValue(), databaseName.getContent().getValue());
-                            popup.clear()
-                                    .addComponent(Translatable.createLabel(Messages.IMPORT_SUCCESS, importResult.getSuccessCount(), importResult.getTotalCount()))
+                            new FluentDialog().addComponent(Translatable.createLabel(Messages.IMPORT_SUCCESS, importResult.getSuccessCount(), importResult.getTotalCount()))
                                     .addComponent(new ConfigurationLabel(importResult.getUser()))
                                     .addCloseButton()
                                     .show();

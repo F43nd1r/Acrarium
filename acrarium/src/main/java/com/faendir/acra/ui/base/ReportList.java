@@ -24,7 +24,7 @@ import com.faendir.acra.model.QReport;
 import com.faendir.acra.model.Report;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.AvatarService;
-import com.faendir.acra.ui.base.popup.Popup;
+import com.faendir.acra.ui.component.dialog.FluentDialog;
 import com.faendir.acra.ui.view.report.ReportView;
 import com.faendir.acra.util.TimeSpanRenderer;
 import com.vaadin.flow.component.button.Button;
@@ -54,10 +54,10 @@ public class ReportList extends MyGrid<Report>{
         addColumn(report -> report.getStacktrace().getStacktrace().split("\n", 2)[0], QReport.report.stacktrace.stacktrace, Messages.STACKTRACE).setAutoWidth(false).setFlexGrow(1);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
             addColumn(new ComponentRenderer<>(report -> new Button(new Icon(VaadinIcon.TRASH),
-                    event -> new Popup().setTitle(Messages.DELETE_REPORT_CONFIRM).addYesNoButtons(p -> {
+                    event -> new FluentDialog().addText(Messages.DELETE_REPORT_CONFIRM).addConfirmButtons(p -> {
                         reportDeleter.accept(report);
                         getDataProvider().refreshAll();
-                    }, true).show())));
+                    }).show())));
         }
         addOnClickNavigation(ReportView.class, Report::getId);
     }
