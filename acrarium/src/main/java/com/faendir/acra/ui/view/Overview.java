@@ -24,9 +24,9 @@ import com.faendir.acra.model.User;
 import com.faendir.acra.model.view.VApp;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.base.ConfigurationLabel;
+import com.faendir.acra.ui.component.ConfigurationLabel;
 import com.faendir.acra.ui.base.HasAcrariumTitle;
-import com.faendir.acra.ui.base.MyGrid;
+import com.faendir.acra.ui.component.Grid;
 import com.faendir.acra.ui.base.TranslatableText;
 import com.faendir.acra.ui.component.dialog.FluentDialog;
 import com.faendir.acra.ui.component.dialog.ValidatedField;
@@ -36,7 +36,6 @@ import com.faendir.acra.util.ImportResult;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
@@ -65,9 +64,9 @@ public class Overview extends VerticalLayout implements ComponentEventListener<A
     @Override
     public void onComponentEvent(AttachEvent event) {
         removeAll();
-        MyGrid<VApp> grid = new MyGrid<>(dataService.getAppProvider());
-        grid.setSelectionMode(Grid.SelectionMode.NONE);
-        Grid.Column<VApp> appColumn = grid.addColumn(VApp::getName, QApp.app.name, Messages.NAME).setFlexGrow(1);
+        Grid<VApp> grid = new Grid<>(dataService.getAppProvider());
+        grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.NONE);
+        com.vaadin.flow.component.grid.Grid.Column<VApp> appColumn = grid.addColumn(VApp::getName, QApp.app.name, Messages.NAME).setFlexGrow(1);
         grid.addColumn(VApp::getBugCount, QBug.bug.countDistinct(), Messages.BUGS);
         grid.addColumn(VApp::getReportCount, QReport.report.count(), Messages.REPORTS);
         grid.addOnClickNavigation(BugTab.class, VApp::getId);

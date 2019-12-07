@@ -27,8 +27,8 @@ import com.faendir.acra.model.Version;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.service.UserService;
-import com.faendir.acra.ui.base.ConfigurationLabel;
-import com.faendir.acra.ui.base.MyGrid;
+import com.faendir.acra.ui.component.ConfigurationLabel;
+import com.faendir.acra.ui.component.Grid;
 import com.faendir.acra.ui.component.dialog.FluentDialog;
 import com.faendir.acra.ui.component.Box;
 import com.faendir.acra.ui.component.Card;
@@ -95,7 +95,7 @@ public class AdminTab extends AppTab<Div> {
     @Override
     protected void init(App app) {
         layout.removeAll();
-        MyGrid<Version> versionGrid = new MyGrid<>(getDataService().getVersionProvider(app));
+        Grid<Version> versionGrid = new Grid<>(getDataService().getVersionProvider(app));
         versionGrid.setMinHeight(280, HasSize.Unit.PIXEL);
         versionGrid.setHeight(100, HasSize.Unit.PERCENTAGE);
         versionGrid.addColumn(Version::getCode, QVersion.version.code, Messages.VERSION_CODE).setFlexGrow(1);

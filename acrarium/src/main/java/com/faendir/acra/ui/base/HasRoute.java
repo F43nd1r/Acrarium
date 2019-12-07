@@ -16,6 +16,7 @@
 
 package com.faendir.acra.ui.base;
 
+import com.faendir.acra.ui.component.Path;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.BeforeEvent;

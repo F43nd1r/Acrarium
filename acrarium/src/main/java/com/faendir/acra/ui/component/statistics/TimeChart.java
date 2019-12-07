@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.base.statistics;
+package com.faendir.acra.ui.component.statistics;
 
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.util.LocalSettings;

@@ -19,7 +19,7 @@ package com.faendir.acra.ui.view.bug.tabs;
 import com.faendir.acra.model.Bug;
 import com.faendir.acra.service.AvatarService;
 import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.base.ReportList;
+import com.faendir.acra.ui.component.ReportList;
 import com.faendir.acra.ui.view.bug.BugView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;

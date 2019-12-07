@@ -26,7 +26,7 @@ import com.faendir.acra.model.view.VBug;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.BugMerger;
 import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.base.MyGrid;
+import com.faendir.acra.ui.component.Grid;
 import com.faendir.acra.ui.component.dialog.FluentDialog;
 import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.view.app.AppView;
@@ -35,7 +35,6 @@ import com.faendir.acra.util.TimeSpanRenderer;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.FooterRow;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -72,8 +71,8 @@ public class BugTab extends AppTab<VerticalLayout> {
     protected void init(App app) {
         getContent().setAlignItems(FlexComponent.Alignment.START);
         Translatable<Checkbox> hideSolved = Translatable.createCheckbox(true, Messages.HIDE_SOLVED);
-        MyGrid<VBug> bugs = new MyGrid<>(getDataService().getBugProvider(app, () -> hideSolved.getContent().getValue()));
-        bugs.setSelectionMode(Grid.SelectionMode.MULTI);
+        Grid<VBug> bugs = new Grid<>(getDataService().getBugProvider(app, () -> hideSolved.getContent().getValue()));
+        bugs.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.MULTI);
         hideSolved.getContent().addValueChangeListener(e -> getUI().ifPresent(ui -> ui.access(() -> {
             bugs.deselectAll();
             bugs.getDataProvider().refreshAll();
@@ -93,14 +92,14 @@ public class BugTab extends AppTab<VerticalLayout> {
                 Notification.show(Messages.ONLY_ONE_BUG_SELECTED);
             }
         }, Messages.MERGE_BUGS);
-        Grid.Column<VBug> countColumn = bugs.addColumn(VBug::getReportCount, QReport.report.count(), Messages.REPORTS);
-        Grid.Column<VBug> dateColumn = bugs.addColumn(new TimeSpanRenderer<>(VBug::getLastReport), QReport.report.date.max(), Messages.LATEST_REPORT);
+        com.vaadin.flow.component.grid.Grid.Column<VBug> countColumn = bugs.addColumn(VBug::getReportCount, QReport.report.count(), Messages.REPORTS);
+        com.vaadin.flow.component.grid.Grid.Column<VBug> dateColumn = bugs.addColumn(new TimeSpanRenderer<>(VBug::getLastReport), QReport.report.date.max(), Messages.LATEST_REPORT);
         bugs.sort(GridSortOrder.desc(dateColumn).build());
         bugs.addColumn(VBug::getHighestVersionCode, QReport.report.stacktrace.version.code.max(), Messages.LATEST_VERSION);
         bugs.addColumn(VBug::getUserCount, QReport.report.installationId.countDistinct(), Messages.AFFECTED_USERS);
         bugs.addColumn(bug -> bug.getBug().getTitle(), QBug.bug.title, Messages.TITLE).setAutoWidth(false).setFlexGrow(1);
         List<Version> versions = getDataService().findAllVersions(app);
-        Grid.Column<VBug> solvedColumn = bugs.addColumn(new ComponentRenderer<>((VBug bug) -> {
+        com.vaadin.flow.component.grid.Grid.Column<VBug> solvedColumn = bugs.addColumn(new ComponentRenderer<>((VBug bug) -> {
             Select<Version> versionSelect = new Select<>(versions.toArray(new Version[0]));
             versionSelect.setTextRenderer(Version::getName);
             versionSelect.setEmptySelectionAllowed(true);

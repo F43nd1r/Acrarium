@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.base;
+package com.faendir.acra.ui.component;
 
 import com.faendir.acra.dataprovider.QueryDslDataProvider;
-import com.faendir.acra.ui.component.HasSize;
 import com.querydsl.core.types.Expression;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.grid.FooterRow;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -48,11 +46,11 @@ import java.util.stream.Stream;
  * @author lukas
  * @since 13.07.18
  */
-public class MyGrid<T> extends Composite<Grid<T>> implements LocaleChangeObserver, HasSize {
+public class Grid<T> extends Composite<com.vaadin.flow.component.grid.Grid<T>> implements LocaleChangeObserver, HasSize {
     private final QueryDslDataProvider<T> dataProvider;
-    private final Map<Grid.Column<T>, Pair<String, Object[]>> columnCaptions;
+    private final Map<com.vaadin.flow.component.grid.Grid.Column<T>, Pair<String, Object[]>> columnCaptions;
 
-    public MyGrid(QueryDslDataProvider<T> dataProvider) {
+    public Grid(QueryDslDataProvider<T> dataProvider) {
         this.dataProvider = dataProvider;
         getContent().setDataProvider(dataProvider);
         getContent().setSizeFull();
@@ -62,38 +60,38 @@ public class MyGrid<T> extends Composite<Grid<T>> implements LocaleChangeObserve
     }
 
     @NonNull
-    public Grid.Column<T> addColumn(@NonNull ValueProvider<T, ?> valueProvider, @NonNull String captionId, Object... params) {
+    public com.vaadin.flow.component.grid.Grid.Column<T> addColumn(@NonNull ValueProvider<T, ?> valueProvider, @NonNull String captionId, Object... params) {
         return setupColumn(getContent().addColumn(valueProvider), captionId, params);
     }
 
     @NonNull
-    public Grid.Column<T> addColumn(@NonNull ValueProvider<T, ?> valueProvider, @NonNull Expression<? extends Comparable> sort, @NonNull String captionId, Object... params) {
+    public com.vaadin.flow.component.grid.Grid.Column<T> addColumn(@NonNull ValueProvider<T, ?> valueProvider, @NonNull Expression<? extends Comparable> sort, @NonNull String captionId, Object... params) {
         return setupSortableColumn(addColumn(valueProvider, captionId, params), sort);
     }
 
     @NonNull
-    public Grid.Column<T> addColumn(@NonNull Renderer<T> renderer) {
+    public com.vaadin.flow.component.grid.Grid.Column<T> addColumn(@NonNull Renderer<T> renderer) {
         return getContent().addColumn(renderer).setResizable(true).setAutoWidth(true).setFlexGrow(0);
     }
 
     @NonNull
-    public Grid.Column<T> addColumn(@NonNull Renderer<T> renderer, @NonNull String captionId, Object... params) {
+    public com.vaadin.flow.component.grid.Grid.Column<T> addColumn(@NonNull Renderer<T> renderer, @NonNull String captionId, Object... params) {
         return setupColumn(getContent().addColumn(renderer), captionId, params);
     }
 
     @NonNull
-    public Grid.Column<T> addColumn(@NonNull Renderer<T> renderer, @NonNull Expression<? extends Comparable> sort, @NonNull String captionId, Object... params) {
+    public com.vaadin.flow.component.grid.Grid.Column<T> addColumn(@NonNull Renderer<T> renderer, @NonNull Expression<? extends Comparable> sort, @NonNull String captionId, Object... params) {
         return setupSortableColumn(addColumn(renderer, captionId, params), sort);
     }
 
-    private Grid.Column<T> setupColumn(@NonNull Grid.Column<T> column, @NonNull String captionId, Object... params) {
+    private com.vaadin.flow.component.grid.Grid.Column<T> setupColumn(@NonNull com.vaadin.flow.component.grid.Grid.Column<T> column, @NonNull String captionId, Object... params) {
         String caption = getTranslation(captionId, params);
         column = column.setHeader(caption).setResizable(true).setAutoWidth(true).setFlexGrow(0);
         columnCaptions.put(column, Pair.of(captionId, params));
         return column;
     }
 
-    private Grid.Column<T> setupSortableColumn(@NonNull Grid.Column<T> column, @NonNull Expression<? extends Comparable> sort) {
+    private com.vaadin.flow.component.grid.Grid.Column<T> setupSortableColumn(@NonNull com.vaadin.flow.component.grid.Grid.Column<T> column, @NonNull Expression<? extends Comparable> sort) {
         column.setSortOrderProvider(direction -> Stream.of(new QueryDslDataProvider.QueryDslSortOrder(sort, direction)));
         column.setSortable(true);
         return column;
@@ -107,11 +105,11 @@ public class MyGrid<T> extends Composite<Grid<T>> implements LocaleChangeObserve
         getContent().addItemClickListener(e -> getUI().ifPresent(e.getButton() == 1 ? (ui -> ui.getPage().executeJavaScript("window.open(\"" + RouteConfiguration.forSessionScope().getUrl(target, parameterTransformer.apply(e.getItem())) + "\", \"blank\", \"\");")) : (ui -> ui.navigate(target, parameterTransformer.apply(e.getItem())))));
     }
 
-    public Registration addSelectionListener(SelectionListener<Grid<T>, T> listener) {
+    public Registration addSelectionListener(SelectionListener<com.vaadin.flow.component.grid.Grid<T>, T> listener) {
         return getContent().addSelectionListener(listener);
     }
 
-    public void setSelectionMode(Grid.SelectionMode selectionMode) {
+    public void setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode selectionMode) {
         getContent().setSelectionMode(selectionMode);
     }
 
@@ -135,7 +133,7 @@ public class MyGrid<T> extends Composite<Grid<T>> implements LocaleChangeObserve
         return getContent().appendFooterRow();
     }
 
-    public List<Grid.Column<T>> getColumns() {
+    public List<com.vaadin.flow.component.grid.Grid.Column<T>> getColumns() {
         return getContent().getColumns();
     }
 

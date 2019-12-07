@@ -25,7 +25,7 @@ import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.service.UserService;
 import com.faendir.acra.ui.base.HasAcrariumTitle;
-import com.faendir.acra.ui.base.MyGrid;
+import com.faendir.acra.ui.component.Grid;
 import com.faendir.acra.ui.base.TranslatableText;
 import com.faendir.acra.ui.component.dialog.FluentDialog;
 import com.faendir.acra.ui.component.dialog.ValidatedField;
@@ -37,7 +37,6 @@ import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -70,9 +69,9 @@ public class UserManager extends Composite<FlexLayout> implements HasAcrariumTit
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         getContent().removeAll();
-        MyGrid<User> userGrid = new MyGrid<>(userService.getUserProvider());
+        Grid<User> userGrid = new Grid<>(userService.getUserProvider());
         userGrid.setWidthFull();
-        userGrid.setSelectionMode(Grid.SelectionMode.NONE);
+        userGrid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.NONE);
         userGrid.addColumn(User::getUsername, QUser.user.username, Messages.USERNAME).setFlexGrow(1);
         userGrid.addColumn(new ComponentRenderer<>(user -> {
             Checkbox checkbox = new Checkbox(user.getRoles().contains(User.Role.ADMIN));

@@ -22,7 +22,7 @@ import com.faendir.acra.service.AvatarService;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.base.HasRoute;
 import com.faendir.acra.ui.base.HasSecureParameter;
-import com.faendir.acra.ui.base.Path;
+import com.faendir.acra.ui.component.Path;
 import com.faendir.acra.ui.component.Card;
 import com.faendir.acra.ui.component.CssGrid;
 import com.faendir.acra.ui.component.HasSize;

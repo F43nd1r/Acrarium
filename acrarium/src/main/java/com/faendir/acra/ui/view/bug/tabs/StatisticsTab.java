@@ -19,7 +19,7 @@ package com.faendir.acra.ui.view.bug.tabs;
 import com.faendir.acra.model.Bug;
 import com.faendir.acra.model.QReport;
 import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.base.statistics.Statistics;
+import com.faendir.acra.ui.component.statistics.Statistics;
 import com.faendir.acra.ui.view.bug.BugView;
 import com.faendir.acra.util.LocalSettings;
 import com.vaadin.flow.component.html.Div;

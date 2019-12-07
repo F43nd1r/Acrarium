@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.base;
+package com.faendir.acra.ui.component;
 
+import com.faendir.acra.ui.base.HasRoute;
+import com.faendir.acra.ui.base.TranslatableText;
 import com.faendir.acra.ui.component.HasSize;
 import com.faendir.acra.ui.component.HasStyle;
 import com.faendir.acra.ui.component.SubTabs;
@@ -85,7 +87,7 @@ public class Path extends SubTabs implements AfterNavigationListener, HasStyle, 
         super.onDetach(detachEvent);
     }
 
-    public static class Element<T extends Component> extends TranslatableText{
+    public static class Element<T extends Component> extends TranslatableText {
         final Class<T> target;
 
         public Element(Class<T> target, String titleId, Object... params) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.base;
+package com.faendir.acra.ui.component;
 
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.User;

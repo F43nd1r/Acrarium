@@ -19,6 +19,7 @@ package com.faendir.acra.ui.base;
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.component.FlexLayout;
+import com.faendir.acra.ui.component.Path;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
