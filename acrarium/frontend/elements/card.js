@@ -27,26 +27,33 @@ class AcrariumCard extends PolymerElement {
                     box-sizing: border-box;
                     display: inline-block;
                     width: 100%;
+                    height: 100%;
+                }
+                
+                .acrarium-card-content-wrapper {
+                    width: 100%;
                     flex: 1;
                     min-height: 0;
                 }
 
-                .acrarium-card-content.collapse {
+                .collapse {
                     display: none;
                 }
 
-                slot[class~="divider"]::slotted(:not(:first-child)) {
+                .divider > ::slotted(:not(:first-child)) {
                     border-top: 1px solid var(--lumo-contrast-20pct);
                     margin-top: 0.5em;
                 }
             </style>
             <slot name="header" class="acrarium-card-header" on-click="handleClick"></slot>
-            <slot class$="{{getContentClass(collapse, divider)}}"></slot>
+            <div class$="{{getContentClass(collapse, divider)}}">
+                <slot class="acrarium-card-content"></slot>
+            </div>
         `
     }
 
     getContentClass(collapse, divider) {
-        let classes = "acrarium-card-content";
+        let classes = "acrarium-card-content-wrapper";
         if (collapse) classes += " collapse";
         if (divider) classes += " divider";
         return classes;
