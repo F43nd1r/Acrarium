@@ -18,12 +18,7 @@ package com.faendir.acra.ui.base;
 
 import com.faendir.acra.ui.component.Path;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.router.AfterNavigationEvent;
-import com.vaadin.flow.router.BeforeEvent;
-import com.vaadin.flow.router.HasUrlParameter;
-import com.vaadin.flow.router.Location;
-import com.vaadin.flow.router.NavigationTrigger;
-import com.vaadin.flow.router.Router;
+import com.vaadin.flow.router.*;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -84,15 +79,8 @@ public interface HasRoute extends HasAcrariumTitle {
         @Override
         public T get(ApplicationContext applicationContext, AfterNavigationEvent afterNavigationEvent) {
             T t = super.get(applicationContext, afterNavigationEvent);
-            t.setParameter(new BeforeRouteEvent(afterNavigationEvent.getSource(), afterNavigationEvent.getLocation(), afterNavigationEvent.getActiveChain().get(0).getClass()), parameter);
+            t.setParameter(null, parameter);
             return t;
-        }
-    }
-
-    class BeforeRouteEvent extends BeforeEvent {
-
-        public BeforeRouteEvent(Router router, Location location, Class<?> navigationTarget) {
-            super(router, NavigationTrigger.PAGE_LOAD,location, navigationTarget, UI.getCurrent());
         }
     }
 }

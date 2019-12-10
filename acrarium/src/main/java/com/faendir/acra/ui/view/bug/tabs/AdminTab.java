@@ -16,24 +16,19 @@
 
 package com.faendir.acra.ui.view.bug.tabs;
 
-import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.Bug;
 import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.component.dialog.FluentDialog;
-import com.faendir.acra.ui.component.Card;
-import com.faendir.acra.ui.component.FlexLayout;
-import com.faendir.acra.ui.component.HasSize;
-import com.faendir.acra.ui.component.Translatable;
-import com.faendir.acra.ui.view.Overview;
+import com.faendir.acra.ui.base.CardView;
 import com.faendir.acra.ui.view.bug.BugView;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.textfield.TextArea;
+import com.faendir.acra.ui.view.bug.tabs.admintabs.AdminCard;
+import com.faendir.acra.ui.view.bug.tabs.admintabs.DangerCard;
+import com.faendir.acra.ui.view.bug.tabs.admintabs.PropertiesCard;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.annotation.PostConstruct;
 
 
 /**
@@ -43,48 +38,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 @UIScope
 @SpringComponent("bugAdminTab")
 @Route(value = "admin", layout = BugView.class)
-public class AdminTab extends BugTab<Div> {
+public class AdminTab extends BugTab<CardView<AdminCard, Bug>> {
     @Autowired
     public AdminTab(DataService dataService) {
         super(dataService);
-        getContent().setSizeFull();
+    }
+
+    @PostConstruct
+    public void setupContent() {
+        getContent().add(PropertiesCard.class, DangerCard.class);
     }
 
     @Override
-    protected void init(Bug bug) {
-        getContent().removeAll();
-        FlexLayout layout = new FlexLayout();
-        layout.setFlexWrap(FlexLayout.FlexWrap.WRAP);
-        layout.setWidthFull();
-        Translatable<TextArea> title = Translatable.createTextArea(bug.getTitle(), Messages.TITLE);
-        title.setWidthFull();
-        Translatable<Button> save = Translatable.createButton(e -> {
-            bug.setTitle(title.getContent().getValue());
-            getDataService().store(bug);
-        }, Messages.SAVE);
-        save.setWidthFull();
-        Card propertiesCard = new Card(title, save);
-        propertiesCard.setHeader(Translatable.createLabel(Messages.PROPERTIES));
-        propertiesCard.setWidth(500, HasSize.Unit.PIXEL);
-        layout.add(propertiesCard);
-        layout.expand(propertiesCard);
-
-        Translatable<Button> unmergeButton = Translatable.createButton(e -> new FluentDialog().addText(Messages.UNMERGE_BUG_CONFIRM).addConfirmButtons(p -> {
-            getDataService().unmergeBug(bug);
-            UI.getCurrent().navigate(Overview.class);
-        }), Messages.UNMERGE_BUG);
-        unmergeButton.setWidthFull();
-        Translatable<Button> deleteButton = Translatable.createButton(e -> new FluentDialog().addText(Messages.DELETE_BUG_CONFIRM).addConfirmButtons(popup -> {
-            getDataService().delete(bug);
-            UI.getCurrent().navigate(Overview.class);
-        }).show(), Messages.DELETE_BUG);
-        deleteButton.setWidthFull();
-        Card dangerCard = new Card(unmergeButton, deleteButton);
-        dangerCard.setHeader(Translatable.createLabel(Messages.DANGER_ZONE));
-        dangerCard.setHeaderColor("var(----lumo-error-text-color)", "var(--lumo-error-color)");
-        dangerCard.setWidth(500, HasSize.Unit.PIXEL);
-        layout.add(dangerCard);
-        layout.expand(dangerCard);
-        getContent().add(layout);
+    public void init(Bug bug) {
+        getContent().init(bug);
     }
 }

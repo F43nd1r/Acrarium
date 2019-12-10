@@ -46,7 +46,7 @@ public class StatisticsTab extends AppTab<Div> {
     }
 
     @Override
-    protected void init(App app) {
+    public void init(App app) {
         getContent().removeAll();
         getContent().add(new Statistics(app, null, getDataService(), localSettings));
     }

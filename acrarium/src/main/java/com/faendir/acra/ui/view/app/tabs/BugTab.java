@@ -68,7 +68,7 @@ public class BugTab extends AppTab<VerticalLayout> {
     }
 
     @Override
-    protected void init(App app) {
+    public void init(App app) {
         getContent().setAlignItems(FlexComponent.Alignment.START);
         Translatable<Checkbox> hideSolved = Translatable.createCheckbox(true, Messages.HIDE_SOLVED);
         Grid<VBug> bugs = new Grid<>(getDataService().getBugProvider(app, () -> hideSolved.getContent().getValue()));

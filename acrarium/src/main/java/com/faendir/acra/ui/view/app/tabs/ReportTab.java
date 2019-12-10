@@ -46,7 +46,7 @@ public class ReportTab extends AppTab<Div> {
     }
 
     @Override
-    protected void init(App app) {
+    public void init(App app) {
         getContent().removeAll();
         getContent().add(new ReportList(app, getDataService().getReportProvider(app), avatarService, getDataService()::delete));
     }

@@ -20,6 +20,7 @@ import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.Path;
+import com.faendir.acra.ui.component.SpringComposite;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
@@ -87,7 +88,7 @@ public class TabView<T extends Component & HasUrlParameter<P>, P> extends Parent
         }
     }
 
-    public abstract static class Tab<T extends Component, P> extends Composite<T> implements HasSecureParameter<Integer>, HasRoute {
+    public abstract static class Tab<T extends Component, P> extends SpringComposite<T> implements HasSecureParameter<Integer>, HasRoute, Init<P> {
         private final DataService dataService;
         private final BiFunction<DataService, Integer, Optional<P>> parameterGetter;
         private final Function<P, Integer> idGetter;
@@ -116,8 +117,6 @@ public class TabView<T extends Component & HasUrlParameter<P>, P> extends Parent
                 event.rerouteToError(IllegalArgumentException.class);
             }
         }
-
-        protected abstract void init(P parameter);
 
         @Override
         protected void onAttach(AttachEvent attachEvent) {
