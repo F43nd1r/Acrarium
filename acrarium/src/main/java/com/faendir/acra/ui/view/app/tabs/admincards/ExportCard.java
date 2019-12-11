@@ -40,11 +40,13 @@ import static com.faendir.acra.model.QReport.report;
 public class ExportCard extends AdminCard {
     public ExportCard(DataService dataService) {
         super(dataService);
+        setHeader(Translatable.createLabel(Messages.EXPORT));
 
     }
 
     @Override
     public void init(App app) {
+        removeContent();
         Translatable<ComboBox<String>> mailBox = Translatable.createComboBox(getDataService().getFromReports(app, null, QReport.report.userEmail), Messages.BY_MAIL);
         mailBox.setWidthFull();
         Translatable<ComboBox<String>> idBox = Translatable.createComboBox(getDataService().getFromReports(app, null, QReport.report.installationId), Messages.BY_ID);
@@ -65,7 +67,6 @@ public class ExportCard extends AdminCard {
             return new ByteArrayInputStream(getDataService().getFromReports(app, where, report.content, report.id).stream().collect(Collectors.joining(", ", "[", "]")).getBytes(StandardCharsets.UTF_8));
         }), Messages.DOWNLOAD);
         download.setSizeFull();
-        setHeader(Translatable.createLabel(Messages.EXPORT));
         add(mailBox, idBox, download);
     }
 }

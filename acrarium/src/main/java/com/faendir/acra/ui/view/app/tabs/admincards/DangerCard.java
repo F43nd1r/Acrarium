@@ -35,10 +35,14 @@ import static com.faendir.acra.model.QReport.report;
 public class DangerCard extends AdminCard {
     public DangerCard(DataService dataService) {
         super(dataService);
+        setHeader(Translatable.createLabel(Messages.DANGER_ZONE));
+        enableDivider();
+        setHeaderColor("var(--lumo-error-contrast-color)", "var(--lumo-error-color)");
     }
 
     @Override
     public void init(App app) {
+        removeContent();
         Box configBox = new Box(Translatable.createLabel(Messages.NEW_ACRA_CONFIG), Translatable.createLabel(Messages.NEW_ACRA_CONFIG_DETAILS),
                 Translatable.createButton(e -> new FluentDialog().addText(Messages.NEW_ACRA_CONFIG_CONFIRM)
                         .addConfirmButtons(popup -> new FluentDialog().addComponent(new ConfigurationLabel(getDataService().recreateReporterUser(app))).addCloseButton().show())
@@ -88,8 +92,5 @@ public class DangerCard extends AdminCard {
                     UI.getCurrent().navigate(Overview.class);
                 }).show(), Messages.DELETE));
         add(configBox, matchingBox, purgeAgeBox, purgeVersionBox, deleteBox);
-        setHeader(Translatable.createLabel(Messages.DANGER_ZONE));
-        enableDivider();
-        setHeaderColor("var(----lumo-error-text-color)", "var(--lumo-error-color)");
     }
 }

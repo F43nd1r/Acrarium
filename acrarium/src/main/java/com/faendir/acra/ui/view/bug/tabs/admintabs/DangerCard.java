@@ -34,10 +34,13 @@ import com.vaadin.flow.spring.annotation.UIScope;
 public class DangerCard extends AdminCard {
     public DangerCard(DataService dataService) {
         super(dataService);
+        setHeader(Translatable.createLabel(Messages.DANGER_ZONE));
+        setHeaderColor("var(--lumo-error-contrast-color)", "var(--lumo-error-color)");
     }
 
     @Override
     public void init(Bug bug) {
+        removeContent();
         Translatable<Button> unmergeButton = Translatable.createButton(e -> new FluentDialog().addText(Messages.UNMERGE_BUG_CONFIRM).addConfirmButtons(p -> {
             getDataService().unmergeBug(bug);
             UI.getCurrent().navigate(Overview.class);
@@ -49,7 +52,5 @@ public class DangerCard extends AdminCard {
         }).show(), Messages.DELETE_BUG);
         deleteButton.setWidthFull();
         add(unmergeButton, deleteButton);
-        setHeader(Translatable.createLabel(Messages.DANGER_ZONE));
-        setHeaderColor("var(----lumo-error-text-color)", "var(--lumo-error-color)");
     }
 }

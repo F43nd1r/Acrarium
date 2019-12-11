@@ -40,7 +40,7 @@ class AcrariumCard extends PolymerElement {
                     display: none;
                 }
 
-                .divider > ::slotted(:not(:first-child)) {
+                .divider > ::slotted(:not(:first-of-type)) {
                     border-top: 1px solid var(--lumo-contrast-20pct);
                     margin-top: 0.5em;
                 }

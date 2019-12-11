@@ -42,10 +42,12 @@ public class NotificationCard extends AdminCard {
     public NotificationCard(UserService userService, DataService dataService) {
         super(dataService);
         this.userService = userService;
+        setHeader(Translatable.createLabel(Messages.NOTIFICATIONS));
     }
 
     @Override
     public void init(App app) {
+        removeContent();
         CssGrid notificationLayout = new CssGrid();
         notificationLayout.setTemplateColumns("auto max-content");
         notificationLayout.setWidthFull();
@@ -75,7 +77,6 @@ public class NotificationCard extends AdminCard {
             div.getStyle().set("font-style", "italic");
             notificationLayout.add(div);
         }
-        setHeader(Translatable.createLabel(Messages.NOTIFICATIONS));
         add(notificationLayout);
     }
 }

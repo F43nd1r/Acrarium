@@ -36,10 +36,12 @@ public class PropertiesCard extends AdminCard {
 
     public PropertiesCard(DataService dataService) {
         super(dataService);
+        setHeader(Translatable.createLabel(Messages.PROPERTIES));
     }
 
     @Override
     public void init(Bug bug) {
+        removeContent();
         Translatable<TextArea> title = Translatable.createTextArea(bug.getTitle(), Messages.TITLE);
         title.setWidthFull();
         Translatable<Button> save = Translatable.createButton(e -> {
@@ -51,6 +53,5 @@ public class PropertiesCard extends AdminCard {
         layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
         layout.setAlignItems(FlexComponent.Alignment.END);
         add(layout);
-        setHeader(Translatable.createLabel(Messages.PROPERTIES));
     }
 }

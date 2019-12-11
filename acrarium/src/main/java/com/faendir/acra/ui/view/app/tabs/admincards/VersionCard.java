@@ -41,10 +41,12 @@ import com.vaadin.flow.spring.annotation.UIScope;
 public class VersionCard extends AdminCard {
     public VersionCard(DataService dataService) {
         super(dataService);
+        setHeader(Translatable.createLabel(Messages.VERSIONS));
     }
 
     @Override
     public void init(App app) {
+        removeContent();
         Grid<Version> versionGrid = new Grid<>(getDataService().getVersionProvider(app));
         versionGrid.setMinHeight(280, HasSize.Unit.PIXEL);
         versionGrid.setHeight(100, HasSize.Unit.PERCENTAGE);
@@ -62,6 +64,5 @@ public class VersionCard extends AdminCard {
             versionGrid.appendFooterRow().getCell(versionGrid.getColumns().get(0)).setComponent(Translatable.createButton(e -> new VersionEditorDialog(getDataService(), app, () -> versionGrid.getDataProvider().refreshAll(), null).open(), Messages.NEW_VERSION));
         }
         add(versionGrid);
-        setHeader(Translatable.createLabel(Messages.VERSIONS));
     }
 }
