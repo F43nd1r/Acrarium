@@ -18,6 +18,10 @@ import {registerStyles, css} from '@vaadin/vaadin-themable-mixin/register-styles
 registerStyles("vaadin-login-form-wrapper",
     // language=css
     css`
+        :host {
+            background: none;    
+        }
+        
         [part="form"] {
             padding: 0;
         }
