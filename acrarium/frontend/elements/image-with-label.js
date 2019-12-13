@@ -16,7 +16,7 @@
 
 import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
-class AcrariumBox extends PolymerElement {
+class AcrariumImageWithLabel extends PolymerElement {
     static get template() {
         // language=HTML
         return html`
@@ -27,23 +27,26 @@ class AcrariumBox extends PolymerElement {
                     align-items: center;
                 }
 
-                .acrarium-box-title {
-                    font-weight: bold;
+                img {
+                    width: 32px;
+                    height: 32px;
                 }
 
-                .acrarium-box-text {
-                    display: flex;
-                    flex-direction: column;
-                    flex: 1;
+                label {
+                    padding-left: var(--lumo-space-s);
                 }
             </style>
-            <div class="acrarium-box-text">
-                <slot name="title" class="acrarium-box-title"></slot>
-                <slot name="details"></slot>
-            </div>
-            <slot name="action"></slot>
+            <img src$="[[image]]">
+            <label>[[label]]</label>
         `
+    }
+
+    static get properties() {
+        return {
+            image: String,
+            label: String
+        }
     }
 }
 
-customElements.define("acrarium-box", AcrariumBox);
+customElements.define("acrarium-image-with-label", AcrariumImageWithLabel);
