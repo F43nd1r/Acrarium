@@ -184,6 +184,9 @@ public class DataService implements Serializable {
     @Transactional
     public void delete(Object entity) {
         entityManager.remove(entityManager.contains(entity) ? entity : entityManager.merge(entity));
+        if(entity instanceof Report) {
+            applicationEventPublisher.publishEvent(new ReportsDeleteEvent(this));
+        }
     }
 
     /**
