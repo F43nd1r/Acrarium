@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.view.bug.tabs.admintabs;
+package com.faendir.acra.ui.view.bug.tabs.admincards;
 
 import com.faendir.acra.i18n.Messages;
-import com.faendir.acra.model.App;
 import com.faendir.acra.model.Bug;
 import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.component.Card;
 import com.faendir.acra.ui.component.FlexLayout;
-import com.faendir.acra.ui.component.HasSize;
 import com.faendir.acra.ui.component.Translatable;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.view.bug.tabs.admintabs;
+package com.faendir.acra.ui.view.bug.tabs.admincards;
 
 import com.faendir.acra.i18n.Messages;
 import com.faendir.acra.model.Bug;
 import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.component.Card;
-import com.faendir.acra.ui.component.HasSize;
+import com.faendir.acra.ui.component.Box;
 import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.component.dialog.FluentDialog;
 import com.faendir.acra.ui.view.Overview;
@@ -36,21 +35,20 @@ public class DangerCard extends AdminCard {
         super(dataService);
         setHeader(Translatable.createLabel(Messages.DANGER_ZONE));
         setHeaderColor("var(--lumo-error-contrast-color)", "var(--lumo-error-color)");
+        enableDivider();
     }
 
     @Override
     public void init(Bug bug) {
         removeContent();
-        Translatable<Button> unmergeButton = Translatable.createButton(e -> new FluentDialog().addText(Messages.UNMERGE_BUG_CONFIRM).addConfirmButtons(p -> {
+        Box unmergeBox = new Box(Translatable.createLabel(Messages.UNMERGE_BUG), Translatable.createLabel(Messages.UNMERGE_BUG_DETAILS),Translatable.createButton(e -> new FluentDialog().addText(Messages.UNMERGE_BUG_CONFIRM).addConfirmButtons(p -> {
             getDataService().unmergeBug(bug);
             UI.getCurrent().navigate(Overview.class);
-        }), Messages.UNMERGE_BUG);
-        unmergeButton.setWidthFull();
-        Translatable<Button> deleteButton = Translatable.createButton(e -> new FluentDialog().addText(Messages.DELETE_BUG_CONFIRM).addConfirmButtons(popup -> {
+        }), Messages.UNMERGE));
+        Box deleteBox = new Box(Translatable.createLabel(Messages.DELETE_BUG), Translatable.createLabel(Messages.DELETE_BUG_DETAILS), Translatable.createButton(e -> new FluentDialog().addText(Messages.DELETE_BUG_CONFIRM).addConfirmButtons(popup -> {
             getDataService().delete(bug);
             UI.getCurrent().navigate(Overview.class);
-        }).show(), Messages.DELETE_BUG);
-        deleteButton.setWidthFull();
-        add(unmergeButton, deleteButton);
+        }).show(), Messages.DELETE));
+        add(unmergeBox, deleteBox);
     }
 }
