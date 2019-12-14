@@ -88,8 +88,6 @@ public class MainView extends ParentLayout {
         layout.getElement().getStyle().set("width", "100%");
         layout.getElement().getStyle().set("height", "100%");
         setRouterRoot(layout);
-        UI.getCurrent().getElement().setAttribute("theme", localSettings.getDarkTheme() ? Lumo.DARK : Lumo.LIGHT);
-        UI.getCurrent().setLocale(localSettings.getLocale());
         if (SecurityUtils.isLoggedIn()) {
             showMain();
         } else if (userService.hasAdmin()) {

@@ -41,10 +41,6 @@ import java.util.List;
  * @since 21.05.18
  */
 public class Statistics extends Composite<FlexLayout> {
-    static final Color BLUE = new Color(0x197de1); //vaadin blue
-    static final String FOREGROUND_DARK = "0xcacecf";
-    static final String FOREGROUND_LIGHT = "0x464646";
-    static final Font LABEL_FONT = new Font("Roboto", Font.PLAIN, 18);
     @Nullable
     private final BooleanExpression baseExpression;
     private final List<Property<?, ?, ?>> properties;
@@ -61,12 +57,12 @@ public class Statistics extends Composite<FlexLayout> {
 
         TextField dayStepper = new TextField();
         dayStepper.setValue("30");
-        Property.Factory factory = new Property.Factory(dataService, baseExpression);
-        properties.add(factory.createAgeProperty(localSettings, app, QReport.report.date, Messages.LAST_X_DAYS, Messages.REPORTS_OVER_TIME));
-        properties.add(factory.createStringProperty(localSettings, app, QReport.report.androidVersion, Messages.ANDROID_VERSION, Messages.REPORTS_PER_ANDROID_VERSION));
-        properties.add(factory.createStringProperty(localSettings, app, QReport.report.stacktrace.version.name, Messages.APP_VERSION, Messages.REPORTS_PER_APP_VERSION));
-        properties.add(factory.createStringProperty(localSettings, app, QReport.report.phoneModel, Messages.PHONE_MODEL, Messages.REPORTS_PER_PHONE_MODEL));
-        properties.add(factory.createStringProperty(localSettings, app, QReport.report.brand, Messages.PHONE_BRAND, Messages.REPORTS_PER_BRAND));
+        Property.Factory factory = new Property.Factory(dataService, baseExpression,localSettings, app);
+        properties.add(factory.createAgeProperty(QReport.report.date, Messages.LAST_X_DAYS, Messages.REPORTS_OVER_TIME));
+        properties.add(factory.createStringProperty(QReport.report.androidVersion, Messages.ANDROID_VERSION, Messages.REPORTS_PER_ANDROID_VERSION));
+        properties.add(factory.createStringProperty(QReport.report.stacktrace.version.name, Messages.APP_VERSION, Messages.REPORTS_PER_APP_VERSION));
+        properties.add(factory.createStringProperty(QReport.report.phoneModel, Messages.PHONE_MODEL, Messages.REPORTS_PER_PHONE_MODEL));
+        properties.add(factory.createStringProperty(QReport.report.brand, Messages.PHONE_BRAND, Messages.REPORTS_PER_BRAND));
 
         getContent().setFlexWrap(FlexLayout.FlexWrap.WRAP);
         getContent().setWidthFull();
@@ -77,7 +73,14 @@ public class Statistics extends Composite<FlexLayout> {
         properties.forEach(property -> property.addTo(filterLayout, getContent()));
 
         filterLayout.add(Translatable.createButton(e -> update(), Messages.APPLY));
-        update();
+        new Thread(() -> {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            getUI().ifPresent(ui -> ui.access(this::update));
+        }).start();
     }
 
     private void update() {

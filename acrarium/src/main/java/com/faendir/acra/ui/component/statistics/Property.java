@@ -37,6 +37,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import javax.validation.constraints.Null;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -70,7 +71,7 @@ class Property<F, C extends Component & HasValue<?, F> & HasEnabled & HasSize & 
         checkBox.getContent().addValueChangeListener(e -> filterComponent.setEnabled(e.getValue()));
     }
 
-    void addTo(FormLayout filterLayout, FlexComponent chartLayout) {
+    void addTo(FormLayout filterLayout, FlexComponent<?> chartLayout) {
         filterLayout.addFormItem(filterComponent, checkBox);
         chartLayout.add(chart);
         chartLayout.expand(chart);
@@ -90,13 +91,17 @@ class Property<F, C extends Component & HasValue<?, F> & HasEnabled & HasSize & 
     static class Factory {
         private final DataService dataService;
         private final BooleanExpression expression;
+        private final LocalSettings localSettings;
+        private final App app;
 
-        Factory(DataService dataService, BooleanExpression expression) {
+        Factory(@NonNull DataService dataService, @Nullable BooleanExpression expression, @NonNull LocalSettings localSettings, @NonNull App app) {
             this.dataService = dataService;
             this.expression = expression;
+            this.localSettings = localSettings;
+            this.app = app;
         }
 
-        Property<?, ?, ?> createStringProperty(@NonNull LocalSettings localSettings, App app, ComparableExpressionBase<String> stringExpression, String filterTextId, String chartTitleId) {
+        Property<?, ?, ?> createStringProperty(ComparableExpressionBase<String> stringExpression, String filterTextId, String chartTitleId) {
             List<String> list = dataService.getFromReports(app, expression, stringExpression);
             Select<String> select = new Select<>(list.toArray(new String[0]));
             if(!list.isEmpty()) {
@@ -105,7 +110,7 @@ class Property<F, C extends Component & HasValue<?, F> & HasEnabled & HasSize & 
             return new Property<>(app, select, stringExpression::eq, new PieChart(localSettings, chartTitleId), dataService, stringExpression, filterTextId);
         }
 
-        Property<?, ?, ?> createAgeProperty(@NonNull LocalSettings localSettings, App app, DateTimePath<ZonedDateTime> dateTimeExpression, String filterTextId, String chartTitleId) {
+        Property<?, ?, ?> createAgeProperty(DateTimePath<ZonedDateTime> dateTimeExpression, String filterTextId, String chartTitleId) {
             TextField stepper = new TextField();
             stepper.setValue("30");
             return new Property<>(app, stepper,
