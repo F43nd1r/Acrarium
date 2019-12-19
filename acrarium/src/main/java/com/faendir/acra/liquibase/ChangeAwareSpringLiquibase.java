@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,11 +41,10 @@ import java.util.List;
 @Component("liquibase")
 @EnableConfigurationProperties(LiquibaseProperties.class)
 public class ChangeAwareSpringLiquibase extends SpringLiquibase {
-    @NonNull private final List<LiquibaseChangePostProcessor> processors;
+    @NonNull private List<LiquibaseChangePostProcessor> processors = new ArrayList<>();
 
     @Autowired
-    public ChangeAwareSpringLiquibase(@NonNull LiquibaseProperties properties, @NonNull DataSource dataSource, @NonNull List<LiquibaseChangePostProcessor> processors) {
-        this.processors = processors;
+    public ChangeAwareSpringLiquibase(@NonNull LiquibaseProperties properties, @NonNull DataSource dataSource) {
         setDataSource(dataSource);
         setChangeLog(properties.getChangeLog());
         setContexts(properties.getContexts());
@@ -54,6 +54,12 @@ public class ChangeAwareSpringLiquibase extends SpringLiquibase {
         setLabels(properties.getLabels());
         setChangeLogParameters(properties.getParameters());
         setRollbackFile(properties.getRollbackFile());
+    }
+
+
+    @Autowired(required = false)
+    public void setProcessors(@NonNull List<LiquibaseChangePostProcessor> processors) {
+        this.processors.addAll(processors);
     }
 
     @Override

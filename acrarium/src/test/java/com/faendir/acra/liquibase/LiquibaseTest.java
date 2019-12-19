@@ -26,6 +26,7 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Bean;
@@ -51,14 +52,23 @@ import java.util.List;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ComponentScan(basePackageClasses = BackendApplication.class, excludeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = SpringLiquibase.class), @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = VaadinSessionSecurityContextHolderStrategy.class)})
 @ImportAutoConfiguration(exclude = {LiquibaseAutoConfiguration.class, EmbeddedDataSourceConfiguration.class})
+@EnableConfigurationProperties(LiquibaseProperties.class)
 public abstract class LiquibaseTest {
-    @Autowired ResourceLoader resourceLoader;
-    @Autowired DataSource dataSource;
-    @Autowired List<LiquibaseChangePostProcessor> processors;
+    @Autowired
+    ResourceLoader resourceLoader;
+    @Autowired
+    DataSource dataSource;
+    @Autowired(required = false)
+    List<LiquibaseChangePostProcessor> processors;
+    @Autowired
+    LiquibaseProperties properties;
 
     @Test
     public void setupTest() throws LiquibaseException {
-        SpringLiquibase liquibase = new ChangeAwareSpringLiquibase(new LiquibaseProperties(), dataSource, processors);
+        ChangeAwareSpringLiquibase liquibase = new ChangeAwareSpringLiquibase(properties, dataSource);
+        if (processors != null) {
+            liquibase.setProcessors(processors);
+        }
         liquibase.setResourceLoader(resourceLoader);
         liquibase.afterPropertiesSet();
     }
@@ -67,7 +77,7 @@ public abstract class LiquibaseTest {
     @ComponentScan("com.faendir.acra.liquibase.change")
     public static class Config {
         @Bean
-        public Validator validator(){
+        public Validator validator() {
             return Validation.buildDefaultValidatorFactory().getValidator();
         }
     }
