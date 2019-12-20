@@ -14,7 +14,17 @@
  * limitations under the License.
  */
 
-import org.liquibase.kotlin.databaseChangeLog
+package com.faendir.acra.liquibase.changelog
 
-databaseChangeLog {
+object ColumnType {
+    const val STRING = "VARCHAR(255)"
+    const val INT = "INT"
+    const val BOOLEAN = "BOOLEAN"
+    const val BLOB = "LONGBLOB"
+    const val TEXT = "LONGTEXT"
+    const val DATETIME = "DATETIME"
+}
+
+object AUTHOR {
+    const val F43ND1R = "f43nd1r"
 }

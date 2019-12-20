@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-import org.liquibase.kotlin.databaseChangeLog
+package com.faendir.acra.liquibase.changelog
 
-databaseChangeLog {
-    property("objectQuotingStrategy", "QUOTE_ALL_OBJECTS")
-    include("db.changelog-0.10.kts", true)
-    //future versions go here
+import com.faendir.acra.liquibase.changelog.v0.m10.Main
+import liquibase.changelog.DatabaseChangeLog
+import org.liquibase.kotlin.KotlinDatabaseChangeLogDefinition
+
+class MasterChangeLog : KotlinDatabaseChangeLogDefinition {
+    override fun define(): DatabaseChangeLog {
+        return changeLog {
+            include(Main::class.java)
+        }
+    }
 }
