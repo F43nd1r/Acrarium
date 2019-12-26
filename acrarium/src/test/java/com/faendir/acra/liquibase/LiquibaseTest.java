@@ -74,7 +74,6 @@ public abstract class LiquibaseTest {
     }
 
     @Configuration
-    @ComponentScan("com.faendir.acra.liquibase.change")
     public static class Config {
         @Bean
         public Validator validator() {
