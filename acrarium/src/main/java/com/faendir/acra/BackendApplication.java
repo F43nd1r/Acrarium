@@ -16,15 +16,21 @@
 
 package com.faendir.acra;
 
+import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
+import com.vaadin.flow.spring.SpringServlet;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.lang.NonNull;
+
+import javax.servlet.ServletContext;
 
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 @PropertySource("classpath:default.properties")
@@ -40,5 +46,10 @@ public class BackendApplication extends SpringBootServletInitializer {
     @Override
     protected SpringApplicationBuilder configure(@NonNull SpringApplicationBuilder builder) {
         return builder.sources(BackendApplication.class);
+    }
+
+    @Bean
+    public static RouteConfiguration routeConfiguration(@NonNull ServletContext servletContext) {
+        return RouteConfiguration.forRegistry(ApplicationRouteRegistry.getInstance(servletContext));
     }
 }

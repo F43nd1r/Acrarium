@@ -29,6 +29,7 @@ import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.server.RouteRegistry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.event.EventListener;
 import org.springframework.lang.NonNull;
@@ -72,11 +73,14 @@ public class MailService {
     private final I18NProvider i18nProvider;
     @NonNull
     private final JavaMailSender mailSender;
+    @NonNull
+    private final RouteConfiguration routeConfiguration;
 
-    public MailService(@NonNull EntityManager entityManager, @NonNull I18NProvider i18nProvider, @NonNull JavaMailSender mailSender) {
+    public MailService(@NonNull EntityManager entityManager, @NonNull I18NProvider i18nProvider, @NonNull JavaMailSender mailSender, @NonNull RouteConfiguration routeConfiguration) {
         this.entityManager = entityManager;
         this.i18nProvider = i18nProvider;
         this.mailSender = mailSender;
+        this.routeConfiguration = routeConfiguration;
     }
 
     @Transactional
@@ -91,18 +95,17 @@ public class MailService {
         List<User> newBugReceiver = getUserBy(settings, MailSettings::getNewBug);
         List<User> regressionReceiver = getUserBy(settings, MailSettings::getRegression);
         List<User> spikeReceiver = getUserBy(settings, MailSettings::getSpike);
-        RouteConfiguration configuration = RouteConfiguration.forApplicationScope();
         if (!newBugReceiver.isEmpty() && new JPAQuery<>(entityManager).from(report).where(report.stacktrace.bug.eq(bug)).limit(2).select(report.count()).fetchCount() == 1) {
-            sendMessage(newBugReceiver, getTranslation(Messages.NEW_BUG_MAIL_TEMPLATE, configuration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), r.getBrand(), r.getPhoneModel(), r.getAndroidVersion(), app.getName(), stacktrace.getVersion().getName()), getTranslation(Messages.NEW_BUG_MAIL_SUBJECT, app.getName()));
+            sendMessage(newBugReceiver, getTranslation(Messages.NEW_BUG_MAIL_TEMPLATE, routeConfiguration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), r.getBrand(), r.getPhoneModel(), r.getAndroidVersion(), app.getName(), stacktrace.getVersion().getName()), getTranslation(Messages.NEW_BUG_MAIL_SUBJECT, app.getName()));
         } else if (!regressionReceiver.isEmpty() && bug.getSolvedVersion() != null && bug.getSolvedVersion().getCode() <= stacktrace.getVersion().getCode()) {
-            sendMessage(regressionReceiver, getTranslation(Messages.REGRESSION_MAIL_TEMPLATE, configuration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), r.getBrand(), bug.getSolvedVersion().getName(), r.getPhoneModel(), r.getAndroidVersion(), app.getName(), stacktrace.getVersion().getName()), getTranslation(Messages.REGRESSION_MAIL_SUBJECT, app.getName()));
+            sendMessage(regressionReceiver, getTranslation(Messages.REGRESSION_MAIL_TEMPLATE, routeConfiguration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), r.getBrand(), bug.getSolvedVersion().getName(), r.getPhoneModel(), r.getAndroidVersion(), app.getName(), stacktrace.getVersion().getName()), getTranslation(Messages.REGRESSION_MAIL_SUBJECT, app.getName()));
             bug.setSolvedVersion(null);
             entityManager.merge(bug);
         } else if(!spikeReceiver.isEmpty()){
             long reportCount = fetchReportCountOnDay(0);
             double averageCount = LongStream.range(1, 3).map(this::fetchReportCountOnDay).average().orElse(Double.MAX_VALUE);
             if (reportCount > 1.2 * averageCount && reportCount - 1 <= 1.2 * averageCount) {
-                sendMessage(regressionReceiver, getTranslation(Messages.SPIKE_MAIL_TEMPLATE, configuration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), stacktrace.getVersion().getName(), reportCount), getTranslation(Messages.SPIKE_MAIL_SUBJECT, app.getName()));
+                sendMessage(regressionReceiver, getTranslation(Messages.SPIKE_MAIL_TEMPLATE, routeConfiguration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), stacktrace.getVersion().getName(), reportCount), getTranslation(Messages.SPIKE_MAIL_SUBJECT, app.getName()));
             }
         }
     }
