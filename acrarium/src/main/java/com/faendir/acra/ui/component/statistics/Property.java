@@ -71,7 +71,7 @@ class Property<F, C extends Component & HasValue<?, F> & HasEnabled & HasSize & 
         checkBox.getContent().addValueChangeListener(e -> filterComponent.setEnabled(e.getValue()));
     }
 
-    void addTo(FormLayout filterLayout, FlexComponent<?> chartLayout) {
+    void addTo(FormLayout filterLayout, FlexComponent chartLayout) {
         filterLayout.addFormItem(filterComponent, checkBox);
         chartLayout.add(chart);
         chartLayout.expand(chart);
