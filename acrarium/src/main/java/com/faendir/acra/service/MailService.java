@@ -17,25 +17,20 @@
 package com.faendir.acra.service;
 
 import com.faendir.acra.i18n.Messages;
-import com.faendir.acra.model.App;
-import com.faendir.acra.model.Bug;
-import com.faendir.acra.model.MailSettings;
-import com.faendir.acra.model.QBug;
-import com.faendir.acra.model.Report;
-import com.faendir.acra.model.Stacktrace;
-import com.faendir.acra.model.User;
+import com.faendir.acra.model.*;
 import com.faendir.acra.ui.view.bug.tabs.ReportTab;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQuery;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.i18n.I18NProvider;
+import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.RouteConfiguration;
-import com.vaadin.flow.server.RouteRegistry;
-import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 import org.springframework.lang.NonNull;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -43,11 +38,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
-import javax.servlet.ServletContext;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -78,6 +70,8 @@ public class MailService {
     private final JavaMailSender mailSender;
     @NonNull
     private final RouteConfiguration routeConfiguration;
+    @Value("${server.context-path}")
+    private String baseUrl;
 
     public MailService(@NonNull EntityManager entityManager, @NonNull I18NProvider i18nProvider, @NonNull JavaMailSender mailSender, @NonNull RouteConfiguration routeConfiguration) {
         this.entityManager = entityManager;
@@ -99,16 +93,16 @@ public class MailService {
         List<User> regressionReceiver = getUserBy(settings, MailSettings::getRegression);
         List<User> spikeReceiver = getUserBy(settings, MailSettings::getSpike);
         if (!newBugReceiver.isEmpty() && new JPAQuery<>(entityManager).from(report).where(report.stacktrace.bug.eq(bug)).limit(2).select(report.count()).fetchCount() == 1) {
-            sendMessage(newBugReceiver, getTranslation(Messages.NEW_BUG_MAIL_TEMPLATE, routeConfiguration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), r.getBrand(), r.getPhoneModel(), r.getAndroidVersion(), app.getName(), stacktrace.getVersion().getName()), getTranslation(Messages.NEW_BUG_MAIL_SUBJECT, app.getName()));
+            sendMessage(newBugReceiver, getTranslation(Messages.NEW_BUG_MAIL_TEMPLATE, getFullUrl(ReportTab.class, bug.getId()), bug.getTitle(), r.getBrand(), r.getPhoneModel(), r.getAndroidVersion(), app.getName(), stacktrace.getVersion().getName()), getTranslation(Messages.NEW_BUG_MAIL_SUBJECT, app.getName()));
         } else if (!regressionReceiver.isEmpty() && bug.getSolvedVersion() != null && bug.getSolvedVersion().getCode() <= stacktrace.getVersion().getCode()) {
-            sendMessage(regressionReceiver, getTranslation(Messages.REGRESSION_MAIL_TEMPLATE, routeConfiguration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), r.getBrand(), bug.getSolvedVersion().getName(), r.getPhoneModel(), r.getAndroidVersion(), app.getName(), stacktrace.getVersion().getName()), getTranslation(Messages.REGRESSION_MAIL_SUBJECT, app.getName()));
+            sendMessage(regressionReceiver, getTranslation(Messages.REGRESSION_MAIL_TEMPLATE, getFullUrl(ReportTab.class, bug.getId()), bug.getTitle(), r.getBrand(), bug.getSolvedVersion().getName(), r.getPhoneModel(), r.getAndroidVersion(), app.getName(), stacktrace.getVersion().getName()), getTranslation(Messages.REGRESSION_MAIL_SUBJECT, app.getName()));
             bug.setSolvedVersion(null);
             entityManager.merge(bug);
-        } else if(!spikeReceiver.isEmpty()){
+        } else if (!spikeReceiver.isEmpty()) {
             long reportCount = fetchReportCountOnDay(0);
             double averageCount = LongStream.range(1, 3).map(this::fetchReportCountOnDay).average().orElse(Double.MAX_VALUE);
             if (reportCount > 1.2 * averageCount && reportCount - 1 <= 1.2 * averageCount) {
-                sendMessage(regressionReceiver, getTranslation(Messages.SPIKE_MAIL_TEMPLATE, routeConfiguration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), stacktrace.getVersion().getName(), reportCount), getTranslation(Messages.SPIKE_MAIL_SUBJECT, app.getName()));
+                sendMessage(regressionReceiver, getTranslation(Messages.SPIKE_MAIL_TEMPLATE, getFullUrl(ReportTab.class, bug.getId()), bug.getTitle(), stacktrace.getVersion().getName(), reportCount), getTranslation(Messages.SPIKE_MAIL_SUBJECT, app.getName()));
             }
         }
     }
@@ -127,7 +121,6 @@ public class MailService {
         Map<App, List<MailSettings>> settings = new JPAQuery<>(entityManager).select(mailSettings).from(mailSettings).where(mailSettings.summary.isTrue()).fetch()
                 .stream()
                 .collect(Collectors.groupingBy(MailSettings::getApp, Collectors.toList()));
-        RouteConfiguration configuration = RouteConfiguration.forApplicationScope();
         for (Map.Entry<App, List<MailSettings>> entry : settings.entrySet()) {
             List<Tuple> tuples = new JPAQuery<>(entityManager).from(bug).join(stacktrace1).on(bug.eq(stacktrace1.bug)).join(report).on(stacktrace1.eq(report.stacktrace)).where(bug.app.eq(entry.getKey()).and(report.date.after(ZonedDateTime.now().minus(1, ChronoUnit.WEEKS))))
                     .groupBy(bug)
@@ -135,7 +128,7 @@ public class MailService {
                     .fetch();
             String body = tuples.stream().map(tuple -> {
                 Bug bug = tuple.get(QBug.bug);
-                return getTranslation(Messages.WEEKLY_MAIL_BUG_TEMPLATE, configuration.getUrl(ReportTab.class, bug.getId()), bug.getTitle(), tuple.get(report.count()), tuple.get(report.installationId.countDistinct()));
+                return getTranslation(Messages.WEEKLY_MAIL_BUG_TEMPLATE, getFullUrl(ReportTab.class, bug.getId()), bug.getTitle(), tuple.get(report.count()), tuple.get(report.installationId.countDistinct()));
             }).collect(Collectors.joining("\n"));
             if (body.isEmpty()) {
                 body = getTranslation(Messages.WEEKLY_MAIL_NO_REPORTS);
@@ -145,22 +138,27 @@ public class MailService {
     }
 
     private void sendMessage(@NonNull List<User> users, @NonNull String body, @NonNull String subject) {
-        try {
-            MimeMessage template = mailSender.createMimeMessage();
-            template.setContent(body, "text/html");
-            template.setSubject(subject);
-            for (User user : users) {
-                MimeMessage message = new MimeMessage(template);
-                message.setRecipients(Message.RecipientType.TO, user.getMail());
-                mailSender.send(message);
+        for (User user : users) {
+            if (user.getMail() != null && !"".equals(user.getMail())) {
+                try {
+                    MimeMessageHelper message = new MimeMessageHelper(mailSender.createMimeMessage(), true);
+                    message.setTo(user.getMail());
+                    message.setSubject(subject);
+                    message.setText(body , true);
+                    mailSender.send(message.getMimeMessage());
+                } catch (MessagingException e) {
+                    e.printStackTrace();
+                }
             }
-        } catch (MessagingException e) {
-            e.printStackTrace();
         }
     }
 
     private String getTranslation(String messageId, Object... params) {
         //TODO use user locale
         return i18nProvider.getTranslation(messageId, Locale.ENGLISH, params);
+    }
+
+    private <T, C extends Component & HasUrlParameter<T>> String getFullUrl(Class<? extends C> navigationTarget, T parameter) {
+        return baseUrl + (baseUrl.endsWith("/") ? "" : "/") + routeConfiguration.getUrl(navigationTarget, parameter);
     }
 }
