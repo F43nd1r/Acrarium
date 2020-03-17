@@ -95,7 +95,11 @@ public class UserEditor extends Composite<FlexLayout> {
             newPasswordBindingBuilder.asRequired(getTranslation(Messages.PASSWORD_REQUIRED));
             repeatPasswordBindingBuilder.asRequired(getTranslation(Messages.PASSWORD_REQUIRED));
         }
-        newPasswordBindingBuilder.bind(user1 -> "", User::setPlainTextPassword);
+        newPasswordBindingBuilder.bind(user1 -> "", (user2, plainTextPassword) -> {
+            if(plainTextPassword != null && !"".equals(plainTextPassword)) {
+                user2.setPlainTextPassword(plainTextPassword);
+            }
+        });
         getContent().add(newPassword);
         Binder.Binding<User, String> repeatPasswordBinding = repeatPasswordBindingBuilder.withValidator(p -> p.equals(newPassword.getValue()), getTranslation(Messages.PASSWORDS_NOT_MATCHING)).bind(user1 -> "", (user1, s) -> doNothing());
         newPassword.addValueChangeListener(e -> {
