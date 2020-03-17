@@ -21,9 +21,13 @@ import com.faendir.acra.model.User;
 import com.faendir.acra.rest.RestReportInterface;
 import com.faendir.acra.ui.component.Label;
 import com.faendir.acra.ui.view.Overview;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.internal.UIInternals;
+import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.server.VaadinRequest;
 import org.springframework.lang.NonNull;
 
 /**
@@ -40,6 +44,9 @@ public class ConfigurationLabel extends Label implements LocaleChangeObserver {
 
     @Override
     public void localeChange(LocaleChangeEvent event) {
-        getElement().setProperty("innerHTML", getTranslation(Messages.CONFIGURATION_LABEL, RouteConfiguration.forSessionScope().getUrl(Overview.class), RestReportInterface.REPORT_PATH, user.getUsername(), user.getPlainTextPassword()));
+        String baseUrl = VaadinRequest.getCurrent().getHeader("host");
+        getElement().setProperty("innerHTML", getTranslation(Messages.CONFIGURATION_LABEL,
+                baseUrl + (baseUrl.endsWith("/") ? "": "/") + RouteConfiguration.forSessionScope().getUrl(Overview.class),
+                RestReportInterface.REPORT_PATH, user.getUsername(), user.getPlainTextPassword()));
     }
 }
