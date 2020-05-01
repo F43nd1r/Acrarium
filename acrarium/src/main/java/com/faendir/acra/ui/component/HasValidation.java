@@ -24,7 +24,7 @@ import com.vaadin.flow.component.HasValue;
  * @author lukas
  * @since 01.03.19
  */
-public interface HasValidation<T extends Component, V> extends com.vaadin.flow.component.HasValidation, HasValue<AbstractField.ComponentValueChangeEvent<? super T, V>, V> {
+public interface HasValidation<T extends Component, E extends AbstractField.ComponentValueChangeEvent<? super T, V>, V> extends com.vaadin.flow.component.HasValidation, HasValue<E, V> {
 
     default void invalidateWithMessage(String errorMessageId, Object... params) {
         setErrorMessage(getTranslation(errorMessageId, params));

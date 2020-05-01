@@ -50,7 +50,7 @@ public class DangerCard extends AdminCard {
         Box matchingBox = new Box(Translatable.createLabel(Messages.NEW_BUG_CONFIG), Translatable.createLabel(Messages.NEW_BUG_CONFIG_DETAILS),
                 Translatable.createButton(e -> {
                     App.Configuration configuration = app.getConfiguration();
-                    Translatable.Value<RangeField, Double> score = Translatable.createRangeField(Messages.SCORE).with(it -> {
+                    Translatable.ValidatedValue<RangeField, ?, Double> score = Translatable.createRangeField(Messages.SCORE).with(it -> {
                         it.setMin(0);
                         it.setMax(100);
                         it.setValue((double) configuration.getMinScore());
@@ -61,7 +61,7 @@ public class DangerCard extends AdminCard {
                             .show();
                 }, Messages.CONFIGURE));
         Box purgeAgeBox = new Box(Translatable.createLabel(Messages.PURGE_OLD), Translatable.createLabel(Messages.PURGE_OLD_DETAILS), Translatable.createButton(e -> {
-            Translatable.Value<NumberField, Double> age = Translatable.createNumberField(30d, Messages.REPORTS_OLDER_THAN1).with(it -> {
+            Translatable.ValidatedValue<NumberField, ?, Double> age = Translatable.createNumberField(30d, Messages.REPORTS_OLDER_THAN1).with(it -> {
                         it.setStep(1d);
                         it.setMin(1d);
                         it.setPreventInvalidInput(true);
@@ -77,7 +77,7 @@ public class DangerCard extends AdminCard {
                     }).show();
         }, Messages.PURGE));
         Box purgeVersionBox = new Box(Translatable.createLabel(Messages.PURGE_VERSION), Translatable.createLabel(Messages.PURGE_VERSION_DETAILS), Translatable.createButton(e -> {
-            Translatable.Value<ComboBox<Integer>, Integer> versionBox = Translatable.createComboBox(getDataService().getFromReports(app, null, report.stacktrace.version.code), Messages.REPORTS_BEFORE_VERSION);
+            Translatable.ValidatedValue<ComboBox<Integer>, ?, Integer> versionBox = Translatable.createComboBox(getDataService().getFromReports(app, null, report.stacktrace.version.code), Messages.REPORTS_BEFORE_VERSION);
             new FluentDialog().addComponent(versionBox)
                     .setTitle(Messages.PURGE)
                     .addConfirmButtons(popup -> {

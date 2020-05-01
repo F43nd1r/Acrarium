@@ -112,10 +112,8 @@ public class DataService implements Serializable {
 
     @NonNull
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public QueryDslDataProvider<VBug> getBugProvider(@NonNull App app, BooleanSupplier onlyNonSolvedProvider) {
-        Supplier<BooleanExpression> whereSupplier = () -> onlyNonSolvedProvider.getAsBoolean() ? bug.app.eq(app).and(bug.solvedVersion.isNull()) : bug.app.eq(app);
-        return new QueryDslDataProvider<>(() -> Queries.selectVBug(entityManager).where(whereSupplier.get()),
-                () -> Queries.selectVBug(entityManager).where(whereSupplier.get()));
+    public QueryDslDataProvider<VBug> getBugProvider(@NonNull App app) {
+        return new QueryDslDataProvider<>(Queries.selectVBug(entityManager).where(bug.app.eq(app)));
     }
 
     @NonNull

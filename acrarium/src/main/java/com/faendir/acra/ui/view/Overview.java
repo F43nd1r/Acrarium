@@ -26,7 +26,7 @@ import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.component.ConfigurationLabel;
 import com.faendir.acra.ui.base.HasAcrariumTitle;
-import com.faendir.acra.ui.component.Grid;
+import com.faendir.acra.ui.component.grid.AcrariumGrid;
 import com.faendir.acra.ui.base.TranslatableText;
 import com.faendir.acra.ui.component.dialog.FluentDialog;
 import com.faendir.acra.ui.component.dialog.ValidatedField;
@@ -64,11 +64,11 @@ public class Overview extends VerticalLayout implements ComponentEventListener<A
     @Override
     public void onComponentEvent(AttachEvent event) {
         removeAll();
-        Grid<VApp> grid = new Grid<>(dataService.getAppProvider());
+        AcrariumGrid<VApp> grid = new AcrariumGrid<>(dataService.getAppProvider());
         grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.NONE);
-        com.vaadin.flow.component.grid.Grid.Column<VApp> appColumn = grid.addColumn(VApp::getName, QApp.app.name, Messages.NAME).setFlexGrow(1);
-        grid.addColumn(VApp::getBugCount, QBug.bug.countDistinct(), Messages.BUGS);
-        grid.addColumn(VApp::getReportCount, QReport.report.count(), Messages.REPORTS);
+        com.vaadin.flow.component.grid.Grid.Column<VApp> appColumn = grid.addColumn(VApp::getName).setSortable( QApp.app.name).setCaption(Messages.NAME).setFlexGrow(1);
+        grid.addColumn(VApp::getBugCount).setSortable(QBug.bug.countDistinct()).setCaption(Messages.BUGS);
+        grid.addColumn(VApp::getReportCount).setSortable(QReport.report.count()).setCaption(Messages.REPORTS);
         grid.addOnClickNavigation(BugTab.class, VApp::getId);
         if (SecurityUtils.hasRole(User.Role.ADMIN)) {
             grid.appendFooterRow().getCell(appColumn).setComponent(new HorizontalLayout(Translatable.createButton(e -> {
@@ -79,12 +79,12 @@ public class Overview extends VerticalLayout implements ComponentEventListener<A
                 }).show();
             }, Messages.NEW_APP), Translatable.createButton(e -> {
                 Translatable<TextField> host = Translatable.createTextField("localhost", Messages.HOST);
-                Translatable.Value<NumberField, Double> port = Translatable.createNumberField(5984, Messages.PORT).with(p -> {
+                Translatable.ValidatedValue<NumberField, ?, Double> port = Translatable.createNumberField(5984, Messages.PORT).with(p -> {
                     p.setMin(0);
                     p.setMax(65535);
                 });
                 Translatable<Checkbox> ssl = Translatable.createCheckbox(false, Messages.SSL);
-                Translatable.Value<TextField, String> databaseName = Translatable.createTextField("acra-myapp", Messages.DATABASE_NAME);
+                Translatable.ValidatedValue<TextField, ?, String> databaseName = Translatable.createTextField("acra-myapp", Messages.DATABASE_NAME);
                 new FluentDialog().setTitle(Messages.IMPORT_ACRALYZER)
                         .addComponent(host)
                         .addComponent(port)

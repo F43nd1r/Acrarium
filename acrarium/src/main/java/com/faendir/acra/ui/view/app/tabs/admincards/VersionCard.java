@@ -23,7 +23,7 @@ import com.faendir.acra.model.QVersion;
 import com.faendir.acra.model.Version;
 import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.component.Grid;
+import com.faendir.acra.ui.component.grid.AcrariumGrid;
 import com.faendir.acra.ui.component.HasSize;
 import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.component.dialog.FluentDialog;
@@ -47,12 +47,14 @@ public class VersionCard extends AdminCard {
     @Override
     public void init(App app) {
         removeContent();
-        Grid<Version> versionGrid = new Grid<>(getDataService().getVersionProvider(app));
+        AcrariumGrid<Version> versionGrid = new AcrariumGrid<>(getDataService().getVersionProvider(app));
         versionGrid.setMinHeight(280, HasSize.Unit.PIXEL);
         versionGrid.setHeight(100, HasSize.Unit.PERCENTAGE);
-        versionGrid.addColumn(Version::getCode, QVersion.version.code, Messages.VERSION_CODE).setFlexGrow(1);
-        versionGrid.addColumn(Version::getName, QVersion.version.name, Messages.VERSION).setFlexGrow(1);
-        versionGrid.addColumn(new IconRenderer<>(v -> new Icon(v.getMappings() != null ? VaadinIcon.CHECK : VaadinIcon.CLOSE), v -> ""), QVersion.version.mappings.isNotNull(), Messages.PROGUARD_MAPPINGS);
+        versionGrid.addColumn(Version::getCode).setSortable(QVersion.version.code).setCaption(Messages.VERSION_CODE).setFlexGrow(1);
+        versionGrid.addColumn(Version::getName).setSortable(QVersion.version.name).setCaption(Messages.VERSION).setFlexGrow(1);
+        versionGrid.addColumn(new IconRenderer<>(v -> new Icon(v.getMappings() != null ? VaadinIcon.CHECK : VaadinIcon.CLOSE), v -> ""))
+                .setSortable(QVersion.version.mappings.isNotNull())
+                .setCaption(Messages.PROGUARD_MAPPINGS);
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
             versionGrid.addColumn(new ComponentRenderer<>(v -> new Button(new Icon(VaadinIcon.EDIT), e -> new VersionEditorDialog(getDataService(), app, () -> versionGrid.getDataProvider().refreshAll(), v).open())));
             versionGrid.addColumn(new ComponentRenderer<>(v -> new Button(new Icon(VaadinIcon.TRASH), e -> new FluentDialog()

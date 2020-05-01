@@ -16,15 +16,7 @@
 
 package com.faendir.acra.ui.component;
 
-import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.HasText;
-import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -62,26 +54,6 @@ public class Translatable<T extends Component> extends Composite<T> implements L
         this.setter = setter;
     }
 
-    @Override
-    protected T initContent() {
-        return t;
-    }
-
-    @Override
-    public void localeChange(LocaleChangeEvent event) {
-        setter.accept(getContent());
-        fireEvent(new TranslatedEvent(this, false));
-    }
-
-    public Translatable<T> with(Consumer<T> consumer) {
-        consumer.accept(t);
-        return this;
-    }
-
-    public Registration addTranslatedListener(ComponentEventListener<TranslatedEvent> listener) {
-        return addListener(TranslatedEvent.class, listener);
-    }
-
     @NonNull
     public static Translatable<Text> createText(@NonNull String captionId, @NonNull Object... params) {
         return create(new Text(""), captionId, params);
@@ -104,13 +76,18 @@ public class Translatable<T extends Component> extends Composite<T> implements L
     }
 
     @NonNull
-    public static Value<TextField, String> createTextField(@Nullable String initialValue, @NonNull String captionId, @NonNull Object... params) {
-        return new Value<>(new TextField("", initialValue == null ? "" : initialValue, ""), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
+    public static ValidatedValue<TextField, ?, String> createTextField(@Nullable String initialValue, @NonNull String captionId, @NonNull Object... params) {
+        return new ValidatedValue<>(new TextField("", initialValue == null ? "" : initialValue, ""), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
     }
 
     @NonNull
-    public static Value<PasswordField, String> createPasswordField(@NonNull String captionId, @NonNull Object... params) {
-        return new Value<>(new PasswordField(), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
+    public static ValidatedValue<TextField, AbstractField.ComponentValueChangeEvent<TextField, String>, String> createTextFieldWithHint(@NonNull String captionId, @NonNull Object... params) {
+        return new ValidatedValue<>(new TextField("", "",  ""), textField -> textField.setPlaceholder(textField.getTranslation(captionId, params)));
+    }
+
+    @NonNull
+    public static ValidatedValue<PasswordField, ?, String> createPasswordField(@NonNull String captionId, @NonNull Object... params) {
+        return new ValidatedValue<>(new PasswordField(), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
     }
 
     @NonNull
@@ -118,8 +95,8 @@ public class Translatable<T extends Component> extends Composite<T> implements L
         return new Translatable<>(new TextArea("", initialValue, ""), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
     }
 
-    public static <T> Translatable.Value<ComboBox<T>, T> createComboBox(@NonNull Collection<T> items, @NonNull String captionId, @NonNull Object... params) {
-        return new Translatable.Value<>(new ComboBox<>("", items), tComboBox -> tComboBox.setLabel(tComboBox.getTranslation(captionId, params)));
+    public static <T> ValidatedValue<ComboBox<T>,?,  T> createComboBox(@NonNull Collection<T> items, @NonNull String captionId, @NonNull Object... params) {
+        return new ValidatedValue<>(new ComboBox<>("", items), tComboBox -> tComboBox.setLabel(tComboBox.getTranslation(captionId, params)));
     }
 
     public static <T> Translatable<Select<T>> createSelect(@NonNull Collection<T> items, @NonNull String captionId, @NonNull Object... params) {
@@ -132,8 +109,8 @@ public class Translatable<T extends Component> extends Composite<T> implements L
     }
 
     @NonNull
-    public static Translatable<Checkbox> createCheckbox(boolean initialValue, @NonNull String captionId, @NonNull Object... params) {
-        return new Translatable<>(new Checkbox(initialValue), checkbox -> checkbox.setLabel(checkbox.getTranslation(captionId, params)));
+    public static Value<Checkbox, AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>, Boolean> createCheckbox(boolean initialValue, @NonNull String captionId, @NonNull Object... params) {
+        return new Value<>(new Checkbox(initialValue), checkbox -> checkbox.setLabel(checkbox.getTranslation(captionId, params)));
     }
 
     public static Translatable<RouterLink> createRouterLink(@NonNull Class<? extends Component> target, @NonNull String captionId, @NonNull Object... params) {
@@ -156,12 +133,16 @@ public class Translatable<T extends Component> extends Composite<T> implements L
         return new Translatable<>(new Image(src, ""), image -> image.setAlt(image.getTranslation(captionId, params)));
     }
 
-    public static Value<NumberField, Double> createNumberField(double initialValue, @NonNull String captionId, @NonNull Object... params) {
-        return new Value<>(new NumberField(null, initialValue, null), numberField -> numberField.setLabel(numberField.getTranslation(captionId, params)));
+    public static ValidatedValue<NumberField, ?, Double> createNumberField(double initialValue, @NonNull String captionId, @NonNull Object... params) {
+        return new ValidatedValue<>(new NumberField(null, initialValue, null), numberField -> numberField.setLabel(numberField.getTranslation(captionId, params)));
     }
 
-    public static Value<UploadField, String> createUploadField(@NonNull String captionId, @NonNull Object... params) {
-        return new Value<>(new UploadField(), uploadField -> uploadField.setLabel(uploadField.getTranslation(captionId, params)));
+    public static ValidatedValue<NumberField, AbstractField.ComponentValueChangeEvent<NumberField, Double>, Double> createNumberFieldWithHint(@NonNull String captionId, @NonNull Object... params) {
+        return new ValidatedValue<>(new NumberField(), numberField -> numberField.setPlaceholder(numberField.getTranslation(captionId, params)));
+    }
+
+    public static ValidatedValue<UploadField, ?, String> createUploadField(@NonNull String captionId, @NonNull Object... params) {
+        return new ValidatedValue<>(new UploadField(), uploadField -> uploadField.setLabel(uploadField.getTranslation(captionId, params)));
     }
 
     public static Translatable<Div> createDiv(@NonNull String captionId, @NonNull Object... params) {
@@ -171,25 +152,44 @@ public class Translatable<T extends Component> extends Composite<T> implements L
         });
     }
 
-    public static Value<RangeField, Double> createRangeField(@NonNull String captionId, @NonNull Object... params) {
-        return new Value<>(new RangeField(), rangeField -> rangeField.setLabel(rangeField.getTranslation(captionId, params)));
+    public static ValidatedValue<RangeField, ?, Double> createRangeField(@NonNull String captionId, @NonNull Object... params) {
+        return new ValidatedValue<>(new RangeField(), rangeField -> rangeField.setLabel(rangeField.getTranslation(captionId, params)));
     }
 
-    public static class Value<T extends Component & HasValue<? extends AbstractField.ComponentValueChangeEvent<? super T, V>, V> & com.vaadin.flow.component.HasValidation, V> extends Translatable<T> implements HasValidation<T, V> {
+    @Override
+    protected T initContent() {
+        return t;
+    }
 
+    @Override
+    public void localeChange(LocaleChangeEvent event) {
+        setter.accept(getContent());
+        fireEvent(new TranslatedEvent(this, false));
+    }
+
+    public Translatable<T> with(Consumer<T> consumer) {
+        consumer.accept(t);
+        return this;
+    }
+
+    public Registration addTranslatedListener(ComponentEventListener<TranslatedEvent> listener) {
+        return addListener(TranslatedEvent.class, listener);
+    }
+
+    public static class Value<T extends Component & HasValue<E, V>, E extends AbstractField.ComponentValueChangeEvent<? super T, V>, V> extends Translatable<T> implements HasValue<E, V> {
         protected Value(T t, Consumer<T> setter) {
             super(t, setter);
-        }
-
-        public void setValue(V value) {
-            getContent().setValue(value);
         }
 
         public V getValue() {
             return getContent().getValue();
         }
 
-        public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<? super T, V>> listener) {
+        public void setValue(V value) {
+            getContent().setValue(value);
+        }
+
+        public Registration addValueChangeListener(HasValue.ValueChangeListener<? super E> listener) {
             return getContent().addValueChangeListener(listener);
         }
 
@@ -209,41 +209,53 @@ public class Translatable<T extends Component> extends Composite<T> implements L
             getContent().clear();
         }
 
-        public void setReadOnly(boolean readOnly) {
-            getContent().setReadOnly(readOnly);
-        }
-
         public boolean isReadOnly() {
             return getContent().isReadOnly();
         }
 
-        public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-            getContent().setRequiredIndicatorVisible(requiredIndicatorVisible);
+        public void setReadOnly(boolean readOnly) {
+            getContent().setReadOnly(readOnly);
         }
 
         public boolean isRequiredIndicatorVisible() {
             return getContent().isRequiredIndicatorVisible();
         }
 
-        public void setErrorMessage(String errorMessage) {
-            getContent().setErrorMessage(errorMessage);
+        public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
+            getContent().setRequiredIndicatorVisible(requiredIndicatorVisible);
+        }
+
+        @Override
+        public Value<T, E, V> with(Consumer<T> consumer) {
+            return (Value<T, E, V>) super.with(consumer);
+        }
+    }
+
+    public static class ValidatedValue<T extends Component & HasValue<E, V> & com.vaadin.flow.component.HasValidation, E extends AbstractField.ComponentValueChangeEvent<? super T, V>, V> extends Translatable.Value<T, E, V> implements HasValidation<T, E, V> {
+
+        protected ValidatedValue(T t, Consumer<T> setter) {
+            super(t, setter);
         }
 
         public String getErrorMessage() {
             return getContent().getErrorMessage();
         }
 
-        public void setInvalid(boolean invalid) {
-            getContent().setInvalid(invalid);
+        public void setErrorMessage(String errorMessage) {
+            getContent().setErrorMessage(errorMessage);
         }
 
         public boolean isInvalid() {
             return getContent().isInvalid();
         }
 
+        public void setInvalid(boolean invalid) {
+            getContent().setInvalid(invalid);
+        }
+
         @Override
-        public Value<T, V> with(Consumer<T> consumer) {
-            return (Value<T, V>) super.with(consumer);
+        public ValidatedValue<T, E, V> with(Consumer<T> consumer) {
+            return (ValidatedValue<T, E, V>) super.with(consumer);
         }
     }
 

@@ -25,7 +25,7 @@ import com.faendir.acra.security.SecurityUtils;
 import com.faendir.acra.service.DataService;
 import com.faendir.acra.service.UserService;
 import com.faendir.acra.ui.base.HasAcrariumTitle;
-import com.faendir.acra.ui.component.Grid;
+import com.faendir.acra.ui.component.grid.AcrariumGrid;
 import com.faendir.acra.ui.base.TranslatableText;
 import com.faendir.acra.ui.component.dialog.FluentDialog;
 import com.faendir.acra.ui.component.dialog.ValidatedField;
@@ -69,10 +69,10 @@ public class UserManager extends Composite<FlexLayout> implements HasAcrariumTit
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         getContent().removeAll();
-        Grid<User> userGrid = new Grid<>(userService.getUserProvider());
+        AcrariumGrid<User> userGrid = new AcrariumGrid<>(userService.getUserProvider());
         userGrid.setWidthFull();
         userGrid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.NONE);
-        userGrid.addColumn(User::getUsername, QUser.user.username, Messages.USERNAME).setFlexGrow(1);
+        userGrid.addColumn(User::getUsername).setSortable(QUser.user.username).setCaption(Messages.USERNAME).setFlexGrow(1);
         userGrid.addColumn(new ComponentRenderer<>(user -> {
             Checkbox checkbox = new Checkbox(user.getRoles().contains(User.Role.ADMIN));
             checkbox.addValueChangeListener(e -> {
@@ -81,7 +81,7 @@ public class UserManager extends Composite<FlexLayout> implements HasAcrariumTit
             });
             checkbox.setEnabled(!user.getUsername().equals(SecurityUtils.getUsername()));
             return checkbox;
-        }), Messages.ADMIN);
+        })).setCaption(Messages.ADMIN);
         userGrid.addColumn(new ComponentRenderer<>(user -> {
             Checkbox checkbox = new Checkbox(user.getRoles().contains(User.Role.API));
             checkbox.addValueChangeListener(e -> {
@@ -89,7 +89,7 @@ public class UserManager extends Composite<FlexLayout> implements HasAcrariumTit
                 userGrid.getDataProvider().refreshAll();
             });
             return checkbox;
-        }), Messages.API);
+        })).setCaption(Messages.API);
         for (App app : dataService.findAllApps()) {
             userGrid.addColumn(new ComponentRenderer<>(user -> {
                 Permission.Level permission = SecurityUtils.getPermission(app, user);
@@ -100,11 +100,11 @@ public class UserManager extends Composite<FlexLayout> implements HasAcrariumTit
                     userGrid.getDataProvider().refreshAll();
                 });
                 return levelComboBox;
-            }), Messages.ACCESS_PERMISSION, app.getName());
+            })).setCaption(Messages.ACCESS_PERMISSION, app.getName());
         }
         Translatable<Button> newUser = Translatable.createButton(e -> {
-            Translatable.Value<TextField, String> name = Translatable.createTextField("", Messages.USERNAME);
-            Translatable.Value<PasswordField, String> password = Translatable.createPasswordField(Messages.PASSWORD);
+            Translatable.ValidatedValue<TextField, ?, String> name = Translatable.createTextField("", Messages.USERNAME);
+            Translatable.ValidatedValue<PasswordField, ?, String> password = Translatable.createPasswordField(Messages.PASSWORD);
             new FluentDialog().setTitle(Messages.NEW_USER)
                     .addValidatedField(ValidatedField.of(name).addValidator(s -> !s.isEmpty(), Messages.USERNAME_EMPTY))
                     .addValidatedField(ValidatedField.of(password).addValidator(s -> !s.isEmpty(), Messages.PASSWORD_EMPTY))

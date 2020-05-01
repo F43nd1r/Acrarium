@@ -23,7 +23,6 @@ import com.faendir.acra.service.DataService;
 import com.faendir.acra.ui.component.FlexLayout;
 import com.faendir.acra.ui.component.Translatable;
 import com.faendir.acra.ui.component.UploadField;
-import com.faendir.acra.ui.component.dialog.AcrariumDialog;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import org.springframework.lang.NonNull;
@@ -37,7 +36,7 @@ public class VersionEditorDialog extends AcrariumDialog {
     public VersionEditorDialog(@NonNull DataService dataService, @NonNull App app, @Nullable Runnable onUpdate, @Nullable Version old) {
         boolean isNew = old == null;
         setHeader(isNew ? Messages.NEW_VERSION : Messages.EDIT_VERSION);
-        Translatable.Value<NumberField, Double> code = Translatable.createNumberField(isNew ? dataService.getMaxVersion(app).map(i -> i + 1d).orElse(1d) : old.getCode(), Messages.VERSION_CODE).with(n -> {
+        Translatable.ValidatedValue<NumberField, ?, Double> code = Translatable.createNumberField(isNew ? dataService.getMaxVersion(app).map(i -> i + 1d).orElse(1d) : old.getCode(), Messages.VERSION_CODE).with(n -> {
             n.setStep(1d);
             n.setMin(1d);
             n.setPreventInvalidInput(true);
@@ -47,12 +46,12 @@ public class VersionEditorDialog extends AcrariumDialog {
                 n.setEnabled(false);
             }
         });
-        Translatable.Value<TextField, String> name = Translatable.createTextField(isNew ? "" : old.getName(), Messages.VERSION_NAME).with(n -> {
+        Translatable.ValidatedValue<TextField, ?, String> name = Translatable.createTextField(isNew ? "" : old.getName(), Messages.VERSION_NAME).with(n -> {
             if (isNew) {
                 n.setRequired(true);
             }
         });
-        Translatable.Value<UploadField, String> upload = Translatable.createUploadField(Messages.MAPPING_FILE).with(n -> {
+        Translatable.ValidatedValue<UploadField, ?, String> upload = Translatable.createUploadField(Messages.MAPPING_FILE).with(n -> {
             n.setWidthFull();
             if(!isNew) {
                 n.setValue(old.getMappings());
