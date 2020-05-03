@@ -13,22 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.view
 
-package com.faendir.acra.ui.view;
-
-import com.faendir.acra.i18n.Messages;
-import com.faendir.acra.ui.base.HasAcrariumTitle;
-import com.faendir.acra.ui.base.TranslatableText;
-import com.faendir.acra.ui.component.FlexLayout;
-import com.faendir.acra.ui.component.Translatable;
-import com.faendir.acra.util.LocalSettings;
-import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.annotation.UIScope;
-import com.vaadin.flow.theme.lumo.Lumo;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.faendir.acra.i18n.Messages
+import com.faendir.acra.ui.base.HasAcrariumTitle
+import com.faendir.acra.ui.base.TranslatableText
+import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.util.LocalSettings
+import com.vaadin.flow.component.UI
+import com.vaadin.flow.component.formlayout.FormLayout
+import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep
+import com.vaadin.flow.component.orderedlayout.FlexComponent
+import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode
+import com.vaadin.flow.component.orderedlayout.FlexLayout
+import com.vaadin.flow.router.Route
+import com.vaadin.flow.server.VaadinSession
+import com.vaadin.flow.spring.annotation.SpringComponent
+import com.vaadin.flow.spring.annotation.UIScope
+import com.vaadin.flow.theme.lumo.Lumo
+import org.springframework.beans.factory.annotation.Autowired
+import java.util.function.Consumer
 
 /**
  * @author lukas
@@ -36,32 +40,32 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @UIScope
 @SpringComponent
-@Route(value = "settings", layout = MainView.class)
-public class SettingsView extends FlexLayout implements HasAcrariumTitle {
-    @Autowired
-    public SettingsView(LocalSettings localSettings) {
-        setSizeFull();
-        setJustifyContentMode(JustifyContentMode.CENTER);
-        setAlignItems(Alignment.CENTER);
-        FormLayout layout = new FormLayout();
-        layout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 1));
-        layout.getStyle().set("align-self", "auto");
-        layout.add(Translatable.createCheckbox(localSettings.getDarkTheme(), Messages.DARK_THEME).with(checkbox -> checkbox.addValueChangeListener(e -> {
-            localSettings.setDarkTheme(e.getValue());
-            VaadinSession.getCurrent().getUIs().forEach(ui -> ui.getElement().setAttribute("theme", e.getValue() ? Lumo.DARK : Lumo.LIGHT));
-        })), Translatable.createSelect(LocalSettings.getI18NProvider().getProvidedLocales(), Messages.LOCALE).with(select -> {
-            select.setItemLabelGenerator(locale -> locale.getDisplayName(localSettings.getLocale()));
-            select.setValue(localSettings.getLocale());
-            select.addValueChangeListener(e -> {
-                localSettings.setLocale(e.getValue());
-                VaadinSession.getCurrent().setLocale(e.getValue());
-            });
-        }));
-        add(layout);
+@Route(value = "settings", layout = MainView::class)
+class SettingsView(localSettings: LocalSettings) : FlexLayout(), HasAcrariumTitle {
+
+    init {
+        setSizeFull()
+        justifyContentMode = JustifyContentMode.CENTER
+        alignItems = FlexComponent.Alignment.CENTER
+        val layout = FormLayout()
+        layout.setResponsiveSteps(ResponsiveStep("0px", 1))
+        layout.style["align-self"] = "auto"
+        layout.add(Translatable.createCheckbox(Messages.DARK_THEME).with {
+            value = localSettings.darkTheme
+            addValueChangeListener {
+                localSettings.darkTheme = it.value
+                VaadinSession.getCurrent().uIs.forEach(Consumer { ui: UI -> ui.element.setAttribute("theme", if (it.value) Lumo.DARK else Lumo.LIGHT) })
+            }
+        }, Translatable.createSelect(LocalSettings.getI18NProvider().providedLocales, Messages.LOCALE).with {
+            setItemLabelGenerator { it.getDisplayName(localSettings.locale) }
+            value = localSettings.locale
+            addValueChangeListener {
+                localSettings.locale = it.value
+                VaadinSession.getCurrent().locale = it.value
+            }
+        })
+        add(layout)
     }
 
-    @Override
-    public TranslatableText getTitle() {
-        return new TranslatableText(Messages.SETTINGS);
-    }
+    override fun getTitle(): TranslatableText = TranslatableText(Messages.SETTINGS)
 }

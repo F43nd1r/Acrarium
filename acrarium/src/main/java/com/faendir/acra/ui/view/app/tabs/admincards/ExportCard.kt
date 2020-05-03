@@ -13,60 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.view.app.tabs.admincards
 
-package com.faendir.acra.ui.view.app.tabs.admincards;
-
-import com.faendir.acra.i18n.Messages;
-import com.faendir.acra.model.App;
-import com.faendir.acra.model.QReport;
-import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.component.Card;
-import com.faendir.acra.ui.component.DownloadButton;
-import com.faendir.acra.ui.component.Translatable;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.server.StreamResource;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.annotation.UIScope;
-
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
-
-import static com.faendir.acra.model.QReport.report;
+import com.faendir.acra.i18n.Messages
+import com.faendir.acra.model.App
+import com.faendir.acra.model.QReport
+import com.faendir.acra.service.DataService
+import com.faendir.acra.ui.component.DownloadButton
+import com.faendir.acra.ui.component.Translatable
+import com.querydsl.core.types.dsl.BooleanExpression
+import com.vaadin.flow.component.combobox.ComboBox
+import com.vaadin.flow.server.InputStreamFactory
+import com.vaadin.flow.server.StreamResource
+import com.vaadin.flow.spring.annotation.SpringComponent
+import com.vaadin.flow.spring.annotation.UIScope
+import java.io.ByteArrayInputStream
+import java.nio.charset.StandardCharsets
+import java.util.stream.Collectors
 
 @UIScope
 @SpringComponent
-public class ExportCard extends AdminCard {
-    public ExportCard(DataService dataService) {
-        super(dataService);
-        setHeader(Translatable.createLabel(Messages.EXPORT));
-
+class ExportCard(dataService: DataService) : AdminCard(dataService) {
+    init {
+        setHeader(Translatable.createLabel(Messages.EXPORT))
     }
 
-    @Override
-    public void init(App app) {
-        removeContent();
-        Translatable<ComboBox<String>> mailBox = Translatable.createComboBox(getDataService().getFromReports(app, null, QReport.report.userEmail), Messages.BY_MAIL);
-        mailBox.setWidthFull();
-        Translatable<ComboBox<String>> idBox = Translatable.createComboBox(getDataService().getFromReports(app, null, QReport.report.installationId), Messages.BY_ID);
-        idBox.setWidthFull();
-        DownloadButton download = new DownloadButton(new StreamResource("reports.json", () -> {
-            BooleanExpression where = null;
-            String mail = mailBox.getContent().getValue();
-            String id = idBox.getContent().getValue();
-            if (mail != null && !mail.isEmpty()) {
-                where = report.userEmail.eq(mail);
+    override fun init(app: App) {
+        removeContent()
+        val mailBox = Translatable.createComboBox(dataService.getFromReports(app, null, QReport.report.userEmail), Messages.BY_MAIL)
+        mailBox.setWidthFull()
+        val idBox = Translatable.createComboBox(dataService.getFromReports(app, null, QReport.report.installationId), Messages.BY_ID)
+        idBox.setWidthFull()
+        val download = DownloadButton(StreamResource("reports.json", InputStreamFactory {
+            var where: BooleanExpression? = null
+            val mail = mailBox.content.value
+            val id = idBox.content.value
+            if (mail != null && mail.isNotEmpty()) {
+                where = QReport.report.userEmail.eq(mail)
             }
-            if (id != null && !id.isEmpty()) {
-                where = report.installationId.eq(id).and(where);
+            if (id != null && id.isNotEmpty()) {
+                where = QReport.report.installationId.eq(id).and(where)
             }
-            if (where == null) {
-                return new ByteArrayInputStream(new byte[0]);
-            }
-            return new ByteArrayInputStream(getDataService().getFromReports(app, where, report.content, report.id).stream().collect(Collectors.joining(", ", "[", "]")).getBytes(StandardCharsets.UTF_8));
-        }), Messages.DOWNLOAD);
-        download.setSizeFull();
-        add(mailBox, idBox, download);
+            ByteArrayInputStream(if (where == null) ByteArray(0) else dataService.getFromReports(app, where, QReport.report.content, QReport.report.id)
+                    .joinToString(", ", "[", "]").toByteArray(StandardCharsets.UTF_8))
+        }), Messages.DOWNLOAD)
+        download.setSizeFull()
+        add(mailBox, idBox, download)
     }
 }

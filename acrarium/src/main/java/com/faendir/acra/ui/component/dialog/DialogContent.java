@@ -28,7 +28,7 @@ import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
  */
 @Tag("acrarium-dialog-content")
 @JsModule("./elements/dialog-content.js")
-public class DialogContent extends PolymerTemplate<Card.CardModel> implements com.faendir.acra.ui.component.HasSize, HasStyle, HasOrderedComponents {
+public class DialogContent extends PolymerTemplate<Card.CardModel> implements HasSize, HasStyle, HasOrderedComponents {
 
     public void setHeader(HasElement header) {
         header.getElement().setAttribute("slot", "header");

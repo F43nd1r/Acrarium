@@ -13,112 +13,86 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.component.statistics;
+package com.faendir.acra.ui.component.statistics
 
-import com.faendir.acra.model.App;
-import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.component.Translatable;
-import com.faendir.acra.util.LocalSettings;
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.ComparableExpressionBase;
-import com.querydsl.core.types.dsl.DateTimePath;
-import com.querydsl.sql.SQLExpressions;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasEnabled;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.component.textfield.TextField;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
-
-import javax.validation.constraints.Null;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.List;
-import java.util.function.Function;
+import com.faendir.acra.model.App
+import com.faendir.acra.service.DataService
+import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.ext.preventWhiteSpaceBreaking
+import com.faendir.acra.util.LocalSettings
+import com.querydsl.core.types.Expression
+import com.querydsl.core.types.dsl.BooleanExpression
+import com.querydsl.core.types.dsl.ComparableExpressionBase
+import com.querydsl.core.types.dsl.DateTimePath
+import com.querydsl.sql.SQLExpressions
+import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.HasEnabled
+import com.vaadin.flow.component.HasSize
+import com.vaadin.flow.component.HasStyle
+import com.vaadin.flow.component.HasValue
+import com.vaadin.flow.component.checkbox.Checkbox
+import com.vaadin.flow.component.formlayout.FormLayout
+import com.vaadin.flow.component.orderedlayout.FlexComponent
+import com.vaadin.flow.component.select.Select
+import com.vaadin.flow.component.textfield.NumberField
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
+import java.util.*
 
 /**
  * @author lukas
  * @since 01.06.18
  */
-class Property<F, C extends Component & HasValue<?, F> & HasEnabled & HasSize & HasStyle, T> {
-    private final App app;
-    private final DataService dataService;
-    private final Translatable<Checkbox> checkBox;
-    private final C filterComponent;
-    private final Function<F, BooleanExpression> filter;
-    private final Chart<T> chart;
-    private final Expression<T> select;
+internal class Property<F, C, T, E : HasValue.ValueChangeEvent<F>> private
+constructor(private val app: App, private val filterComponent: C, private val filter: (F) -> BooleanExpression, chart: Chart<T>,
+            private val dataService: DataService, select: Expression<T>, filterTextId: String, vararg params: Any)
+        where C : Component, C : HasValue<E, F>, C : HasEnabled, C : HasSize, C : HasStyle {
+    private val checkBox: Translatable<Checkbox>
+    private val chart: Chart<T>
+    private val select: Expression<T>
 
-    private Property(App app, C filterComponent, Function<F, BooleanExpression> filter, Chart<T> chart, DataService dataService, Expression<T> select, String filterTextId, Object... params) {
-        this.app = app;
-        this.dataService = dataService;
-        this.checkBox = Translatable.createCheckbox(false, filterTextId, params);
-        checkBox.preventWhiteSpaceBreaking();
-        this.filterComponent = filterComponent;
-        this.filter = filter;
-        this.chart = chart;
-        this.select = select;
-        filterComponent.setEnabled(false);
-        filterComponent.setWidth("100%");
-        checkBox.getContent().addValueChangeListener(e -> filterComponent.setEnabled(e.getValue()));
+    init {
+        checkBox = Translatable.createCheckbox(filterTextId, *params)
+        checkBox.preventWhiteSpaceBreaking()
+        this.chart = chart
+        this.select = select
+        filterComponent.isEnabled = false
+        filterComponent.setWidthFull()
+        checkBox.content.addValueChangeListener { filterComponent.isEnabled = it.value }
     }
 
-    void addTo(FormLayout filterLayout, FlexComponent chartLayout) {
-        filterLayout.addFormItem(filterComponent, checkBox);
-        chartLayout.add(chart);
-        chartLayout.expand(chart);
+    fun addTo(filterLayout: FormLayout, chartLayout: FlexComponent) {
+        filterLayout.addFormItem(filterComponent, checkBox)
+        chartLayout.add(chart)
+        chartLayout.expand(chart)
     }
 
-    BooleanExpression applyFilter(@Nullable BooleanExpression expression) {
-        if (checkBox.getContent().getValue() && filterComponent.getValue() != null) {
-            return filter.apply(filterComponent.getValue()).and(expression);
-        }
-        return expression;
+    fun applyFilter(expression: BooleanExpression?): BooleanExpression? {
+        return if (checkBox.content.value && filterComponent.value != null) {
+            filter(filterComponent.value).and(expression)
+        } else expression
     }
 
-    void update(BooleanExpression expression) {
-        chart.setContent(dataService.countReports(app, expression, select));
+    fun update(expression: BooleanExpression?) {
+        chart.setContent(dataService.countReports(app, expression, select))
     }
 
-    static class Factory {
-        private final DataService dataService;
-        private final BooleanExpression expression;
-        private final LocalSettings localSettings;
-        private final App app;
-
-        Factory(@NonNull DataService dataService, @Nullable BooleanExpression expression, @NonNull LocalSettings localSettings, @NonNull App app) {
-            this.dataService = dataService;
-            this.expression = expression;
-            this.localSettings = localSettings;
-            this.app = app;
-        }
-
-        Property<?, ?, ?> createStringProperty(ComparableExpressionBase<String> stringExpression, String filterTextId, String chartTitleId) {
-            List<String> list = dataService.getFromReports(app, expression, stringExpression);
-            Select<String> select = new Select<>(list.toArray(new String[0]));
-            if(!list.isEmpty()) {
-                select.setValue(list.get(0));
+    internal class Factory(private val dataService: DataService, private val expression: BooleanExpression?, private val localSettings: LocalSettings, private val app: App) {
+        fun createStringProperty(stringExpression: ComparableExpressionBase<String>, filterTextId: String, chartTitleId: String): Property<*, *, *, *> {
+            val list = dataService.getFromReports(app, expression, stringExpression)
+            val select = Select(*list.toTypedArray())
+            if (list.isNotEmpty()) {
+                select.value = list[0]
             }
-            return new Property<>(app, select, stringExpression::eq, new PieChart(localSettings, chartTitleId), dataService, stringExpression, filterTextId);
+            return Property(app, select, { stringExpression.eq(it) }, PieChart(chartTitleId), dataService, stringExpression, filterTextId)
         }
 
-        Property<?, ?, ?> createAgeProperty(DateTimePath<ZonedDateTime> dateTimeExpression, String filterTextId, String chartTitleId) {
-            TextField stepper = new TextField();
-            stepper.setValue("30");
-            return new Property<>(app, stepper,
-                    days -> dateTimeExpression.after(ZonedDateTime.now().minus(Integer.parseInt(days), ChronoUnit.DAYS)),
-                    new TimeChart(localSettings, chartTitleId),
-                    dataService,
-                    SQLExpressions.date(Date.class, dateTimeExpression),
-                    filterTextId);
+        fun createAgeProperty(dateTimeExpression: DateTimePath<ZonedDateTime>, filterTextId: String, chartTitleId: String): Property<*, *, *, *> {
+            val stepper = NumberField()
+            stepper.value = 30.0
+            return Property(app, stepper, { dateTimeExpression.after(ZonedDateTime.now().minus(it.toInt().toLong(), ChronoUnit.DAYS)) }, TimeChart(chartTitleId),
+                    dataService, SQLExpressions.date(Date::class.java, dateTimeExpression), filterTextId)
         }
+
     }
 }

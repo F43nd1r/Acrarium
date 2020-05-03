@@ -20,6 +20,7 @@ import com.faendir.acra.dataprovider.QueryDslFilter
 import com.faendir.acra.dataprovider.QueryDslFilterWithParameter
 import com.faendir.acra.dataprovider.QueryDslSortOrder
 import com.faendir.acra.i18n.Messages
+import com.faendir.acra.ui.base.TranslatableText
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.util.getConverter
 import com.querydsl.core.types.Expression
@@ -30,8 +31,6 @@ import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.HasSize
 import com.vaadin.flow.component.HasValue
 import com.vaadin.flow.component.grid.Grid
-import com.vaadin.flow.component.textfield.NumberField
-import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.data.provider.SortDirection
 import com.vaadin.flow.data.renderer.Renderer
 import com.vaadin.flow.i18n.LocaleChangeEvent
@@ -39,7 +38,7 @@ import com.vaadin.flow.i18n.LocaleChangeObserver
 import java.util.stream.Stream
 
 class AcrariumColumn<T>(private val acrariumGrid: AcrariumGrid<T>, columnId: String, renderer: Renderer<T>) : Grid.Column<T>(acrariumGrid, columnId, renderer), LocaleChangeObserver {
-    private var caption: Pair<String, Array<out Any>>? = null
+    private var caption: TranslatableText? = null
     internal var filter: QueryDslFilter? = null
 
     init {
@@ -49,7 +48,7 @@ class AcrariumColumn<T>(private val acrariumGrid: AcrariumGrid<T>, columnId: Str
     }
 
     fun setCaption(id: String, vararg params: Any): AcrariumColumn<T> {
-        caption = id to params
+        caption = TranslatableText(id, *params)
         return this
     }
 
@@ -73,12 +72,11 @@ class AcrariumColumn<T>(private val acrariumGrid: AcrariumGrid<T>, columnId: Str
         return setSortable(expr).setFilterable(Translatable.createNumberFieldWithHint(Messages.FILTER), object : QueryDslFilterWithParameter<Double?> {
             override var parameter: Double? = null
 
-            override fun <T> apply(query: JPAQuery<T>): JPAQuery<T> = parameter?.let {query.where(expr.eq(converter(it))) } ?: query
-
+            override fun <T> apply(query: JPAQuery<T>): JPAQuery<T> = parameter?.let { query.where(expr.eq(converter(it))) } ?: query
         })
     }
 
-    fun <C, U> setFilterable(filterField: C, filter: QueryDslFilterWithParameter<U>): AcrariumColumn<T> where C : Component, C : HasValue<out HasValue.ValueChangeEvent<U>, U>, C: HasSize {
+    fun <C, U> setFilterable(filterField: C, filter: QueryDslFilterWithParameter<U>): AcrariumColumn<T> where C : Component, C : HasValue<out HasValue.ValueChangeEvent<U>, U>, C : HasSize {
         filterField.setWidthFull()
         acrariumGrid.filterRow.getCell(this).setComponent(filterField)
         this.filter = filter
@@ -90,6 +88,6 @@ class AcrariumColumn<T>(private val acrariumGrid: AcrariumGrid<T>, columnId: Str
     }
 
     override fun localeChange(event: LocaleChangeEvent?) {
-        caption?.let { setHeader(getTranslation(it.first, *it.second)) }
+        caption?.let { setHeader(it.translate()) }
     }
 }

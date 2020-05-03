@@ -16,11 +16,7 @@
 
 package com.faendir.acra.ui.component;
 
-import com.vaadin.flow.component.AbstractSinglePropertyField;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.PropertyDescriptor;
-import com.vaadin.flow.component.PropertyDescriptors;
-import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.*;
 
 /**
  * @author lukas

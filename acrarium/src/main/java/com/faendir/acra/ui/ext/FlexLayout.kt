@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2020 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,16 @@
  * limitations under the License.
  */
 
-package com.faendir.acra.ui.component;
+package com.faendir.acra.ui.ext
 
-/**
- * @author lukas
- * @since 19.11.18
- */
-public class Label extends com.vaadin.flow.component.html.Label implements HasStyle {
-    public Label() {
-    }
+import com.vaadin.flow.component.orderedlayout.FlexLayout
 
-    public Label(String text) {
-        super(text);
-    }
 
-    public Label secondary() {
-        getStyle().set("color", "var(--lumo-secondary-text-color)");
-        return this;
-    }
+enum class FlexDirection(internal val value: String) {
+    COLUMN("column"),
+    ROW("row");
+}
 
-    public Label honorWhitespaces() {
-        getStyle().set("white-space","pre");
-        return this;
-    }
+fun FlexLayout.setFlexDirection(flexDirection: FlexDirection) {
+    style.set("flex-direction", flexDirection.value)
 }

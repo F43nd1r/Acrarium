@@ -13,119 +13,70 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.component
 
-package com.faendir.acra.ui.component;
-
-import com.faendir.acra.ui.base.HasRoute;
-import com.faendir.acra.ui.base.TranslatableText;
-import com.faendir.acra.ui.component.HasSize;
-import com.faendir.acra.ui.component.HasStyle;
-import com.faendir.acra.ui.component.SubTabs;
-import com.faendir.acra.ui.component.Translatable;
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.tabs.Tab;
-import com.vaadin.flow.router.AfterNavigationEvent;
-import com.vaadin.flow.router.AfterNavigationListener;
-import com.vaadin.flow.router.HasUrlParameter;
-import com.vaadin.flow.shared.Registration;
-import org.springframework.context.ApplicationContext;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.faendir.acra.ui.base.HasRoute
+import com.faendir.acra.ui.base.TranslatableText
+import com.vaadin.flow.component.AttachEvent
+import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.DetachEvent
+import com.vaadin.flow.component.UI
+import com.vaadin.flow.component.tabs.Tab
+import com.vaadin.flow.component.tabs.Tabs.SelectedChangeEvent
+import com.vaadin.flow.router.AfterNavigationEvent
+import com.vaadin.flow.router.AfterNavigationListener
+import com.vaadin.flow.router.HasUrlParameter
+import com.vaadin.flow.shared.Registration
+import org.springframework.context.ApplicationContext
 
 /**
  * @author lukas
  * @since 18.10.18
  */
-public class Path extends SubTabs implements AfterNavigationListener, HasStyle, HasSize {
-    private final ApplicationContext applicationContext;
-    private final Map<Tab, Runnable> actions = new HashMap<>();
-    private Registration registration;
+class Path(private val applicationContext: ApplicationContext) : SubTabs(), AfterNavigationListener {
+    private val actions: MutableMap<Tab, () -> Unit> = mutableMapOf()
+    private var registration: Registration? = null
 
-    public Path(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-        addSelectedChangeListener(e -> {
-            Runnable action = actions.get(e.getSelectedTab());
-            if(action != null) {
-                action.run();
-            }
-        });
+    init {
+        addSelectedChangeListener { actions[it.selectedTab]?.invoke() }
     }
 
-    @Override
-    public void afterNavigation(AfterNavigationEvent event) {
-        removeAll();
-        actions.clear();
-        List<Element<?>> elements = event.getActiveChain().stream().filter(HasRoute.class::isInstance).map(HasRoute.class::cast).flatMap(e -> e.getPathElements(applicationContext, event).stream()).collect(Collectors.toList());
-        Collections.reverse(elements);
-        for (Element<?> element : elements) {
-                Tab tab = element.toTab();
-                add(tab);
-                setSelectedTab(tab);
-                actions.put(tab, element.getAction());
-
+    override fun afterNavigation(event: AfterNavigationEvent) {
+        removeAll()
+        actions.clear()
+        event.activeChain.filterIsInstance<HasRoute>().flatMap { it.getPathElements(applicationContext, event) }.reversed().forEach { element ->
+            val tab = element.toTab()
+            add(tab)
+            selectedTab = tab
+            actions[tab] = element.action
         }
     }
 
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        registration = attachEvent.getUI().addAfterNavigationListener(this);
+    override fun onAttach(attachEvent: AttachEvent) {
+        super.onAttach(attachEvent)
+        registration = attachEvent.ui.addAfterNavigationListener(this)
     }
 
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        registration.remove();
-        super.onDetach(detachEvent);
+    override fun onDetach(detachEvent: DetachEvent) {
+        registration?.remove()
+        super.onDetach(detachEvent)
     }
 
-    public static class Element<T extends Component> extends TranslatableText {
-        final Class<T> target;
-
-        public Element(Class<T> target, String titleId, Object... params) {
-            super(titleId, params);
-            this.target = target;
+    open class Element<T : Component>(val target: Class<T>, titleId: String, vararg params: Any) : TranslatableText(titleId, *params) {
+        fun toTab(): Tab {
+            val div = Translatable.createDiv(id, *params)
+            div.addTranslatedListener { div.content.text?.let { div.content.element.setProperty("innerHTML", it.replace(".", ".<wbr>")) } }
+            div.style["overflow-wrap"] = "break-word"
+            div.setWidthFull()
+            return Tab(div)
         }
 
-        public Tab toTab() {
-            Translatable<Div> div = Translatable.createDiv(getId(), getParams());
-            div.addTranslatedListener(e -> {
-                String text = div.getContent().getText();
-                if(text != null) {
-                    div.getContent().getElement().setProperty("innerHTML", text.replace(".", ".<wbr>"));
-                }
-            });
-            div.getStyle().set("overflow-wrap", "break-word");
-            div.getStyle().set("width", "100%");
-            return new Tab(div);
-        }
-
-        public Runnable getAction() {
-            return () -> UI.getCurrent().navigate(target);
-        }
+        open val action: () -> Unit = { UI.getCurrent().navigate(target) }
 
     }
 
-    public static class ParametrizedTextElement<T extends Component & HasUrlParameter<P>, P> extends Element<T> {
-        final P parameter;
-
-        public ParametrizedTextElement(Class<T> target, P parameter, String titleId, Object... params) {
-            super(target, titleId, params);
-            this.parameter = parameter;
-        }
-
-        @Override
-        public Runnable getAction() {
-            return () -> UI.getCurrent().navigate(target, parameter);
-        }
+    class ParametrizedTextElement<T, P>(target: Class<T>, val parameter: P, titleId: String, vararg params: Any) : Element<T>(target, titleId, *params)
+            where T : Component, T : HasUrlParameter<P> {
+        override val action: () -> Unit = { UI.getCurrent().navigate(target, parameter) }
     }
-
 }

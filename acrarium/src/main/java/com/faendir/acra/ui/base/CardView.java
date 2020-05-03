@@ -17,9 +17,9 @@
 package com.faendir.acra.ui.base;
 
 import com.faendir.acra.ui.component.Card;
-import com.faendir.acra.ui.component.FlexLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -37,7 +37,7 @@ public class CardView<C extends Card & Init<P>, P> extends FlexLayout implements
     @Autowired
     public CardView(ApplicationContext context) {
         setWidthFull();
-        setFlexWrap(FlexLayout.FlexWrap.WRAP);
+        setWrapMode(WrapMode.WRAP);
         setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         this.context = context;
     }

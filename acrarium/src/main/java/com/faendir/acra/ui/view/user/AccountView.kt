@@ -13,27 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.view.user
 
-package com.faendir.acra.ui.view.user;
-
-import com.faendir.acra.i18n.Messages;
-import com.faendir.acra.model.User;
-import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.service.UserService;
-import com.faendir.acra.ui.base.HasAcrariumTitle;
-import com.faendir.acra.ui.base.TranslatableText;
-import com.faendir.acra.ui.component.FlexLayout;
-import com.faendir.acra.ui.component.UserEditor;
-import com.faendir.acra.ui.view.MainView;
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.annotation.UIScope;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.NonNull;
+import com.faendir.acra.i18n.Messages
+import com.faendir.acra.service.UserService
+import com.faendir.acra.ui.base.HasAcrariumTitle
+import com.faendir.acra.ui.base.TranslatableText
+import com.faendir.acra.ui.component.UserEditor
+import com.faendir.acra.ui.view.MainView
+import com.faendir.acra.util.getCurrentUser
+import com.vaadin.flow.component.AttachEvent
+import com.vaadin.flow.component.Composite
+import com.vaadin.flow.component.notification.Notification
+import com.vaadin.flow.component.orderedlayout.FlexComponent
+import com.vaadin.flow.component.orderedlayout.FlexLayout
+import com.vaadin.flow.router.Route
+import com.vaadin.flow.spring.annotation.SpringComponent
+import com.vaadin.flow.spring.annotation.UIScope
+import org.springframework.lang.NonNull
 
 /**
  * @author lukas
@@ -41,30 +38,24 @@ import org.springframework.lang.NonNull;
  */
 @UIScope
 @SpringComponent
-@Route(value = "account", layout = MainView.class)
-public class AccountView extends Composite<FlexLayout> implements HasAcrariumTitle {
-    @NonNull
-    private final UserService userService;
+@Route(value = "account", layout = MainView::class)
+class AccountView constructor(@field:NonNull @param:NonNull private val userService: UserService) : Composite<FlexLayout>(), HasAcrariumTitle {
 
-    @Autowired
-    public AccountView(@NonNull UserService userService) {
-        this.userService = userService;
+    init {
+        content.setSizeFull()
+        content.justifyContentMode = FlexComponent.JustifyContentMode.CENTER
+        content.alignItems = FlexComponent.Alignment.CENTER
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        getContent().removeAll();
-        User user = userService.getUser(SecurityUtils.getUsername());
-        assert user != null;
-        UserEditor userEditor = new UserEditor(userService, user, () -> Notification.show(getTranslation(Messages.SUCCESS)));
-        getContent().add(userEditor);
-        getContent().setSizeFull();
-        getContent().setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-        getContent().setAlignItems(FlexComponent.Alignment.CENTER);
+    override fun onAttach(attachEvent: AttachEvent) {
+        content.removeAll()
+        val user = userService.getCurrentUser()
+        val userEditor = UserEditor(userService, user) { Notification.show(getTranslation(Messages.SUCCESS)) }
+        content.add(userEditor)
     }
 
-    @Override
-    public TranslatableText getTitle() {
-        return new TranslatableText(Messages.ACCOUNT);
+    override fun getTitle(): TranslatableText {
+        return TranslatableText(Messages.ACCOUNT)
     }
+
 }

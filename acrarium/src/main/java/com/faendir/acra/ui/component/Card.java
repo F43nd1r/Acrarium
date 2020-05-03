@@ -16,10 +16,7 @@
 
 package com.faendir.acra.ui.component;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasComponents;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
 import com.vaadin.flow.templatemodel.TemplateModel;
@@ -72,7 +69,7 @@ public class Card extends PolymerTemplate<Card.CardModel> implements HasSize, Ha
     }
 
     public void setHeaderColor(String textColor, String backgroundColor) {
-        getStyle().set("--acrarium-card-header-text-color",textColor);
+        getStyle().set("--acrarium-card-header-text-color", textColor);
         getStyle().set("--acrarium-card-header-color", backgroundColor);
     }
 
@@ -81,13 +78,16 @@ public class Card extends PolymerTemplate<Card.CardModel> implements HasSize, Ha
     }
 
     public interface CardModel extends TemplateModel {
-        void setCanCollapse(boolean collapse);
         boolean getCanCollapse();
 
-        void setCollapse(boolean collapse);
+        void setCanCollapse(boolean collapse);
+
         boolean getCollapse();
 
-        void setDivider(boolean divider);
+        void setCollapse(boolean collapse);
+
         boolean getDivider();
+
+        void setDivider(boolean divider);
     }
 }

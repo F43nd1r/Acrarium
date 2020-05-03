@@ -16,9 +16,9 @@
 
 package com.faendir.acra.ui.base;
 
-import com.faendir.acra.ui.component.FlexLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.router.RouterLayout;
 
 /**

@@ -13,42 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.view.bug.tabs.admincards
 
-package com.faendir.acra.ui.view.bug.tabs.admincards;
-
-import com.faendir.acra.i18n.Messages;
-import com.faendir.acra.model.Bug;
-import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.component.Box;
-import com.faendir.acra.ui.component.Translatable;
-import com.faendir.acra.ui.component.dialog.FluentDialog;
-import com.faendir.acra.ui.view.Overview;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.annotation.UIScope;
+import com.faendir.acra.i18n.Messages
+import com.faendir.acra.model.Bug
+import com.faendir.acra.service.DataService
+import com.faendir.acra.ui.component.Box
+import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.component.dialog.FluentDialog
+import com.faendir.acra.ui.view.Overview
+import com.vaadin.flow.component.UI
+import com.vaadin.flow.spring.annotation.SpringComponent
+import com.vaadin.flow.spring.annotation.UIScope
 
 @UIScope
 @SpringComponent("bugDangerCard")
-public class DangerCard extends AdminCard {
-    public DangerCard(DataService dataService) {
-        super(dataService);
-        setHeader(Translatable.createLabel(Messages.DANGER_ZONE));
-        setHeaderColor("var(--lumo-error-contrast-color)", "var(--lumo-error-color)");
-        enableDivider();
+class DangerCard(dataService: DataService?) : AdminCard(dataService!!) {
+    override fun init(bug: Bug) {
+        removeContent()
+        val unmergeBox = Box(Translatable.createLabel(Messages.UNMERGE_BUG), Translatable.createLabel(Messages.UNMERGE_BUG_DETAILS), Translatable.createButton(Messages.UNMERGE) {
+            FluentDialog().addText(Messages.UNMERGE_BUG_CONFIRM).addConfirmButtons {
+                dataService.unmergeBug(bug)
+                UI.getCurrent().navigate(Overview::class.java)
+            }
+        })
+        val deleteBox = Box(Translatable.createLabel(Messages.DELETE_BUG), Translatable.createLabel(Messages.DELETE_BUG_DETAILS), Translatable.createButton(Messages.DELETE) {
+            FluentDialog().addText(Messages.DELETE_BUG_CONFIRM).addConfirmButtons {
+                dataService.delete(bug)
+                UI.getCurrent().navigate(Overview::class.java)
+            }.show()
+        })
+        add(unmergeBox, deleteBox)
     }
 
-    @Override
-    public void init(Bug bug) {
-        removeContent();
-        Box unmergeBox = new Box(Translatable.createLabel(Messages.UNMERGE_BUG), Translatable.createLabel(Messages.UNMERGE_BUG_DETAILS),Translatable.createButton(e -> new FluentDialog().addText(Messages.UNMERGE_BUG_CONFIRM).addConfirmButtons(p -> {
-            getDataService().unmergeBug(bug);
-            UI.getCurrent().navigate(Overview.class);
-        }), Messages.UNMERGE));
-        Box deleteBox = new Box(Translatable.createLabel(Messages.DELETE_BUG), Translatable.createLabel(Messages.DELETE_BUG_DETAILS), Translatable.createButton(e -> new FluentDialog().addText(Messages.DELETE_BUG_CONFIRM).addConfirmButtons(popup -> {
-            getDataService().delete(bug);
-            UI.getCurrent().navigate(Overview.class);
-        }).show(), Messages.DELETE));
-        add(unmergeBox, deleteBox);
+    init {
+        setHeader(Translatable.createLabel(Messages.DANGER_ZONE))
+        setHeaderColor("var(--lumo-error-contrast-color)", "var(--lumo-error-color)")
+        enableDivider()
     }
 }

@@ -13,70 +13,65 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.view.app.tabs.admincards
 
-package com.faendir.acra.ui.view.app.tabs.admincards;
-
-import com.faendir.acra.i18n.Messages;
-import com.faendir.acra.model.App;
-import com.faendir.acra.model.MailSettings;
-import com.faendir.acra.model.User;
-import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.service.DataService;
-import com.faendir.acra.service.UserService;
-import com.faendir.acra.ui.component.Card;
-import com.faendir.acra.ui.component.CssGrid;
-import com.faendir.acra.ui.component.Translatable;
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.annotation.UIScope;
+import com.faendir.acra.i18n.Messages
+import com.faendir.acra.model.App
+import com.faendir.acra.model.MailSettings
+import com.faendir.acra.security.SecurityUtils
+import com.faendir.acra.service.DataService
+import com.faendir.acra.service.UserService
+import com.faendir.acra.ui.component.CssGrid
+import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.util.getCurrentUser
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent
+import com.vaadin.flow.component.HasValue.ValueChangeListener
+import com.vaadin.flow.component.checkbox.Checkbox
+import com.vaadin.flow.component.html.Div
+import com.vaadin.flow.component.icon.VaadinIcon
+import com.vaadin.flow.spring.annotation.SpringComponent
+import com.vaadin.flow.spring.annotation.UIScope
+import org.springframework.lang.NonNull
 
 @UIScope
 @SpringComponent
-public class NotificationCard extends AdminCard {
-    @org.springframework.lang.NonNull
-    private final UserService userService;
+class NotificationCard(private val userService: UserService, dataService: DataService) : AdminCard(dataService) {
 
-    public NotificationCard(UserService userService, DataService dataService) {
-        super(dataService);
-        this.userService = userService;
-        setHeader(Translatable.createLabel(Messages.NOTIFICATIONS));
+    init {
+        setHeader(Translatable.createLabel(Messages.NOTIFICATIONS))
     }
 
-    @Override
-    public void init(App app) {
-        removeContent();
-        CssGrid notificationLayout = new CssGrid();
-        notificationLayout.setTemplateColumns("auto max-content");
-        notificationLayout.setWidthFull();
-        User user = userService.getUser(SecurityUtils.getUsername());
-        MailSettings settings = getDataService().findMailSettings(app, user).orElse(new MailSettings(app, user));
-        notificationLayout.add(Translatable.createLabel(Messages.NEW_BUG_MAIL_LABEL), new Checkbox("", event -> {
-            settings.setNewBug(event.getValue());
-            getDataService().store(settings);
-        }));
-        notificationLayout.add(Translatable.createLabel(Messages.REGRESSION_MAIL_LABEL), new Checkbox("", event -> {
-            settings.setRegression(event.getValue());
-            getDataService().store(settings);
-        }));
-        notificationLayout.add(Translatable.createLabel(Messages.SPIKE_MAIL_LABEL), new Checkbox("", event -> {
-            settings.setSpike(event.getValue());
-            getDataService().store(settings);
-        }));
-        notificationLayout.add(Translatable.createLabel(Messages.WEEKLY_MAIL_LABEL), new Checkbox("", event -> {
-            settings.setSummary(event.getValue());
-            getDataService().store(settings);
-        }));
-        if (user.getMail() == null) {
-            Icon icon = VaadinIcon.WARNING.create();
-            icon.getStyle().set("height", "var(--lumo-font-size-m)");
-            Div div = new Div(icon, Translatable.createText(Messages.NO_MAIL_SET));
-            div.getStyle().set("color", "var(--lumo-error-color)");
-            div.getStyle().set("font-style", "italic");
-            notificationLayout.add(div);
+    override fun init(app: App) {
+        removeContent()
+        val notificationLayout = CssGrid()
+        notificationLayout.setTemplateColumns("auto max-content")
+        notificationLayout.setWidthFull()
+        val user = userService.getCurrentUser()
+        val settings = dataService.findMailSettings(app, user).orElse(MailSettings(app, user))
+        notificationLayout.add(Translatable.createLabel(Messages.NEW_BUG_MAIL_LABEL), Checkbox("") {
+            settings.newBug = it.value
+            dataService.store(settings)
+        })
+        notificationLayout.add(Translatable.createLabel(Messages.REGRESSION_MAIL_LABEL), Checkbox("") {
+            settings.regression = it.value
+            dataService.store(settings)
+        })
+        notificationLayout.add(Translatable.createLabel(Messages.SPIKE_MAIL_LABEL), Checkbox("") {
+            settings.spike = it.value
+            dataService.store(settings)
+        })
+        notificationLayout.add(Translatable.createLabel(Messages.WEEKLY_MAIL_LABEL), Checkbox("") {
+            settings.summary = it.value
+            dataService.store(settings)
+        })
+        if (user.mail == null) {
+            val icon = VaadinIcon.WARNING.create()
+            icon.style["height"] = "var(--lumo-font-size-m)"
+            val div = Div(icon, Translatable.createText(Messages.NO_MAIL_SET))
+            div.style["color"] = "var(--lumo-error-color)"
+            div.style["font-style"] = "italic"
+            notificationLayout.add(div)
         }
-        add(notificationLayout);
+        add(notificationLayout)
     }
 }

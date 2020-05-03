@@ -16,7 +16,10 @@
 
 package com.faendir.acra.ui.component;
 
+import com.faendir.acra.ui.ext.Unit;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.html.Div;
 import org.springframework.lang.NonNull;
 
@@ -50,8 +53,8 @@ public class CssGrid extends Div implements HasSize, HasStyle {
         getStyle().set("align-items", alignMode.value);
     }
 
-    public void alignItems(AlignMode alignMode, com.vaadin.flow.component.HasStyle... components) {
-        for (com.vaadin.flow.component.HasStyle component : components) {
+    public void alignItems(AlignMode alignMode, HasStyle... components) {
+        for (HasStyle component : components) {
             component.getStyle().set("align-self", alignMode.value);
         }
     }

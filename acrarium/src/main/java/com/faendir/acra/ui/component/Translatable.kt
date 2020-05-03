@@ -13,256 +13,122 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.component
 
-package com.faendir.acra.ui.component;
-
-import com.vaadin.flow.component.*;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.i18n.LocaleChangeEvent;
-import com.vaadin.flow.i18n.LocaleChangeObserver;
-import com.vaadin.flow.router.HasUrlParameter;
-import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.shared.Registration;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
-
-import java.util.Collection;
-import java.util.Optional;
-import java.util.function.Consumer;
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent
+import com.vaadin.flow.component.ClickEvent
+import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.ComponentEvent
+import com.vaadin.flow.component.ComponentEventListener
+import com.vaadin.flow.component.Composite
+import com.vaadin.flow.component.HasSize
+import com.vaadin.flow.component.HasStyle
+import com.vaadin.flow.component.HasText
+import com.vaadin.flow.component.HasValidation
+import com.vaadin.flow.component.HasValue
+import com.vaadin.flow.component.Text
+import com.vaadin.flow.component.button.Button
+import com.vaadin.flow.component.button.ButtonVariant
+import com.vaadin.flow.component.checkbox.Checkbox
+import com.vaadin.flow.component.combobox.ComboBox
+import com.vaadin.flow.component.html.Div
+import com.vaadin.flow.component.html.H3
+import com.vaadin.flow.component.html.Image
+import com.vaadin.flow.component.html.Label
+import com.vaadin.flow.component.select.Select
+import com.vaadin.flow.component.textfield.NumberField
+import com.vaadin.flow.component.textfield.PasswordField
+import com.vaadin.flow.component.textfield.TextArea
+import com.vaadin.flow.component.textfield.TextField
+import com.vaadin.flow.i18n.LocaleChangeEvent
+import com.vaadin.flow.i18n.LocaleChangeObserver
+import com.vaadin.flow.shared.Registration
 
 /**
  * @author lukas
  * @since 14.11.18
  */
-public class Translatable<T extends Component> extends Composite<T> implements LocaleChangeObserver, HasSize, HasStyle {
-    private final T t;
-    private final Consumer<T> setter;
+open class Translatable<T : Component> protected constructor(protected val t: T, private val setter: T.() -> Unit) :
+        Composite<T>(), LocaleChangeObserver, HasSize, HasStyle {
+    constructor(t: T, property: T.(String) -> Unit, captionId: String, vararg params: Any) : this(t, { t.property(t.getTranslation(captionId, *params)) })
 
-    protected Translatable(@NonNull T t, @NonNull Consumer<T> setter) {
-        this.t = t;
-        this.setter = setter;
+    override fun initContent(): T {
+        return t
     }
 
-    @NonNull
-    public static Translatable<Text> createText(@NonNull String captionId, @NonNull Object... params) {
-        return create(new Text(""), captionId, params);
+    override fun localeChange(event: LocaleChangeEvent) {
+        t.setter()
+        fireEvent(TranslatedEvent(this, false))
     }
 
-    private static <T extends Component & HasText> Translatable<T> create(T component, @NonNull String captionId, @NonNull Object... params) {
-        return new Translatable<>(component, text -> text.setText(text.getTranslation(captionId, params)));
+    open fun with(consumer: T.() -> Unit): Translatable<T> {
+        t.consumer()
+        return this
     }
 
-    @NonNull
-    public static Translatable<Button> createButton(@NonNull String captionId, @NonNull Object... params) {
-        return create(new Button(), captionId, params);
+    fun addTranslatedListener(listener: (TranslatedEvent) -> Unit): Registration {
+        return addListener(TranslatedEvent::class.java, listener)
     }
 
-    @NonNull
-    public static Translatable<Button> createButton(@NonNull ComponentEventListener<ClickEvent<Button>> clickListener, @NonNull String captionId, @NonNull Object... params) {
-        Button button = new Button("", clickListener);
-        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        return create(button, captionId, params);
-    }
+    open class Value<T, E : ComponentValueChangeEvent<in T, V>, V>(t: T, setter: T.() -> Unit) : Translatable<T>(t, setter), HasValue<E, V> by t
+            where T : Component, T : HasValue<E, V> {
+        constructor(t: T, property: T.(String) -> Unit, captionId: String, vararg params: Any) : this(t, { t.property(t.getTranslation(captionId, *params)) })
 
-    @NonNull
-    public static ValidatedValue<TextField, ?, String> createTextField(@Nullable String initialValue, @NonNull String captionId, @NonNull Object... params) {
-        return new ValidatedValue<>(new TextField("", initialValue == null ? "" : initialValue, ""), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
-    }
-
-    @NonNull
-    public static ValidatedValue<TextField, AbstractField.ComponentValueChangeEvent<TextField, String>, String> createTextFieldWithHint(@NonNull String captionId, @NonNull Object... params) {
-        return new ValidatedValue<>(new TextField("", "",  ""), textField -> textField.setPlaceholder(textField.getTranslation(captionId, params)));
-    }
-
-    @NonNull
-    public static ValidatedValue<PasswordField, ?, String> createPasswordField(@NonNull String captionId, @NonNull Object... params) {
-        return new ValidatedValue<>(new PasswordField(), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
-    }
-
-    @NonNull
-    public static Translatable<TextArea> createTextArea(@NonNull String initialValue, @NonNull String captionId, @NonNull Object... params) {
-        return new Translatable<>(new TextArea("", initialValue, ""), textField -> textField.setLabel(textField.getTranslation(captionId, params)));
-    }
-
-    public static <T> ValidatedValue<ComboBox<T>,?,  T> createComboBox(@NonNull Collection<T> items, @NonNull String captionId, @NonNull Object... params) {
-        return new ValidatedValue<>(new ComboBox<>("", items), tComboBox -> tComboBox.setLabel(tComboBox.getTranslation(captionId, params)));
-    }
-
-    public static <T> Translatable<Select<T>> createSelect(@NonNull Collection<T> items, @NonNull String captionId, @NonNull Object... params) {
-        Select<T> s = new Select<>();
-        s.setItems(items);
-        return new Translatable<>(s, select -> {
-            select.setLabel(select.getTranslation(captionId, params));
-            select.setItemLabelGenerator(select.getItemLabelGenerator());
-        });
-    }
-
-    @NonNull
-    public static Value<Checkbox, AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>, Boolean> createCheckbox(boolean initialValue, @NonNull String captionId, @NonNull Object... params) {
-        return new Value<>(new Checkbox(initialValue), checkbox -> checkbox.setLabel(checkbox.getTranslation(captionId, params)));
-    }
-
-    public static Translatable<RouterLink> createRouterLink(@NonNull Class<? extends Component> target, @NonNull String captionId, @NonNull Object... params) {
-        return create(new RouterLink("", target), captionId, params);
-    }
-
-    public static <T extends Component & HasUrlParameter<P>, P> Translatable<RouterLink> createRouterLink(@NonNull Class<T> target, @NonNull P parameter, @NonNull String captionId, @NonNull Object... params) {
-        return create(new RouterLink("", target, parameter), captionId, params);
-    }
-
-    public static Translatable<Label> createLabel(@NonNull String captionId, @NonNull Object... params) {
-        return create(new Label(), captionId, params);
-    }
-
-    public static Translatable<H3> createH3(@NonNull String captionId, @NonNull Object... params) {
-        return create(new H3(), captionId, params);
-    }
-
-    public static Translatable<Image> createImage(@NonNull String src, @NonNull String captionId, @NonNull Object... params) {
-        return new Translatable<>(new Image(src, ""), image -> image.setAlt(image.getTranslation(captionId, params)));
-    }
-
-    public static ValidatedValue<NumberField, ?, Double> createNumberField(double initialValue, @NonNull String captionId, @NonNull Object... params) {
-        return new ValidatedValue<>(new NumberField(null, initialValue, null), numberField -> numberField.setLabel(numberField.getTranslation(captionId, params)));
-    }
-
-    public static ValidatedValue<NumberField, AbstractField.ComponentValueChangeEvent<NumberField, Double>, Double> createNumberFieldWithHint(@NonNull String captionId, @NonNull Object... params) {
-        return new ValidatedValue<>(new NumberField(), numberField -> numberField.setPlaceholder(numberField.getTranslation(captionId, params)));
-    }
-
-    public static ValidatedValue<UploadField, ?, String> createUploadField(@NonNull String captionId, @NonNull Object... params) {
-        return new ValidatedValue<>(new UploadField(), uploadField -> uploadField.setLabel(uploadField.getTranslation(captionId, params)));
-    }
-
-    public static Translatable<Div> createDiv(@NonNull String captionId, @NonNull Object... params) {
-        return new Translatable<>(new Div(), div -> {
-            String translation = div.getTranslation(captionId, params);
-            div.setText(translation);
-        });
-    }
-
-    public static ValidatedValue<RangeField, ?, Double> createRangeField(@NonNull String captionId, @NonNull Object... params) {
-        return new ValidatedValue<>(new RangeField(), rangeField -> rangeField.setLabel(rangeField.getTranslation(captionId, params)));
-    }
-
-    @Override
-    protected T initContent() {
-        return t;
-    }
-
-    @Override
-    public void localeChange(LocaleChangeEvent event) {
-        setter.accept(getContent());
-        fireEvent(new TranslatedEvent(this, false));
-    }
-
-    public Translatable<T> with(Consumer<T> consumer) {
-        consumer.accept(t);
-        return this;
-    }
-
-    public Registration addTranslatedListener(ComponentEventListener<TranslatedEvent> listener) {
-        return addListener(TranslatedEvent.class, listener);
-    }
-
-    public static class Value<T extends Component & HasValue<E, V>, E extends AbstractField.ComponentValueChangeEvent<? super T, V>, V> extends Translatable<T> implements HasValue<E, V> {
-        protected Value(T t, Consumer<T> setter) {
-            super(t, setter);
-        }
-
-        public V getValue() {
-            return getContent().getValue();
-        }
-
-        public void setValue(V value) {
-            getContent().setValue(value);
-        }
-
-        public Registration addValueChangeListener(HasValue.ValueChangeListener<? super E> listener) {
-            return getContent().addValueChangeListener(listener);
-        }
-
-        public V getEmptyValue() {
-            return getContent().getEmptyValue();
-        }
-
-        public Optional<V> getOptionalValue() {
-            return getContent().getOptionalValue();
-        }
-
-        public boolean isEmpty() {
-            return getContent().isEmpty();
-        }
-
-        public void clear() {
-            getContent().clear();
-        }
-
-        public boolean isReadOnly() {
-            return getContent().isReadOnly();
-        }
-
-        public void setReadOnly(boolean readOnly) {
-            getContent().setReadOnly(readOnly);
-        }
-
-        public boolean isRequiredIndicatorVisible() {
-            return getContent().isRequiredIndicatorVisible();
-        }
-
-        public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-            getContent().setRequiredIndicatorVisible(requiredIndicatorVisible);
-        }
-
-        @Override
-        public Value<T, E, V> with(Consumer<T> consumer) {
-            return (Value<T, E, V>) super.with(consumer);
+        override fun with(consumer: T.() -> Unit): Value<T, E, V> {
+            t.consumer()
+            return this
         }
     }
 
-    public static class ValidatedValue<T extends Component & HasValue<E, V> & com.vaadin.flow.component.HasValidation, E extends AbstractField.ComponentValueChangeEvent<? super T, V>, V> extends Translatable.Value<T, E, V> implements HasValidation<T, E, V> {
+    class ValidatedValue<T, E : ComponentValueChangeEvent<in T, V>, V>(t: T, setter: T.() -> Unit) : Value<T, E, V>(t, setter), HasValidation by t
+            where T : Component, T : HasValue<E, V>, T : HasValidation {
+        constructor(t: T, property: T.(String) -> Unit, captionId: String, vararg params: Any) : this(t, { t.property(t.getTranslation(captionId, *params)) })
 
-        protected ValidatedValue(T t, Consumer<T> setter) {
-            super(t, setter);
-        }
-
-        public String getErrorMessage() {
-            return getContent().getErrorMessage();
-        }
-
-        public void setErrorMessage(String errorMessage) {
-            getContent().setErrorMessage(errorMessage);
-        }
-
-        public boolean isInvalid() {
-            return getContent().isInvalid();
-        }
-
-        public void setInvalid(boolean invalid) {
-            getContent().setInvalid(invalid);
-        }
-
-        @Override
-        public ValidatedValue<T, E, V> with(Consumer<T> consumer) {
-            return (ValidatedValue<T, E, V>) super.with(consumer);
+        override fun with(consumer: T.() -> Unit): ValidatedValue<T, E, V> {
+            t.consumer()
+            return this
         }
     }
 
-    public static class TranslatedEvent extends ComponentEvent<Translatable<?>> {
+    class TranslatedEvent(source: Translatable<*>, fromClient: Boolean) : ComponentEvent<Translatable<*>>(source, fromClient)
+    companion object {
 
-        public TranslatedEvent(Translatable<?> source, boolean fromClient) {
-            super(source, fromClient);
-        }
+        fun createText(captionId: String, vararg params: Any) = Translatable(Text(""), HasText::setText, captionId, *params)
+
+        fun createButton(captionId: String, vararg params: Any, clickListener: ((ClickEvent<Button>) -> Unit)? = null) =
+                Translatable(Button("", clickListener).apply { addThemeVariants(ButtonVariant.LUMO_PRIMARY) }, HasText::setText, captionId, *params)
+
+        fun createTextField(captionId: String, vararg params: Any) = ValidatedValue(TextField(), TextField::setLabel, captionId, *params)
+
+        fun createTextFieldWithHint(captionId: String, vararg params: Any) = ValidatedValue(TextField(), TextField::setPlaceholder, captionId, *params)
+
+        fun createPasswordField(captionId: String, vararg params: Any) = ValidatedValue(PasswordField(), PasswordField::setLabel, captionId, *params)
+
+        fun createTextArea(captionId: String, vararg params: Any) = ValidatedValue(TextArea(), TextArea::setLabel, captionId, *params)
+
+        fun <T> createComboBox(items: Collection<T>, captionId: String, vararg params: Any) = ValidatedValue(ComboBox("", items), ComboBox<T>::setLabel, captionId, *params)
+
+        fun <T> createSelect(items: Collection<T>, captionId: String, vararg params: Any) = Translatable(Select<T>().apply { setItems(items) }, {
+            label = getTranslation(captionId, *params)
+            setItemLabelGenerator(itemLabelGenerator)
+        })
+
+        fun createCheckbox(captionId: String, vararg params: Any) = Value(Checkbox(), Checkbox::setLabel, captionId, *params)
+
+        fun createLabel(captionId: String, vararg params: Any) = Translatable(Label(), HasText::setText, captionId, *params)
+
+        fun createH3(captionId: String, vararg params: Any) = Translatable(H3(), HasText::setText, captionId, *params)
+
+        fun createImage(src: String, captionId: String, vararg params: Any) = Translatable(Image(src, ""), Image::setAlt, captionId, *params)
+
+        fun createNumberField(captionId: String, vararg params: Any) = ValidatedValue(NumberField(), NumberField::setLabel, captionId, *params)
+
+        fun createNumberFieldWithHint(captionId: String, vararg params: Any) = ValidatedValue(NumberField(), NumberField::setPlaceholder, captionId, *params)
+
+        fun createUploadField(captionId: String, vararg params: Any) = ValidatedValue(UploadField(), UploadField::setLabel, captionId, *params)
+
+        fun createDiv(captionId: String, vararg params: Any) = Translatable(Div(), Div::setText, captionId, *params)
+
+        fun createRangeField(captionId: String, vararg params: Any) = ValidatedValue(RangeField(), RangeField::setLabel, captionId, *params)
     }
 }

@@ -13,38 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.view
+package com.faendir.acra.ui.view.bug.tabs.admincards
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.ui.base.HasAcrariumTitle
-import com.faendir.acra.ui.base.TranslatableText
-import com.vaadin.flow.component.html.Div
+import com.faendir.acra.model.Bug
+import com.faendir.acra.service.DataService
+import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.ext.FlexDirection
+import com.faendir.acra.ui.ext.setFlexDirection
 import com.vaadin.flow.component.orderedlayout.FlexComponent
-import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode
 import com.vaadin.flow.component.orderedlayout.FlexLayout
-import com.vaadin.flow.router.Route
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
 
-/**
- * @author lukas
- * @since 06.09.19
- */
 @UIScope
 @SpringComponent
-@Route(value = "about", layout = MainView::class)
-class AboutView : FlexLayout(), HasAcrariumTitle {
+class PropertiesCard(dataService: DataService) : AdminCard(dataService) {
 
     init {
-        setSizeFull()
-        justifyContentMode = JustifyContentMode.CENTER
-        alignItems = FlexComponent.Alignment.CENTER
-        val div = Div()
-        div.element.setProperty("innerHTML", getTranslation(Messages.FOOTER))
-        add(div)
+        setHeader(Translatable.createLabel(Messages.PROPERTIES))
     }
 
-    override fun getTitle(): TranslatableText {
-        return TranslatableText(Messages.ABOUT)
+    override fun init(bug: Bug) {
+        removeContent()
+        val title = Translatable.createTextArea(Messages.TITLE).with { value = bug.title }
+        title.setWidthFull()
+        val save = Translatable.createButton(Messages.SAVE) {
+            bug.title = title.content.value
+            dataService.store(bug)
+        }
+        val layout = FlexLayout(title, save)
+        layout.setFlexDirection(FlexDirection.COLUMN)
+        layout.alignItems = FlexComponent.Alignment.END
+        add(layout)
     }
 }

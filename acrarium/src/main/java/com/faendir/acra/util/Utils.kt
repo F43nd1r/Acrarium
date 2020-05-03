@@ -16,6 +16,10 @@
 
 package com.faendir.acra.util
 
+import com.faendir.acra.security.SecurityUtils
+import com.faendir.acra.service.UserService
+import java.util.*
+
 inline fun <reified T : Number> getConverter(): (Number) -> T {
     return when (T::class.java) {
         java.lang.Integer::class.java -> { number -> number.toInt() as T }
@@ -28,3 +32,7 @@ inline fun <reified T : Number> getConverter(): (Number) -> T {
         else -> throw IllegalArgumentException("unknown number type ${T::class.java}")
     }
 }
+
+fun <T : Any> Optional<T>.toNullable(): T? = this.orElse(null);
+
+fun UserService.getCurrentUser() = getUser(SecurityUtils.getUsername())!!

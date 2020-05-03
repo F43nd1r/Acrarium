@@ -17,16 +17,12 @@ package com.faendir.acra.ui.component.grid
 
 import com.faendir.acra.dataprovider.QueryDslDataProvider
 import com.faendir.acra.dataprovider.QueryDslFilter
-import com.faendir.acra.ui.component.HasSize
 import com.querydsl.jpa.impl.JPAQuery
 import com.vaadin.flow.component.Component
-import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.ItemClickEvent
 import com.vaadin.flow.data.renderer.Renderer
 import com.vaadin.flow.function.ValueProvider
-import com.vaadin.flow.i18n.LocaleChangeEvent
-import com.vaadin.flow.i18n.LocaleChangeObserver
 import com.vaadin.flow.router.HasUrlParameter
 import com.vaadin.flow.router.RouteConfiguration
 import java.util.function.BiFunction
@@ -36,17 +32,14 @@ import java.util.function.Consumer
  * @author lukas
  * @since 13.07.18
  */
-@OptIn(ExperimentalStdlibApi::class)
-class AcrariumGrid<T>(val dataProvider: QueryDslDataProvider<T>) : Grid<T>(), LocaleChangeObserver, HasSize {
+class AcrariumGrid<T>(val dataProvider: QueryDslDataProvider<T>) : Grid<T>() {
     internal val filterRow by lazy { appendHeaderRow() }
     val acrariumColumns: List<AcrariumColumn<T>>
         get() = super.getColumns().filterIsInstance<AcrariumColumn<T>>()
 
     init {
         dataCommunicator.setDataProvider(dataProvider, object : QueryDslFilter {
-            override fun <T> apply(query: JPAQuery<T>): JPAQuery<T> {
-                return acrariumColumns.mapNotNull { it.filter }.fold(query) { q, f -> f.apply(q) }
-            }
+            override fun <T> apply(query: JPAQuery<T>): JPAQuery<T> = acrariumColumns.mapNotNull { it.filter }.fold(query) { q, f -> f.apply(q) }
         })
         setSizeFull()
         isMultiSort = true
@@ -57,28 +50,29 @@ class AcrariumGrid<T>(val dataProvider: QueryDslDataProvider<T>) : Grid<T>(), Lo
 
     override fun getDefaultColumnFactory(): BiFunction<Renderer<T>, String, Column<T>> = BiFunction { renderer, columnId -> AcrariumColumn(this, columnId, renderer) }
 
-    override fun addColumn(propertyName: String?): AcrariumColumn<T> = super.addColumn(propertyName) as AcrariumColumn<T>
+    override fun addColumn(propertyName: String): AcrariumColumn<T> = super.addColumn(propertyName) as AcrariumColumn<T>
 
-    override fun addColumn(valueProvider: ValueProvider<T, *>?): AcrariumColumn<T> = super.addColumn(valueProvider) as AcrariumColumn<T>
+    override fun addColumn(valueProvider: ValueProvider<T, *>): AcrariumColumn<T> = super.addColumn(valueProvider) as AcrariumColumn<T>
 
-    override fun addColumn(renderer: Renderer<T>?): AcrariumColumn<T> {
+    override fun addColumn(renderer: Renderer<T>): AcrariumColumn<T> {
         return super.addColumn(renderer) as AcrariumColumn<T>
     }
 
     @Deprecated(message = "Not supported")
-    override fun <V : Comparable<V>?> addColumn(valueProvider: ValueProvider<T, V>?, vararg sortingProperties: String?): Column<T> {
+    override fun <V : Comparable<V>?> addColumn(valueProvider: ValueProvider<T, V>, vararg sortingProperties: String): Column<T> {
         throw UnsupportedOperationException()
     }
 
     @Deprecated(message = "Not supported")
-    override fun addColumn(renderer: Renderer<T>?, vararg sortingProperties: String?): Column<T> {
+    override fun addColumn(renderer: Renderer<T>, vararg sortingProperties: String): Column<T> {
         throw UnsupportedOperationException()
     }
 
-    fun <C, R> addOnClickNavigation(target: Class<C>?, parameterTransformer: (T) -> R) where C : Component?, C : HasUrlParameter<R>? {
-        addItemClickListener { e: ItemClickEvent<T> -> ui.ifPresent(if (e.button == 1 || e.isCtrlKey) Consumer { ui: UI -> ui.page.executeJavaScript("window.open(\"" + RouteConfiguration.forSessionScope().getUrl(target, parameterTransformer.invoke(e.item)) + "\", \"blank\", \"\");") } else Consumer { ui: UI -> ui.navigate(target, parameterTransformer.invoke(e.item)) }) }
-    }
-
-    override fun localeChange(event: LocaleChangeEvent) {
+    fun <C, R> addOnClickNavigation(target: Class<C>, transform: (T) -> R) where C : Component, C : HasUrlParameter<R> {
+        addItemClickListener { e: ItemClickEvent<T> ->
+            ui.ifPresent(if (e.button == 1 || e.isCtrlKey) Consumer {
+                it.page.executeJs("""window.open("${RouteConfiguration.forSessionScope().getUrl(target, transform(e.item))}", "blank", "");""")
+            } else Consumer { it.navigate(target, transform(e.item)) })
+        }
     }
 }

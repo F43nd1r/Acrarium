@@ -13,37 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.view
 
-package com.faendir.acra.ui.view;
-
-import com.faendir.acra.i18n.Messages;
-import com.faendir.acra.model.QApp;
-import com.faendir.acra.model.QBug;
-import com.faendir.acra.model.QReport;
-import com.faendir.acra.model.User;
-import com.faendir.acra.model.view.VApp;
-import com.faendir.acra.security.SecurityUtils;
-import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.component.ConfigurationLabel;
-import com.faendir.acra.ui.base.HasAcrariumTitle;
-import com.faendir.acra.ui.component.grid.AcrariumGrid;
-import com.faendir.acra.ui.base.TranslatableText;
-import com.faendir.acra.ui.component.dialog.FluentDialog;
-import com.faendir.acra.ui.component.dialog.ValidatedField;
-import com.faendir.acra.ui.component.Translatable;
-import com.faendir.acra.ui.view.app.tabs.BugTab;
-import com.faendir.acra.util.ImportResult;
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.annotation.UIScope;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.faendir.acra.i18n.Messages
+import com.faendir.acra.model.QApp
+import com.faendir.acra.model.QBug
+import com.faendir.acra.model.QReport
+import com.faendir.acra.model.User
+import com.faendir.acra.security.SecurityUtils
+import com.faendir.acra.service.DataService
+import com.faendir.acra.ui.base.HasAcrariumTitle
+import com.faendir.acra.ui.base.TranslatableText
+import com.faendir.acra.ui.component.ConfigurationLabel
+import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.component.dialog.FluentDialog
+import com.faendir.acra.ui.component.dialog.ValidatedField
+import com.faendir.acra.ui.component.grid.AcrariumGrid
+import com.faendir.acra.ui.view.app.tabs.BugTab
+import com.vaadin.flow.component.AttachEvent
+import com.vaadin.flow.component.ComponentEventListener
+import com.vaadin.flow.component.grid.Grid
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout
+import com.vaadin.flow.component.orderedlayout.VerticalLayout
+import com.vaadin.flow.component.textfield.TextField
+import com.vaadin.flow.router.Route
+import com.vaadin.flow.spring.annotation.SpringComponent
+import com.vaadin.flow.spring.annotation.UIScope
 
 /**
  * @author lukas
@@ -51,62 +46,57 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @UIScope
 @SpringComponent
-@Route(value = "", layout = MainView.class)
-public class Overview extends VerticalLayout implements ComponentEventListener<AttachEvent>, HasAcrariumTitle {
-    private final DataService dataService;
+@Route(value = "", layout = MainView::class)
+class Overview(private val dataService: DataService) : VerticalLayout(), ComponentEventListener<AttachEvent>, HasAcrariumTitle {
 
-    @Autowired
-    public Overview(DataService dataService) {
-        this.dataService = dataService;
-        addAttachListener(this);
+    init {
+        addAttachListener(this)
     }
 
-    @Override
-    public void onComponentEvent(AttachEvent event) {
-        removeAll();
-        AcrariumGrid<VApp> grid = new AcrariumGrid<>(dataService.getAppProvider());
-        grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.NONE);
-        com.vaadin.flow.component.grid.Grid.Column<VApp> appColumn = grid.addColumn(VApp::getName).setSortable( QApp.app.name).setCaption(Messages.NAME).setFlexGrow(1);
-        grid.addColumn(VApp::getBugCount).setSortable(QBug.bug.countDistinct()).setCaption(Messages.BUGS);
-        grid.addColumn(VApp::getReportCount).setSortable(QReport.report.count()).setCaption(Messages.REPORTS);
-        grid.addOnClickNavigation(BugTab.class, VApp::getId);
+    override fun onComponentEvent(event: AttachEvent) {
+        removeAll()
+        val grid = AcrariumGrid(dataService.appProvider)
+        grid.setSelectionMode(Grid.SelectionMode.NONE)
+        val appColumn = grid.addColumn { it.name }.setSortable(QApp.app.name).setCaption(Messages.NAME).setFlexGrow(1)
+        grid.addColumn { it.bugCount }.setSortable(QBug.bug.countDistinct()).setCaption(Messages.BUGS)
+        grid.addColumn { it.reportCount }.setSortable(QReport.report.count()).setCaption(Messages.REPORTS)
+        grid.addOnClickNavigation(BugTab::class.java) { it.id }
         if (SecurityUtils.hasRole(User.Role.ADMIN)) {
-            grid.appendFooterRow().getCell(appColumn).setComponent(new HorizontalLayout(Translatable.createButton(e -> {
-                Translatable<TextField> name = Translatable.createTextField("", Messages.NAME);
-                new FluentDialog().setTitle(Messages.NEW_APP).addComponent(name).addCreateButton(popup -> {
-                    new FluentDialog().addComponent(new ConfigurationLabel(dataService.createNewApp(name.getContent().getValue()))).addCloseButton().show();
-                    grid.getDataProvider().refreshAll();
-                }).show();
-            }, Messages.NEW_APP), Translatable.createButton(e -> {
-                Translatable<TextField> host = Translatable.createTextField("localhost", Messages.HOST);
-                Translatable.ValidatedValue<NumberField, ?, Double> port = Translatable.createNumberField(5984, Messages.PORT).with(p -> {
-                    p.setMin(0);
-                    p.setMax(65535);
-                });
-                Translatable<Checkbox> ssl = Translatable.createCheckbox(false, Messages.SSL);
-                Translatable.ValidatedValue<TextField, ?, String> databaseName = Translatable.createTextField("acra-myapp", Messages.DATABASE_NAME);
-                new FluentDialog().setTitle(Messages.IMPORT_ACRALYZER)
+            grid.appendFooterRow().getCell(appColumn).setComponent(HorizontalLayout(Translatable.createButton(Messages.NEW_APP) {
+                val name = Translatable.createTextField(Messages.NAME)
+                FluentDialog().setTitle(Messages.NEW_APP).addComponent(name).addCreateButton {
+                    FluentDialog().addComponent(ConfigurationLabel(dataService.createNewApp(name.content.value))).addCloseButton().show()
+                    grid.dataProvider.refreshAll()
+                }.show()
+            }, Translatable.createButton(Messages.IMPORT_ACRALYZER) {
+                val host = Translatable.createTextField(Messages.HOST).with { value = "localhost" }
+                val port = Translatable.createNumberField(Messages.PORT).with {
+                    value = 5984.0
+                    min = 0.0
+                    max = 65535.0
+                }
+                val ssl = Translatable.createCheckbox(Messages.SSL)
+                val databaseName = Translatable.createTextField(Messages.DATABASE_NAME).with { value = "acra-myapp" }
+                FluentDialog().setTitle(Messages.IMPORT_ACRALYZER)
                         .addComponent(host)
                         .addComponent(port)
                         .addComponent(ssl)
                         .addValidatedField(ValidatedField.of(databaseName), true)
-                        .addCreateButton(popup -> {
-                            ImportResult importResult = dataService.importFromAcraStorage(host.getContent().getValue(), port.getValue().intValue(), ssl.getContent().getValue(), databaseName.getContent().getValue());
-                            new FluentDialog().addComponent(Translatable.createLabel(Messages.IMPORT_SUCCESS, importResult.getSuccessCount(), importResult.getTotalCount()))
-                                    .addComponent(new ConfigurationLabel(importResult.getUser()))
+                        .addCreateButton {
+                            val importResult = dataService.importFromAcraStorage(host.content.value, port.value.toInt(), ssl.content.value, databaseName.content.value)
+                            FluentDialog().addComponent(Translatable.createLabel(Messages.IMPORT_SUCCESS, importResult.successCount, importResult.totalCount))
+                                    .addComponent(ConfigurationLabel(importResult.user))
                                     .addCloseButton()
-                                    .show();
-                            grid.getDataProvider().refreshAll();
-                        })
-                        .show();
-            }, Messages.IMPORT_ACRALYZER)));
+                                    .show()
+                            grid.dataProvider.refreshAll()
+                        }.show()
+            }))
         }
-        setSizeFull();
-        add(grid);
+        setSizeFull()
+        add(grid)
     }
 
-    @Override
-    public TranslatableText getTitle() {
-        return new TranslatableText(Messages.ACRARIUM);
+    override fun getTitle(): TranslatableText {
+        return TranslatableText(Messages.ACRARIUM)
     }
 }

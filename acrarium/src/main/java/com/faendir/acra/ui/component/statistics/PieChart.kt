@@ -13,49 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.component.statistics
 
-package com.faendir.acra.ui.component.statistics;
-
-import com.faendir.acra.i18n.Messages;
-import com.faendir.acra.util.LocalSettings;
-import com.github.appreciated.apexcharts.ApexCharts;
-import com.github.appreciated.apexcharts.ApexChartsBuilder;
-import com.github.appreciated.apexcharts.config.builder.ChartBuilder;
-import com.github.appreciated.apexcharts.config.chart.Type;
-import org.springframework.data.util.Pair;
-import org.springframework.lang.NonNull;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.faendir.acra.i18n.Messages
+import com.github.appreciated.apexcharts.ApexCharts
+import com.github.appreciated.apexcharts.ApexChartsBuilder
+import com.github.appreciated.apexcharts.config.builder.ChartBuilder
+import com.github.appreciated.apexcharts.config.chart.Type
+import org.springframework.data.util.Pair
+import org.springframework.lang.NonNull
+import java.util.*
+import java.util.function.Function
+import java.util.stream.Collectors
 
 /**
  * @author lukas
  * @since 01.06.18
  */
-class PieChart extends Chart<String> {
-    private static final int MAX_PARTS = 4;
-    PieChart(@NonNull LocalSettings localSettings, @NonNull String captionId, @NonNull Object... params) {
-        super(localSettings, captionId, params);
-    }
+internal class PieChart(captionId: String, vararg params: Any) : Chart<String>(captionId, *params) {
 
-    @Override
-    public ApexCharts createChart(@NonNull Map<String, Long> map) {
-        List<Pair<String, Long>> list = map.entrySet().stream()
-                .map(e -> Pair.of(e.getKey(), e.getValue()))
-                .sorted(Comparator.<Pair<String, Long>, Long>comparing(Pair::getSecond).reversed())
-                .collect(Collectors.toList());
-        if(list.size() > MAX_PARTS) {
-            List<Pair<String, Long>> replace = list.subList(MAX_PARTS, list.size());
-            Pair<String, Long> other = Pair.of(getTranslation(Messages.OTHER), replace.stream().mapToLong(Pair::getSecond).sum());
-            replace.clear();
-            list.add(other);
+    override fun createChart(map: Map<String, Long>): ApexCharts {
+        val list = map.entries.map { it.key to it.value }.sortedByDescending { it.second }.toMutableList()
+        if (list.size > MAX_PARTS) {
+            val replace = list.subList(MAX_PARTS, list.size)
+            val other = getTranslation(Messages.OTHER) to  replace.map { it.second }.sum()
+            replace.clear()
+            list.add(other)
         }
         return ApexChartsBuilder.get()
                 .withChart(ChartBuilder.get().withType(Type.pie).withBackground("transparent").build())
-                .withLabels(list.stream().map(Pair::getFirst).toArray(String[]::new))
-                .withSeries(list.stream().map(p -> p.getSecond().doubleValue()).toArray(Double[]::new))
-                .build();
+                .withLabels(*list.map { it.first }.toTypedArray())
+                .withSeries(*list.map {it.second.toDouble() }.toTypedArray())
+                .build()
+    }
+
+    companion object {
+        private const val MAX_PARTS = 4
     }
 }

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2020 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.component
 
-import com.vaadin.flow.component.html.Anchor
-import com.vaadin.flow.server.AbstractStreamResource
-import org.springframework.lang.NonNull
+package com.faendir.acra.ui.ext
 
-/**
- * @author lukas
- * @since 15.11.18
- */
-class DownloadButton(href: AbstractStreamResource,captionId: String, vararg params: Any) : Anchor(href, "") {
-    init {
-        element.setAttribute("download", true)
-        add(Translatable.createButton(captionId, *params))
-    }
+import com.vaadin.flow.component.html.Label
+
+
+fun Label.secondary(): Label {
+    style.set("color", "var(--lumo-secondary-text-color)")
+    return this
+}
+
+fun Label.honorWhitespaces(): Label {
+    style.set("white-space", "pre")
+    return this
 }
