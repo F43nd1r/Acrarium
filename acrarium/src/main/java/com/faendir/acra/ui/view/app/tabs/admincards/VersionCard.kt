@@ -60,10 +60,10 @@ class VersionCard(dataService: DataService) : AdminCard(dataService) {
                 .setSortable(QVersion.version.mappings.isNotNull)
                 .setCaption(Messages.PROGUARD_MAPPINGS)
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-            versionGrid.addColumn(ComponentRenderer { version ->
+            versionGrid.addColumn(ComponentRenderer<Button, Version> { version ->
                 Button(Icon(VaadinIcon.EDIT)) { VersionEditorDialog(dataService, app, { versionGrid.dataProvider.refreshAll() }, version).open() }
             })
-            versionGrid.addColumn(ComponentRenderer { version ->
+            versionGrid.addColumn(ComponentRenderer<Button, Version> { version ->
                 Button(Icon(VaadinIcon.TRASH)) {
                     FluentDialog()
                             .addComponent(Translatable.createText(Messages.DELETE_VERSION_CONFIRM, version.code))

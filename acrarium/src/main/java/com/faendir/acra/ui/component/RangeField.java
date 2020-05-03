@@ -31,7 +31,6 @@ public class RangeField extends CustomField<Double> {
         input = new RangeInput();
         field = new NumberField();
         field.setHasControls(true);
-        field.setPreventInvalidInput(true);
         input.addValueChangeListener(e -> {
             if(e.isFromClient()) {
                 field.setValue(e.getValue());
