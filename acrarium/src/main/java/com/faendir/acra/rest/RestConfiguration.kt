@@ -13,26 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.rest;
+package com.faendir.acra.rest
 
-import com.github.ziplet.filter.compression.CompressingFilter;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-
-import javax.servlet.Filter;
+import com.github.ziplet.filter.compression.CompressingFilter
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
+import javax.servlet.Filter
 
 /**
  * @author lukas
  * @since 16.05.18
  */
 @Configuration
-public class RestConfiguration {
-
+open class RestConfiguration {
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
-    public static Filter gzipFilter() {
-        return new CompressingFilter();
-    }
+    open fun gzipFilter(): Filter = CompressingFilter()
 }

@@ -13,39 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.security;
+package com.faendir.acra.security
 
-import com.faendir.acra.model.User;
-import com.faendir.acra.rest.RestApiInterface;
-import com.faendir.acra.rest.RestReportInterface;
-import com.faendir.acra.service.UserService;
-import org.apache.commons.text.RandomStringGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.BeanIds;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
-
-import java.security.SecureRandom;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.faendir.acra.model.User
+import com.faendir.acra.rest.RestApiInterface
+import com.faendir.acra.rest.RestReportInterface
+import com.faendir.acra.service.UserService
+import org.apache.commons.text.CharacterPredicate
+import org.apache.commons.text.RandomStringGenerator
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.lang.NonNull
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.AuthenticationProvider
+import org.springframework.security.authentication.BadCredentialsException
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.config.BeanIds
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.AuthenticationException
+import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper
+import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint
+import java.security.SecureRandom
 
 /**
  * @author Lukas
@@ -54,87 +50,56 @@ import java.util.stream.Stream;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-    @NonNull private final UserService userService;
-
-    @Autowired
-    public SecurityConfiguration(@NonNull UserService userService) {
-        this.userService = userService;
-    }
-
-    @NonNull
-    @Bean
-    public static SecureRandom secureRandom() {
-        return new SecureRandom();
-    }
-
-    @NonNull
-    @Bean
-    public static PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @NonNull
-    @Bean
-    public static RandomStringGenerator randomStringGenerator(@NonNull SecureRandom secureRandom) {
-        return new RandomStringGenerator.Builder().usingRandom(secureRandom::nextInt).withinRange('0', 'z').filteredBy(Character::isLetterOrDigit).build();
-    }
-
-    @NonNull
-    @Bean
-    public static GrantedAuthoritiesMapper grantedAuthoritiesMapper() {
-        return authorities -> Stream.of(User.Role.values())
-                .filter(role -> authorities.stream().anyMatch(auth -> auth.getAuthority().equals(role.getAuthority())))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    protected void configure(@NonNull AuthenticationManagerBuilder auth) {
-        auth.authenticationProvider(new AuthenticationProvider() {
-            @Nullable
-            @Override
-            public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-                if (authentication instanceof UsernamePasswordAuthenticationToken) {
-                    User user = userService.getUser(authentication.getName());
-                    if (user == null) {
-                        throw new UsernameNotFoundException("Username " + authentication.getName() + " not found");
+open class SecurityConfiguration(private val userService: UserService) : WebSecurityConfigurerAdapter() {
+    override fun configure(auth: AuthenticationManagerBuilder) {
+        auth.authenticationProvider(object : AuthenticationProvider {
+            @Throws(AuthenticationException::class)
+            override fun authenticate(authentication: Authentication): Authentication? {
+                if (authentication is UsernamePasswordAuthenticationToken) {
+                    val user = userService.getUser(authentication.getName()) ?: throw UsernameNotFoundException("Username " + authentication.getName() + " not found")
+                    if (userService.checkPassword(user, authentication.getCredentials() as String)) {
+                        return UsernamePasswordAuthenticationToken(user.username, user.password, user.authorities)
                     }
-                    if (userService.checkPassword(user, (String) authentication.getCredentials())) {
-                        return new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), user.getAuthorities());
-                    }
-                    throw new BadCredentialsException("Password mismatch for user " + user.getUsername());
+                    throw BadCredentialsException("Password mismatch for user " + user.username)
                 }
-                return null;
+                return null
             }
 
-            @Override
-            public boolean supports(@NonNull Class<?> authentication) {
-                return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
+            override fun supports(authentication: Class<*>): Boolean {
+                return UsernamePasswordAuthenticationToken::class.java.isAssignableFrom(authentication)
             }
-        });
+        })
     }
 
-    @Override
-    protected void configure(@NonNull HttpSecurity http) throws Exception {
-        http.csrf()
-                .disable()
-                .headers()
-                .disable()
-                .anonymous()
-                .disable()
+    override fun configure(http: HttpSecurity) {
+        http.csrf().disable()
+                .headers().disable()
+                .anonymous().disable()
                 .exceptionHandling()
-                .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
-                .and()
-                .sessionManagement()
-                .and()
-                .regexMatcher("/(" + RestReportInterface.REPORT_PATH + "|" + RestApiInterface.API_PATH + "/.*)")
-                .httpBasic();
+                .authenticationEntryPoint(Http403ForbiddenEntryPoint())
+                .and().sessionManagement()
+                .and().regexMatcher("/(" + RestReportInterface.REPORT_PATH + "|" + RestApiInterface.API_PATH + "/.*)")
+                .httpBasic()
     }
 
-    @NonNull
-    @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return authenticationManager();
+    @Bean(name = [BeanIds.AUTHENTICATION_MANAGER])
+    override fun authenticationManagerBean(): AuthenticationManager = authenticationManager()
+
+    companion object {
+        @Bean
+        fun secureRandom(): SecureRandom = SecureRandom()
+
+        @Bean
+        fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
+
+        @Bean
+        fun randomStringGenerator(@NonNull secureRandom: SecureRandom): RandomStringGenerator =
+                RandomStringGenerator.Builder().usingRandom { secureRandom.nextInt(it) }.withinRange('0'.toInt(), 'z'.toInt())
+                        .filteredBy(CharacterPredicate { Character.isLetterOrDigit(it) }).build()
+
+        @NonNull
+        @Bean
+        fun grantedAuthoritiesMapper() = GrantedAuthoritiesMapper { authorities -> User.Role.values().filter { role -> authorities.any { it?.authority == role.authority } } }
     }
+
 }

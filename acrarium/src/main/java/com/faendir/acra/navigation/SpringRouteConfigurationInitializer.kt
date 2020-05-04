@@ -36,20 +36,17 @@ open class SpringRouteConfigurationInitializer : AbstractRouteRegistryInitialize
         val registry = SpringRouteRegistry()
         val routes = validateRouteClasses(Stream.concat(Arrays.stream(context.getBeanNamesForAnnotation(Route::class.java)),
                 Arrays.stream(context.getBeanNamesForAnnotation(RouteAlias::class.java))).map { context.getType(it) })
-        val routeConfiguration = RouteConfiguration
-                .forRegistry(registry)
-        routeConfiguration.update { setAnnotatedRoutes(routeConfiguration, routes) }
-        return routeConfiguration
+        return RouteConfiguration.forRegistry(registry).also { it.update { setAnnotatedRoutes(it, routes) } }
     }
 
     private fun setAnnotatedRoutes(routeConfiguration: RouteConfiguration,
                                    routes: Set<Class<out Component?>>) {
         routeConfiguration.handledRegistry.clean()
-        routes.forEach { navigationTarget ->
+        routes.forEach {
             try {
-                routeConfiguration.setAnnotatedRoute(navigationTarget)
+                routeConfiguration.setAnnotatedRoute(it)
             } catch (exception: AmbiguousRouteConfigurationException) {
-                if (!handleAmbiguousRoute(routeConfiguration, exception.configuredNavigationTarget, navigationTarget)) {
+                if (!handleAmbiguousRoute(routeConfiguration, exception.configuredNavigationTarget, it)) {
                     throw exception
                 }
             }
@@ -60,9 +57,7 @@ open class SpringRouteConfigurationInitializer : AbstractRouteRegistryInitialize
                                      configuredNavigationTarget: Class<out Component?>,
                                      navigationTarget: Class<out Component?>): Boolean {
         return when {
-            GenericTypeReflector.isSuperType(navigationTarget, configuredNavigationTarget) -> {
-                true
-            }
+            GenericTypeReflector.isSuperType(navigationTarget, configuredNavigationTarget) -> true
             GenericTypeReflector.isSuperType(configuredNavigationTarget, navigationTarget) -> {
                 routeConfiguration.removeRoute(configuredNavigationTarget)
                 routeConfiguration.setAnnotatedRoute(navigationTarget)

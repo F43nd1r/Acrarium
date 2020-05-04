@@ -13,18 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.liquibase
 
-package com.faendir.acra.liquibase;
-
-import liquibase.changelog.ChangeSet;
-import org.springframework.transaction.annotation.Transactional;
+import liquibase.changelog.ChangeSet
+import org.springframework.transaction.annotation.Transactional
 
 /**
  * @author lukas
  * @since 25.06.18
  */
-public interface LiquibaseChangePostProcessor {
-
+interface LiquibaseChangePostProcessor {
     @Transactional
-    void handle(ChangeSet changeSet);
+    fun handle(changeSet: ChangeSet?)
 }

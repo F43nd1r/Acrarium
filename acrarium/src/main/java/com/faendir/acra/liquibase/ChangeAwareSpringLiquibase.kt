@@ -13,64 +13,60 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.liquibase
 
-package com.faendir.acra.liquibase;
-
-import liquibase.Liquibase;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.visitor.AbstractChangeExecListener;
-import liquibase.database.Database;
-import liquibase.exception.LiquibaseException;
-import liquibase.integration.spring.SpringLiquibase;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
+import liquibase.Liquibase
+import liquibase.changelog.ChangeSet
+import liquibase.changelog.ChangeSet.ExecType
+import liquibase.changelog.DatabaseChangeLog
+import liquibase.changelog.visitor.AbstractChangeExecListener
+import liquibase.database.Database
+import liquibase.exception.LiquibaseException
+import liquibase.integration.spring.SpringLiquibase
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties
+import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.lang.NonNull
+import org.springframework.stereotype.Component
+import java.sql.Connection
+import java.util.*
+import java.util.function.Consumer
+import javax.sql.DataSource
 
 /**
  * @author lukas
  * @since 01.06.18
  */
 @Component("liquibase")
-@EnableConfigurationProperties(LiquibaseProperties.class)
-public class ChangeAwareSpringLiquibase extends SpringLiquibase {
-    @NonNull private List<LiquibaseChangePostProcessor> processors = new ArrayList<>();
+@EnableConfigurationProperties(LiquibaseProperties::class)
+class ChangeAwareSpringLiquibase constructor(properties: LiquibaseProperties, dataSource: DataSource) : SpringLiquibase() {
+    private val processors: MutableList<LiquibaseChangePostProcessor> = mutableListOf()
 
-    @Autowired
-    public ChangeAwareSpringLiquibase(@NonNull LiquibaseProperties properties, @NonNull DataSource dataSource) {
-        setDataSource(dataSource);
-        setChangeLog(properties.getChangeLog());
-        setContexts(properties.getContexts());
-        setDefaultSchema(properties.getDefaultSchema());
-        setDropFirst(properties.isDropFirst());
-        setShouldRun(properties.isEnabled());
-        setLabels(properties.getLabels());
-        setChangeLogParameters(properties.getParameters());
-        setRollbackFile(properties.getRollbackFile());
+    init {
+        setDataSource(dataSource)
+        setChangeLog(properties.changeLog)
+        setContexts(properties.contexts)
+        setDefaultSchema(properties.defaultSchema)
+        isDropFirst = properties.isDropFirst
+        setShouldRun(properties.isEnabled)
+        setLabels(properties.labels)
+        setChangeLogParameters(properties.parameters)
+        setRollbackFile(properties.rollbackFile)
     }
-
 
     @Autowired(required = false)
-    public void setProcessors(@NonNull List<LiquibaseChangePostProcessor> processors) {
-        this.processors.addAll(processors);
+    fun setProcessors(processors: List<LiquibaseChangePostProcessor>) {
+        this.processors.addAll(processors)
     }
 
-    @Override
-    protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
-        Liquibase liquibase = super.createLiquibase(c);
-        liquibase.setChangeExecListener(new AbstractChangeExecListener() {
-            @Override
-            public void ran(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, ChangeSet.ExecType execType) {
-                processors.forEach(processor -> processor.handle(changeSet));
-            }
-        });
-        return liquibase;
+    @Throws(LiquibaseException::class)
+    override fun createLiquibase(c: Connection): Liquibase {
+        return super.createLiquibase(c).apply {
+            setChangeExecListener(object : AbstractChangeExecListener() {
+                override fun ran(changeSet: ChangeSet, databaseChangeLog: DatabaseChangeLog, database: Database, execType: ExecType) {
+                    processors.forEach { it.handle(changeSet) }
+                }
+            })
+        }
     }
 }

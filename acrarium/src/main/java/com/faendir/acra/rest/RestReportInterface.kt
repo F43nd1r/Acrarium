@@ -13,104 +13,88 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.rest;
+package com.faendir.acra.rest
 
-import com.faendir.acra.model.App;
-import com.faendir.acra.service.DataService;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.StreamUtils;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.Principal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static com.faendir.acra.model.QReport.report;
+import com.faendir.acra.model.QReport
+import com.faendir.acra.service.DataService
+import com.querydsl.core.types.dsl.BooleanExpression
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.util.StreamUtils
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.multipart.MultipartHttpServletRequest
+import java.io.IOException
+import java.nio.charset.StandardCharsets
+import java.security.Principal
+import java.util.stream.Collectors
 
 /**
  * @author Lukas
  * @since 22.03.2017
  */
 @RestController
-public class RestReportInterface {
-    public static final String EXPORT_PATH = "export";
-    public static final String PARAM_APP = "app_id";
-    public static final String PARAM_ID = "id";
-    public static final String PARAM_MAIL = "mail";
-    public static final String REPORT_PATH = "report";
-    public static final String REPORT = "ACRA_REPORT";
-    public static final String ATTACHMENT = "ACRA_ATTACHMENT";
-    @NonNull private final DataService dataService;
-
-    @Autowired
-    public RestReportInterface(@NonNull DataService dataService) {
-        this.dataService = dataService;
+class RestReportInterface(private val dataService: DataService) {
+    @PreAuthorize("hasRole(T(com.faendir.acra.model.User\$Role).REPORTER)")
+    @RequestMapping(value = [REPORT_PATH], consumes = [MediaType.APPLICATION_JSON_VALUE], method = [RequestMethod.POST])
+    fun report(@RequestBody content: String, principal: Principal) {
+        if (content.isNotBlank()) dataService.createNewReport(principal.name, content, emptyList())
     }
 
-    @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).REPORTER)")
-    @RequestMapping(value = REPORT_PATH, consumes = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
-    public void report(@NonNull @RequestBody String content, @NonNull Principal principal) {
-        if (!"".equals(content)) {
-            dataService.createNewReport(principal.getName(), content, Collections.emptyList());
+    @PreAuthorize("hasRole(T(com.faendir.acra.model.User\$Role).REPORTER)")
+    @RequestMapping(value = [REPORT_PATH], consumes = [MediaType.MULTIPART_FORM_DATA_VALUE], method = [RequestMethod.POST])
+    @Throws(IOException::class)
+    fun report(request: MultipartHttpServletRequest, principal: Principal): ResponseEntity<*> {
+        val fileMap = request.multiFileMap
+        val report = fileMap[REPORT]
+        if (report == null || report.isEmpty()) {
+            return ResponseEntity.badRequest().build<Any>()
         }
+        val content = StreamUtils.copyToString(report[0].inputStream, StandardCharsets.UTF_8)
+        val attachments = fileMap[ATTACHMENT] ?: emptyList()
+        dataService.createNewReport(principal.name, content, attachments)
+        return ResponseEntity.ok().build<Any>()
     }
 
-    @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).REPORTER)")
-    @RequestMapping(value = REPORT_PATH, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = RequestMethod.POST)
-    public ResponseEntity report(@NonNull MultipartHttpServletRequest request, @NonNull Principal principal) throws IOException {
-        MultiValueMap<String, MultipartFile> fileMap = request.getMultiFileMap();
-        if (!fileMap.containsKey(REPORT) || fileMap.get(REPORT).isEmpty()) {
-            return ResponseEntity.badRequest().build();
+    @PreAuthorize("hasRole(T(com.faendir.acra.model.User\$Role).USER)")
+    @RequestMapping(value = [EXPORT_PATH], produces = [MediaType.APPLICATION_JSON_VALUE], method = [RequestMethod.GET])
+    fun export(@RequestParam(name = PARAM_APP) appId: String, @RequestParam(name = PARAM_ID, required = false) id: String?,
+               @RequestParam(name = PARAM_MAIL, required = false) mail: String?): ResponseEntity<String> {
+        val app = dataService.findApp(appId)
+        if (!app.isPresent) {
+            return ResponseEntity.notFound().build()
         }
-        String content = StreamUtils.copyToString(fileMap.get(REPORT).get(0).getInputStream(), StandardCharsets.UTF_8);
-        List<MultipartFile> attachments = fileMap.get(ATTACHMENT);
-        if(attachments == null) {
-            attachments = Collections.emptyList();
+        var where: BooleanExpression? = null
+        var name = ""
+        if (mail != null && mail.isNotEmpty()) {
+            where = QReport.report.userEmail.eq(mail)
+            name += "_$mail"
         }
-        dataService.createNewReport(principal.getName(), content, attachments);
-        return ResponseEntity.ok().build();
-    }
-
-    @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).USER)")
-    @RequestMapping(value = EXPORT_PATH, produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
-    public ResponseEntity<String> export(@RequestParam(name = PARAM_APP) String appId, @RequestParam(name = PARAM_ID, required = false) String id,
-            @RequestParam(name = PARAM_MAIL, required = false) String mail) {
-        Optional<App> app = dataService.findApp(appId);
-        if (!app.isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
-        BooleanExpression where = null;
-        String name = "";
-        if (mail != null && !mail.isEmpty()) {
-            where = report.userEmail.eq(mail);
-            name += "_" + mail;
-        }
-        if (id != null && !id.isEmpty()) {
-            where = report.installationId.eq(id).and(where);
-            name += "_" + id;
+        if (id != null && id.isNotEmpty()) {
+            where = QReport.report.installationId.eq(id).and(where)
+            name += "_$id"
         }
         if (name.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().build()
         }
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentDispositionFormData("attachment", "reports" + name + ".json");
-        return ResponseEntity.ok().headers(headers).body(dataService.getFromReports(app.get(), where, report.content, report.id).stream().collect(Collectors.joining(", ", "[", "]")));
+        val headers = HttpHeaders()
+        headers.setContentDispositionFormData("attachment", "reports$name.json")
+        return ResponseEntity.ok().headers(headers).body(dataService.getFromReports(app.get(), where, QReport.report.content, QReport.report.id).joinToString(", ", "[", "]"))
     }
+
+    companion object {
+        const val EXPORT_PATH = "export"
+        const val PARAM_APP = "app_id"
+        const val PARAM_ID = "id"
+        const val PARAM_MAIL = "mail"
+        const val REPORT_PATH = "report"
+        const val REPORT = "ACRA_REPORT"
+        const val ATTACHMENT = "ACRA_ATTACHMENT"
+    }
+
 }

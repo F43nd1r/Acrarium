@@ -21,11 +21,7 @@ import com.vaadin.flow.router.internal.AbstractRouteRegistry
 import java.util.*
 
 class SpringRouteRegistry : AbstractRouteRegistry() {
-    override fun getNavigationTarget(pathString: String?): Optional<Class<out Component>> {
-        return getNavigationTarget(pathString, mutableListOf())
-    }
+    override fun getNavigationTarget(pathString: String?): Optional<Class<out Component>> = getNavigationTarget(pathString, mutableListOf())
 
-    override fun getNavigationTarget(pathString: String?, segments: MutableList<String>?): Optional<Class<out Component>> {
-        return configuration.getRoute(pathString, segments)
-    }
+    override fun getNavigationTarget(pathString: String?, segments: MutableList<String>?): Optional<Class<out Component>> = configuration.getRoute(pathString, segments)
 }

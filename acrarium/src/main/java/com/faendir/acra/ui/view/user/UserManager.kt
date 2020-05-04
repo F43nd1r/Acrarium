@@ -69,7 +69,7 @@ class UserManager(private val userService: UserService, private val dataService:
                     userService.setAdmin(user, it.value)
                     userGrid.dataProvider.refreshAll()
                 }
-                isEnabled = user.username != SecurityUtils.getUsername()
+                isEnabled = user.username != SecurityUtils.username
             }
         }).setCaption(Messages.ADMIN)
         userGrid.addColumn(ComponentRenderer { user: User ->
