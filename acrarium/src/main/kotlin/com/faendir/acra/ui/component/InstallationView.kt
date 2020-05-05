@@ -13,23 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.component
 
-package com.faendir.acra.ui.component;
-
-import com.faendir.acra.service.AvatarService;
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.HasComponents;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
-import com.vaadin.flow.server.StreamRegistration;
-import com.vaadin.flow.server.StreamResource;
-import com.vaadin.flow.server.StreamResourceRegistry;
-import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.templatemodel.TemplateModel;
-import org.springframework.lang.NonNull;
+import com.faendir.acra.service.AvatarService
+import com.faendir.acra.ui.component.InstallationView.InstallationModel
+import com.vaadin.flow.component.AttachEvent
+import com.vaadin.flow.component.DetachEvent
+import com.vaadin.flow.component.Tag
+import com.vaadin.flow.component.dependency.JsModule
+import com.vaadin.flow.component.polymertemplate.PolymerTemplate
+import com.vaadin.flow.server.StreamRegistration
+import com.vaadin.flow.server.StreamResource
+import com.vaadin.flow.server.StreamResourceRegistry
+import com.vaadin.flow.server.VaadinSession
+import com.vaadin.flow.templatemodel.TemplateModel
+import org.springframework.lang.NonNull
 
 /**
  * @author lukas
@@ -37,49 +35,38 @@ import org.springframework.lang.NonNull;
  */
 @Tag("acrarium-image-with-label")
 @JsModule("./elements/image-with-label.js")
-public class InstallationView extends PolymerTemplate<InstallationView.InstallationModel> {
-    private final AvatarService avatarService;
-    private StreamResource resource;
-    private StreamRegistration registration;
+class InstallationView(private val avatarService: AvatarService) : PolymerTemplate<InstallationModel>() {
+    private var resource: StreamResource? = null
+    private var registration: StreamRegistration? = null
 
-    public InstallationView(@NonNull AvatarService avatarService) {
-        this.avatarService = avatarService;
-    }
-
-    public void setInstallationId(String installationId) {
-        resource = avatarService.getAvatar(installationId);
-        getModel().setImage(StreamResourceRegistry.getURI(resource).toASCIIString());
-        getModel().setLabel(installationId);
-        if(getParent().isPresent()) {
-            register();
+    fun setInstallationId(installationId: String) {
+        resource = avatarService.getAvatar(installationId)
+        model.image = StreamResourceRegistry.getURI(resource).toASCIIString()
+        model.label = installationId
+        if (parent.isPresent) {
+            register()
         }
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        if(resource != null) {
-            register();
+    override fun onAttach(attachEvent: AttachEvent) {
+        if (resource != null) {
+            register()
         }
-        super.onAttach(attachEvent);
+        super.onAttach(attachEvent)
     }
 
-    private void register() {
-        registration = VaadinSession.getCurrent().getResourceRegistry().registerResource(resource);
+    private fun register() {
+        registration = VaadinSession.getCurrent().resourceRegistry.registerResource(resource)
     }
 
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        super.onDetach(detachEvent);
-        if(registration != null) {
-            registration.unregister();
-        }
+    override fun onDetach(detachEvent: DetachEvent) {
+        super.onDetach(detachEvent)
+        registration?.unregister()
     }
 
-    public interface InstallationModel extends TemplateModel {
-        void setImage(String image);
-        String getImage();
-
-        void setLabel(String label);
-        String getLabel();
+    interface InstallationModel : TemplateModel {
+        var image: String?
+        var label: String?
     }
+
 }

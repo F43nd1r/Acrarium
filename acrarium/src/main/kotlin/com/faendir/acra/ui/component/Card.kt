@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.component
 
-package com.faendir.acra.ui.component;
-
-import com.vaadin.flow.component.*;
-import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
-import com.vaadin.flow.templatemodel.TemplateModel;
-
-import java.util.stream.Stream;
+import com.faendir.acra.ui.component.Card.CardModel
+import com.faendir.acra.util.getValue
+import com.faendir.acra.util.setValue
+import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.HasComponents
+import com.vaadin.flow.component.HasSize
+import com.vaadin.flow.component.HasStyle
+import com.vaadin.flow.component.Tag
+import com.vaadin.flow.component.dependency.JsModule
+import com.vaadin.flow.component.polymertemplate.PolymerTemplate
+import com.vaadin.flow.templatemodel.TemplateModel
 
 /**
  * @author lukas
@@ -29,65 +33,45 @@ import java.util.stream.Stream;
  */
 @Tag("acrarium-card")
 @JsModule("./elements/card.js")
-public class Card extends PolymerTemplate<Card.CardModel> implements HasSize, HasStyle, HasComponents {
-
-    public Card() {
+open class Card() : PolymerTemplate<CardModel>(), HasSize, HasStyle, HasComponents {
+    constructor(vararg components: Component?) : this() {
+        add(*components)
     }
 
-    public Card(Component... components) {
-        this();
-        add(components);
+    fun setHeader(vararg components: Component) {
+        components.forEach { it.element.setAttribute("slot", "header") }
+        add(*components)
     }
 
-    public void setHeader(Component... components) {
-        Stream.of(components).forEach(component -> component.getElement().setAttribute("slot", "header"));
-        add(components);
+    var allowCollapse by model::canCollapse
+
+    fun collapse() {
+        model.collapse = true
     }
 
-    public boolean allowsCollapse() {
-        return getModel().getCanCollapse();
+    fun expand() {
+        model.collapse = false
     }
 
-    public void setAllowCollapse(boolean allowCollapse) {
-        getModel().setCanCollapse(allowCollapse);
+    val isCollapsed: Boolean
+        get() = model.collapse
+
+    fun enableDivider() {
+        model.divider = true
     }
 
-    public void collapse() {
-        getModel().setCollapse(true);
+    fun setHeaderColor(textColor: String?, backgroundColor: String?) {
+        style["--acrarium-card-header-text-color"] = textColor
+        style["--acrarium-card-header-color"] = backgroundColor
     }
 
-    public void expand() {
-        getModel().setCollapse(false);
+    fun removeContent() {
+        children.filter { it.element.getAttribute("slot") == null }.forEach { this.remove(it) }
     }
 
-    public boolean isCollapsed() {
-        return getModel().getCollapse();
-    }
-
-    public void enableDivider() {
-        getModel().setDivider(true);
-    }
-
-    public void setHeaderColor(String textColor, String backgroundColor) {
-        getStyle().set("--acrarium-card-header-text-color", textColor);
-        getStyle().set("--acrarium-card-header-color", backgroundColor);
-    }
-
-    public void removeContent() {
-        getChildren().filter(component -> component.getElement().getAttribute("slot") == null).forEach(this::remove);
-    }
-
-    public interface CardModel extends TemplateModel {
-        boolean getCanCollapse();
-
-        void setCanCollapse(boolean collapse);
-
-        boolean getCollapse();
-
-        void setCollapse(boolean collapse);
-
-        boolean getDivider();
-
-        void setDivider(boolean divider);
+    interface CardModel : TemplateModel {
+        var canCollapse: Boolean
+        var collapse: Boolean
+        var divider: Boolean
     }
 }

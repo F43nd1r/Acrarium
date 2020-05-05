@@ -13,56 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.component
 
-package com.faendir.acra.ui.component;
-
-import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.AbstractSinglePropertyField
+import com.vaadin.flow.component.Focusable
+import com.vaadin.flow.component.HasSize
+import com.vaadin.flow.component.HasStyle
+import com.vaadin.flow.component.PropertyDescriptors
+import com.vaadin.flow.component.Tag
 
 /**
  * @author lukas
  * @since 29.11.18
  */
 @Tag(Tag.INPUT)
-public class RangeInput extends AbstractSinglePropertyField<RangeInput, Double> implements Focusable<RangeInput>, HasSize, HasStyle {
-    private static final PropertyDescriptor<Double, Double> MIN_DESCRIPTOR = PropertyDescriptors.propertyWithDefault("min", 0d);
-    private static final PropertyDescriptor<Double, Double> MAX_DESCRIPTOR = PropertyDescriptors.propertyWithDefault("max", 100d);
-    private static final PropertyDescriptor<Double, Double> STEP_DESCRIPTOR = PropertyDescriptors.propertyWithDefault("step", 1d);
+class RangeInput : AbstractSinglePropertyField<RangeInput, Double>("value", 0.0, false), Focusable<RangeInput>, HasSize, HasStyle {
 
-    public RangeInput() {
-        super("value", 0d, false);
-        setSynchronizedEvent("change");
-        getElement().setProperty("type", "range");
+    init {
+        setSynchronizedEvent("change")
+        element.setProperty("type", "range")
     }
 
-    public RangeInput(double min, double max, double defaultValue) {
-        this();
-        setSynchronizedEvent("change");
-        setMin(min);
-        setMax(max);
-        setValue(defaultValue);
-    }
+    var min: Double
+        get() = get(MIN_DESCRIPTOR)
+        set(min) = set(MIN_DESCRIPTOR, min)
 
-    public void setMin(double min) {
-        set(MIN_DESCRIPTOR, min);
-    }
+    var max: Double
+        get() = get(MAX_DESCRIPTOR)
+        set(max) = set(MAX_DESCRIPTOR, max)
 
-    public double getMin() {
-        return get(MIN_DESCRIPTOR);
-    }
+    var step: Double
+        get() = get(STEP_DESCRIPTOR)
+        set(step) = set(STEP_DESCRIPTOR, step)
 
-    public void setMax(double max) {
-        set(MAX_DESCRIPTOR, max);
-    }
-
-    public double getMax() {
-        return get(MAX_DESCRIPTOR);
-    }
-
-    public void setStep(double step) {
-        set(STEP_DESCRIPTOR, step);
-    }
-
-    public double getStep() {
-        return get(STEP_DESCRIPTOR);
+    companion object {
+        private val MIN_DESCRIPTOR = PropertyDescriptors.propertyWithDefault("min", 0.0)
+        private val MAX_DESCRIPTOR = PropertyDescriptors.propertyWithDefault("max", 100.0)
+        private val STEP_DESCRIPTOR = PropertyDescriptors.propertyWithDefault("step", 1.0)
     }
 }

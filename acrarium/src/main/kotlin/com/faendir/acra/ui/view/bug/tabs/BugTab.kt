@@ -13,20 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.view.bug.tabs
 
-package com.faendir.acra.ui.view.bug.tabs;
-
-import com.faendir.acra.model.Bug;
-import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.base.TabView;
-import com.vaadin.flow.component.Component;
+import com.faendir.acra.model.Bug
+import com.faendir.acra.service.DataService
+import com.faendir.acra.ui.base.HasRoute.ParametrizedParent
+import com.faendir.acra.ui.base.TabView
+import com.faendir.acra.ui.view.app.tabs.BugTab
+import com.faendir.acra.util.toNullable
+import com.vaadin.flow.component.Component
 
 /**
  * @author lukas
  * @since 19.11.18
  */
-public abstract class BugTab <T extends Component> extends TabView.Tab<T, Bug> {
-    public BugTab(DataService dataService) {
-        super(dataService, DataService::findBug, Bug::getId, Bug::getTitle, bug -> new ParametrizedParent<>(com.faendir.acra.ui.view.app.tabs.BugTab.class, bug.getApp().getId()));
-    }
-}
+abstract class BugTab<T : Component>(dataService: DataService) : TabView.Tab<T, Bug>(dataService, DataService::findBug, Bug::id, Bug::title,
+        { ParametrizedParent(BugTab::class.java, app.id) })

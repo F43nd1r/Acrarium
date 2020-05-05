@@ -13,74 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.base
 
-package com.faendir.acra.ui.base;
-
-import com.faendir.acra.ui.component.Path;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.router.*;
-import org.springframework.context.ApplicationContext;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.faendir.acra.ui.component.Path
+import com.vaadin.flow.router.AfterNavigationEvent
+import com.vaadin.flow.router.HasUrlParameter
+import org.springframework.context.ApplicationContext
 
 /**
  * @author lukas
  * @since 18.10.18
  */
-public interface HasRoute extends HasAcrariumTitle {
-    @NonNull
-    Path.Element<?> getPathElement();
+interface HasRoute : HasAcrariumTitle {
+    val pathElement: Path.Element<*>
 
-    @Nullable
-    default Parent<?> getLogicalParent() {
-        return null;
+    val logicalParent: Parent<*>?
+        get() = null
+
+    fun getPathElements(applicationContext: ApplicationContext, afterNavigationEvent: AfterNavigationEvent): List<Path.Element<*>> {
+        val list: MutableList<Path.Element<*>> = mutableListOf(pathElement)
+        logicalParent?.let { list.addAll(it[applicationContext, afterNavigationEvent].getPathElements(applicationContext, afterNavigationEvent)) }
+        return list
     }
 
-    default List<Path.Element<?>> getPathElements(ApplicationContext applicationContext, AfterNavigationEvent afterNavigationEvent) {
-        List<Path.Element<?>> list = new ArrayList<>();
-        list.add(getPathElement());
-        Parent<?> parent = getLogicalParent();
-        if (parent != null) {
-            list.addAll(parent.get(applicationContext, afterNavigationEvent).getPathElements(applicationContext, afterNavigationEvent));
-        }
-        return list;
+    override val title: TranslatableText
+        get() = pathElement
+
+    fun getTranslation(key: String, vararg params: Any): String
+
+    open class Parent<T : HasRoute>(private val parentClass: Class<T>) {
+        open operator fun get(applicationContext: ApplicationContext, afterNavigationEvent: AfterNavigationEvent?): T = applicationContext.getBean(parentClass)
     }
 
-    @Override
-    default TranslatableText getTitle() {
-        return getPathElement();
-    }
-
-    String getTranslation(String key, Object... params);
-
-    class Parent<T extends HasRoute> {
-        private final Class<T> parentClass;
-
-        public Parent(Class<T> parentClass) {
-            this.parentClass = parentClass;
-        }
-
-        public T get(ApplicationContext applicationContext, AfterNavigationEvent afterNavigationEvent) {
-            return applicationContext.getBean(parentClass);
-        }
-    }
-
-    class ParametrizedParent<T extends HasRoute & HasUrlParameter<P>, P> extends Parent<T> {
-        private final P parameter;
-
-        public ParametrizedParent(Class<T> parentClass, P parameter) {
-            super(parentClass);
-            this.parameter = parameter;
-        }
-
-        @Override
-        public T get(ApplicationContext applicationContext, AfterNavigationEvent afterNavigationEvent) {
-            T t = super.get(applicationContext, afterNavigationEvent);
-            t.setParameter(null, parameter);
-            return t;
-        }
+    class ParametrizedParent<T, P>(parentClass: Class<T>, private val parameter: P) : Parent<T>(parentClass) where T : HasRoute, T : HasUrlParameter<P> {
+        override fun get(applicationContext: ApplicationContext, afterNavigationEvent: AfterNavigationEvent?): T =
+                super.get(applicationContext, afterNavigationEvent).apply { setParameter(null, parameter) }
     }
 }

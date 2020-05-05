@@ -13,120 +13,106 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.component
 
-package com.faendir.acra.ui.component;
-
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.HasComponents;
-import com.vaadin.flow.component.Synchronize;
-import com.vaadin.flow.component.tabs.Tab;
-import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.component.AttachEvent
+import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.ComponentEventListener
+import com.vaadin.flow.component.DetachEvent
+import com.vaadin.flow.component.HasComponents
+import com.vaadin.flow.component.Synchronize
+import com.vaadin.flow.component.tabs.Tab
+import com.vaadin.flow.component.tabs.Tabs
+import com.vaadin.flow.component.tabs.Tabs.SelectedChangeEvent
+import com.vaadin.flow.shared.Registration
 
 /**
  * @author lukas
  * @since 06.09.19
  */
-public class SubTabs extends Tab implements HasComponents {
-    private final Tabs content;
-    private Registration registration;
+open class SubTabs(vararg tabs: Tab?) : Tab(), HasComponents {
+    private val content: Tabs = Tabs(false, *tabs)
+    private var registration: Registration? = null
 
-    public SubTabs(Tab... tabs) {
-        content = new Tabs(false, tabs);
-        content.setOrientation(Tabs.Orientation.VERTICAL);
-        content.addSelectedChangeListener(e -> getParent().ifPresent(parent -> {
-            if (e.getSelectedTab() != null && parent instanceof Tabs) {
-                ((Tabs) parent).setSelectedIndex(-1);
+    init {
+        content.orientation = Tabs.Orientation.VERTICAL
+        content.addSelectedChangeListener { e: SelectedChangeEvent ->
+            parent.ifPresent { parent: Component? ->
+                if (e.selectedTab != null && parent is Tabs) {
+                    parent.selectedIndex = -1
+                }
             }
-        }));
-        content.setWidthFull();
-        super.add(content);
-        hideIfEmpty();
+        }
+        content.setWidthFull()
+        super<Tab>.add(content)
+        hideIfEmpty()
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        getParent().ifPresent(parent -> {
-            if (parent instanceof Tabs) {
-                registration = ((Tabs) parent).addSelectedChangeListener(e -> {
-                    if(isVisible()) {
-                        if (e.getSelectedTab() == this) {
-                            content.setSelectedIndex(0);
-                        } else if (e.getSelectedTab() != null) {
-                            content.setSelectedIndex(-1);
+    override fun onAttach(attachEvent: AttachEvent) {
+        parent.ifPresent { parent: Component? ->
+            if (parent is Tabs) {
+                registration = parent.addSelectedChangeListener { e: SelectedChangeEvent ->
+                    if (isVisible) {
+                        if (e.selectedTab === this) {
+                            content.selectedIndex = 0
+                        } else if (e.selectedTab != null) {
+                            content.selectedIndex = -1
                         }
                     }
-                });
+                }
             }
-        });
-    }
-
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        if(registration != null) {
-            registration.remove();
         }
     }
 
-    public void add(Tab... tabs) {
-        content.add(tabs);
-        hideIfEmpty();
+    override fun onDetach(detachEvent: DetachEvent) {
+        if (registration != null) {
+            registration!!.remove()
+        }
     }
 
-    @Override
-    public void add(Component... components) {
-        content.add(components);
-        hideIfEmpty();
+    override fun add(vararg components: Component) {
+        content.add(*components)
+        hideIfEmpty()
     }
 
-    @Override
-    public void remove(Component... components) {
-        content.remove(components);
-        hideIfEmpty();
+    override fun remove(vararg components: Component) {
+        content.remove(*components)
+        hideIfEmpty()
     }
 
-    @Override
-    public void removeAll() {
-        content.removeAll();
-        hideIfEmpty();
+    override fun removeAll() {
+        content.removeAll()
+        hideIfEmpty()
     }
 
-    @Override
-    public void addComponentAtIndex(int index, Component component) {
-        content.addComponentAtIndex(index, component);
-        hideIfEmpty();
+    override fun addComponentAtIndex(index: Int, component: Component) {
+        content.addComponentAtIndex(index, component)
+        hideIfEmpty()
     }
 
-    public void replace(Component oldComponent, Component newComponent) {
-        content.replace(oldComponent, newComponent);
-        hideIfEmpty();
+    fun replace(oldComponent: Component?, newComponent: Component?) {
+        content.replace(oldComponent, newComponent)
+        hideIfEmpty()
     }
 
-    public Registration addSelectedChangeListener(ComponentEventListener<Tabs.SelectedChangeEvent> listener) {
-        return content.addSelectedChangeListener(listener);
+    fun addSelectedChangeListener(listener: (SelectedChangeEvent) -> Unit): Registration {
+        return content.addSelectedChangeListener(listener)
     }
 
-    @Synchronize(property = "selected", value = {"selected-changed"})
-    public int getSelectedIndex() {
-        return content.getSelectedIndex();
-    }
+    @get:Synchronize(property = "selected", value = ["selected-changed"])
+    var selectedIndex: Int
+        get() = content.selectedIndex
+        set(selectedIndex) {
+            content.selectedIndex = selectedIndex
+        }
 
-    public void setSelectedIndex(int selectedIndex) {
-        content.setSelectedIndex(selectedIndex);
-    }
+    var selectedTab: Tab?
+        get() = content.selectedTab
+        set(selectedTab) {
+            content.selectedTab = selectedTab
+        }
 
-    public Tab getSelectedTab() {
-        return content.getSelectedTab();
-    }
-
-    public void setSelectedTab(Tab selectedTab) {
-        content.setSelectedTab(selectedTab);
-    }
-
-    private void hideIfEmpty() {
-        setVisible(content.getComponentCount() > 0);
+    private fun hideIfEmpty() {
+        isVisible = content.componentCount > 0
     }
 }

@@ -13,177 +13,129 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.service;
+package com.faendir.acra.service
 
-import com.faendir.acra.dataprovider.QueryDslDataProvider;
-import com.faendir.acra.model.*;
-import com.faendir.acra.model.view.Queries;
-import com.faendir.acra.model.view.VApp;
-import com.faendir.acra.model.view.VBug;
-import com.faendir.acra.model.view.WhereExpressions;
-import com.faendir.acra.util.ImportResult;
-import com.querydsl.core.Tuple;
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.ComparableExpressionBase;
-import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.impl.JPADeleteClause;
-import com.querydsl.jpa.impl.JPAQuery;
-import org.acra.ReportField;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.ektorp.CouchDbConnector;
-import org.ektorp.http.HttpClient;
-import org.ektorp.http.StdHttpClient;
-import org.ektorp.impl.StdCouchDbConnector;
-import org.ektorp.impl.StdCouchDbInstance;
-import org.hibernate.Hibernate;
-import org.hibernate.Session;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PostFilter;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.persistence.EntityManager;
-import java.io.IOException;
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import static com.faendir.acra.model.QApp.app;
-import static com.faendir.acra.model.QAttachment.attachment;
-import static com.faendir.acra.model.QBug.bug;
-import static com.faendir.acra.model.QMailSettings.mailSettings;
-import static com.faendir.acra.model.QReport.report;
-import static com.faendir.acra.model.QStacktrace.stacktrace1;
-import static com.faendir.acra.model.QVersion.version;
+import com.faendir.acra.dataprovider.QueryDslDataProvider
+import com.faendir.acra.model.App
+import com.faendir.acra.model.Attachment
+import com.faendir.acra.model.Bug
+import com.faendir.acra.model.MailSettings
+import com.faendir.acra.model.QApp
+import com.faendir.acra.model.QAttachment
+import com.faendir.acra.model.QBug
+import com.faendir.acra.model.QMailSettings
+import com.faendir.acra.model.QReport
+import com.faendir.acra.model.QStacktrace
+import com.faendir.acra.model.QVersion
+import com.faendir.acra.model.Report
+import com.faendir.acra.model.Stacktrace
+import com.faendir.acra.model.User
+import com.faendir.acra.model.Version
+import com.faendir.acra.model.view.Queries
+import com.faendir.acra.model.view.VApp
+import com.faendir.acra.model.view.WhereExpressions.whereHasAppPermission
+import com.faendir.acra.util.ImportResult
+import com.faendir.acra.util.getIntOrNull
+import com.querydsl.core.Tuple
+import com.querydsl.core.types.Expression
+import com.querydsl.core.types.Predicate
+import com.querydsl.core.types.dsl.ComparableExpressionBase
+import com.querydsl.jpa.JPAExpressions
+import com.querydsl.jpa.impl.JPADeleteClause
+import com.querydsl.jpa.impl.JPAQuery
+import org.acra.ReportField
+import org.apache.commons.io.IOUtils
+import org.apache.commons.logging.LogFactory
+import org.ektorp.CouchDbConnector
+import org.ektorp.http.StdHttpClient
+import org.ektorp.impl.StdCouchDbConnector
+import org.ektorp.impl.StdCouchDbInstance
+import org.hibernate.Hibernate
+import org.hibernate.Session
+import org.json.JSONArray
+import org.json.JSONObject
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.lang.NonNull
+import org.springframework.lang.Nullable
+import org.springframework.security.access.prepost.PostAuthorize
+import org.springframework.security.access.prepost.PostFilter
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.multipart.MultipartFile
+import java.io.IOException
+import java.io.Serializable
+import java.nio.charset.StandardCharsets
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
+import java.util.*
+import java.util.stream.Collectors
+import java.util.stream.StreamSupport
+import javax.persistence.EntityManager
+import kotlin.reflect.jvm.reflect
 
 /**
  * @author lukas
  * @since 16.05.18
  */
 @Service
-public class DataService implements Serializable {
-    @NonNull
-    private final Log log = LogFactory.getLog(getClass());
-    @NonNull
-    private final UserService userService;
-    @NonNull
-    private final EntityManager entityManager;
-    @NonNull
-    private final ApplicationEventPublisher applicationEventPublisher;
-    private final Object stacktraceLock = new Object();
+class DataService(private val userService: UserService, private val entityManager: EntityManager, private val applicationEventPublisher: ApplicationEventPublisher) : Serializable {
+    private val log = LogFactory.getLog(javaClass)
+    private val stacktraceLock = Any()
 
-    @Autowired
-    public DataService(@NonNull UserService userService, @NonNull EntityManager entityManager, @NonNull ApplicationEventPublisher applicationEventPublisher) {
-        this.userService = userService;
-        this.entityManager = entityManager;
-        this.applicationEventPublisher = applicationEventPublisher;
+    fun getAppProvider(): QueryDslDataProvider<VApp> {
+        val where = whereHasAppPermission()
+        return QueryDslDataProvider(Queries.selectVApp(entityManager).where(where), JPAQuery<Any>(entityManager).from(QApp.app).where(where))
     }
 
-    @NonNull
-    public QueryDslDataProvider<VApp> getAppProvider() {
-        BooleanExpression where = WhereExpressions.whereHasAppPermission();
-        return new QueryDslDataProvider<>(Queries.selectVApp(entityManager).where(where), new JPAQuery<>(entityManager).from(app).where(where));
+    fun getAppIds(): List<Int> = JPAQuery<Any>(entityManager).from(QApp.app).where(whereHasAppPermission()).select(QApp.app.id).fetch()
+
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun getBugProvider(app: App) = QueryDslDataProvider(Queries.selectVBug(entityManager).where(QBug.bug.app.eq(app)))
+
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun getBugIds(app: App): List<Int> = JPAQuery<Any>(entityManager).from(QBug.bug).where(QBug.bug.app.eq(app)).select(QBug.bug.id).fetch()
+
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun getStacktraceIds(bug: Bug): List<Int> =
+            JPAQuery<Any>(entityManager).from(QStacktrace.stacktrace1).where(QStacktrace.stacktrace1.bug.eq(bug)).select(QStacktrace.stacktrace1.id).fetch()
+
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun getReportProvider(bug: Bug) = QueryDslDataProvider(JPAQuery<Any>(entityManager).from(QReport.report)
+            .join(QReport.report.stacktrace, QStacktrace.stacktrace1).fetchJoin()
+            .where(QStacktrace.stacktrace1.bug.eq(bug))
+            .select(QReport.report))
+
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun getReportProvider(app: App) = QueryDslDataProvider(JPAQuery<Any>(entityManager).from(QReport.report)
+            .join(QReport.report.stacktrace, QStacktrace.stacktrace1).fetchJoin()
+            .join(QStacktrace.stacktrace1.bug, QBug.bug)
+            .where(QBug.bug.app.eq(app))
+            .select(QReport.report))
+
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#stacktrace.bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun getReportIds(stacktrace: Stacktrace): List<String> =
+            JPAQuery<Any>(entityManager).from(QReport.report).where(QReport.report.stacktrace.eq(stacktrace)).select(QReport.report.id).fetch()
+
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun getReportIds(app: App, before: ZonedDateTime?, after: ZonedDateTime?): List<String> {
+        var where = QReport.report.stacktrace.bug.app.eq(app)
+        before?.let { where = where.and(QReport.report.date.before(it)) }
+        after?.let { where = where.and(QReport.report.date.after(it)) }
+        return JPAQuery<Any>(entityManager).from(QReport.report).where(where).select(QReport.report.id).fetch()
     }
 
-    @NonNull
-    public List<Integer> getAppIds() {
-        return new JPAQuery<>(entityManager).from(app).where(WhereExpressions.whereHasAppPermission()).select(app.id).fetch();
-    }
-
-    @NonNull
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public QueryDslDataProvider<VBug> getBugProvider(@NonNull App app) {
-        return new QueryDslDataProvider<>(Queries.selectVBug(entityManager).where(bug.app.eq(app)));
-    }
-
-    @NonNull
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public List<Integer> getBugIds(@NonNull App app) {
-        return new JPAQuery<>(entityManager).from(bug).where(bug.app.eq(app)).select(bug.id).fetch();
-    }
-
-    @NonNull
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public List<Integer> getStacktraceIds(@NonNull Bug bug) {
-        return new JPAQuery<>(entityManager).from(stacktrace1).where(stacktrace1.bug.eq(bug)).select(stacktrace1.id).fetch();
-    }
-
-    @NonNull
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public QueryDslDataProvider<Report> getReportProvider(@NonNull Bug bug) {
-        return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(report)
-                .join(report.stacktrace, stacktrace1)
-                .fetchJoin()
-                .where(stacktrace1.bug.eq(bug))
-                .select(report));
-    }
-
-    @NonNull
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public QueryDslDataProvider<Report> getReportProvider(@NonNull App app) {
-        return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(report)
-                .join(report.stacktrace, stacktrace1)
-                .fetchJoin()
-                .join(stacktrace1.bug, bug)
-                .where(bug.app.eq(app))
-                .select(report));
-    }
-
-    @NonNull
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#stacktrace.bug.app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public List<String> getReportIds(@NonNull Stacktrace stacktrace) {
-        return new JPAQuery<>(entityManager).from(report).where(report.stacktrace.eq(stacktrace)).select(report.id).fetch();
-    }
-
-    @NonNull
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public List<String> getReportIds(@NonNull App app, @Nullable ZonedDateTime before, @Nullable ZonedDateTime after) {
-        BooleanExpression where = report.stacktrace.bug.app.eq(app);
-        if (before != null) {
-            where = where.and(report.date.before(before));
-        }
-        if (after != null) {
-            where = where.and(report.date.after(after));
-        }
-        return new JPAQuery<>(entityManager).from(report).where(where).select(report.id).fetch();
-    }
-
-    @NonNull
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public QueryDslDataProvider<Version> getVersionProvider(@NonNull App app) {
-        return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(version).where(version.app.eq(app)).select(version));
-    }
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun getVersionProvider(app: App) = QueryDslDataProvider(JPAQuery<Any>(entityManager).from(QVersion.version).where(QVersion.version.app.eq(app)).select(QVersion.version))
 
     @Transactional
-    public <T> T store(T entity) {
-        return entityManager.merge(entity);
-    }
+    fun <T> store(entity: T): T = entityManager.merge(entity)
 
     @Transactional
-    public void delete(Object entity) {
-        entityManager.remove(entityManager.contains(entity) ? entity : entityManager.merge(entity));
-        if(entity instanceof Report) {
-            applicationEventPublisher.publishEvent(new ReportsDeleteEvent(this));
+    fun delete(entity: Any) {
+        entityManager.remove(if (entityManager.contains(entity)) entity else entityManager.merge(entity))
+        if (entity is Report) {
+            applicationEventPublisher.publishEvent(ReportsDeleteEvent(this))
         }
     }
 
@@ -194,285 +146,212 @@ public class DataService implements Serializable {
      * @return the name of the reporter user and its password (plaintext)
      */
     @Transactional
-    @NonNull
-    @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
-    public User createNewApp(@NonNull String name) {
-        User user = userService.createReporterUser();
-        store(new App(name, user));
-        return user;
+    @PreAuthorize("hasRole(T(com.faendir.acra.model.User\$Role).ADMIN)")
+    fun createNewApp(name: String): User {
+        val user = userService.createReporterUser()
+        store(App(name, user))
+        return user
     }
 
     @Transactional
-    @NonNull
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).ADMIN)")
-    public User recreateReporterUser(@NonNull App app) {
-        User user = userService.createReporterUser();
-        app.setReporter(user);
-        store(app);
-        return user;
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).ADMIN)")
+    fun recreateReporterUser(app: App): User {
+        val user = userService.createReporterUser()
+        app.reporter = user
+        store(app)
+        return user
     }
 
     @Transactional
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission$Level).EDIT)")
-    public void unmergeBug(@NonNull Bug bug) {
-        getStacktraces(bug).forEach(stacktrace -> stacktrace.setBug(new Bug(bug.getApp(), stacktrace.getStacktrace())));
-        delete(bug);
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission\$Level).EDIT)")
+    fun unmergeBug(bug: Bug) {
+        getStacktraces(bug).forEach { it.bug = Bug(bug.app, it.stacktrace) }
+        delete(bug)
     }
 
     @Transactional
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission$Level).EDIT)")
-    public void setBugSolved(@NonNull Bug bug, Version solved) {
-        bug.setSolvedVersion(solved);
-        store(bug);
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission\$Level).EDIT)")
+    fun setBugSolved(bug: Bug, solved: Version?) {
+        bug.solvedVersion = solved
+        store(bug)
     }
 
-    /*@NonNull
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public Optional<ProguardMapping> findMapping(@NonNull App app, int versionCode) {
-        return Optional.ofNullable(new JPAQuery<>(entityManager).from(proguardMapping)
-                .where(proguardMapping.app.eq(app).and(proguardMapping.versionCode.eq(versionCode)))
-                .select(proguardMapping)
-                .fetchOne());
-    }*/
-
-    @NonNull
-    @PostAuthorize("!returnObject.isPresent() || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.get().stacktrace.bug.app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public Optional<Report> findReport(@NonNull String id) {
-        return Optional.ofNullable(new JPAQuery<>(entityManager).from(report)
-                .join(report.stacktrace, stacktrace1)
+    @PostAuthorize("returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.stacktrace.bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun findReport(id: String): Report? = JPAQuery<Any>(entityManager).from(QReport.report)
+                .join(QReport.report.stacktrace, QStacktrace.stacktrace1)
                 .fetchJoin()
-                .join(stacktrace1.bug, bug)
+                .join(QStacktrace.stacktrace1.bug, QBug.bug)
                 .fetchJoin()
-                .join(bug.app, app)
+                .join(QBug.bug.app, QApp.app)
                 .fetchJoin()
-                .where(report.id.eq(id))
-                .select(report)
-                .fetchOne());
+                .where(QReport.report.id.eq(id))
+                .select(QReport.report)
+                .fetchOne()
+
+    @PostAuthorize("returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun findBug(id: Int): Bug? =
+            JPAQuery<Any>(entityManager).from(QBug.bug).join(QBug.bug.app).fetchJoin().where(QBug.bug.id.eq(id)).select(QBug.bug).fetchOne()
+
+    @PostAuthorize("returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun findApp(encodedId: String): App? = try {
+        findApp(encodedId.toInt())
+    } catch (e: NumberFormatException) {
+        null
     }
 
-    @NonNull
-    @PostAuthorize("!returnObject.isPresent() || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.get().app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public Optional<Bug> findBug(@NonNull int id) {
-        return Optional.ofNullable(new JPAQuery<>(entityManager).from(bug).join(bug.app).fetchJoin().where(bug.id.eq(id)).select(bug).fetchOne());
-    }
+    @PostAuthorize("returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun findApp(id: Int): App? = JPAQuery<Any>(entityManager).from(QApp.app).where(QApp.app.id.eq(id)).select(QApp.app).fetchOne()
 
-    @NonNull
-    @PostAuthorize("!returnObject.isPresent() || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.get(), T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public Optional<App> findApp(@NonNull String encodedId) {
-        try {
-            return findApp(Integer.parseInt(encodedId));
-        } catch (NumberFormatException e) {
-            return Optional.empty();
-        }
-    }
+    @PostFilter("hasRole(T(com.faendir.acra.model.User\$Role).ADMIN) || T(com.faendir.acra.security.SecurityUtils).hasPermission(filterObject, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun findAllApps(): List<App> = JPAQuery<Any>(entityManager).from(QApp.app).select(QApp.app).fetch()
 
-    @NonNull
-    @PostAuthorize("!returnObject.isPresent() || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.get(), T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public Optional<App> findApp(int id) {
-        return Optional.ofNullable(new JPAQuery<>(entityManager).from(app).where(app.id.eq(id)).select(app).fetchOne());
-    }
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#report.stacktrace.bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun findAttachments(report: Report): List<Attachment> =
+            JPAQuery<Any>(entityManager).from(QAttachment.attachment).where(QAttachment.attachment.report.eq(report)).select(QAttachment.attachment).fetch()
 
-    @NonNull
-    @PostFilter("hasRole(T(com.faendir.acra.model.User$Role).ADMIN) || T(com.faendir.acra.security.SecurityUtils).hasPermission(filterObject, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public List<App> findAllApps() {
-        return new JPAQuery<>(entityManager).from(app).select(app).fetch();
-    }
+    @PostAuthorize("returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun findStacktrace(id: Int): Stacktrace? =
+            JPAQuery<Any>(entityManager).from(QStacktrace.stacktrace1).where(QStacktrace.stacktrace1.id.eq(id)).select(QStacktrace.stacktrace1).fetchOne()
 
-    @NonNull
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#report.stacktrace.bug.app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public List<Attachment> findAttachments(@NonNull Report report) {
-        return new JPAQuery<>(entityManager).from(attachment).where(attachment.report.eq(report)).select(attachment).fetch();
-    }
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun findStacktrace(app: App, stacktrace: String, versionCode: Int): Stacktrace? = JPAQuery<Any>(entityManager).from(QStacktrace.stacktrace1)
+            .where(QStacktrace.stacktrace1.stacktrace.eq(stacktrace).and(QStacktrace.stacktrace1.version.code.eq(versionCode)).and(QStacktrace.stacktrace1.bug.app.eq(app)))
+            .select(QStacktrace.stacktrace1)
+            .fetchOne()
 
-    @PostAuthorize("!returnObject.isPresent() || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.get().bug.app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public Optional<Stacktrace> findStacktrace(int id) {
-        return Optional.ofNullable(new JPAQuery<>(entityManager).from(stacktrace1).where(stacktrace1.id.eq(id)).select(stacktrace1).fetchOne());
-    }
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun findVersion(app: App, versionCode: Int): Version? = JPAQuery<Any>(entityManager).from(QVersion.version)
+            .where(QVersion.version.code.eq(versionCode).and(QVersion.version.app.eq(app)))
+            .select(QVersion.version)
+            .fetchOne()
 
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public Optional<Stacktrace> findStacktrace(@NonNull App app, @NonNull String stacktrace, int versionCode) {
-        return Optional.ofNullable(new JPAQuery<>(entityManager).from(stacktrace1)
-                .where(stacktrace1.stacktrace.eq(stacktrace).and(stacktrace1.version.code.eq(versionCode)).and(stacktrace1.bug.app.eq(app)))
-                .select(stacktrace1)
-                .fetchOne());
-    }
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    private fun findBug(app: App, stacktrace: String): Bug? = JPAQuery<Any>(entityManager).from(QStacktrace.stacktrace1)
+            .join(QStacktrace.stacktrace1.bug, QBug.bug)
+            .where(QBug.bug.app.eq(app).and(QStacktrace.stacktrace1.stacktrace.like(stacktrace)))
+            .select(QBug.bug)
+            .fetchFirst()
 
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public Optional<Version> findVersion(@NonNull App app, int versionCode) {
-        return Optional.ofNullable(new JPAQuery<>(entityManager).from(version)
-                .where(version.code.eq(versionCode).and(version.app.eq(app)))
-                .select(version)
-                .fetchOne());
-    }
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun findAllVersions(app: App): List<Version> = JPAQuery<Any>(entityManager).from(QVersion.version).where(QVersion.version.app.eq(app)).select(QVersion.version).fetch()
 
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    private Optional<Bug> findBug(@NonNull App app, @NonNull String stacktrace) {
-        return Optional.ofNullable(new JPAQuery<>(entityManager).from(stacktrace1)
-                .join(stacktrace1.bug, bug)
-                .where(bug.app.eq(app).and(stacktrace1.stacktrace.like(stacktrace)))
-                .select(bug)
-                .fetchFirst());
-    }
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun findMailSettings(app: App, user: User): MailSettings? = JPAQuery<Any>(entityManager).from(QMailSettings.mailSettings)
+            .where(QMailSettings.mailSettings.app.eq(app).and(QMailSettings.mailSettings.user.eq(user)))
+            .select(QMailSettings.mailSettings).fetchOne()
 
-    @NonNull
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public List<Version> findAllVersions(@NonNull App app) {
-        return new JPAQuery<>(entityManager).from(version).where(version.app.eq(app)).select(version).fetch();
-    }
-
-    @NonNull
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public Optional<MailSettings> findMailSettings(@NonNull App app, @NonNull User user) {
-        return Optional.ofNullable(new JPAQuery<>(entityManager).from(mailSettings).where(mailSettings.app.eq(app).and(mailSettings.user.eq(user))).select(mailSettings).fetchOne());
+    @Transactional
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#a, T(com.faendir.acra.model.Permission\$Level).EDIT)")
+    fun changeConfiguration(a: App, configuration: App.Configuration) {
+        var app = a
+        app.configuration = configuration
+        app = store(app)
+        entityManager.flush()
+        applicationEventPublisher.publishEvent(ConfigurationUpdateEvent(this, app))
     }
 
     @Transactional
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).EDIT)")
-    public void changeConfiguration(@NonNull App app, @NonNull App.Configuration configuration) {
-        app.setConfiguration(configuration);
-        app = store(app);
-        entityManager.flush();
-        applicationEventPublisher.publishEvent(new ConfigurationUpdateEvent(this, app));
-
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).EDIT)")
+    fun deleteReportsOlderThanDays(app: App, days: Int) {
+        JPADeleteClause(entityManager, QReport.report).where(
+                QReport.report.stacktrace.`in`(JPAExpressions.select(QStacktrace.stacktrace1).from(QStacktrace.stacktrace1).where(QStacktrace.stacktrace1.bug.app.eq(app)))
+                        .and(QReport.report.date.before(ZonedDateTime.now().minus(days.toLong(), ChronoUnit.DAYS)))).execute()
+        entityManager.flush()
+        applicationEventPublisher.publishEvent(ReportsDeleteEvent(this))
     }
 
     @Transactional
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).EDIT)")
-    public void deleteReportsOlderThanDays(@NonNull App app, int days) {
-        new JPADeleteClause(entityManager, report).where(report.stacktrace.in(JPAExpressions.select(stacktrace1).from(stacktrace1).where(stacktrace1.bug.app.eq(app)))
-                .and(report.date.before(ZonedDateTime.now().minus(days, ChronoUnit.DAYS)))).execute();
-        entityManager.flush();
-        applicationEventPublisher.publishEvent(new ReportsDeleteEvent(this));
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).EDIT)")
+    fun deleteReportsBeforeVersion(app: App, versionCode: Int) {
+        JPADeleteClause(entityManager, QReport.report).where(
+                QReport.report.stacktrace.`in`(JPAExpressions.select(QStacktrace.stacktrace1).from(QStacktrace.stacktrace1).where(QStacktrace.stacktrace1.bug.app.eq(app)
+                        .and(QStacktrace.stacktrace1.version.code.lt(versionCode))))).execute()
+        entityManager.flush()
+        applicationEventPublisher.publishEvent(ReportsDeleteEvent(this))
     }
 
     @Transactional
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).EDIT)")
-    public void deleteReportsBeforeVersion(@NonNull App app, int versionCode) {
-        new JPADeleteClause(entityManager, report).where(report.stacktrace.in(JPAExpressions.select(stacktrace1).from(stacktrace1).where(stacktrace1.bug.app.eq(app)
-                .and(stacktrace1.version.code.lt(versionCode))))).execute();
-        entityManager.flush();
-        applicationEventPublisher.publishEvent(new ReportsDeleteEvent(this));
-    }
-
-    @Transactional
-    @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).REPORTER)")
-    public void createNewReport(@NonNull String reporterUserName, @NonNull String content, @NonNull List<MultipartFile> attachments) {
-        App app = new JPAQuery<>(entityManager).from(QApp.app).where(QApp.app.reporter.username.eq(reporterUserName)).select(QApp.app).fetchOne();
-        if (app != null) {
-            JSONObject jsonObject = new JSONObject(content);
-            String trace = jsonObject.optString(ReportField.STACK_TRACE.name());
-            Version version = getVersion(app, jsonObject);
-            Stacktrace stacktrace = findStacktrace(app, trace, version.getCode()).orElseGet(() -> {
-                synchronized (stacktraceLock) {
-                    return findStacktrace(app, trace, version.getCode()).orElseGet(() -> store(new Stacktrace(findBug(app, trace).orElseGet(() -> new Bug(app, trace)), trace, version)));
-                }
-            });
-            Report report = store(new Report(stacktrace, content));
-            attachments.forEach(multipartFile -> {
+    @PreAuthorize("hasRole(T(com.faendir.acra.model.User\$Role).REPORTER)")
+    fun createNewReport(reporterUserName: String, content: String, attachments: List<MultipartFile>) {
+        JPAQuery<Any>(entityManager).from(QApp.app).where(QApp.app.reporter.username.eq(reporterUserName)).select(QApp.app).fetchOne()?.let { app ->
+            val jsonObject = JSONObject(content)
+            val trace = jsonObject.optString(ReportField.STACK_TRACE.name)
+            val version = getVersion(app, jsonObject)
+            val stacktrace = findStacktrace(app, trace, version.code) ?: synchronized(stacktraceLock) {
+                findStacktrace(app, trace, version.code) ?: store(Stacktrace(findBug(app, trace) ?: Bug(app, trace), trace, version))
+            }
+            val report = store(Report(stacktrace, content))
+            attachments.forEach {
                 try {
-                    store(new Attachment(report,
-                            multipartFile.getName(),
-                            Hibernate.getLobCreator(entityManager.unwrap(Session.class)).createBlob(multipartFile.getInputStream(), multipartFile.getSize())));
-                } catch (IOException e) {
-                    log.warn("Failed to load attachment with name " + multipartFile.getName(), e);
+                    store(Attachment(report, it.originalFilename ?: it.name, Hibernate.getLobCreator(entityManager.unwrap(Session::class.java)).createBlob(it.inputStream, it.size)))
+                } catch (e: IOException) {
+                    log.warn("Failed to load attachment with name ${it.originalFilename}", e)
                 }
-            });
-            entityManager.flush();
-            applicationEventPublisher.publishEvent(new NewReportEvent(this, report));
+            }
+            entityManager.flush()
+            applicationEventPublisher.publishEvent(NewReportEvent(this, report))
         }
     }
 
-    private Version getVersion(App app, JSONObject jsonObject) {
-        JSONObject buildConfig = jsonObject.optJSONObject(ReportField.BUILD_CONFIG.name());
-        Integer versionCode = null;
-        String versionName = null;
-        if (buildConfig != null) {
-            try {
-                versionCode = buildConfig.getInt("VERSION_CODE");
-            } catch (Exception ignored) {
-            }
-            try {
-                versionName = buildConfig.getString("VERSION_NAME");
-            } catch (Exception ignored) {
-            }
-        }
-        if (versionCode == null) {
-            versionCode = jsonObject.optInt(ReportField.APP_VERSION_CODE.name());
-        }
-        if (versionName == null) {
-            versionName = jsonObject.optString(ReportField.APP_VERSION_NAME.name(), "N/A");
-        }
-        return findVersion(app, versionCode).orElse(new Version(app, versionCode, versionName));
+    private fun getVersion(app: App, jsonObject: JSONObject): Version {
+        val buildConfig: JSONObject? = jsonObject.optJSONObject(ReportField.BUILD_CONFIG.name)
+        val versionCode: Int = buildConfig?.getIntOrNull("VERSION_CODE") ?: jsonObject.optInt(ReportField.APP_VERSION_CODE.name)
+        val versionName: String = buildConfig?.getString("VERSION_NAME") ?: jsonObject.optString(ReportField.APP_VERSION_NAME.name, "N/A")
+        return findVersion(app, versionCode) ?: (Version(app, versionCode, versionName))
     }
 
-    @NonNull
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public <T> Map<T, Long> countReports(@NonNull App app, @Nullable Predicate where, @NonNull Expression<T> select) {
-        List<Tuple> result = ((JPAQuery<?>) new JPAQuery<>(entityManager)).from(report)
-                .where(report.stacktrace.bug.app.eq(app).and(where))
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun <T> countReports(app: App, where: Predicate?, select: Expression<T>): Map<T, Long> {
+        val result = (JPAQuery<Any>(entityManager) as JPAQuery<*>).from(QReport.report)
+                .where(QReport.report.stacktrace.bug.app.eq(app).and(where))
                 .groupBy(select)
-                .select(select, report.id.count())
-                .fetch();
-        return result.stream().collect(Collectors.toMap(tuple -> tuple.get(select), tuple -> Optional.ofNullable(tuple.get(report.id.count())).orElse(0L)));
+                .select(select, QReport.report.id.count())
+                .fetch()
+        return result.map { it[select]!! to (it[QReport.report.id.count()] ?: 0L) }.toMap()
     }
 
-    @NonNull
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public <T extends Comparable> List<T> getFromReports(@NonNull App app, @Nullable Predicate where, @NonNull ComparableExpressionBase<T> select) {
-        return getFromReports(app, where, select, select);
-    }
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun <T : Comparable<*>> getFromReports(app: App, where: Predicate?, select: ComparableExpressionBase<T>): List<T> = getFromReports(app, where, select, select)
 
-    @NonNull
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public <T> List<T> getFromReports(@NonNull App app, @Nullable Predicate where, @NonNull Expression<T> select, ComparableExpressionBase<?> order) {
-        return ((JPAQuery<?>) new JPAQuery<>(entityManager)).from(report)
-                .where(report.stacktrace.bug.app.eq(app).and(where))
-                .select(select)
-                .distinct()
-                .orderBy(order.asc())
-                .fetch();
-    }
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun <T> getFromReports(app: App, where: Predicate?, select: Expression<T>, order: ComparableExpressionBase<*>): List<T> =
+            (JPAQuery<Any>(entityManager) as JPAQuery<*>).from(QReport.report).where(QReport.report.stacktrace.bug.app.eq(app).and(where))
+                    .select(select).distinct().orderBy(order.asc()).fetch()
 
-    @NonNull
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public List<Stacktrace> getStacktraces(@NonNull Bug bug) {
-        return new JPAQuery<>(entityManager).from(stacktrace1).where(stacktrace1.bug.eq(bug)).select(stacktrace1).fetch();
-    }
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun getStacktraces( bug: Bug): List<Stacktrace> =
+            JPAQuery<Any>(entityManager).from(QStacktrace.stacktrace1).where(QStacktrace.stacktrace1.bug.eq(bug)).select(QStacktrace.stacktrace1).fetch()
 
-    @NonNull
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission$Level).VIEW)")
-    public Optional<Integer> getMaxVersion(@NonNull App app) {
-        return Optional.ofNullable(new JPAQuery<>(entityManager).from(version).where(version.app.eq(app)).select(version.code.max()).fetchOne());
-    }
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun getMaxVersion( app: App): Int? = JPAQuery<Any>(entityManager).from(QVersion.version).where(QVersion.version.app.eq(app)).select(QVersion.version.code.max()).fetchOne()
 
     @Transactional
-    @PreAuthorize("hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
-    public ImportResult importFromAcraStorage(String host, int port, boolean ssl, String database) {
-        HttpClient httpClient = new StdHttpClient.Builder().host(host).port(port).enableSSL(ssl).build();
-        CouchDbConnector db = new StdCouchDbConnector(database, new StdCouchDbInstance(httpClient));
-        User user = createNewApp(database.replaceFirst("acra-", ""));
-        int total = 0;
-        int success = 0;
-        for (String id : db.getAllDocIds()) {
+    @PreAuthorize("hasRole(T(com.faendir.acra.model.User\$Role).ADMIN)")
+    fun importFromAcraStorage(host: String, port: Int, ssl: Boolean, database: String): ImportResult {
+        val httpClient = StdHttpClient.Builder().host(host).port(port).enableSSL(ssl).build()
+        val db: CouchDbConnector = StdCouchDbConnector(database, StdCouchDbInstance(httpClient))
+        val user = createNewApp(database.replaceFirst("acra-".toRegex(), ""))
+        var total = 0
+        var success = 0
+        for (id in db.allDocIds) {
             if (!id.startsWith("_design")) {
-                total++;
+                total++
                 try {
-                    JSONObject report = new JSONObject(IOUtils.toString(db.getAsStream(id), StandardCharsets.UTF_8));
-                    fixStringIsArray(report, ReportField.STACK_TRACE);
-                    fixStringIsArray(report, ReportField.LOGCAT);
-                    createNewReport(user.getUsername(), report.toString(), Collections.emptyList());
-                    success++;
-                } catch (Exception ignored) {
+                    val report = JSONObject(IOUtils.toString(db.getAsStream(id), StandardCharsets.UTF_8))
+                    fixStringIsArray(report, ReportField.STACK_TRACE)
+                    fixStringIsArray(report, ReportField.LOGCAT)
+                    createNewReport(user.username, report.toString(), emptyList())
+                    success++
+                } catch (ignored: Exception) {
                 }
             }
         }
-        httpClient.shutdown();
-        return new ImportResult(user, total, success);
+        httpClient.shutdown()
+        return ImportResult(user, total, success)
     }
 
-    private void fixStringIsArray(JSONObject report, ReportField reportField) {
-        Optional.ofNullable(report.optJSONArray(reportField.name()))
-                .ifPresent(array -> report.put(reportField.name(),
-                        StreamSupport.stream(array.spliterator(), false).filter(String.class::isInstance).map(String.class::cast).collect(Collectors.joining("\n"))));
+    private fun fixStringIsArray(report: JSONObject, reportField: ReportField) {
+        report.optJSONArray(reportField.name)?.let { report.put(reportField.name, it.filterIsInstance<String>().joinToString("\n")) }
     }
+
 }

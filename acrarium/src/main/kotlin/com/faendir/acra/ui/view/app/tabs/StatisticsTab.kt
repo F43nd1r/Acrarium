@@ -13,20 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.view.app.tabs
 
-package com.faendir.acra.ui.view.app.tabs;
-
-import com.faendir.acra.model.App;
-import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.component.statistics.Statistics;
-import com.faendir.acra.ui.view.app.AppView;
-import com.faendir.acra.util.LocalSettings;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.annotation.UIScope;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.NonNull;
+import com.faendir.acra.model.App
+import com.faendir.acra.service.DataService
+import com.faendir.acra.ui.component.statistics.Statistics
+import com.faendir.acra.ui.view.app.AppView
+import com.faendir.acra.util.LocalSettings
+import com.vaadin.flow.component.html.Div
+import com.vaadin.flow.router.Route
+import com.vaadin.flow.spring.annotation.SpringComponent
+import com.vaadin.flow.spring.annotation.UIScope
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.lang.NonNull
 
 /**
  * @author lukas
@@ -34,20 +33,15 @@ import org.springframework.lang.NonNull;
  */
 @UIScope
 @SpringComponent
-@Route(value = "statistics", layout = AppView.class)
-public class StatisticsTab extends AppTab<Div> {
-    private final LocalSettings localSettings;
+@Route(value = "statistics", layout = AppView::class)
+class StatisticsTab(dataService: DataService, private val localSettings: LocalSettings) : AppTab<Div>(dataService) {
 
-    @Autowired
-    public StatisticsTab(@NonNull DataService dataService, @NonNull LocalSettings localSettings) {
-        super(dataService);
-        this.localSettings = localSettings;
-        getContent().setSizeFull();
+    init {
+        content.setSizeFull()
     }
 
-    @Override
-    public void init(App app) {
-        getContent().removeAll();
-        getContent().add(new Statistics(app, null, getDataService(), localSettings));
+    override fun init(app: App) {
+        content.removeAll()
+        content.add(Statistics(app, null, dataService, localSettings))
     }
 }

@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.service;
+package com.faendir.acra.service
 
-import com.faendir.acra.model.Report;
-import com.talanlabs.avatargenerator.Avatar;
-import com.talanlabs.avatargenerator.IdenticonAvatar;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.server.StreamResource;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Service;
-
-import java.io.ByteArrayInputStream;
+import com.faendir.acra.model.Report
+import com.talanlabs.avatargenerator.Avatar
+import com.talanlabs.avatargenerator.IdenticonAvatar
+import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.html.Image
+import com.vaadin.flow.server.InputStreamFactory
+import com.vaadin.flow.server.StreamResource
+import org.springframework.cache.annotation.EnableCaching
+import org.springframework.lang.NonNull
+import org.springframework.stereotype.Service
+import java.io.ByteArrayInputStream
 
 /**
  * @author lukas
@@ -33,20 +33,14 @@ import java.io.ByteArrayInputStream;
  */
 @Service
 @EnableCaching
-public class AvatarService {
-    private final Avatar avatar;
+class AvatarService {
+    private val avatar: Avatar = IdenticonAvatar.newAvatarBuilder().size(32, 32).build()
 
-    public AvatarService() {
-        avatar = IdenticonAvatar.newAvatarBuilder().size(32, 32).build();
+    fun getAvatar(report: Report): Component = Image(getAvatar(report.installationId), "")
+
+    fun getAvatar(installationId: String): StreamResource {
+        val bytes = avatar.createAsPngBytes(installationId.hashCode().toLong())
+        return StreamResource("", InputStreamFactory { ByteArrayInputStream(bytes) })
     }
 
-    //@Cacheable(cacheNames = "avatars", key = "#report.installationId")
-    public Component getAvatar(@NonNull Report report) {
-        return new Image(getAvatar(report.getInstallationId()), "");
-    }
-
-    public StreamResource getAvatar(@NonNull String installationId) {
-        byte[] bytes = avatar.createAsPngBytes(installationId.hashCode());
-        return new StreamResource("", () -> new ByteArrayInputStream(bytes));
-    }
 }

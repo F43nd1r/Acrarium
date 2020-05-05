@@ -13,57 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.base
 
-package com.faendir.acra.ui.base;
-
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasElement;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
-import com.vaadin.flow.router.RouterLayout;
+import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.HasElement
+import com.vaadin.flow.component.orderedlayout.FlexLayout
+import com.vaadin.flow.router.RouterLayout
 
 /**
  * @author lukas
  * @since 13.07.18
  */
-public class ParentLayout extends FlexLayout implements RouterLayout {
-    private Component content;
-    private HasElement routerRoot;
+open class ParentLayout() : FlexLayout(), RouterLayout {
+    private var _content: Component? = null
+    private var routerRoot: HasElement = this
 
-    public ParentLayout(HasElement routerRoot) {
-        this();
-        this.routerRoot = routerRoot;
+    constructor(routerRoot: HasElement) : this() {
+        this.routerRoot = routerRoot
     }
 
-    public ParentLayout() {
-        this.routerRoot = this;
-    }
-
-    private void setContent(HasElement content, HasElement root) {
-        if (root == this) {
-            this.content = content instanceof Component ? (Component) content : null;
-        }
-        if (root != this && root instanceof RouterLayout) {
-            ((RouterLayout) root).showRouterLayoutContent(content);
-        } else {
-            root.getElement().removeAllChildren();
-            root.getElement().appendChild(content.getElement());
+    private fun setContent(content: HasElement, root: HasElement) {
+        if (root === this) this._content = if (content is Component) content else null
+        if (root != this && root is RouterLayout) root.showRouterLayoutContent(content)
+        else {
+            root.element.removeAllChildren()
+            root.element.appendChild(content.element)
         }
     }
 
-    public HasElement getContent() {
-        return content;
+    var content: HasElement?
+        get() = _content
+        set(value) {
+            value?.let { setContent(it, this) }
+        }
+
+    fun setRouterRoot(routerRoot: HasElement) {
+        this.routerRoot = routerRoot
     }
 
-    public void setContent(HasElement content) {
-        setContent(content, this);
-    }
-
-    public void setRouterRoot(HasElement routerRoot) {
-        this.routerRoot = routerRoot;
-    }
-
-    @Override
-    public void showRouterLayoutContent(HasElement content) {
-        setContent(content, routerRoot);
-    }
+    override fun showRouterLayoutContent(content: HasElement) = setContent(content, routerRoot)
 }

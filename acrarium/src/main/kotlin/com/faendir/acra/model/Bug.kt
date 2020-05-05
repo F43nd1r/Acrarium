@@ -13,93 +13,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.model;
+package com.faendir.acra.model
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-import org.hibernate.annotations.Type;
-import org.springframework.data.annotation.PersistenceConstructor;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo
+import com.fasterxml.jackson.annotation.JsonIdentityReference
+import com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator
+import org.hibernate.annotations.OnDelete
+import org.hibernate.annotations.OnDeleteAction
+import org.hibernate.annotations.Type
+import javax.persistence.CascadeType
+import javax.persistence.Entity
+import javax.persistence.FetchType
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
 
 /**
  * @author Lukas
  * @since 08.12.2017
  */
 @Entity
-public class Bug {
-    @Type(type = "text") protected String title;
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-    @JsonIdentityReference(alwaysAsId = true)
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, optional = false, fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private App app;
-    @Nullable
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
+class Bug(@OnDelete(action = OnDeleteAction.CASCADE)
+          @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.REFRESH], optional = false, fetch = FetchType.LAZY) @JsonIdentityReference(alwaysAsId = true)
+          @JsonIdentityInfo(generator = PropertyGenerator::class, property = "id")
+          val app: App,
+          stacktrace: String) {
+    @Type(type = "text")
+    var title: String = stacktrace.split("\n".toRegex(), 2).toTypedArray()[0]
+
+    @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.REFRESH], fetch = FetchType.EAGER)
     @JoinColumn(name = "solved_version")
-    private Version solvedVersion;
+    var solvedVersion: Version? = null
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    val id = 0
 
-    @PersistenceConstructor
-    Bug() {
+    override fun equals(other: Any?): Boolean {
+        return when {
+            this === other -> true
+            other == null || javaClass != other.javaClass -> false
+            else -> id == (other as Bug).id
+        }
     }
 
-    public Bug(@NonNull App app, @NonNull String stacktrace) {
-        this.app = app;
-        this.title = stacktrace.split("\n", 2)[0];
-    }
+    override fun hashCode(): Int = id
 
-    public int getId() {
-        return id;
-    }
-
-    @NonNull
-    public App getApp() {
-        return app;
-    }
-
-    @NonNull
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(@NonNull String title) {
-        this.title = title;
-    }
-
-    @Nullable
-    public Version getSolvedVersion() {
-        return solvedVersion;
-    }
-
-    public void setSolvedVersion(@Nullable Version solvedVersion) {
-        this.solvedVersion = solvedVersion;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Bug bug = (Bug) o;
-        return id == bug.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return id;
-    }
 }

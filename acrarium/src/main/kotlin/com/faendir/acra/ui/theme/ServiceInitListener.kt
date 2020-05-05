@@ -13,30 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.theme
 
-package com.faendir.acra.ui.theme;
-
-import com.vaadin.flow.server.ServiceInitEvent;
-import com.vaadin.flow.server.UIInitListener;
-import com.vaadin.flow.server.VaadinServiceInitListener;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
-import java.util.Optional;
+import com.vaadin.flow.server.ServiceInitEvent
+import com.vaadin.flow.server.UIInitEvent
+import com.vaadin.flow.server.UIInitListener
+import com.vaadin.flow.server.VaadinServiceInitListener
+import com.vaadin.flow.spring.annotation.SpringComponent
+import org.springframework.beans.factory.ObjectProvider
+import org.springframework.beans.factory.annotation.Autowired
+import java.util.*
+import java.util.function.Consumer
 
 @SpringComponent
-public class ServiceInitListener implements VaadinServiceInitListener {
-    private ObjectProvider<List<UIInitListener>> uiInitListenerProvider;
-
-    @Autowired
-    public ServiceInitListener(ObjectProvider<List<UIInitListener>> uiInitListenerProvider) {
-        this.uiInitListenerProvider = uiInitListenerProvider;
+class ServiceInitListener(private val uiInitListenerProvider: ObjectProvider<List<UIInitListener>>) : VaadinServiceInitListener {
+    override fun serviceInit(event: ServiceInitEvent) {
+        event.source.addUIInitListener { e -> uiInitListenerProvider.ifAvailable?.let { list -> list.forEach { it.uiInit(e) } } }
     }
 
-    @Override
-    public void serviceInit(ServiceInitEvent event) {
-        event.getSource().addUIInitListener(e -> Optional.ofNullable(uiInitListenerProvider.getIfAvailable()).ifPresent(list -> list.forEach(l -> l.uiInit(e))));
-    }
 }

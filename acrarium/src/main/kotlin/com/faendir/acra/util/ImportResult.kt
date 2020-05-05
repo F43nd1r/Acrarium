@@ -13,35 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.util
 
-package com.faendir.acra.util;
-
-import com.faendir.acra.model.User;
+import com.faendir.acra.model.User
 
 /**
  * @author lukas
  * @since 15.08.18
  */
-public class ImportResult {
-    private final User user;
-    private final int totalCount;
-    private final int successCount;
-
-    public ImportResult(User user, int totalCount, int successCount) {
-        this.user = user;
-        this.totalCount = totalCount;
-        this.successCount = successCount;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public int getTotalCount() {
-        return totalCount;
-    }
-
-    public int getSuccessCount() {
-        return successCount;
-    }
-}
+data class ImportResult(val user: User, val totalCount: Int, val successCount: Int)

@@ -71,7 +71,7 @@ public class RestReportInterfaceTest {
     @Before
     public void setUp() {
         App app = mock(App.class);
-        when(dataService.findApp(TEST_STRING)).thenReturn(Optional.of(app));
+        when(dataService.findApp(TEST_STRING)).thenReturn(app);
         when(dataService.getFromReports(any(), any(), any(), any())).thenReturn(Arrays.asList("{\"name\":\"a\"}", "{\"name\":\"b\"}"));
     }
 

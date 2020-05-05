@@ -13,121 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.model
 
-package com.faendir.acra.model;
-
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.data.annotation.PersistenceConstructor;
-import org.springframework.lang.NonNull;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import java.io.Serializable;
-import java.util.Objects;
+import com.faendir.acra.util.NoArgConstructor
+import org.hibernate.annotations.OnDelete
+import org.hibernate.annotations.OnDeleteAction
+import java.io.Serializable
+import java.util.*
+import javax.persistence.Entity
+import javax.persistence.Id
+import javax.persistence.IdClass
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
 
 /**
  * @author lukas
  * @since 07.12.18
  */
 @Entity
-@IdClass(MailSettings.ID.class)
-public class MailSettings {
-    @Id
-    @ManyToOne
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private App app;
-    @Id
-    @ManyToOne
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "username")
-    private User user;
-    private boolean newBug;
-    private boolean regression;
-    private boolean spike;
-    private boolean summary;
+@IdClass(MailSettings.ID::class)
+class MailSettings(@OnDelete(action = OnDeleteAction.CASCADE)
+                   @ManyToOne
+                   @Id
+                   val app: App, @JoinColumn(name = "username")
+                   @OnDelete(action = OnDeleteAction.CASCADE)
+                   @ManyToOne
+                   @Id
+                   val user: User) {
 
-    @PersistenceConstructor
-    MailSettings() {
-    }
+    var newBug = false
+    var regression = false
+    var spike = false
+    var summary = false
 
-    public MailSettings(@NonNull App app, @NonNull User user) {
-        this.app = app;
-        this.user = user;
-    }
+    @NoArgConstructor
+    internal data class ID(val app: Int, val user: String) : Serializable
 
-    public App getApp() {
-        return app;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public boolean getNewBug() {
-        return newBug;
-    }
-
-    public void setNewBug(boolean newBug) {
-        this.newBug = newBug;
-    }
-
-    public boolean getRegression() {
-        return regression;
-    }
-
-    public void setRegression(boolean regression) {
-        this.regression = regression;
-    }
-
-    public boolean getSpike() {
-        return spike;
-    }
-
-    public void setSpike(boolean spike) {
-        this.spike = spike;
-    }
-
-    public boolean getSummary() {
-        return summary;
-    }
-
-    public void setSummary(boolean summary) {
-        this.summary = summary;
-    }
-
-    static class ID implements Serializable {
-        private int app;
-        private String user;
-
-        @PersistenceConstructor
-        ID() {
-        }
-
-        public ID(App app, User user) {
-            this.app = app.getId();
-            this.user = user.getUsername();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            ID id = (ID) o;
-            return app == id.app &&
-                    Objects.equals(user, id.user);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(app, user);
-        }
-    }
 }

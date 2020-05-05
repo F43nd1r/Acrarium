@@ -13,25 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.service
 
-package com.faendir.acra.service;
-
-import com.faendir.acra.model.App;
-import org.springframework.context.ApplicationEvent;
+import com.faendir.acra.model.App
+import org.springframework.context.ApplicationEvent
 
 /**
  * @author lukas
  * @since 07.12.18
  */
-public class ConfigurationUpdateEvent extends ApplicationEvent {
-    private final App app;
-
-    public ConfigurationUpdateEvent(Object source, App app) {
-        super(source);
-        this.app = app;
-    }
-
-    public App getApp() {
-        return app;
-    }
-}
+class ConfigurationUpdateEvent(source: Any, val app: App) : ApplicationEvent(source)

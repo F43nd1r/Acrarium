@@ -13,46 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.service
 
-package com.faendir.acra.service;
-
-import com.faendir.acra.i18n.Messages;
-import com.faendir.acra.model.*;
-import com.faendir.acra.ui.view.bug.tabs.ReportTab;
-import com.querydsl.core.Tuple;
-import com.querydsl.jpa.impl.JPAQuery;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.i18n.I18NProvider;
-import com.vaadin.flow.router.HasUrlParameter;
-import com.vaadin.flow.router.RouteConfiguration;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.event.EventListener;
-import org.springframework.lang.NonNull;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.mail.MessagingException;
-import javax.persistence.EntityManager;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
-
-import static com.faendir.acra.model.QBug.bug;
-import static com.faendir.acra.model.QMailSettings.mailSettings;
-import static com.faendir.acra.model.QReport.report;
-import static com.faendir.acra.model.QStacktrace.stacktrace1;
+import com.faendir.acra.i18n.Messages
+import com.faendir.acra.model.MailSettings
+import com.faendir.acra.model.QBug
+import com.faendir.acra.model.QMailSettings
+import com.faendir.acra.model.QReport
+import com.faendir.acra.model.QStacktrace
+import com.faendir.acra.model.User
+import com.faendir.acra.ui.view.bug.tabs.ReportTab
+import com.faendir.acra.util.ensureTrailing
+import com.querydsl.core.Tuple
+import com.querydsl.jpa.impl.JPAQuery
+import com.vaadin.flow.component.Component
+import com.vaadin.flow.i18n.I18NProvider
+import com.vaadin.flow.router.HasUrlParameter
+import com.vaadin.flow.router.RouteConfiguration
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.context.event.EventListener
+import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.mail.javamail.MimeMessageHelper
+import org.springframework.scheduling.annotation.Async
+import org.springframework.scheduling.annotation.EnableAsync
+import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
+import java.util.*
+import java.util.stream.Collectors
+import java.util.stream.LongStream
+import javax.mail.MessagingException
+import javax.persistence.EntityManager
 
 /**
  * @author lukas
@@ -61,104 +56,99 @@ import static com.faendir.acra.model.QStacktrace.stacktrace1;
 @Service
 @EnableScheduling
 @EnableAsync
-@ConditionalOnProperty(prefix = "spring.mail", name = "host")
-public class MailService {
-    private final EntityManager entityManager;
-    @NonNull
-    private final I18NProvider i18nProvider;
-    @NonNull
-    private final JavaMailSender mailSender;
-    @NonNull
-    private final RouteConfiguration routeConfiguration;
-    @Value("${server.context-path}")
-    private String baseUrl;
+@ConditionalOnProperty(prefix = "spring.mail", name = ["host"])
+class MailService(private val entityManager: EntityManager, private val i18nProvider: I18NProvider, private val mailSender: JavaMailSender, private val routeConfiguration: RouteConfiguration) {
 
-    public MailService(@NonNull EntityManager entityManager, @NonNull I18NProvider i18nProvider, @NonNull JavaMailSender mailSender, @NonNull RouteConfiguration routeConfiguration) {
-        this.entityManager = entityManager;
-        this.i18nProvider = i18nProvider;
-        this.mailSender = mailSender;
-        this.routeConfiguration = routeConfiguration;
-    }
+    @Value("\${server.context-path}")
+    private val baseUrl: String? = null
 
     @Transactional
     @EventListener
     @Async
-    public void onNewReport(NewReportEvent event) {
-        Report r = event.getReport();
-        Stacktrace stacktrace = r.getStacktrace();
-        Bug bug = stacktrace.getBug();
-        App app = bug.getApp();
-        List<MailSettings> settings = new JPAQuery<>(entityManager).select(mailSettings).from(mailSettings).where(mailSettings.app.eq(app).and(mailSettings.user.mail.isNotNull())).fetch();
-        List<User> newBugReceiver = getUserBy(settings, MailSettings::getNewBug);
-        List<User> regressionReceiver = getUserBy(settings, MailSettings::getRegression);
-        List<User> spikeReceiver = getUserBy(settings, MailSettings::getSpike);
-        if (!newBugReceiver.isEmpty() && new JPAQuery<>(entityManager).from(report).where(report.stacktrace.bug.eq(bug)).limit(2).select(report.count()).fetchCount() == 1) {
-            sendMessage(newBugReceiver, getTranslation(Messages.NEW_BUG_MAIL_TEMPLATE, getFullUrl(ReportTab.class, bug.getId()), bug.getTitle(), r.getBrand(), r.getPhoneModel(), r.getAndroidVersion(), app.getName(), stacktrace.getVersion().getName()), getTranslation(Messages.NEW_BUG_MAIL_SUBJECT, app.getName()));
-        } else if (!regressionReceiver.isEmpty() && bug.getSolvedVersion() != null && bug.getSolvedVersion().getCode() <= stacktrace.getVersion().getCode()) {
-            sendMessage(regressionReceiver, getTranslation(Messages.REGRESSION_MAIL_TEMPLATE, getFullUrl(ReportTab.class, bug.getId()), bug.getTitle(), r.getBrand(), bug.getSolvedVersion().getName(), r.getPhoneModel(), r.getAndroidVersion(), app.getName(), stacktrace.getVersion().getName()), getTranslation(Messages.REGRESSION_MAIL_SUBJECT, app.getName()));
-            bug.setSolvedVersion(null);
-            entityManager.merge(bug);
-        } else if (!spikeReceiver.isEmpty()) {
-            long reportCount = fetchReportCountOnDay(0);
-            double averageCount = LongStream.range(1, 3).map(this::fetchReportCountOnDay).average().orElse(Double.MAX_VALUE);
+    fun onNewReport(event: NewReportEvent) {
+        val r = event.report
+        val stacktrace = r.stacktrace
+        val bug = stacktrace.bug
+        val app = bug.app
+        val settings = JPAQuery<Any>(entityManager).select(QMailSettings.mailSettings).from(QMailSettings.mailSettings).where(QMailSettings.mailSettings.app.eq(app)
+                .and(QMailSettings.mailSettings.user.mail.isNotNull)).fetch()
+        val newBugReceiver = getUserBy(settings, MailSettings::newBug)
+        val regressionReceiver = getUserBy(settings, MailSettings::regression)
+        val spikeReceiver = getUserBy(settings, MailSettings::spike)
+        if (newBugReceiver.isNotEmpty() && JPAQuery<Any>(entityManager).from(QReport.report).where(QReport.report.stacktrace.bug.eq(bug)).limit(2)
+                        .select(QReport.report.count()).fetchCount() == 1L) {
+            sendMessage(newBugReceiver, getTranslation(Messages.NEW_BUG_MAIL_TEMPLATE, getFullUrl(ReportTab::class.java, bug.id), bug.title, r.brand, r.phoneModel, r.androidVersion,
+                    app.name, stacktrace.version.name), getTranslation(Messages.NEW_BUG_MAIL_SUBJECT, app.name))
+        } else if (regressionReceiver.isNotEmpty() && bug.solvedVersion != null && bug.solvedVersion!!.code <= stacktrace.version.code) {
+            sendMessage(regressionReceiver, getTranslation(Messages.REGRESSION_MAIL_TEMPLATE, getFullUrl(ReportTab::class.java, bug.id), bug.title, r.brand, bug.solvedVersion!!.name,
+                    r.phoneModel, r.androidVersion, app.name, stacktrace.version.name), getTranslation(Messages.REGRESSION_MAIL_SUBJECT, app.name))
+            bug.solvedVersion = null
+            entityManager.merge(bug)
+        } else if (spikeReceiver.isNotEmpty()) {
+            val reportCount = fetchReportCountOnDay(0)
+            val averageCount = LongStream.range(1, 3).map { subtractDays: Long -> fetchReportCountOnDay(subtractDays) }.average().orElse(Double.MAX_VALUE)
             if (reportCount > 1.2 * averageCount && reportCount - 1 <= 1.2 * averageCount) {
-                sendMessage(regressionReceiver, getTranslation(Messages.SPIKE_MAIL_TEMPLATE, getFullUrl(ReportTab.class, bug.getId()), bug.getTitle(), stacktrace.getVersion().getName(), reportCount), getTranslation(Messages.SPIKE_MAIL_SUBJECT, app.getName()));
+                sendMessage(regressionReceiver, getTranslation(Messages.SPIKE_MAIL_TEMPLATE, getFullUrl(ReportTab::class.java, bug.id), bug.title, stacktrace.version.name,
+                        reportCount), getTranslation(Messages.SPIKE_MAIL_SUBJECT, app.name))
             }
         }
     }
 
-    private List<User> getUserBy(List<MailSettings> list, Predicate<MailSettings> predicate) {
-        return list.stream().filter(predicate).map(MailSettings::getUser).collect(Collectors.toList());
-    }
+    private fun getUserBy(list: List<MailSettings>, predicate: (MailSettings) -> Boolean): List<User> = list.filter(predicate).map(MailSettings::user)
 
-    private long fetchReportCountOnDay(long subtractDays) {
-        ZonedDateTime today = ZonedDateTime.now().truncatedTo(ChronoUnit.DAYS);
-        return new JPAQuery<>(entityManager).from(report).where(report.stacktrace.bug.eq(bug).and(report.date.between(today.minus(subtractDays, ChronoUnit.DAYS), today.minus(subtractDays - 1, ChronoUnit.DAYS)))).select(report.count()).fetchCount();
+    private fun fetchReportCountOnDay(subtractDays: Long): Long {
+        val today = ZonedDateTime.now().truncatedTo(ChronoUnit.DAYS)
+        return JPAQuery<Any>(entityManager).from(QReport.report).where(QReport.report.stacktrace.bug.eq(QBug.bug)
+                .and(QReport.report.date.between(today.minus(subtractDays, ChronoUnit.DAYS), today.minus(subtractDays - 1, ChronoUnit.DAYS))))
+                .select(QReport.report.count()).fetchCount()
     }
 
     @Scheduled(cron = "0 0 0 * * SUN")
-    public void weeklyReport() {
-        Map<App, List<MailSettings>> settings = new JPAQuery<>(entityManager).select(mailSettings).from(mailSettings).where(mailSettings.summary.isTrue()).fetch()
-                .stream()
-                .collect(Collectors.groupingBy(MailSettings::getApp, Collectors.toList()));
-        for (Map.Entry<App, List<MailSettings>> entry : settings.entrySet()) {
-            List<Tuple> tuples = new JPAQuery<>(entityManager).from(bug).join(stacktrace1).on(bug.eq(stacktrace1.bug)).join(report).on(stacktrace1.eq(report.stacktrace)).where(bug.app.eq(entry.getKey()).and(report.date.after(ZonedDateTime.now().minus(1, ChronoUnit.WEEKS))))
-                    .groupBy(bug)
-                    .select(bug, report.count(), report.installationId.countDistinct())
-                    .fetch();
-            String body = tuples.stream().map(tuple -> {
-                Bug bug = tuple.get(QBug.bug);
-                return getTranslation(Messages.WEEKLY_MAIL_BUG_TEMPLATE, getFullUrl(ReportTab.class, bug.getId()), bug.getTitle(), tuple.get(report.count()), tuple.get(report.installationId.countDistinct()));
-            }).collect(Collectors.joining("\n"));
-            if (body.isEmpty()) {
-                body = getTranslation(Messages.WEEKLY_MAIL_NO_REPORTS);
+    fun weeklyReport() {
+        val settings = JPAQuery<Any>(entityManager).select(QMailSettings.mailSettings).from(QMailSettings.mailSettings).where(QMailSettings.mailSettings.summary.isTrue).fetch()
+                .groupBy { it.app }
+        for ((key, value) in settings) {
+            val tuples = JPAQuery<Any>(entityManager).from(QBug.bug).join(QStacktrace.stacktrace1).on(QBug.bug.eq(QStacktrace.stacktrace1.bug)).join(QReport.report).on(QStacktrace.stacktrace1.eq(QReport.report.stacktrace)).where(QBug.bug.app.eq(key).and(QReport.report.date.after(ZonedDateTime.now().minus(1, ChronoUnit.WEEKS))))
+                    .groupBy(QBug.bug)
+                    .select(QBug.bug, QReport.report.count(), QReport.report.installationId.countDistinct())
+                    .fetch()
+            var body = tuples.joinToString("\n") { tuple: Tuple ->
+                val bug = tuple.get(QBug.bug)
+                getTranslation(Messages.WEEKLY_MAIL_BUG_TEMPLATE, getFullUrl(ReportTab::class.java, bug!!.id), bug.title, tuple.get(QReport.report.count())!!,
+                        tuple.get(QReport.report.installationId.countDistinct())!!)
             }
-            sendMessage(entry.getValue().stream().map(MailSettings::getUser).collect(Collectors.toList()), body, getTranslation(Messages.WEEKLY_MAIL_SUBJECT, entry.getKey().getName()));
+            if (body.isEmpty()) {
+                body = getTranslation(Messages.WEEKLY_MAIL_NO_REPORTS)
+            }
+            sendMessage(value.map(MailSettings::user), body, getTranslation(Messages.WEEKLY_MAIL_SUBJECT, key.name))
         }
     }
 
-    private void sendMessage(@NonNull List<User> users, @NonNull String body, @NonNull String subject) {
-        for (User user : users) {
-            if (user.getMail() != null && !"".equals(user.getMail())) {
-                try {
-                    MimeMessageHelper message = new MimeMessageHelper(mailSender.createMimeMessage(), true);
-                    message.setTo(user.getMail());
-                    message.setSubject(subject);
-                    message.setText(body , true);
-                    mailSender.send(message.getMimeMessage());
-                } catch (MessagingException e) {
-                    e.printStackTrace();
+    private fun sendMessage(users: List<User>, body: String, subject: String) {
+        for (user in users) {
+            user.mail?.let {
+                if (it.isNotBlank()) {
+                    try {
+                        val message = MimeMessageHelper(mailSender.createMimeMessage(), true)
+                        message.setTo(it)
+                        message.setSubject(subject)
+                        message.setText(body, true)
+                        mailSender.send(message.mimeMessage)
+                    } catch (e: MessagingException) {
+                        e.printStackTrace()
+                    }
                 }
             }
         }
     }
 
-    private String getTranslation(String messageId, Object... params) {
+    private fun getTranslation(messageId: String, vararg params: Any): String {
         //TODO use user locale
-        return i18nProvider.getTranslation(messageId, Locale.ENGLISH, params);
+        return i18nProvider.getTranslation(messageId, Locale.ENGLISH, *params)
     }
 
-    private <T, C extends Component & HasUrlParameter<T>> String getFullUrl(Class<? extends C> navigationTarget, T parameter) {
-        return baseUrl + (baseUrl.endsWith("/") ? "" : "/") + routeConfiguration.getUrl(navigationTarget, parameter);
+    private fun <T, C> getFullUrl(navigationTarget: Class<out C?>, parameter: T): String where C : Component, C : HasUrlParameter<T> {
+        return baseUrl?.ensureTrailing("/") + routeConfiguration.getUrl(navigationTarget, parameter)
     }
+
 }

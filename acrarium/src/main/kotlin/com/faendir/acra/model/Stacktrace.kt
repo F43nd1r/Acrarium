@@ -13,72 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.model
 
-package com.faendir.acra.model;
-
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-import org.hibernate.annotations.Type;
-import org.springframework.data.annotation.PersistenceConstructor;
-import org.springframework.lang.NonNull;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo
+import com.fasterxml.jackson.annotation.JsonIdentityReference
+import com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator
+import org.hibernate.annotations.OnDelete
+import org.hibernate.annotations.OnDeleteAction
+import org.hibernate.annotations.Type
+import javax.persistence.CascadeType
+import javax.persistence.Entity
+import javax.persistence.FetchType
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.ManyToOne
 
 /**
  * @author lukas
  * @since 04.06.18
  */
 @Entity
-public class Stacktrace {
+class Stacktrace(@OnDelete(action = OnDeleteAction.CASCADE)
+                 @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH], optional = false, fetch = FetchType.LAZY)
+                 @JsonIdentityReference(alwaysAsId = true)
+                 @JsonIdentityInfo(generator = PropertyGenerator::class, property = "id")
+                 var bug: Bug,
+                 @Type(type = "text")
+                 val stacktrace: String,
+                 @OnDelete(action = OnDeleteAction.CASCADE)
+                 @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH], optional = false, fetch = FetchType.EAGER)
+                 val version: Version) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-    @JsonIdentityReference(alwaysAsId = true)
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, optional = false, fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Bug bug;
-    @Type(type = "text") private String stacktrace;
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, optional = false, fetch = FetchType.EAGER)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Version version;
-
-    @PersistenceConstructor
-    Stacktrace(){
-    }
-
-    public Stacktrace(@NonNull Bug bug, @NonNull String stacktrace, Version version) {
-        this.bug = bug;
-        this.stacktrace = stacktrace;
-        this.version = version;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public Bug getBug() {
-        return bug;
-    }
-
-    public void setBug(Bug bug) {
-        this.bug = bug;
-    }
-
-    public String getStacktrace() {
-        return stacktrace;
-    }
-
-    public Version getVersion() {
-        return version;
-    }
+    val id = 0
 }

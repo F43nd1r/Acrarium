@@ -13,160 +13,122 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.service;
+package com.faendir.acra.service
 
-import com.faendir.acra.dataprovider.QueryDslDataProvider;
-import com.faendir.acra.model.App;
-import com.faendir.acra.model.Permission;
-import com.faendir.acra.model.QUser;
-import com.faendir.acra.model.User;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.jpa.impl.JPAQuery;
-import org.apache.commons.text.RandomStringGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import javax.validation.Validator;
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.Optional;
+import com.faendir.acra.dataprovider.QueryDslDataProvider
+import com.faendir.acra.model.App
+import com.faendir.acra.model.Permission
+import com.faendir.acra.model.QUser
+import com.faendir.acra.model.User
+import com.querydsl.core.types.dsl.Expressions
+import com.querydsl.jpa.impl.JPAQuery
+import org.apache.commons.text.RandomStringGenerator
+import org.springframework.lang.NonNull
+import org.springframework.lang.Nullable
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.io.Serializable
+import javax.persistence.EntityManager
+import javax.validation.Validator
 
 /**
  * @author Lukas
  * @since 20.05.2017
  */
 @Service
-public class UserService implements Serializable {
-    private static final QUser USER = QUser.user;
-    @NonNull
-    private final PasswordEncoder passwordEncoder;
-    @NonNull
-    private final RandomStringGenerator randomStringGenerator;
-    @NonNull
-    private final EntityManager entityManager;
-    @NonNull
-    private final Validator validator;
+class UserService(private val passwordEncoder: PasswordEncoder, private val randomStringGenerator: RandomStringGenerator, private val entityManager: EntityManager,
+                  private val validator: Validator) : Serializable {
 
-    @Autowired
-    public UserService(@NonNull PasswordEncoder passwordEncoder, @NonNull RandomStringGenerator randomStringGenerator,
-                       @NonNull EntityManager entityManager, @NonNull Validator validator) {
-        this.passwordEncoder = passwordEncoder;
-        this.randomStringGenerator = randomStringGenerator;
-        this.entityManager = entityManager;
-        this.validator = validator;
-    }
-
-    @Nullable
-    public User getUser(@NonNull String username) {
-        return new JPAQuery<>(entityManager).from(USER).where(USER.username.eq(username)).select(USER).fetchOne();
-    }
+    fun getUser(username: String): User? = JPAQuery<Any>(entityManager).from(USER).where(USER.username.eq(username)).select(USER).fetchOne()
 
     @Transactional
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
-    public void createUser(@NonNull String username, @NonNull String password) {
-        if (new JPAQuery<>(entityManager).from(USER).where(USER.username.eq(username)).fetchFirst() != null) {
-            throw new IllegalArgumentException("Username already exists");
-        }
-        entityManager.persist(new User(username, passwordEncoder.encode(password), Collections.singleton(User.Role.USER)));
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User\$Role).ADMIN)")
+    fun createUser(username: String, password: String) {
+        require(JPAQuery<Any?>(entityManager).from(USER).where(USER.username.eq(username)).fetchFirst() == null) { "Username already exists" }
+        entityManager.persist(User(username, passwordEncoder.encode(password), mutableSetOf(User.Role.USER)))
     }
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
-    public User createReporterUser() {
-        String username;
+
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User\$Role).ADMIN)")
+    fun createReporterUser(): User {
+        var username: String
         do {
-            username = randomStringGenerator.generate(16);
-        } while (new JPAQuery<>(entityManager).from(USER).where(USER.username.eq(username)).fetchFirst() != null);
-        String password = randomStringGenerator.generate(16);
-        return new User(username, password, passwordEncoder.encode(password), Collections.singleton(User.Role.REPORTER));
+            username = randomStringGenerator.generate(16)
+        } while (JPAQuery<Any?>(entityManager).from(USER).where(USER.username.eq(username)).fetchFirst() != null)
+        val password = randomStringGenerator.generate(16)
+        return User(username, passwordEncoder.encode(password), mutableSetOf(User.Role.REPORTER), password)
     }
 
-    public boolean checkPassword(@Nullable User user, @NonNull String password) {
-        return user != null && passwordEncoder.matches(password, user.getPassword());
-    }
+    fun checkPassword(user: User?, password: String?): Boolean = user != null && passwordEncoder.matches(password, user.password)
 
     @Transactional
-    public User store(@NonNull User user) {
-        if(user.hasPlainTextPassword()) {
-            user.setPassword(passwordEncoder.encode(user.getPlainTextPassword()));
-        }
-        return entityManager.merge(user);
-    }
+    fun store(user: User): User = entityManager.merge(user.apply { if(hasPlainTextPassword()) password =  passwordEncoder.encode(user.getPlainTextPassword()) })
 
-    public boolean hasAdmin() {
-        return new JPAQuery<>(entityManager).from(USER).where(USER.roles.contains(User.Role.ADMIN)).select(Expressions.ONE).fetchFirst() != null;
-    }
-
+    fun hasAdmin(): Boolean = JPAQuery<Any>(entityManager).from(USER).where(USER.roles.contains(User.Role.ADMIN)).select(Expressions.ONE).fetchFirst() != null
 
     @Transactional
     @PreAuthorize("authentication.name == #user.username")
-    public boolean changePassword(@NonNull User user, @NonNull String oldPassword, @NonNull String newPassword) {
+    fun changePassword(user: User, oldPassword: String?, newPassword: String): Boolean {
         if (checkPassword(user, oldPassword)) {
-            user.setPassword(passwordEncoder.encode(newPassword));
-            entityManager.merge(user);
-            return true;
+            user.password = passwordEncoder.encode(newPassword)
+            entityManager.merge(user)
+            return true
         }
-        return false;
+        return false
     }
 
     @Transactional
     @PreAuthorize("authentication.name == #user.username")
-    public boolean changeMail(@NonNull User user, @Nullable String mail) {
-        String oldMail = user.getMail();
-        user.setMail(mail);
-        if (!validator.validate(user).isEmpty()) {
-            user.setMail(oldMail);
-            return false;
+    fun changeMail(user: User, mail: String?): Boolean {
+        val oldMail = user.mail
+        user.mail = mail
+        if (validator.validate(user).isNotEmpty()) {
+            user.mail = oldMail
+            return false
         }
-        entityManager.merge(user);
-        return true;
+        entityManager.merge(user)
+        return true
     }
 
-
     @Transactional
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
-    public void setAdmin(@NonNull User user, boolean admin) {
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User\$Role).ADMIN)")
+    fun setAdmin(user: User, admin: Boolean) {
         if (admin) {
-            user.getRoles().add(User.Role.ADMIN);
+            user.roles.add(User.Role.ADMIN)
         } else {
-            user.getRoles().remove(User.Role.ADMIN);
+            user.roles.remove(User.Role.ADMIN)
         }
-        entityManager.merge(user);
+        entityManager.merge(user)
     }
 
     @Transactional
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
-    public void setApiAccess(@NonNull User user, boolean access) {
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User\$Role).ADMIN)")
+    fun setApiAccess(user: User, access: Boolean) {
         if (access) {
-            user.getRoles().add(User.Role.API);
+            user.roles.add(User.Role.API)
         } else {
-            user.getRoles().remove(User.Role.API);
+            user.roles.remove(User.Role.API)
         }
-        entityManager.merge(user);
+        entityManager.merge(user)
     }
 
     @Transactional
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
-    public void setPermission(@NonNull User user, @NonNull App app, @Nullable Permission.Level level) {
-        Optional<Permission> permission = user.getPermissions().stream().filter(p -> p.getApp().equals(app)).findAny();
-        if (permission.isPresent()) {
-            if (level != null) {
-                permission.get().setLevel(level);
-            } else {
-                user.getPermissions().remove(permission.get());
-            }
-        } else if (level != null) {
-            user.getPermissions().add(new Permission(app, level));
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User\$Role).ADMIN)")
+    fun setPermission(user: User, app: App, level: Permission.Level?) {
+        val permission = user.permissions.firstOrNull { p: Permission -> p.app == app }
+        when {
+            permission != null -> if (level != null) permission.level = level else user.permissions.remove(permission)
+            level != null -> user.permissions.add(Permission(app, level))
         }
-        entityManager.merge(user);
+        entityManager.merge(user)
     }
 
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User$Role).ADMIN)")
-    public QueryDslDataProvider<User> getUserProvider() {
-        return new QueryDslDataProvider<>(new JPAQuery<>(entityManager).from(USER).where(USER.roles.any().eq(User.Role.USER)).select(USER));
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User\$Role).ADMIN)")
+    fun getUserProvider() = QueryDslDataProvider(JPAQuery<Any>(entityManager).from(USER).where(USER.roles.any().eq(User.Role.USER)).select(USER))
+
+    companion object {
+        private val USER = QUser.user
     }
+
 }

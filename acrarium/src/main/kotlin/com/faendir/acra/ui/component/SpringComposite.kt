@@ -13,74 +13,61 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.component
 
-package com.faendir.acra.ui.component;
-
-import com.googlecode.gentyref.GenericTypeReflector;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.internal.ReflectTools;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.annotation.AnnotationUtils;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
+import com.googlecode.gentyref.GenericTypeReflector
+import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.Composite
+import com.vaadin.flow.internal.ReflectTools
+import com.vaadin.flow.spring.annotation.SpringComponent
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
+import org.springframework.core.annotation.AnnotationUtils
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
+import java.lang.reflect.TypeVariable
 
 @SpringComponent
-public abstract class SpringComposite<T extends Component> extends Composite<T> {
-    private ApplicationContext applicationContext;
+abstract class SpringComposite<T : Component> : Composite<T>() {
+    private lateinit var applicationContext: ApplicationContext
 
-    @SuppressWarnings("unchecked")
-    @Override
-    protected T initContent() {
-        Class<? extends Component> contentType = findContentType((Class<? extends Composite<?>>) getClass());
-        if (AnnotationUtils.findAnnotation(contentType, org.springframework.stereotype.Component.class) != null)
-            if (applicationContext != null) {
-                return (T) applicationContext.getBean(contentType);
+    @Suppress("UNCHECKED_CAST")
+    override fun initContent(): T {
+        val contentType = findContentType(javaClass as Class<out Composite<*>?>)
+        return if (AnnotationUtils.findAnnotation(contentType, org.springframework.stereotype.Component::class.java) != null) {
+            if (::applicationContext.isInitialized) {
+                applicationContext.getBean(contentType) as T
             } else {
-                throw new IllegalStateException("Cannot access Composite content before bean initialization");
+                throw IllegalStateException("Cannot access Composite content before bean initialization")
             }
-        return (T) ReflectTools.createInstance(contentType);
+        } else ReflectTools.createInstance(contentType) as T
     }
 
     @Autowired
-    public final void setApplicationContext(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+    fun setApplicationContext(applicationContext: ApplicationContext) {
+        this.applicationContext = applicationContext
     }
 
-    /*
-     * copied from Composite#findContentType(Class)
-     */
-    private static Class<? extends Component> findContentType(
-            Class<? extends Composite<?>> compositeClass) {
-        Type type = GenericTypeReflector.getTypeParameter(
-                compositeClass.getGenericSuperclass(),
-                Composite.class.getTypeParameters()[0]);
-        if (type instanceof Class || type instanceof ParameterizedType) {
-            return GenericTypeReflector.erase(type).asSubclass(Component.class);
-        }
-        throw new IllegalStateException(getExceptionMessage(type));
-    }
-
-    /*
-     * copied from Composite#getExceptionMessage(Type)
-     */
-    private static String getExceptionMessage(Type type) {
-        if (type == null) {
-            return "Composite is used as raw type: either add type information or override initContent().";
+    companion object {
+        /**
+         * adapted from Composite#findContentType(Class)
+         */
+        private fun findContentType(
+                compositeClass: Class<out Composite<*>?>): Class<out Component> {
+            val type = GenericTypeReflector.getTypeParameter(compositeClass.genericSuperclass, Composite::class.java.typeParameters[0])
+            if (type is Class<*> || type is ParameterizedType) return GenericTypeReflector.erase(type).asSubclass(Component::class.java)
+            throw IllegalStateException(getExceptionMessage(type))
         }
 
-        if (type instanceof TypeVariable) {
-            return String.format(
-                    "Could not determine the composite content type for TypeVariable '%s'. "
-                            + "Either specify exact type or override initContent().",
-                    type.getTypeName());
+        /**
+         * adapted from Composite#getExceptionMessage(Type)
+         */
+        private fun getExceptionMessage(type: Type?): String {
+            return when (type) {
+                null -> "Composite is used as raw type: either add type information or override initContent()."
+                is TypeVariable<*> -> String.format("Could not determine the composite content type for TypeVariable '%s'. Either specify exact type or override initContent().", type.getTypeName())
+                else -> String.format("Could not determine the composite content type for %s. Override initContent().", type.typeName)
+            }
         }
-        return String.format(
-                "Could not determine the composite content type for %s. Override initContent().",
-                type.getTypeName());
     }
 }

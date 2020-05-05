@@ -13,20 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.view.app.tabs
 
-package com.faendir.acra.ui.view.app.tabs;
-
-import com.faendir.acra.model.App;
-import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.base.TabView;
-import com.vaadin.flow.component.Component;
+import com.faendir.acra.model.App
+import com.faendir.acra.service.DataService
+import com.faendir.acra.ui.base.TabView
+import com.faendir.acra.util.toNullable
+import com.vaadin.flow.component.Component
 
 /**
  * @author lukas
  * @since 14.07.18
  */
-public abstract class AppTab<T extends Component> extends TabView.Tab<T, App> {
-    public AppTab(DataService dataService) {
-        super(dataService, DataService::findApp, App::getId, App::getName, app -> null);
-    }
-}
+abstract class AppTab<T : Component>(dataService: DataService) : TabView.Tab<T, App>(dataService, DataService::findApp, App::id, App::name, { null })

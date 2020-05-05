@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.base
 
-package com.faendir.acra.ui.base;
-
-public interface Init<T> {
-    void init(T t);
+interface Init<T> {
+    fun init(t: T)
 }

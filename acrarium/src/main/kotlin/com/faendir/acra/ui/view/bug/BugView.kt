@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.view.bug
 
-package com.faendir.acra.ui.view.bug;
-
-import com.faendir.acra.i18n.Messages;
-import com.faendir.acra.ui.base.TabView;
-import com.faendir.acra.ui.view.MainView;
-import com.faendir.acra.ui.view.bug.tabs.AdminTab;
-import com.faendir.acra.ui.view.bug.tabs.BugTab;
-import com.faendir.acra.ui.view.bug.tabs.ReportTab;
-import com.faendir.acra.ui.view.bug.tabs.StacktraceTab;
-import com.faendir.acra.ui.view.bug.tabs.StatisticsTab;
-import com.vaadin.flow.router.RoutePrefix;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.annotation.UIScope;
+import com.faendir.acra.i18n.Messages
+import com.faendir.acra.ui.base.TabView
+import com.faendir.acra.ui.view.MainView
+import com.faendir.acra.ui.view.bug.tabs.AdminTab
+import com.faendir.acra.ui.view.bug.tabs.BugTab
+import com.faendir.acra.ui.view.bug.tabs.ReportTab
+import com.faendir.acra.ui.view.bug.tabs.StacktraceTab
+import com.faendir.acra.ui.view.bug.tabs.StatisticsTab
+import com.vaadin.flow.router.ParentLayout
+import com.vaadin.flow.router.RoutePrefix
+import com.vaadin.flow.spring.annotation.SpringComponent
+import com.vaadin.flow.spring.annotation.UIScope
 
 /**
  * @author lukas
@@ -35,12 +35,8 @@ import com.vaadin.flow.spring.annotation.UIScope;
 @UIScope
 @SpringComponent
 @RoutePrefix("bug")
-@com.vaadin.flow.router.ParentLayout(MainView.class)
-public class BugView extends TabView<BugTab<?>, Integer> {
-    public BugView() {
-        super(new TabInfo<>(ReportTab.class, Messages.REPORTS),
-                new TabInfo<>(StacktraceTab.class, Messages.STACKTRACES),
-                new TabInfo<>(StatisticsTab.class, Messages.STATISTICS),
-                new TabInfo<>(AdminTab.class, Messages.ADMIN));
-    }
-}
+@ParentLayout(MainView::class)
+class BugView : TabView<BugTab<*>, Int>(TabInfo(ReportTab::class.java, Messages.REPORTS),
+        TabInfo(StacktraceTab::class.java, Messages.STACKTRACES),
+        TabInfo(StatisticsTab::class.java, Messages.STATISTICS),
+        TabInfo(AdminTab::class.java, Messages.ADMIN)) 

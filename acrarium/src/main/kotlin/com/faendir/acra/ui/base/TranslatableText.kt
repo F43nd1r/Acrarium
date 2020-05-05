@@ -13,39 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.base
 
-package com.faendir.acra.ui.base;
-
-import com.faendir.acra.util.LocalSettings;
-import com.vaadin.flow.i18n.I18NProvider;
-import com.vaadin.flow.server.VaadinService;
+import com.faendir.acra.util.LocalSettings
+import com.vaadin.flow.i18n.I18NProvider
+import com.vaadin.flow.server.VaadinService
 
 /**
  * @author lukas
  * @since 06.09.19
  */
-public class TranslatableText {
-    private final String id;
-    private final Object[] params;
+open class TranslatableText(val id: String, vararg val params: Any) {
 
-    public TranslatableText(String id, Object... params) {
-        this.id = id;
-        this.params = params;
+    fun translate(): String {
+        return i18NProvider.getTranslation(id, LocalSettings.currentLocale, *params)
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public Object[] getParams() {
-        return params;
-    }
-
-    public String translate() {
-        return getI18NProvider().getTranslation(id, LocalSettings.getCurrentLocale(), params);
-    }
-
-    private I18NProvider getI18NProvider() {
-        return VaadinService.getCurrent().getInstantiator().getI18NProvider();
-    }
+    private val i18NProvider: I18NProvider
+        get() = VaadinService.getCurrent().instantiator.i18NProvider
 }

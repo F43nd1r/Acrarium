@@ -13,25 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.service
 
-package com.faendir.acra.service;
-
-import com.faendir.acra.model.Report;
-import org.springframework.context.ApplicationEvent;
+import com.faendir.acra.model.Report
+import org.springframework.context.ApplicationEvent
 
 /**
  * @author lukas
  * @since 07.12.18
  */
-public class NewReportEvent extends ApplicationEvent {
-    private final Report report;
-
-    public NewReportEvent(Object source, Report report) {
-        super(source);
-        this.report = report;
-    }
-
-    public Report getReport() {
-        return report;
-    }
-}
+class NewReportEvent(source: Any, val report: Report) : ApplicationEvent(source)

@@ -13,58 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.base
 
-package com.faendir.acra.ui.base;
-
-import com.faendir.acra.ui.component.Card;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Scope;
-
-import java.util.stream.Stream;
+import com.faendir.acra.ui.component.Card
+import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.orderedlayout.FlexComponent
+import com.vaadin.flow.component.orderedlayout.FlexLayout
+import com.vaadin.flow.spring.annotation.SpringComponent
+import org.springframework.beans.factory.config.ConfigurableBeanFactory
+import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.Scope
+import kotlin.streams.asSequence
 
 @SpringComponent
 @Scope(scopeName = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class CardView<C extends Card & Init<P>, P> extends FlexLayout implements Init<P> {
-    private final ApplicationContext context;
-    private P parameter;
+class CardView<C, P>(context: ApplicationContext) : FlexLayout(), Init<P> where C : Card, C : Init<P> {
+    private val context: ApplicationContext
+    private var parameter: P? = null
 
-    @Autowired
-    public CardView(ApplicationContext context) {
-        setWidthFull();
-        setWrapMode(WrapMode.WRAP);
-        setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-        this.context = context;
+    init {
+        setWidthFull()
+        wrapMode = WrapMode.WRAP
+        justifyContentMode = FlexComponent.JustifyContentMode.CENTER
+        this.context = context
     }
 
     @SafeVarargs
-    public CardView(ApplicationContext context, Class<? extends C>... cards) {
-        this(context);
-        add(cards);
+    fun add(vararg cards: Class<out C>) {
+        add(*cards.map { context.getBean(it) }.onEach { parameter?.run { it.init(this) } }.map { it as Component }.toTypedArray())
     }
 
-    @SafeVarargs
-    public final void add(Class<? extends C>... cards) {
-        add(Stream.of(cards).map(context::getBean).peek(c -> {
-            if (parameter != null) {
-                c.init(parameter);
-            }
-        }).toArray(Component[]::new));
-    }
-
-    @Override
-    public void init(P p) {
-        parameter = p;
-        getChildren().forEach(component -> {
-            if (component instanceof Init) {
-                //noinspection unchecked
-                ((Init<P>) component).init(parameter);
-            }
-        });
+    override fun init(p: P) {
+        parameter = p
+        children.asSequence().filterIsInstance<Init<P>>().forEach { it.init(p) }
     }
 }

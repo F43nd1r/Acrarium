@@ -13,20 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.view.bug.tabs
 
-package com.faendir.acra.ui.view.bug.tabs;
-
-import com.faendir.acra.model.Bug;
-import com.faendir.acra.service.AvatarService;
-import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.component.ReportList;
-import com.faendir.acra.ui.view.bug.BugView;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.annotation.UIScope;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.NonNull;
+import com.faendir.acra.model.Bug
+import com.faendir.acra.service.AvatarService
+import com.faendir.acra.service.DataService
+import com.faendir.acra.ui.component.ReportList
+import com.faendir.acra.ui.view.bug.BugView
+import com.vaadin.flow.component.html.Div
+import com.vaadin.flow.router.Route
+import com.vaadin.flow.spring.annotation.SpringComponent
+import com.vaadin.flow.spring.annotation.UIScope
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.lang.NonNull
 
 /**
  * @author lukas
@@ -34,21 +33,15 @@ import org.springframework.lang.NonNull;
  */
 @UIScope
 @SpringComponent("bugReportTab")
-@Route(value = "report", layout = BugView.class)
-public class ReportTab extends BugTab<Div> {
-    @NonNull
-    private final AvatarService avatarService;
+@Route(value = "report", layout = BugView::class)
+class ReportTab(dataService: DataService, private val avatarService: AvatarService) : BugTab<Div>(dataService) {
 
-    @Autowired
-    public ReportTab(@NonNull DataService dataService, @NonNull AvatarService avatarService) {
-        super(dataService);
-        this.avatarService = avatarService;
-        getContent().setSizeFull();
+    init {
+        content.setSizeFull()
     }
 
-    @Override
-    public void init(Bug bug) {
-        getContent().removeAll();
-        getContent().add(new ReportList(bug.getApp(), getDataService().getReportProvider(bug), avatarService, getDataService()::delete));
+    override fun init(bug: Bug) {
+        content.removeAll()
+        content.add(ReportList(bug.app, dataService.getReportProvider(bug), avatarService) { dataService.delete(it) })
     }
 }

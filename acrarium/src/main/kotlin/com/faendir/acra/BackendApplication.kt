@@ -13,32 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra
 
-package com.faendir.acra;
+import org.springframework.boot.SpringApplication
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+import org.springframework.boot.builder.SpringApplicationBuilder
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
+import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.PropertySource
+import org.springframework.context.annotation.PropertySources
+import org.springframework.lang.NonNull
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.lang.NonNull;
+@SpringBootApplication(exclude = [SecurityAutoConfiguration::class])
+@PropertySources(PropertySource("classpath:default.properties"),
+        PropertySource(value = ["file:\${user.home}/.config/acrarium/application.properties"], ignoreResourceNotFound = true),
+        PropertySource(value = ["file:\${user.home}/.acra/application.properties"], ignoreResourceNotFound = true))
+@Import(MailSenderAutoConfiguration::class)
+class BackendApplication : SpringBootServletInitializer() {
+    override fun configure(builder: SpringApplicationBuilder): SpringApplicationBuilder = builder.sources(BackendApplication::class.java)
 
-@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
-@PropertySource("classpath:default.properties")
-@PropertySource(value = "file:${user.home}/.config/acrarium/application.properties", ignoreResourceNotFound = true)
-@PropertySource(value = "file:${user.home}/.acra/application.properties", ignoreResourceNotFound = true)
-@Import(MailSenderAutoConfiguration.class)
-public class BackendApplication extends SpringBootServletInitializer {
-    public static void main(String[] args) {
-        SpringApplication.run(BackendApplication.class, args);
-    }
-
-    @NonNull
-    @Override
-    protected SpringApplicationBuilder configure(@NonNull SpringApplicationBuilder builder) {
-        return builder.sources(BackendApplication.class);
+    companion object {
+        @JvmStatic
+        fun main(args: Array<String>) {
+            SpringApplication.run(BackendApplication::class.java, *args)
+        }
     }
 }

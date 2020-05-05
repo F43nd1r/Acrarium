@@ -13,21 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.view.bug.tabs
 
-package com.faendir.acra.ui.view.bug.tabs;
-
-import com.faendir.acra.model.Bug;
-import com.faendir.acra.model.QReport;
-import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.component.statistics.Statistics;
-import com.faendir.acra.ui.view.bug.BugView;
-import com.faendir.acra.util.LocalSettings;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.annotation.UIScope;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.NonNull;
+import com.faendir.acra.model.Bug
+import com.faendir.acra.model.QReport
+import com.faendir.acra.service.DataService
+import com.faendir.acra.ui.component.statistics.Statistics
+import com.faendir.acra.ui.view.bug.BugView
+import com.faendir.acra.util.LocalSettings
+import com.vaadin.flow.component.html.Div
+import com.vaadin.flow.router.Route
+import com.vaadin.flow.spring.annotation.SpringComponent
+import com.vaadin.flow.spring.annotation.UIScope
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.lang.NonNull
 
 /**
  * @author lukas
@@ -35,20 +34,15 @@ import org.springframework.lang.NonNull;
  */
 @UIScope
 @SpringComponent("bugStatisticsTab")
-@Route(value = "statistics", layout = BugView.class)
-public class StatisticsTab extends BugTab<Div> {
-    private final LocalSettings localSettings;
+@Route(value = "statistics", layout = BugView::class)
+class StatisticsTab(dataService: DataService, private val localSettings: LocalSettings) : BugTab<Div>(dataService) {
 
-    @Autowired
-    public StatisticsTab(@NonNull DataService dataService, @NonNull LocalSettings localSettings) {
-        super(dataService);
-        this.localSettings = localSettings;
-        getContent().setSizeFull();
+    init {
+        content.setSizeFull()
     }
 
-    @Override
-    public void init(Bug bug) {
-        getContent().removeAll();
-        getContent().add(new Statistics(bug.getApp(), QReport.report.stacktrace.bug.eq(bug), getDataService(), localSettings));
+    override fun init(bug: Bug) {
+        content.removeAll()
+        content.add(Statistics(bug.app, QReport.report.stacktrace.bug.eq(bug), dataService, localSettings))
     }
 }

@@ -13,34 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.theme
 
-package com.faendir.acra.ui.theme;
-
-import com.faendir.acra.util.LocalSettings;
-import com.vaadin.flow.server.UIInitEvent;
-import com.vaadin.flow.server.UIInitListener;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.annotation.VaadinSessionScope;
-import com.vaadin.flow.theme.lumo.Lumo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.lang.NonNull;
+import com.faendir.acra.util.LocalSettings
+import com.vaadin.flow.server.UIInitEvent
+import com.vaadin.flow.server.UIInitListener
+import com.vaadin.flow.spring.annotation.SpringComponent
+import com.vaadin.flow.spring.annotation.VaadinSessionScope
+import com.vaadin.flow.theme.lumo.Lumo
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
+import org.springframework.lang.NonNull
 
 @VaadinSessionScope
 @SpringComponent
 @Lazy
-public class ThemeUIListener implements UIInitListener {
-    private LocalSettings localSettings;
-
-    @Autowired
-    public ThemeUIListener(@NonNull LocalSettings localSettings) {
-        this.localSettings = localSettings;
-    }
-
-    @Override
-    public void uiInit(UIInitEvent event) {
-        event.getUI().getElement().setAttribute("theme", localSettings.getDarkTheme() ? Lumo.DARK : Lumo.LIGHT);
-        event.getUI().setLocale(localSettings.getLocale());
+class ThemeUIListener(private val localSettings: LocalSettings) : UIInitListener {
+    override fun uiInit(event: UIInitEvent) {
+        event.ui.element.setAttribute("theme", if (localSettings.darkTheme) Lumo.DARK else Lumo.LIGHT)
+        event.ui.locale = localSettings.locale
     }
 }

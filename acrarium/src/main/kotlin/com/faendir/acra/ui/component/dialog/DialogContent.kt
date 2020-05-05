@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.component.dialog
 
-package com.faendir.acra.ui.component.dialog;
-
-import com.faendir.acra.ui.component.Card;
-import com.vaadin.flow.component.*;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
+import com.faendir.acra.ui.component.Card.CardModel
+import com.vaadin.flow.component.HasElement
+import com.vaadin.flow.component.HasOrderedComponents
+import com.vaadin.flow.component.HasSize
+import com.vaadin.flow.component.HasStyle
+import com.vaadin.flow.component.Tag
+import com.vaadin.flow.component.dependency.JsModule
+import com.vaadin.flow.component.polymertemplate.PolymerTemplate
 
 /**
  * @author lukas
@@ -28,20 +30,19 @@ import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
  */
 @Tag("acrarium-dialog-content")
 @JsModule("./elements/dialog-content.js")
-public class DialogContent extends PolymerTemplate<Card.CardModel> implements HasSize, HasStyle, HasOrderedComponents {
-
-    public void setHeader(HasElement header) {
-        header.getElement().setAttribute("slot", "header");
-        getElement().appendChild(header.getElement());
+class DialogContent : PolymerTemplate<CardModel?>(), HasSize, HasStyle, HasOrderedComponents {
+    fun setHeader(header: HasElement) {
+        header.element.setAttribute("slot", "header")
+        element.appendChild(header.element)
     }
 
-    public void setNegative(HasElement negative) {
-        negative.getElement().setAttribute("slot", "negative");
-        getElement().appendChild(negative.getElement());
+    fun setNegative(negative: HasElement) {
+        negative.element.setAttribute("slot", "negative")
+        element.appendChild(negative.element)
     }
 
-    public void setPositive(HasElement positive) {
-        positive.getElement().setAttribute("slot", "positive");
-        getElement().appendChild(positive.getElement());
+    fun setPositive(positive: HasElement) {
+        positive.element.setAttribute("slot", "positive")
+        element.appendChild(positive.element)
     }
 }

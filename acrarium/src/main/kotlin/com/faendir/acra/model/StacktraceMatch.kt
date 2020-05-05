@@ -13,76 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.model
 
-package com.faendir.acra.model;
-
-import org.springframework.data.annotation.PersistenceConstructor;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.ManyToOne;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import com.faendir.acra.util.NoArgConstructor
+import java.io.Serializable
+import java.util.*
+import javax.persistence.Entity
+import javax.persistence.Id
+import javax.persistence.IdClass
+import javax.persistence.ManyToOne
 
 /**
  * @author lukas
  * @since 28.07.18
  */
 @Entity
-@IdClass(StacktraceMatch.ID.class)
-public class StacktraceMatch {
-    @Id
-    @ManyToOne
-    private Stacktrace left;
-    @Id
-    @ManyToOne
-    private Stacktrace right;
-    private int score;
+@IdClass(StacktraceMatch.ID::class)
+class StacktraceMatch(@ManyToOne @Id val left: Stacktrace, @ManyToOne @Id val right: Stacktrace, val score: Int) {
 
-    @PersistenceConstructor
-    StacktraceMatch(){
-    }
+    val both: List<Stacktrace>
+        get() = listOf(left, right)
 
-    public StacktraceMatch(Stacktrace left, Stacktrace right, int score) {
-        this.left = left;
-        this.right = right;
-        this.score = score;
-    }
-
-    public Stacktrace getLeft() {
-        return left;
-    }
-
-    public Stacktrace getRight() {
-        return right;
-    }
-
-    public List<Stacktrace> getBoth() {
-        return Arrays.asList(left, right);
-    }
-
-    public int getScore() {
-        return score;
-    }
-
-    static class ID implements Serializable {
-        private Stacktrace left;
-        private Stacktrace right;
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            ID id = (ID) o;
-            return Objects.equals(left, id.left) && Objects.equals(right, id.right);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(left, right);
-        }
-    }
+    @NoArgConstructor
+    internal data class ID(private val left: Stacktrace, private val right: Stacktrace) : Serializable
 }

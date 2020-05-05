@@ -13,21 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.view.app.tabs
 
-package com.faendir.acra.ui.view.app.tabs;
-
-import com.faendir.acra.model.App;
-import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.base.CardView;
-import com.faendir.acra.ui.view.app.AppView;
-import com.faendir.acra.ui.view.app.tabs.admincards.*;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.annotation.UIScope;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.annotation.PostConstruct;
-
+import com.faendir.acra.model.App
+import com.faendir.acra.service.DataService
+import com.faendir.acra.ui.base.CardView
+import com.faendir.acra.ui.view.app.AppView
+import com.faendir.acra.ui.view.app.tabs.admincards.AdminCard
+import com.faendir.acra.ui.view.app.tabs.admincards.DangerCard
+import com.faendir.acra.ui.view.app.tabs.admincards.ExportCard
+import com.faendir.acra.ui.view.app.tabs.admincards.NotificationCard
+import com.faendir.acra.ui.view.app.tabs.admincards.VersionCard
+import com.vaadin.flow.router.Route
+import com.vaadin.flow.spring.annotation.SpringComponent
+import com.vaadin.flow.spring.annotation.UIScope
+import javax.annotation.PostConstruct
 
 /**
  * @author lukas
@@ -35,21 +35,14 @@ import javax.annotation.PostConstruct;
  */
 @UIScope
 @SpringComponent
-@Route(value = "admin", layout = AppView.class)
-public class AdminTab extends AppTab<CardView<AdminCard, App>> {
-
-    @Autowired
-    public AdminTab(DataService dataService) {
-        super(dataService);
-    }
-
+@Route(value = "admin", layout = AppView::class)
+class AdminTab(dataService: DataService) : AppTab<CardView<AdminCard, App>>(dataService) {
     @PostConstruct
-    public void setupContent() {
-        getContent().add(VersionCard.class, NotificationCard.class, ExportCard.class, DangerCard.class);
+    fun setupContent() {
+        content.add(VersionCard::class.java, NotificationCard::class.java, ExportCard::class.java, DangerCard::class.java)
     }
 
-    @Override
-    public void init(App app) {
-        getContent().init(app);
+    override fun init(app: App) {
+        content.init(app)
     }
 }

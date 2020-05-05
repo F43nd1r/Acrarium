@@ -13,136 +13,84 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.base
 
-package com.faendir.acra.ui.base;
-
-import com.faendir.acra.i18n.Messages;
-import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.component.Path;
-import com.faendir.acra.ui.component.SpringComposite;
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
-import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.flow.router.BeforeEvent;
-import com.vaadin.flow.router.HasUrlParameter;
-import org.springframework.lang.NonNull;
-
-import java.io.Serializable;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Stream;
+import com.faendir.acra.i18n.Messages
+import com.faendir.acra.service.DataService
+import com.faendir.acra.ui.component.Path
+import com.faendir.acra.ui.component.Path.ParametrizedTextElement
+import com.faendir.acra.ui.component.SpringComposite
+import com.faendir.acra.ui.component.Tab
+import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.util.indexOfFirstOrNull
+import com.vaadin.flow.component.AttachEvent
+import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.UI
+import com.vaadin.flow.component.orderedlayout.FlexLayout
+import com.vaadin.flow.component.tabs.Tabs
+import com.vaadin.flow.router.BeforeEvent
+import com.vaadin.flow.router.HasUrlParameter
+import java.io.Serializable
 
 /**
  * @author lukas
  * @since 03.12.18
  */
-public class TabView<T extends Component & HasUrlParameter<P>, P> extends ParentLayout {
-    private final TabInfo<? extends T, P>[] tabs;
-    private final Tabs header;
-    private P parameter;
+open class TabView<T, P>(private vararg val tabs: TabInfo<out T, P>) : ParentLayout() where T : Component, T : HasUrlParameter<P> {
+    private val header: Tabs = Tabs()
+    private var parameter: P? = null
 
-    @SafeVarargs
-    public TabView(TabInfo<? extends T, P>... tabs) {
-        this.tabs = tabs;
-        header = new Tabs(Stream.of(tabs).map(def -> new com.faendir.acra.ui.component.Tab(def.getLabelId())).toArray(com.faendir.acra.ui.component.Tab[]::new));
-        header.addSelectedChangeListener(e -> getUI().ifPresent(ui -> ui.navigate(tabs[e.getSource().getSelectedIndex()].tabClass, parameter)));
-        setSizeFull();
-        FlexLayout content = new FlexLayout();
-        content.setWidthFull();
-        expand(content);
-        content.getStyle().set("overflow", "auto");
-        setRouterRoot(content);
-        getStyle().set("flex-direction", "column");
-        removeAll();
-        add(header, content);
+    init {
+        header.add(*tabs.map { Tab(it.labelId) }.toTypedArray())
+        header.addSelectedChangeListener { ui.ifPresent { ui: UI -> ui.navigate(tabs[it.source.selectedIndex].tabClass, parameter) } }
+        setSizeFull()
+        val content = FlexLayout()
+        content.setWidthFull()
+        expand(content)
+        content.style["overflow"] = "auto"
+        setRouterRoot(content)
+        style["flex-direction"] = "column"
+        removeAll()
+        add(header, content)
     }
 
-    private void setActiveChild(T child, P parameter) {
-        this.parameter = parameter;
-        for (int i = 0; i < tabs.length; i++) {
-            if (tabs[i].getTabClass().equals(child.getClass())) {
-                header.setSelectedIndex(i);
-                break;
-            }
-        }
+    private fun setActiveChild(child: T, parameter: P) {
+        this.parameter = parameter
+        tabs.indexOfFirstOrNull { it.tabClass == child.javaClass }?.let { header.selectedIndex = it }
     }
 
-    public static class TabInfo<T extends HasUrlParameter<P>, P> implements Serializable {
-        private final Class<T> tabClass;
-        private final String labelId;
+    class TabInfo<T : HasUrlParameter<P>, P>(val tabClass: Class<T>, val labelId: String) : Serializable
 
-        public TabInfo(Class<T> tabClass, String labelId) {
-            this.tabClass = tabClass;
-            this.labelId = labelId;
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+    abstract class Tab<T : Component, P : Any>(val dataService: DataService, private val getParameter: DataService.(Int) -> P?, private val getId: P.() -> Int,
+                                               private val getTitle: P.() -> String, private val getParent: P.() -> HasRoute.Parent<*>?) :
+            SpringComposite<T>(), HasSecureParameter<Int>, HasRoute, Init<P> {
+        private lateinit var parameter: P
+
+        override fun setParameterSecure(event: BeforeEvent?, parameter: Int) {
+            dataService.getParameter(parameter)?.also { this.parameter = it } ?: event?.rerouteToError(IllegalArgumentException::class.java) ?: throw IllegalArgumentException()
         }
 
-        public Class<T> getTabClass() {
-            return tabClass;
-        }
-
-        public String getLabelId() {
-            return labelId;
-        }
-    }
-
-    public abstract static class Tab<T extends Component, P> extends SpringComposite<T> implements HasSecureParameter<Integer>, HasRoute, Init<P> {
-        private final DataService dataService;
-        private final BiFunction<DataService, Integer, Optional<P>> parameterGetter;
-        private final Function<P, Integer> idGetter;
-        private final Function<P, String> titleGetter;
-        private final Function<P, Parent<?>> parentGetter;
-        private P parameter;
-
-        public Tab(DataService dataService, BiFunction<DataService, Integer, Optional<P>> parameterGetter, Function<P, Integer> idGetter, Function<P, String> titleGetter, Function<P, Parent<?>> parentGetter) {
-            this.dataService = dataService;
-            this.parameterGetter = parameterGetter;
-            this.idGetter = idGetter;
-            this.titleGetter = titleGetter;
-            this.parentGetter = parentGetter;
-        }
-
-        public DataService getDataService() {
-            return dataService;
-        }
-
-        @Override
-        public void setParameterSecure(BeforeEvent event, Integer parameter) {
-            Optional<P> p = parameterGetter.apply(dataService, parameter);
-            if (p.isPresent()) {
-                this.parameter = p.get();
-            } else {
-                event.rerouteToError(IllegalArgumentException.class);
-            }
-        }
-
-        @Override
-        protected void onAttach(AttachEvent attachEvent) {
-            super.onAttach(attachEvent);
-            init(this.parameter);
-            Optional<Component> parent = getParent();
-            while (parent.isPresent()) {
-                if (parent.get() instanceof TabView) {
-                    //noinspection unchecked
-                    ((TabView<Tab<?, ?>, Integer>) parent.get()).setActiveChild(this, idGetter.apply(parameter));
-                    break;
+        override fun onAttach(attachEvent: AttachEvent) {
+            super.onAttach(attachEvent)
+            init(parameter)
+            var parent = parent
+            while (parent.isPresent) {
+                if (parent.get() is TabView<*, *>) {
+                    @Suppress("UNCHECKED_CAST")
+                    (parent.get() as TabView<Tab<*, *>, Int>).setActiveChild(this, parameter.getId())
+                    break
                 }
-                parent = parent.get().getParent();
+                parent = parent.get().parent
             }
         }
 
-        @Override
-        @NonNull
-        public Path.Element<?> getPathElement() {
-            //noinspection unchecked
-            return new Path.ParametrizedTextElement<>((Class<? extends Tab<?, ?>>) getClass(), idGetter.apply(parameter), Messages.ONE_ARG, titleGetter.apply(parameter));
-        }
+        override val pathElement: Path.Element<*>
+            get() = ParametrizedTextElement<Tab<*, *>, Int>(javaClass, parameter.getId(), Messages.ONE_ARG, parameter.getTitle())
 
-        @Override
-        public Parent<?> getLogicalParent() {
-            return parentGetter.apply(parameter);
-        }
+        override val logicalParent: HasRoute.Parent<*>?
+            get() {
+                return parameter.getParent()
+            }
     }
 }

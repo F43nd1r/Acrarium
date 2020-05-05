@@ -13,91 +13,61 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.component.dialog
 
-package com.faendir.acra.ui.component.dialog;
-
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.HasValue;
-import org.springframework.lang.NonNull;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.HasValidation
+import com.vaadin.flow.component.HasValue
+import org.springframework.lang.NonNull
+import java.util.function.Consumer
+import java.util.function.Supplier
 
 /**
  * @author Lukas
  * @since 22.06.2017
  */
-public class ValidatedField<V, T extends Component> {
-    private final T field;
-    private final Supplier<V> valueSupplier;
-    private final Consumer<String> messageSetter;
-    private final Map<Function<V, Boolean>, String> validators;
-    private final List<Listener> listeners;
-    private boolean valid;
+class ValidatedField<V, T : Component> private constructor(val field: T, private val getValue: () -> V, registerListener: ((V) -> Unit) -> Unit, private val setMessage: (String?) -> Unit) {
+    private val validators: MutableMap<(V) -> Boolean, String> = mutableMapOf()
+    private val listeners: MutableList<(Boolean) -> Unit> = mutableListOf()
+    private var valid: Boolean = false
 
-    private ValidatedField(T field, Supplier<V> valueSupplier, Consumer<Consumer<V>> listenerRegistration, Consumer<String> messageSetter) {
-        this.field = field;
-        this.valueSupplier = valueSupplier;
-        this.messageSetter = messageSetter;
-        this.validators = new HashMap<>();
-        this.listeners = new ArrayList<>();
-        this.valid = false;
-        listenerRegistration.accept(this::validate);
+    init {
+        registerListener { value: V -> validate(value) }
     }
 
-    public static <V, T extends Component & HasValue<?, V> & HasValidation> ValidatedField<V, T> of(T field) {
-        return new ValidatedField<>(field, field::getValue, vConsumer -> field.addValueChangeListener(event -> vConsumer.accept(event.getValue())), field::setErrorMessage);
+    fun addValidator(validator: (V) -> Boolean, errorMessage: String): ValidatedField<V, T> {
+        validators[validator] = errorMessage
+        return this
     }
 
-    public static <V, T extends Component & HasValue<?, V> & HasValidation> ValidatedField<V, T> of(T field, Supplier<V> valueSupplier, Consumer<Consumer<V>> listenerRegistration) {
-        return new ValidatedField<>(field, valueSupplier, listenerRegistration, field::setErrorMessage);
+    fun isValid(): Boolean {
+        return validate(getValue())
     }
 
-    public ValidatedField<V, T> addValidator(Function<V, Boolean> validator, String errorMessage) {
-        validators.put(validator, errorMessage);
-        return this;
-    }
-
-    public T getField() {
-        return field;
-    }
-
-    public boolean isValid() {
-        return validate(valueSupplier.get());
-    }
-
-    private boolean validate(V value) {
-        boolean valid = validators.entrySet().stream().allMatch(entry -> {
-            if (entry.getKey().apply(value)) {
-                messageSetter.accept(null);
-                return true;
-            } else {
-                messageSetter.accept(entry.getValue());
-                return false;
-            }
-        });
+    private fun validate(value: V): Boolean {
+        val valid = validators.entries.all { it.key(value).also { valid -> setMessage(if (valid) null else it.value) } }
         if (this.valid != valid) {
-            this.valid = valid;
-            listeners.forEach(listener -> listener.onValidationChanged(valid));
+            this.valid = valid
+            listeners.forEach { it(valid) }
         }
-        return valid;
+        return valid
     }
 
-    public void addListener(@NonNull Listener listener) {
-        listeners.add(listener);
+    fun addListener(listener: (Boolean) -> Unit) {
+        listeners.add(listener)
     }
 
-    public void removeListener(@NonNull Listener listener) {
-        listeners.remove(listener);
+    fun removeListener(listener: (Boolean) -> Unit) {
+        listeners.remove(listener)
     }
 
-    public interface Listener {
-        void onValidationChanged(boolean value);
+    companion object {
+        fun <V, T, E : HasValue.ValueChangeEvent<V>> of(field: T): ValidatedField<V, T> where T : Component, T : HasValue<E, V>, T : HasValidation {
+            return ValidatedField(field, { field.value }, { listener -> field.addValueChangeListener {  listener(it.value) } }, { field.errorMessage = it })
+        }
+
+        fun <V, T> of(field: T, getValue: () -> V, registerListener: ((V) -> Unit) -> Unit): ValidatedField<V, T> where T : Component, T : HasValue<*, V>, T : HasValidation {
+            return ValidatedField(field, getValue, registerListener,  { field.errorMessage = it })
+        }
     }
 }

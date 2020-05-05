@@ -13,17 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.service
 
-package com.faendir.acra.service;
-
-import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEvent
 
 /**
  * @author lukas
  * @since 07.12.18
  */
-public class ReportsDeleteEvent extends ApplicationEvent {
-    public ReportsDeleteEvent(Object source) {
-        super(source);
-    }
-}
+class ReportsDeleteEvent(source: Any) : ApplicationEvent(source)

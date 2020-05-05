@@ -13,163 +13,76 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.model;
+package com.faendir.acra.model
 
-import org.springframework.data.annotation.PersistenceConstructor;
-import org.springframework.lang.NonNull;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.Transient;
-import javax.validation.constraints.Email;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.userdetails.UserDetails
+import javax.persistence.Column
+import javax.persistence.ElementCollection
+import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
+import javax.persistence.FetchType
+import javax.persistence.Id
+import javax.persistence.Transient
+import javax.validation.constraints.Email
 
 /**
  * @author Lukas
  * @since 20.05.2017
  */
 @Entity
-public class User implements UserDetails {
-    @Id private String username;
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @ElementCollection(fetch = FetchType.EAGER)
-    private Set<Role> roles;
-    @Column(nullable = false)
-    @ElementCollection(fetch = FetchType.EAGER)
-    private Set<Permission> permissions;
-    private String password;
-    @Transient
-    private String plainTextPassword;
-    @Email
-    private String mail;
+class User(@Id
+           private var username: String,
+           private var password: String,
+           @Enumerated(EnumType.STRING)
+           @Column(nullable = false)
+           @ElementCollection(fetch = FetchType.EAGER)
+           val roles: MutableSet<Role>,
+           @Transient
+           private var plainTextPassword: String? = null,
+           @Email
+           var mail: String? = null,
+           @Column(nullable = false)
+           @ElementCollection(fetch = FetchType.EAGER)
+           val permissions: MutableSet<Permission> = mutableSetOf()) : UserDetails {
 
-    @PersistenceConstructor
-    User() {
+
+    constructor(other: User) : this(other.username, other.password, other.roles.toMutableSet(), other.plainTextPassword, other.mail, other.permissions)
+
+    override fun getAuthorities(): Collection<GrantedAuthority> = permissions + roles
+
+    override fun getPassword(): String = password
+
+    fun setPassword(password: String) {
+        this.password = password
     }
 
-    public User(@NonNull String username, @NonNull String password, @NonNull Collection<Role> roles) {
-        this.username = username;
-        this.password = password;
-        this.roles = new HashSet<>(roles);
-        this.permissions = new HashSet<>();
+    fun hasPlainTextPassword(): Boolean = plainTextPassword != null
+
+    fun getPlainTextPassword(): String = plainTextPassword.let { checkNotNull(it) { "Trying to access plain text password of persisted entity" }; it }
+
+    fun setPlainTextPassword(plainTextPassword: String) {
+        this.plainTextPassword = plainTextPassword
     }
 
-    public User(@NonNull String username, @NonNull String plainTextPassword, @NonNull String password, @NonNull Collection<Role> roles) {
-        this(username, password, roles);
-        this.plainTextPassword = plainTextPassword;
+    override fun getUsername(): String = username
+
+    fun setUsername(username: String) {
+        this.username = username
     }
 
-    public User(User other) {
-        this.username = other.username;
-        this.roles = other.roles;
-        this.permissions = other.permissions;
-        this.password = other.password;
-        this.plainTextPassword = other.plainTextPassword;
-        this.mail = other.mail;
-    }
+    override fun isAccountNonExpired(): Boolean = true
 
-    @NonNull
-    public Set<Permission> getPermissions() {
-        return permissions;
-    }
+    override fun isAccountNonLocked(): Boolean = true
 
-    @NonNull
-    public Set<Role> getRoles() {
-        return roles;
-    }
+    override fun isCredentialsNonExpired(): Boolean = true
 
-    @NonNull
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Stream.concat(permissions.stream(), roles.stream()).collect(Collectors.toList());
-    }
+    override fun isEnabled(): Boolean = true
 
-    @NonNull
-    @Override
-    public String getPassword() {
-        return password;
-    }
+    enum class Role : GrantedAuthority {
+        ADMIN, USER, REPORTER, API;
 
-    public void setPassword(@NonNull String password) {
-        this.password = password;
-    }
-
-    public boolean hasPlainTextPassword() {
-        return plainTextPassword != null;
-    }
-
-    @NonNull
-    public String getPlainTextPassword() {
-        if(plainTextPassword == null) {
-            throw new IllegalStateException("Trying to access plain text password of persisted entity");
-        }
-        return plainTextPassword;
-    }
-
-    public void setPlainTextPassword(@NonNull String plainTextPassword) {
-        this.plainTextPassword = plainTextPassword;
-    }
-
-    @NonNull
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    public String getMail() {
-        return mail;
-    }
-
-    public void setMail(String mail) {
-        this.mail = mail;
-    }
-
-
-    public enum Role implements GrantedAuthority {
-        ADMIN,
-        USER,
-        REPORTER,
-        API;
-
-        @Override
-        public String getAuthority() {
-            return "ROLE_" + name();
-        }
+        override fun getAuthority(): String = "ROLE_$name"
     }
 }

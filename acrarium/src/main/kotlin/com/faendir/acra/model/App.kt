@@ -13,104 +13,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.model
 
-package com.faendir.acra.model;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.data.annotation.PersistenceConstructor;
-import org.springframework.lang.NonNull;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import com.fasterxml.jackson.annotation.JsonIgnore
+import org.hibernate.annotations.OnDelete
+import org.hibernate.annotations.OnDeleteAction
+import javax.persistence.Access
+import javax.persistence.AccessType
+import javax.persistence.CascadeType
+import javax.persistence.Embeddable
+import javax.persistence.Entity
+import javax.persistence.FetchType
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.OneToOne
 
 /**
  * @author Lukas
  * @since 08.12.2017
  */
 @Entity
-public class App {
-    @JsonIgnore
-    @OneToOne(cascade = CascadeType.ALL, optional = false, orphanRemoval = true, fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private User reporter;
-    private Configuration configuration;
-    private String name;
+class App(val name: String,
+          @JsonIgnore
+          @OneToOne(cascade = [CascadeType.ALL], optional = false, orphanRemoval = true, fetch = FetchType.LAZY)
+          @OnDelete(action = OnDeleteAction.CASCADE)
+          var reporter: User) {
+
+    var configuration: Configuration = Configuration()
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    val id = 0
 
-    @PersistenceConstructor
-    App() {
+    override fun equals(other: Any?) = when {
+        this === other -> true
+        other == null || javaClass != other.javaClass -> false
+        else -> id == (other as App).id
     }
 
-    public App(@NonNull String name, @NonNull User reporter) {
-        this.name = name;
-        this.reporter = reporter;
-        this.configuration = new Configuration();
-    }
-
-    @NonNull
-    public User getReporter() {
-        return reporter;
-    }
-
-    public void setReporter(User reporter) {
-        this.reporter = reporter;
-    }
-
-    public Configuration getConfiguration() {
-        return configuration;
-    }
-
-    public void setConfiguration(Configuration configuration) {
-        this.configuration = configuration;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    @NonNull
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        App app = (App) o;
-        return id == app.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return id;
-    }
+    override fun hashCode() = id
 
     @Embeddable
-    public static class Configuration {
-        private int minScore;
-
-        @PersistenceConstructor
-        Configuration() {
-            minScore = 95;
-        }
-
-        public Configuration(int minScore) {
-            this.minScore = minScore;
-        }
-
-        public int getMinScore() {
-            return minScore;
-        }
-    }
+    class Configuration(@Access(AccessType.FIELD) val minScore: Int = 95)
 }

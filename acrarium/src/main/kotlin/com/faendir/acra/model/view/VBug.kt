@@ -13,51 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.model.view
 
-package com.faendir.acra.model.view;
-
-import com.faendir.acra.model.Bug;
-import com.querydsl.core.annotations.QueryProjection;
-
-import java.time.ZonedDateTime;
+import com.faendir.acra.model.Bug
+import com.querydsl.core.annotations.QueryProjection
+import java.time.ZonedDateTime
 
 /**
  * @author lukas
  * @since 30.05.18
  */
-public class VBug {
-    private final Bug bug;
-    private final ZonedDateTime lastReport;
-    private final long reportCount;
-    private final int highestVersionCode;
-    private final long userCount;
-
-    @QueryProjection
-    public VBug(Bug bug, ZonedDateTime lastReport, long reportCount, int highestVersionCode, long userCount) {
-        this.bug = bug;
-        this.lastReport = lastReport;
-        this.reportCount = reportCount;
-        this.highestVersionCode = highestVersionCode;
-        this.userCount = userCount;
-    }
-
-    public Bug getBug() {
-        return bug;
-    }
-
-    public long getReportCount() {
-        return reportCount;
-    }
-
-    public ZonedDateTime getLastReport() {
-        return lastReport;
-    }
-
-    public int getHighestVersionCode() {
-        return highestVersionCode;
-    }
-
-    public long getUserCount() {
-        return userCount;
-    }
-}
+class VBug @QueryProjection constructor(val bug: Bug, val lastReport: ZonedDateTime, val reportCount: Long, val highestVersionCode: Int, val userCount: Long) 

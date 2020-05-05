@@ -13,23 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.view.bug.tabs
 
-package com.faendir.acra.ui.view.bug.tabs;
-
-import com.faendir.acra.model.Bug;
-import com.faendir.acra.service.DataService;
-import com.faendir.acra.ui.base.CardView;
-import com.faendir.acra.ui.view.bug.BugView;
-import com.faendir.acra.ui.view.bug.tabs.admincards.AdminCard;
-import com.faendir.acra.ui.view.bug.tabs.admincards.DangerCard;
-import com.faendir.acra.ui.view.bug.tabs.admincards.PropertiesCard;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.annotation.UIScope;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.annotation.PostConstruct;
-
+import com.faendir.acra.model.Bug
+import com.faendir.acra.service.DataService
+import com.faendir.acra.ui.base.CardView
+import com.faendir.acra.ui.view.bug.BugView
+import com.faendir.acra.ui.view.bug.tabs.admincards.AdminCard
+import com.faendir.acra.ui.view.bug.tabs.admincards.DangerCard
+import com.faendir.acra.ui.view.bug.tabs.admincards.PropertiesCard
+import com.vaadin.flow.router.Route
+import com.vaadin.flow.spring.annotation.SpringComponent
+import com.vaadin.flow.spring.annotation.UIScope
+import org.springframework.beans.factory.annotation.Autowired
+import javax.annotation.PostConstruct
 
 /**
  * @author lukas
@@ -37,20 +34,14 @@ import javax.annotation.PostConstruct;
  */
 @UIScope
 @SpringComponent("bugAdminTab")
-@Route(value = "admin", layout = BugView.class)
-public class AdminTab extends BugTab<CardView<AdminCard, Bug>> {
-    @Autowired
-    public AdminTab(DataService dataService) {
-        super(dataService);
-    }
-
+@Route(value = "admin", layout = BugView::class)
+class AdminTab(dataService: DataService) : BugTab<CardView<AdminCard, Bug>>(dataService) {
     @PostConstruct
-    public void setupContent() {
-        getContent().add(PropertiesCard.class, DangerCard.class);
+    fun setupContent() {
+        content.add(PropertiesCard::class.java, DangerCard::class.java)
     }
 
-    @Override
-    public void init(Bug bug) {
-        getContent().init(bug);
+    override fun init(bug: Bug) {
+        content.init(bug)
     }
 }

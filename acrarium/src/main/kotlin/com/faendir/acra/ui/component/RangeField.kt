@@ -13,72 +13,61 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.component
 
-package com.faendir.acra.ui.component;
-
-import com.vaadin.flow.component.customfield.CustomField;
-import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.customfield.CustomField
+import com.vaadin.flow.component.textfield.NumberField
 
 /**
  * @author lukas
  * @since 07.05.19
  */
-public class RangeField extends CustomField<Double> {
-    private final RangeInput input;
-    private final NumberField field;
+class RangeField : CustomField<Double>() {
+    private val input: RangeInput = RangeInput()
+    private val _field: NumberField = NumberField()
 
-    public RangeField() {
-        input = new RangeInput();
-        field = new NumberField();
-        field.setHasControls(true);
-        input.addValueChangeListener(e -> {
-            if(e.isFromClient()) {
-                field.setValue(e.getValue());
+    init {
+        _field.setHasControls(true)
+        input.addValueChangeListener { e: ComponentValueChangeEvent<RangeInput?, Double> ->
+            if (e.isFromClient) {
+                _field.value = e.value
             }
-        });
-        field.addValueChangeListener(e -> {
-            if(e.isFromClient()) {
-                input.setValue(e.getValue());
+        }
+        _field.addValueChangeListener { e: ComponentValueChangeEvent<NumberField?, Double> ->
+            if (e.isFromClient) {
+                input.value = e.value
             }
-        });
-        add(input, field);
+        }
+        add(input, _field)
     }
 
-    @Override
-    protected Double generateModelValue() {
-        return input.getValue();
+    override fun generateModelValue(): Double {
+        return input.value
     }
 
-    @Override
-    protected void setPresentationValue(Double newPresentationValue) {
-        input.setValue(newPresentationValue);
-        field.setValue(newPresentationValue);
+    override fun setPresentationValue(newPresentationValue: Double) {
+        input.value = newPresentationValue
+        _field.value = newPresentationValue
     }
 
-    public void setMin(double min) {
-        input.setMin(min);
-        field.setMin(min);
-    }
+    var min: Double
+        get() = input.min
+        set(min) {
+            input.min = min
+            _field.min = min
+        }
 
-    public double getMin() {
-        return input.getMin();
-    }
+    var max: Double
+        get() = input.max
+        set(max) {
+            input.max = max
+            _field.max = max
+        }
 
-    public void setMax(double max) {
-        input.setMax(max);
-        field.setMax(max);
-    }
-
-    public double getMax() {
-        return input.getMax();
-    }
-
-    public void setStep(double step) {
-        input.setStep(step);
-        field.setStep(step);
-    }
-
-    public double getStep() {
-        return input.getStep();
-    }
+    var step: Double
+        get() = input.step
+        set(step) {
+            input.step = step
+            _field.step = step
+        }
 }

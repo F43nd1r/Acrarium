@@ -13,41 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.component
 
-package com.faendir.acra.ui.component;
-
-import com.vaadin.flow.component.customfield.CustomField;
-import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
-import org.springframework.util.StreamUtils;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
+import com.vaadin.flow.component.customfield.CustomField
+import com.vaadin.flow.component.upload.SucceededEvent
+import com.vaadin.flow.component.upload.Upload
+import com.vaadin.flow.component.upload.receivers.MemoryBuffer
+import org.springframework.util.StreamUtils
+import java.io.IOException
+import java.nio.charset.Charset
 
 /**
  * @author lukas
  * @since 06.03.19
  */
-public class UploadField extends CustomField<String> {
-    private final MemoryBuffer buffer;
+class UploadField : CustomField<String?>() {
+    private val buffer: MemoryBuffer = MemoryBuffer()
 
-    public UploadField() {
-        this.buffer = new MemoryBuffer();
-        Upload upload = new Upload(buffer);
-        upload.addSucceededListener(e -> setValue(generateModelValue()));
-        add(upload);
+    init {
+        val upload = Upload(buffer)
+        upload.addSucceededListener { value = generateModelValue() }
+        add(upload)
     }
 
-    @Override
-    protected String generateModelValue() {
-        try {
-            return StreamUtils.copyToString(buffer.getInputStream(), Charset.defaultCharset());
-        } catch (IOException e) {
-            return null;
+    override fun generateModelValue(): String? {
+        return try {
+            StreamUtils.copyToString(buffer.inputStream, Charset.defaultCharset())
+        } catch (e: IOException) {
+            null
         }
     }
 
-    @Override
-    protected void setPresentationValue(String newPresentationValue) {
-    }
+    override fun setPresentationValue(newPresentationValue: String?) {}
 }

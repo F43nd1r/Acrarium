@@ -13,27 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.util
 
-package com.faendir.acra.util;
-
-import com.vaadin.flow.data.renderer.BasicRenderer;
-import com.vaadin.flow.function.ValueProvider;
-import org.xbib.time.pretty.PrettyTime;
-
-import java.time.ZonedDateTime;
-import java.util.Locale;
+import com.vaadin.flow.data.renderer.BasicRenderer
+import org.xbib.time.pretty.PrettyTime
+import java.time.ZonedDateTime
+import java.util.*
 
 /**
  * @author Lukas
  * @since 26.05.2017
  */
-public class TimeSpanRenderer<T> extends BasicRenderer<T, ZonedDateTime> {
-    public TimeSpanRenderer(ValueProvider<T, ZonedDateTime> valueProvider) {
-        super(valueProvider);
-    }
-
-    @Override
-    protected String getFormattedValue(ZonedDateTime object) {
-        return object != null ? new PrettyTime(Locale.US).formatUnrounded(object.toLocalDateTime()) : "";
-    }
+class TimeSpanRenderer<T>(valueProvider: (T) -> ZonedDateTime?) : BasicRenderer<T, ZonedDateTime?>(valueProvider) {
+    override fun getFormattedValue(dateTime: ZonedDateTime?): String = dateTime?.let { PrettyTime(Locale.US).formatUnrounded(it.toLocalDateTime()) } ?: ""
 }

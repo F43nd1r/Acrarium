@@ -13,37 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.faendir.acra.ui.component
 
-package com.faendir.acra.ui.component;
-
-import com.faendir.acra.i18n.Messages;
-import com.faendir.acra.model.User;
-import com.faendir.acra.rest.RestReportInterface;
-import com.faendir.acra.ui.view.Overview;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.i18n.LocaleChangeEvent;
-import com.vaadin.flow.i18n.LocaleChangeObserver;
-import com.vaadin.flow.router.RouteConfiguration;
-import com.vaadin.flow.server.VaadinRequest;
-import org.springframework.lang.NonNull;
+import com.faendir.acra.i18n.Messages
+import com.faendir.acra.model.User
+import com.faendir.acra.rest.RestReportInterface
+import com.faendir.acra.ui.view.Overview
+import com.faendir.acra.util.ensureTrailing
+import com.vaadin.flow.component.html.Label
+import com.vaadin.flow.i18n.LocaleChangeEvent
+import com.vaadin.flow.i18n.LocaleChangeObserver
+import com.vaadin.flow.router.RouteConfiguration
+import com.vaadin.flow.server.VaadinRequest
+import org.springframework.lang.NonNull
 
 /**
  * @author lukas
  * @since 09.11.18
  */
-public class ConfigurationLabel extends Label implements LocaleChangeObserver {
-    private final User user;
-
-    public ConfigurationLabel(@NonNull User user) {
-        super("");
-        this.user = user;
+class ConfigurationLabel(private val user: User) : Label(""), LocaleChangeObserver {
+    override fun localeChange(event: LocaleChangeEvent) {
+        val baseUrl = VaadinRequest.getCurrent().getHeader("host")
+        element.setProperty("innerHTML", getTranslation(Messages.CONFIGURATION_LABEL,
+                baseUrl.ensureTrailing("/") + RouteConfiguration.forSessionScope().getUrl(Overview::class.java),
+                RestReportInterface.REPORT_PATH, user.username, user.getPlainTextPassword()))
     }
 
-    @Override
-    public void localeChange(LocaleChangeEvent event) {
-        String baseUrl = VaadinRequest.getCurrent().getHeader("host");
-        getElement().setProperty("innerHTML", getTranslation(Messages.CONFIGURATION_LABEL,
-                baseUrl + (baseUrl.endsWith("/") ? "": "/") + RouteConfiguration.forSessionScope().getUrl(Overview.class),
-                RestReportInterface.REPORT_PATH, user.getUsername(), user.getPlainTextPassword()));
-    }
 }
