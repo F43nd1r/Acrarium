@@ -30,19 +30,17 @@ import com.querydsl.jpa.JPAExpressions
  * @since 24.08.18
  */
 object WhereExpressions {
-    private val APP_PERMISSION_ADMIN = JPAExpressions.select(QPermission.permission)
-            .from(QUser.user)
-            .join(QUser.user.permissions, QPermission.permission)
-            .where(QUser.user.username.eq(getUsername()).and(QPermission.permission.app.eq(QApp.app)).and(QPermission.permission.level.lt(Permission.Level.VIEW)))
-            .notExists()
-    private val APP_PERMISSION_NO_ADMIN = JPAExpressions.select(QPermission.permission)
-            .from(QUser.user)
-            .join(QUser.user.permissions, QPermission.permission)
-            .where(QUser.user.username.eq(getUsername()).and(QPermission.permission.app.eq(QApp.app)).and(QPermission.permission.level.goe(Permission.Level.VIEW)))
-            .exists()
 
     @JvmStatic
     fun whereHasAppPermission(): BooleanExpression {
-        return if (hasRole(User.Role.ADMIN)) APP_PERMISSION_ADMIN else APP_PERMISSION_NO_ADMIN
+        val base = JPAExpressions.select(QPermission.permission)
+                .from(QUser.user)
+                .join(QUser.user.permissions, QPermission.permission)
+        return if (hasRole(User.Role.ADMIN)) {
+            base.where(QUser.user.username.eq(getUsername()).and(QPermission.permission.app.eq(QApp.app)).and(QPermission.permission.level.lt(Permission.Level.VIEW)))
+                    .notExists()
+        } else {
+            base.where(QUser.user.username.eq(getUsername()).and(QPermission.permission.app.eq(QApp.app)).and(QPermission.permission.level.goe(Permission.Level.VIEW))).exists()
+        }
     }
 }
