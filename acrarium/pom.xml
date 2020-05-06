@@ -439,6 +439,33 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.faendir.querydsl</groupId>
+                <artifactId>querydsl-maven-plugin</artifactId>
+                <version>4.3.1</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.faendir.querydsl</groupId>
+                        <artifactId>querydsl-kotlin</artifactId>
+                        <version>4.3.1</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>jpa-export</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <targetFolder>target/generated-sources/kotlin</targetFolder>
+                            <language>kotlin</language>
+                            <packages>
+                                <package>com.faendir.acra.model</package>
+                            </packages>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <profiles>
