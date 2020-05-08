@@ -245,6 +245,14 @@
             <id>jcenter</id>
             <url>https://jcenter.bintray.com</url>
         </repository>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-f43nd1r-maven</id>
+            <name>bintray</name>
+            <url>https://dl.bintray.com/f43nd1r/maven</url>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
