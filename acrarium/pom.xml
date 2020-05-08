@@ -212,7 +212,7 @@
         <dependency>
             <groupId>com.faendir.querydsl</groupId>
             <artifactId>querydsl-kotlin</artifactId>
-            <version>4.3.1</version>
+            <version>4.3.2</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -272,6 +272,7 @@
     </pluginRepositories>
     <build>
         <defaultGoal>spring-boot:run</defaultGoal>
+        <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -286,25 +287,6 @@
                         <goals>
                             <goal>prepare-frontend</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.build.directory}/generated-sources/java</source>
-                                <source>${project.build.directory}/generated-sources/kotlin</source>
-                            </sources>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -343,7 +325,7 @@
             <plugin>
                 <groupId>com.faendir.maven</groupId>
                 <artifactId>resource-class-generator</artifactId>
-                <version>1.0.2</version>
+                <version>1.1.2</version>
                 <executions>
                     <execution>
                         <goals>
@@ -353,6 +335,8 @@
                 </executions>
                 <configuration>
                     <inputDirectory>src/main/resources/i18n</inputDirectory>
+                    <outputDirectory>target/generated-sources/kotlin</outputDirectory>
+                    <language>kotlin</language>
                     <packageName>com.faendir.acra.i18n</packageName>
                 </configuration>
             </plugin>
@@ -367,9 +351,6 @@
                             <goal>kapt</goal>
                         </goals>
                         <configuration>
-                            <sourceDirs>
-                                <sourceDir>src/main/kotlin</sourceDir>
-                            </sourceDirs>
                             <annotationProcessors>
                                 <annotationProcessor>com.querydsl.apt.jpa.JPAAnnotationProcessor</annotationProcessor>
                             </annotationProcessors>
@@ -381,12 +362,6 @@
                         <goals>
                             <goal>compile</goal>
                         </goals>
-                        <configuration>
-                            <sourceDirs>
-                                <source>src/main/kotlin</source>
-                                <source>target/generated-sources/java</source>
-                            </sourceDirs>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>test-compile</id>
@@ -419,32 +394,6 @@
                         <version>${kotlin.version}</version>
                     </dependency>
                 </dependencies>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <executions>
-                    <!-- Replacing default-compile as it is treated specially by maven -->
-                    <execution>
-                        <id>default-compile</id>
-                        <phase>none</phase>
-                    </execution>
-                    <!-- Replacing default-testCompile as it is treated specially by maven -->
-                    <execution>
-                        <id>default-testCompile</id>
-                        <phase>none</phase>
-                    </execution>
-                    <execution>
-                        <id>java-compile</id>
-                        <phase>compile</phase>
-                        <goals> <goal>compile</goal> </goals>
-                    </execution>
-                    <execution>
-                        <id>java-test-compile</id>
-                        <phase>test-compile</phase>
-                        <goals> <goal>testCompile</goal> </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
