@@ -20,7 +20,7 @@ import com.faendir.acra.model.QApp
 import com.faendir.acra.model.QBug
 import com.faendir.acra.model.QReport
 import com.faendir.acra.model.QStacktrace
-import com.faendir.acra.model.QStacktrace.stacktrace1
+import com.faendir.acra.model.QStacktrace.Companion.stacktrace1
 import com.faendir.acra.model.QStacktraceMatch
 import com.faendir.acra.model.StacktraceMatch
 import com.querydsl.jpa.JPAExpressions
@@ -29,7 +29,6 @@ import com.querydsl.jpa.impl.JPAQuery
 import com.querydsl.jpa.impl.JPAUpdateClause
 import me.xdrop.fuzzywuzzy.FuzzySearch
 import org.springframework.context.event.EventListener
-import org.springframework.lang.NonNull
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.security.access.prepost.PreAuthorize

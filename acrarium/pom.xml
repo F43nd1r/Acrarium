@@ -111,12 +111,6 @@
             <version>${querydsl.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-apt</artifactId>
-            <version>${querydsl.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>ch.acra</groupId>
             <artifactId>acra-javacore</artifactId>
             <version>5.4.0</version>
@@ -216,6 +210,12 @@
             <artifactId>vaadin-css-grid</artifactId>
             <version>0.7</version>
         </dependency>
+        <dependency>
+            <groupId>com.faendir.querydsl</groupId>
+            <artifactId>querydsl-kotlin</artifactId>
+            <version>4.3.1</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>
@@ -295,6 +295,7 @@
                         <configuration>
                             <sources>
                                 <source>${project.build.directory}/generated-sources/java</source>
+                                <source>${project.build.directory}/generated-sources/kotlin</source>
                             </sources>
                         </configuration>
                     </execution>
@@ -377,7 +378,6 @@
                             <sourceDirs>
                                 <source>src/main/kotlin</source>
                                 <source>target/generated-sources/java</source>
-                                <source>target/generated-sources/kapt/compile</source>
                             </sourceDirs>
                         </configuration>
                     </execution>
@@ -436,33 +436,6 @@
                         <id>java-test-compile</id>
                         <phase>test-compile</phase>
                         <goals> <goal>testCompile</goal> </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.faendir.querydsl</groupId>
-                <artifactId>querydsl-maven-plugin</artifactId>
-                <version>4.3.1</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.faendir.querydsl</groupId>
-                        <artifactId>querydsl-kotlin</artifactId>
-                        <version>4.3.1</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>jpa-export</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <targetFolder>target/generated-sources/kotlin</targetFolder>
-                            <language>kotlin</language>
-                            <packages>
-                                <package>com.faendir.acra.model</package>
-                            </packages>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
