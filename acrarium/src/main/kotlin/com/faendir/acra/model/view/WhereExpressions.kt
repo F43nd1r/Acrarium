@@ -33,12 +33,9 @@ object WhereExpressions {
 
     @JvmStatic
     fun whereHasAppPermission(): BooleanExpression {
-        val base = JPAExpressions.select(QPermission.permission)
-                .from(QUser.user)
-                .join(QUser.user.permissions, QPermission.permission)
+        val base = JPAExpressions.select(QPermission.permission).from(QUser.user).join(QUser.user.permissions, QPermission.permission)
         return if (hasRole(User.Role.ADMIN)) {
-            base.where(QUser.user.username.eq(getUsername()).and(QPermission.permission.app.eq(QApp.app)).and(QPermission.permission.level.lt(Permission.Level.VIEW)))
-                    .notExists()
+            base.where(QUser.user.username.eq(getUsername()).and(QPermission.permission.app.eq(QApp.app)).and(QPermission.permission.level.lt(Permission.Level.VIEW))).notExists()
         } else {
             base.where(QUser.user.username.eq(getUsername()).and(QPermission.permission.app.eq(QApp.app)).and(QPermission.permission.level.goe(Permission.Level.VIEW))).exists()
         }

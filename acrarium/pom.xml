@@ -110,12 +110,6 @@
             <version>${querydsl.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-apt</artifactId>
-            <version>${querydsl.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>ch.acra</groupId>
             <artifactId>acra-javacore</artifactId>
             <version>5.4.0</version>
@@ -215,6 +209,12 @@
             <artifactId>vaadin-css-grid</artifactId>
             <version>0.7</version>
         </dependency>
+        <dependency>
+            <groupId>com.faendir.querydsl</groupId>
+            <artifactId>querydsl-kotlin</artifactId>
+            <version>4.3.1</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>
@@ -294,6 +294,7 @@
                         <configuration>
                             <sources>
                                 <source>${project.build.directory}/generated-sources/java</source>
+                                <source>${project.build.directory}/generated-sources/kotlin</source>
                             </sources>
                         </configuration>
                     </execution>
@@ -376,7 +377,6 @@
                             <sourceDirs>
                                 <source>src/main/kotlin</source>
                                 <source>target/generated-sources/java</source>
-                                <source>target/generated-sources/kapt/compile</source>
                             </sourceDirs>
                         </configuration>
                     </execution>
