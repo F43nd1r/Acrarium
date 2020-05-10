@@ -1,0 +1,14 @@
+version: "3.7"
+
+services:
+  acrarium:
+    build: .
+    container_name: acrarium
+    network_mode: host
+    ports:
+      - 8080:8080
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/acrarium?useSSL=false&allowPublicKeyRetrieval=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: acra
+      SPRING_DATASOURCE_PASSWORD: 1qay2wsx
+      SPRING_JPA_DATABASE-PLATFORM: org.hibernate.dialect.MySQL57Dialect
