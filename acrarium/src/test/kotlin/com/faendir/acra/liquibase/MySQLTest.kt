@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.liquibase;
+package com.faendir.acra.liquibase
 
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.TestPropertySource
 
 /**
  * @author lukas
  * @since 25.06.18
  */
-@TestPropertySource("classpath:application-mysql.properties")
-public class MySQLTest extends LiquibaseTest{
-}
+@TestPropertySource("/application-mysql.properties")
+class MySQLTest : LiquibaseTest()

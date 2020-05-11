@@ -15,11 +15,12 @@
  */
 package com.faendir.acra.dataprovider
 
+import com.faendir.acra.util.fold
+import com.faendir.acra.util.toNullable
 import com.querydsl.jpa.impl.JPAQuery
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider
 import com.vaadin.flow.data.provider.Query
 import java.util.stream.Stream
-import javax.persistence.EntityManager
 
 /**
  * @author lukas
@@ -30,13 +31,12 @@ class QueryDslDataProvider<T>(private val fetchProvider: () -> JPAQuery<T>, priv
     constructor(fetchBase: JPAQuery<T>, countBase: JPAQuery<*>) : this(fetchBase::clone, countBase::clone)
 
     override fun fetchFromBackEnd(query: Query<T, QueryDslFilter>): Stream<T> {
-        var q = fetchProvider.invoke().let { query.filter.map { filter -> filter.apply(it) }.orElse(it) }.offset(query.offset.toLong()).limit(query.limit.toLong())
-        query.sortOrders.filterIsInstance<QueryDslSortOrder>().forEach { q = q.orderBy(it.toSpecifier()) }
-        return q.fetch().stream()
+        return fetchProvider.invoke().also { query.filter.toNullable()?.apply(it) }.offset(query.offset.toLong()).limit(query.limit.toLong())
+                .also { q -> query.sortOrders?.filterIsInstance<QueryDslSortOrder>()?.fold(q) { orderBy(it.toSpecifier()) } }.fetch().stream()
     }
 
     override fun sizeInBackEnd(query: Query<T, QueryDslFilter>): Int {
-        return Math.toIntExact(countProvider.invoke().let { query.filter.map { filter -> filter.apply(it) }.orElse(it) }.fetchCount())
+        return Math.toIntExact(countProvider.invoke().also { query.filter.toNullable()?.apply(it) }.fetchCount())
     }
 }
 

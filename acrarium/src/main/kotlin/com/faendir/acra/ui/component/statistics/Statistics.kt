@@ -62,7 +62,7 @@ class Statistics(app: App, private val baseExpression: BooleanExpression?, dataS
         properties.forEach { it.addTo(filterLayout, content) }
         filterLayout.add(Translatable.createButton(Messages.APPLY) { update() })
         Thread {
-            try { Thread.sleep(100) } catch (e: InterruptedException) { e.printStackTrace() }
+            Thread.sleep(100)
             ui.ifPresent { it.access { update() } }
         }.start()
     }

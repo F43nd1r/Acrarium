@@ -15,9 +15,12 @@
  */
 package com.faendir.acra.i18n
 
+import com.faendir.acra.util.tryOrNull
 import com.vaadin.flow.i18n.I18NProvider
-import org.slf4j.LoggerFactory
+import mu.KotlinLogging
 import java.util.*
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Implementation of [I18NProvider] that reads messages from [ResourceBundle]s with a specific base name.
@@ -31,7 +34,7 @@ class ResourceBundleI18NProvider(private val baseName: String) : I18NProvider {
             ResourceBundle.getBundle(baseName, locale, this.javaClass.classLoader, MessageControl(withFallback))
         } catch (ex: MissingResourceException) {
             if (withFallback) {
-                LOGGER.warn("No message bundle with basename [{}] found for locale [{}]", baseName, locale)
+                logger.warn { "No message bundle with basename $baseName found for locale $locale" }
             }
             null
         }
@@ -39,18 +42,15 @@ class ResourceBundleI18NProvider(private val baseName: String) : I18NProvider {
 
     override fun getProvidedLocales() = Locale.getAvailableLocales().filter { getResourceBundle(it, false) != null }
 
-    override fun getTranslation(key: String, locale: Locale, vararg params: Any): String? = getString(getResourceBundle(locale, true), key)?.let { String.format(it, *params) }
+    override fun getTranslation(key: String, locale: Locale, vararg params: Any): String? =
+            getResourceBundle(locale, true)?.tryOrNull { getString(key) }?.let { String.format(it, *params) }
 
     private class MessageControl internal constructor(private val allowFallback: Boolean) : ResourceBundle.Control() {
         override fun getFallbackLocale(baseName: String, locale: Locale): Locale? = if (allowFallback) super.getFallbackLocale(baseName, locale) else null
 
-        override fun getCandidateLocales(baseName: String, locale: Locale): List<Locale> = if (allowFallback) super.getCandidateLocales(baseName, locale) else listOf(locale, Locale.ROOT)
+        override fun getCandidateLocales(baseName: String, locale: Locale): List<Locale> =
+                if (allowFallback) super.getCandidateLocales(baseName, locale) else listOf(locale, Locale.ROOT)
     }
 
-    companion object {
-        private val LOGGER = LoggerFactory.getLogger(ResourceBundleI18NProvider::class.java)
-
-        private fun getString(bundle: ResourceBundle?, s: String): String? = bundle?.let { try {it.getString(s) } catch (ex: MissingResourceException) { null }}
-    }
 
 }

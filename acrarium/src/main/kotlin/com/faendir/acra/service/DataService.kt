@@ -36,27 +36,24 @@ import com.faendir.acra.model.view.VApp
 import com.faendir.acra.model.view.WhereExpressions.whereHasAppPermission
 import com.faendir.acra.util.ImportResult
 import com.faendir.acra.util.getIntOrNull
-import com.querydsl.core.Tuple
+import com.faendir.acra.util.tryOrNull
 import com.querydsl.core.types.Expression
 import com.querydsl.core.types.Predicate
 import com.querydsl.core.types.dsl.ComparableExpressionBase
 import com.querydsl.jpa.JPAExpressions
 import com.querydsl.jpa.impl.JPADeleteClause
 import com.querydsl.jpa.impl.JPAQuery
+import mu.KotlinLogging
 import org.acra.ReportField
 import org.apache.commons.io.IOUtils
-import org.apache.commons.logging.LogFactory
 import org.ektorp.CouchDbConnector
 import org.ektorp.http.StdHttpClient
 import org.ektorp.impl.StdCouchDbConnector
 import org.ektorp.impl.StdCouchDbInstance
 import org.hibernate.Hibernate
 import org.hibernate.Session
-import org.json.JSONArray
 import org.json.JSONObject
 import org.springframework.context.ApplicationEventPublisher
-import org.springframework.lang.NonNull
-import org.springframework.lang.Nullable
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PostFilter
 import org.springframework.security.access.prepost.PreAuthorize
@@ -68,11 +65,9 @@ import java.io.Serializable
 import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
-import java.util.*
-import java.util.stream.Collectors
-import java.util.stream.StreamSupport
 import javax.persistence.EntityManager
-import kotlin.reflect.jvm.reflect
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * @author lukas
@@ -80,7 +75,6 @@ import kotlin.reflect.jvm.reflect
  */
 @Service
 class DataService(private val userService: UserService, private val entityManager: EntityManager, private val applicationEventPublisher: ApplicationEventPublisher) : Serializable {
-    private val log = LogFactory.getLog(javaClass)
     private val stacktraceLock = Any()
 
     fun getAppProvider(): QueryDslDataProvider<VApp> {
@@ -176,33 +170,31 @@ class DataService(private val userService: UserService, private val entityManage
         store(bug)
     }
 
-    @PostAuthorize("returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.stacktrace.bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    @PostAuthorize(
+            "returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.stacktrace.bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun findReport(id: String): Report? = JPAQuery<Any>(entityManager).from(QReport.report)
-                .join(QReport.report.stacktrace, QStacktrace.stacktrace1)
-                .fetchJoin()
-                .join(QStacktrace.stacktrace1.bug, QBug.bug)
-                .fetchJoin()
-                .join(QBug.bug.app, QApp.app)
-                .fetchJoin()
-                .where(QReport.report.id.eq(id))
-                .select(QReport.report)
-                .fetchOne()
+            .join(QReport.report.stacktrace, QStacktrace.stacktrace1)
+            .fetchJoin()
+            .join(QStacktrace.stacktrace1.bug, QBug.bug)
+            .fetchJoin()
+            .join(QBug.bug.app, QApp.app)
+            .fetchJoin()
+            .where(QReport.report.id.eq(id))
+            .select(QReport.report)
+            .fetchOne()
 
     @PostAuthorize("returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun findBug(id: Int): Bug? =
             JPAQuery<Any>(entityManager).from(QBug.bug).join(QBug.bug.app).fetchJoin().where(QBug.bug.id.eq(id)).select(QBug.bug).fetchOne()
 
     @PostAuthorize("returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject, T(com.faendir.acra.model.Permission\$Level).VIEW)")
-    fun findApp(encodedId: String): App? = try {
-        findApp(encodedId.toInt())
-    } catch (e: NumberFormatException) {
-        null
-    }
+    fun findApp(encodedId: String): App? = tryOrNull { findApp(encodedId.toInt()) }
 
     @PostAuthorize("returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun findApp(id: Int): App? = JPAQuery<Any>(entityManager).from(QApp.app).where(QApp.app.id.eq(id)).select(QApp.app).fetchOne()
 
-    @PostFilter("hasRole(T(com.faendir.acra.model.User\$Role).ADMIN) || T(com.faendir.acra.security.SecurityUtils).hasPermission(filterObject, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    @PostFilter(
+            "hasRole(T(com.faendir.acra.model.User\$Role).ADMIN) || T(com.faendir.acra.security.SecurityUtils).hasPermission(filterObject, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun findAllApps(): List<App> = JPAQuery<Any>(entityManager).from(QApp.app).select(QApp.app).fetch()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#report.stacktrace.bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
@@ -283,9 +275,10 @@ class DataService(private val userService: UserService, private val entityManage
             val report = store(Report(stacktrace, content))
             attachments.forEach {
                 try {
-                    store(Attachment(report, it.originalFilename ?: it.name, Hibernate.getLobCreator(entityManager.unwrap(Session::class.java)).createBlob(it.inputStream, it.size)))
+                    store(Attachment(report, it.originalFilename ?: it.name,
+                            Hibernate.getLobCreator(entityManager.unwrap(Session::class.java)).createBlob(it.inputStream, it.size)))
                 } catch (e: IOException) {
-                    log.warn("Failed to load attachment with name ${it.originalFilename}", e)
+                    logger.warn(e) { "Failed to load attachment with name ${it.originalFilename}" }
                 }
             }
             entityManager.flush()
@@ -319,11 +312,11 @@ class DataService(private val userService: UserService, private val entityManage
                     .select(select).distinct().orderBy(order.asc()).fetch()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
-    fun getStacktraces( bug: Bug): List<Stacktrace> =
+    fun getStacktraces(bug: Bug): List<Stacktrace> =
             JPAQuery<Any>(entityManager).from(QStacktrace.stacktrace1).where(QStacktrace.stacktrace1.bug.eq(bug)).select(QStacktrace.stacktrace1).fetch()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
-    fun getMaxVersion( app: App): Int? = JPAQuery<Any>(entityManager).from(QVersion.version).where(QVersion.version.app.eq(app)).select(QVersion.version.code.max()).fetchOne()
+    fun getMaxVersion(app: App): Int? = JPAQuery<Any>(entityManager).from(QVersion.version).where(QVersion.version.app.eq(app)).select(QVersion.version.code.max()).fetchOne()
 
     @Transactional
     @PreAuthorize("hasRole(T(com.faendir.acra.model.User\$Role).ADMIN)")
@@ -336,13 +329,12 @@ class DataService(private val userService: UserService, private val entityManage
         for (id in db.allDocIds) {
             if (!id.startsWith("_design")) {
                 total++
-                try {
+                tryOrNull {
                     val report = JSONObject(IOUtils.toString(db.getAsStream(id), StandardCharsets.UTF_8))
                     fixStringIsArray(report, ReportField.STACK_TRACE)
                     fixStringIsArray(report, ReportField.LOGCAT)
                     createNewReport(user.username, report.toString(), emptyList())
                     success++
-                } catch (ignored: Exception) {
                 }
             }
         }

@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.liquibase;
+package com.faendir.acra.liquibase
 
-import org.junit.Ignore;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.TestPropertySource
 
 /**
  * @author lukas
  * @since 25.06.18
  */
-@TestPropertySource("classpath:application-oracle.properties")
-public class OracleTest extends LiquibaseTest {
-}
+@TestPropertySource("/application-oracle.properties")
+class OracleTest : LiquibaseTest()

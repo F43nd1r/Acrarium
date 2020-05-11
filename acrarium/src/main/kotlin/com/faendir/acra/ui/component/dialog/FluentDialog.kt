@@ -19,6 +19,7 @@ import com.faendir.acra.i18n.Messages
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.FlexDirection
 import com.faendir.acra.ui.ext.setFlexDirection
+import com.faendir.acra.util.tryOrNull
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.HasSize
 import com.vaadin.flow.component.button.Button
@@ -85,12 +86,7 @@ class FluentDialog : AcrariumDialog() {
     }
 
     fun show() {
-        components.filterIsInstance<HasSize>().forEach {
-            try {
-                it.width = "100%"
-            } catch (ignored: UnsupportedOperationException) {
-            }
-        }
+        components.filterIsInstance<HasSize>().forEach { tryOrNull { it.width = "100%" } }
         val layout = FlexLayout()
         layout.setFlexDirection(FlexDirection.COLUMN)
         components.forEach { layout.add(it) }

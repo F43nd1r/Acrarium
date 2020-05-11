@@ -15,6 +15,7 @@
  */
 package com.faendir.acra.ui.component
 
+import com.faendir.acra.util.tryOrNull
 import com.vaadin.flow.component.customfield.CustomField
 import com.vaadin.flow.component.upload.SucceededEvent
 import com.vaadin.flow.component.upload.Upload
@@ -36,13 +37,7 @@ class UploadField : CustomField<String?>() {
         add(upload)
     }
 
-    override fun generateModelValue(): String? {
-        return try {
-            StreamUtils.copyToString(buffer.inputStream, Charset.defaultCharset())
-        } catch (e: IOException) {
-            null
-        }
-    }
+    override fun generateModelValue(): String? = tryOrNull { StreamUtils.copyToString(buffer.inputStream, Charset.defaultCharset()) }
 
     override fun setPresentationValue(newPresentationValue: String?) {}
 }

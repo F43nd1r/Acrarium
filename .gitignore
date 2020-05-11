@@ -35,6 +35,8 @@ nbdist/
 package-lock.json
 package.json
 webpack.generated.js
+pnpm-lock.yaml
+pnpmfile.js
 
 ### Maven ###
 **/target

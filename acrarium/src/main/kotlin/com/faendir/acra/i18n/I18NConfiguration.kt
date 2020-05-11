@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Configuration
  * @since 10.11.18
  */
 @Configuration
-open class I18NConfiguration {
+class I18NConfiguration {
     @Bean
-    open fun i18NProvider(): I18NProvider = ResourceBundleI18NProvider("i18n.com.faendir.acra.messages")
+    fun i18NProvider(): I18NProvider = ResourceBundleI18NProvider("i18n.com.faendir.acra.messages")
 }

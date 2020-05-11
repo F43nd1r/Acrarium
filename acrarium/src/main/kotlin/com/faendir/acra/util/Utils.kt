@@ -19,7 +19,6 @@ package com.faendir.acra.util
 import com.faendir.acra.model.Stacktrace
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.UserService
-import org.apache.commons.logging.LogFactory
 import org.json.JSONObject
 import proguard.retrace.ReTrace
 import java.io.IOException
@@ -55,11 +54,7 @@ fun UserService.getCurrentUser() = getUser(SecurityUtils.getUsername())!!
 
 inline fun <T> Array<out T>.indexOfFirstOrNull(predicate: (T) -> Boolean): Int? = indexOfFirst(predicate).let { if (it == -1) null else it }
 
-fun JSONObject.getIntOrNull(key: String): Int? = try {
-    getInt(key)
-} catch (e: Exception) {
-    null
-}
+fun JSONObject.getIntOrNull(key: String): Int? = tryOrNull { getInt(key) }
 
 fun String.ensureTrailing(suffix: String) = if (endsWith(suffix)) this else this + suffix
 
@@ -88,5 +83,17 @@ fun Stacktrace.retrace(mappings: String): String {
     } catch (e: IOException) {
         e.printStackTrace()
         return stacktrace
+    }
+}
+
+inline fun <T, R> Iterable<T>.fold(initial: R, crossinline operation: R.(T) -> R): R {
+    return fold(initial, { acc: R, t: T -> acc.operation(t) })
+}
+
+inline fun <T : Any, R> T.tryOrNull(f: T.() -> R): R? {
+    return try {
+        f()
+    } catch (e: Exception) {
+        null
     }
 }
