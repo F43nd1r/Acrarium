@@ -15,6 +15,7 @@
  */
 package com.faendir.acra.model
 
+import com.faendir.acra.util.equalsBy
 import org.hibernate.annotations.OnDelete
 import org.hibernate.annotations.OnDeleteAction
 import org.hibernate.annotations.Type
@@ -43,11 +44,7 @@ class Version(@OnDelete(action = OnDeleteAction.CASCADE)
 
     override fun compareTo(other: Version): Int = code.compareTo(other.code)
 
-    override fun equals(other: Any?): Boolean = when {
-        this === other -> true
-        other == null || javaClass != other.javaClass -> false
-        else -> id == (other as Version).id
-    }
+    override fun equals(other: Any?) = equalsBy(other, Version::id)
 
     override fun hashCode(): Int = Objects.hash(id)
 }

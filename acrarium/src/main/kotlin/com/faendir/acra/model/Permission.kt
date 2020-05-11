@@ -15,6 +15,7 @@
  */
 package com.faendir.acra.model
 
+import com.faendir.acra.util.equalsBy
 import org.hibernate.annotations.OnDelete
 import org.hibernate.annotations.OnDeleteAction
 import org.springframework.security.core.GrantedAuthority
@@ -35,13 +36,7 @@ class Permission(@OnDelete(action = OnDeleteAction.CASCADE)
         return "PERMISSION_" + level.name + "_" + app
     }
 
-    override fun equals(other: Any?): Boolean {
-        return when {
-            this === other -> true
-            other == null || javaClass != other.javaClass -> false
-            else -> app == (other as Permission).app
-        }
-    }
+    override fun equals(other: Any?) = equalsBy(other, Permission::app)
 
     override fun hashCode(): Int = app.hashCode()
 

@@ -16,6 +16,7 @@
 
 package com.faendir.acra.util
 
+import com.faendir.acra.model.App
 import com.faendir.acra.model.Stacktrace
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.UserService
@@ -96,4 +97,11 @@ inline fun <T : Any, R> T.tryOrNull(f: T.() -> R): R? {
     } catch (e: Exception) {
         null
     }
+}
+
+@Suppress("UNCHECKED_CAST")
+inline fun <T: Any, R> T.equalsBy(other: Any?, id: T.() -> R) : Boolean = when {
+    this === other -> true
+    other == null || javaClass != other.javaClass -> false
+    else ->  id() == (other as T).id()
 }

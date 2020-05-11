@@ -30,9 +30,9 @@ import java.util.*
 import java.util.stream.Stream
 
 @Configuration
-open class SpringRouteConfigurationInitializer : AbstractRouteRegistryInitializer() {
+class SpringRouteConfigurationInitializer : AbstractRouteRegistryInitializer() {
     @Bean
-    open fun routeConfiguration(context: ApplicationContext): RouteConfiguration {
+    fun routeConfiguration(context: ApplicationContext): RouteConfiguration {
         val registry = SpringRouteRegistry()
         val routes = validateRouteClasses(Stream.concat(Arrays.stream(context.getBeanNamesForAnnotation(Route::class.java)),
                 Arrays.stream(context.getBeanNamesForAnnotation(RouteAlias::class.java))).map { context.getType(it) })

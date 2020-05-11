@@ -15,6 +15,7 @@
  */
 package com.faendir.acra.model
 
+import com.faendir.acra.util.equalsBy
 import com.fasterxml.jackson.annotation.JsonIdentityInfo
 import com.fasterxml.jackson.annotation.JsonIdentityReference
 import com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator
@@ -51,13 +52,7 @@ class Bug(@OnDelete(action = OnDeleteAction.CASCADE)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id = 0
 
-    override fun equals(other: Any?): Boolean {
-        return when {
-            this === other -> true
-            other == null || javaClass != other.javaClass -> false
-            else -> id == (other as Bug).id
-        }
-    }
+    override fun equals(other: Any?) = equalsBy(other, Bug::id)
 
     override fun hashCode(): Int = id
 

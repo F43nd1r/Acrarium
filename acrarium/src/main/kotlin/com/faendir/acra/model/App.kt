@@ -15,6 +15,7 @@
  */
 package com.faendir.acra.model
 
+import com.faendir.acra.util.equalsBy
 import com.fasterxml.jackson.annotation.JsonIgnore
 import org.hibernate.annotations.OnDelete
 import org.hibernate.annotations.OnDeleteAction
@@ -46,11 +47,7 @@ class App(val name: String,
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id = 0
 
-    override fun equals(other: Any?) = when {
-        this === other -> true
-        other == null || javaClass != other.javaClass -> false
-        else -> id == (other as App).id
-    }
+    override fun equals(other: Any?) = equalsBy(other, App::id)
 
     override fun hashCode() = id
 
