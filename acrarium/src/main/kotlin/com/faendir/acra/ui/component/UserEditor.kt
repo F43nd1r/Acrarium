@@ -45,7 +45,7 @@ class UserEditor(userService: UserService, u: User?, onSuccess: () -> Unit) : Co
 
     init {
         val binder = Binder<User>()
-        val username = Translatable.createTextField(Messages.USERNAME).with { value = user.username }
+        val username = Translatable.createTextField(Messages.USERNAME)
         exposeInput(username)
         username.setWidthFull()
         val usernameBindingBuilder = binder.forField(username)
@@ -55,11 +55,11 @@ class UserEditor(userService: UserService, u: User?, onSuccess: () -> Unit) : Co
         usernameBindingBuilder.withValidator({ it == user.username || userService.getUser(it) == null }, getTranslation(Messages.USERNAME_TAKEN))
                 .bind(ValueProvider { it.username }, if (u == null) Setter { user: User, value: String -> user.username = value } else null)
         content.add(username)
-        val mail = Translatable.createTextField(Messages.EMAIL).with { value = user.mail }
+        val mail = Translatable.createTextField(Messages.EMAIL)
         mail.setWidthFull()
         val emailValidator = EmailValidator(getTranslation(Messages.INVALID_MAIL))
         binder.forField(mail).withValidator { m: String, c: ValueContext? -> if (m.isEmpty()) ValidationResult.ok() else emailValidator.apply(m, c) }
-                .bind({ it.mail }) { user: User, value: String? -> user.mail = value }
+                .bind({ it.mail ?: ""}) { user: User, value: String? -> user.mail = value }
         content.add(mail)
         val newPassword = Translatable.createPasswordField(Messages.NEW_PASSWORD)
         exposeInput(newPassword)
