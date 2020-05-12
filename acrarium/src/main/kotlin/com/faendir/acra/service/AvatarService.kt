@@ -22,22 +22,27 @@ import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.html.Image
 import com.vaadin.flow.server.InputStreamFactory
 import com.vaadin.flow.server.StreamResource
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.lang.NonNull
 import org.springframework.stereotype.Service
 import java.io.ByteArrayInputStream
+import javax.annotation.Resource
 
 /**
  * @author lukas
  * @since 29.07.18
  */
 @Service
-@EnableCaching
 class AvatarService {
     private val avatar: Avatar = IdenticonAvatar.newAvatarBuilder().size(32, 32).build()
 
-    fun getAvatar(report: Report): Component = Image(getAvatar(report.installationId), "")
+    @Resource
+    private lateinit var self: AvatarService
 
+    fun getAvatar(report: Report): Component = Image(self.getAvatar(report.installationId), report.installationId)
+
+    @Cacheable("avatars")
     fun getAvatar(installationId: String): StreamResource {
         val bytes = avatar.createAsPngBytes(installationId.hashCode().toLong())
         return StreamResource("", InputStreamFactory { ByteArrayInputStream(bytes) })

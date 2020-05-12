@@ -17,7 +17,9 @@ package com.faendir.acra.security
 
 import com.faendir.acra.model.User
 import com.faendir.acra.rest.RestApiInterface
+import com.faendir.acra.rest.RestApiInterface.Companion.API_PATH
 import com.faendir.acra.rest.RestReportInterface
+import com.faendir.acra.rest.RestReportInterface.Companion.REPORT_PATH
 import com.faendir.acra.service.UserService
 import org.apache.commons.text.CharacterPredicate
 import org.apache.commons.text.RandomStringGenerator
@@ -35,7 +37,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -50,17 +51,16 @@ import java.security.SecureRandom
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
-open class SecurityConfiguration(private val userService: UserService) : WebSecurityConfigurerAdapter() {
+class SecurityConfiguration(private val userService: UserService) : WebSecurityConfigurerAdapter() {
     override fun configure(auth: AuthenticationManagerBuilder) {
         auth.authenticationProvider(object : AuthenticationProvider {
-            @Throws(AuthenticationException::class)
             override fun authenticate(authentication: Authentication): Authentication? {
                 if (authentication is UsernamePasswordAuthenticationToken) {
-                    val user = userService.getUser(authentication.getName()) ?: throw UsernameNotFoundException("Username " + authentication.getName() + " not found")
+                    val user = userService.getUser(authentication.getName()) ?: throw UsernameNotFoundException("Username ${authentication.getName()} not found")
                     if (userService.checkPassword(user, authentication.getCredentials() as String)) {
                         return UsernamePasswordAuthenticationToken(user.username, user.password, user.authorities)
                     }
-                    throw BadCredentialsException("Password mismatch for user " + user.username)
+                    throw BadCredentialsException("Password mismatch for user ${user.username}")
                 }
                 return null
             }
@@ -78,7 +78,7 @@ open class SecurityConfiguration(private val userService: UserService) : WebSecu
                 .exceptionHandling()
                 .authenticationEntryPoint(Http403ForbiddenEntryPoint())
                 .and().sessionManagement()
-                .and().regexMatcher("/(" + RestReportInterface.REPORT_PATH + "|" + RestApiInterface.API_PATH + "/.*)")
+                .and().regexMatcher("/($REPORT_PATH|$API_PATH/.*)")
                 .httpBasic()
     }
 
@@ -93,11 +93,10 @@ open class SecurityConfiguration(private val userService: UserService) : WebSecu
         fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
         @Bean
-        fun randomStringGenerator(@NonNull secureRandom: SecureRandom): RandomStringGenerator =
+        fun randomStringGenerator(secureRandom: SecureRandom): RandomStringGenerator =
                 RandomStringGenerator.Builder().usingRandom { secureRandom.nextInt(it) }.withinRange('0'.toInt(), 'z'.toInt())
                         .filteredBy(CharacterPredicate { Character.isLetterOrDigit(it) }).build()
 
-        @NonNull
         @Bean
         fun grantedAuthoritiesMapper() = GrantedAuthoritiesMapper { authorities -> User.Role.values().filter { role -> authorities.any { it?.authority == role.authority } } }
     }

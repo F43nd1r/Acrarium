@@ -26,6 +26,7 @@ import com.faendir.acra.model.QBug
 import com.faendir.acra.model.QMailSettings
 import com.faendir.acra.model.QReport
 import com.faendir.acra.model.QStacktrace
+import com.faendir.acra.model.QUser
 import com.faendir.acra.model.QVersion
 import com.faendir.acra.model.Report
 import com.faendir.acra.model.Stacktrace
@@ -103,7 +104,8 @@ class DataService(private val userService: UserService, private val entityManage
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun getReportProvider(app: App) = QueryDslDataProvider(JPAQuery<Any>(entityManager).from(QReport.report)
             .join(QReport.report.stacktrace, QStacktrace.stacktrace1).fetchJoin()
-            .join(QStacktrace.stacktrace1.bug, QBug.bug)
+            .join(QStacktrace.stacktrace1.bug, QBug.bug).fetchJoin()
+            .join(QStacktrace.stacktrace1.version).fetchJoin()
             .where(QBug.bug.app.eq(app))
             .select(QReport.report))
 

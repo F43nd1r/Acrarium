@@ -45,9 +45,8 @@ class ReportList(app: App, private val dataProvider: QueryDslDataProvider<Report
     init {
         content.run {
             setSelectionMode(Grid.SelectionMode.NONE)
-            val userColumn = addColumn(ComponentRenderer { report: Report -> avatarService.getAvatar(report) }).setSortable(QReport.report.installationId).setCaption(Messages.USER)
-            //workaround for auto column sizing
-            filterRow.getCell(userColumn).setComponent(Div())
+            addColumn(ComponentRenderer { report: Report -> avatarService.getAvatar(report) }).setSortable(QReport.report.installationId).setCaption(Messages.USER)
+                    .setWidth("50px").isAutoWidth = false
             val dateColumn = addColumn(TimeSpanRenderer { it.date }).setSortable(QReport.report.date).setCaption(Messages.DATE)
             sort(GridSortOrder.desc(dateColumn).build())
             addColumn { it.stacktrace.version.code }.setSortableAndFilterable(QReport.report.stacktrace.version.code).setCaption(Messages.APP_VERSION)

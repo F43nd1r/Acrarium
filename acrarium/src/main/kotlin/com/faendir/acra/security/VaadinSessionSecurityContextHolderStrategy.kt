@@ -18,7 +18,6 @@ package com.faendir.acra.security
 import com.vaadin.flow.server.VaadinService
 import com.vaadin.flow.server.VaadinSession
 import org.springframework.context.annotation.Configuration
-import org.springframework.lang.NonNull
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.context.SecurityContextHolderStrategy
@@ -28,15 +27,13 @@ import org.springframework.security.core.context.SecurityContextImpl
  * A custom [SecurityContextHolderStrategy] that stores the [SecurityContext] in the Vaadin Session.
  */
 @Configuration
-open class VaadinSessionSecurityContextHolderStrategy : SecurityContextHolderStrategy {
+class VaadinSessionSecurityContextHolderStrategy : SecurityContextHolderStrategy {
     companion object {
-
         init {
             SecurityContextHolder.setStrategyName(VaadinSessionSecurityContextHolderStrategy::class.java.name)
         }
 
         private fun getSession(): VaadinSession = VaadinSession.getCurrent() ?: VaadinSession(VaadinService.getCurrent()).apply { VaadinSession.setCurrent(this) }
-
     }
 
     override fun clearContext() = getSession().setAttribute(SecurityContext::class.java, null)

@@ -41,7 +41,10 @@ import javax.validation.Validator
 class UserService(private val passwordEncoder: PasswordEncoder, private val randomStringGenerator: RandomStringGenerator, private val entityManager: EntityManager,
                   private val validator: Validator) : Serializable {
 
-    fun getUser(username: String): User? = JPAQuery<Any>(entityManager).from(USER).where(USER.username.eq(username)).select(USER).fetchOne()
+    fun getUser(username: String): User? = JPAQuery<Any>(entityManager).from(USER)
+            .leftJoin(USER.roles).fetchJoin()
+            .leftJoin(USER.permissions).fetchJoin()
+            .where(USER.username.eq(username)).select(USER).fetchOne()
 
     @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User\$Role).ADMIN)")

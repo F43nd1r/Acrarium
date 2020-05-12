@@ -20,7 +20,9 @@ import org.hibernate.annotations.OnDelete
 import org.hibernate.annotations.OnDeleteAction
 import org.hibernate.annotations.Type
 import java.util.*
+import javax.persistence.CascadeType
 import javax.persistence.Entity
+import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
@@ -32,7 +34,7 @@ import javax.persistence.ManyToOne
  */
 @Entity
 class Version(@OnDelete(action = OnDeleteAction.CASCADE)
-              @ManyToOne
+              @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.REFRESH], optional = false, fetch = FetchType.LAZY)
               private val app: App,
               val code: Int,
               var name: String,

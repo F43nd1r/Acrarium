@@ -21,6 +21,7 @@ import org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
+import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.PropertySource
 import org.springframework.context.annotation.PropertySources
@@ -31,13 +32,11 @@ import org.springframework.lang.NonNull
         PropertySource(value = ["file:\${user.home}/.config/acrarium/application.properties"], ignoreResourceNotFound = true),
         PropertySource(value = ["file:\${user.home}/.acra/application.properties"], ignoreResourceNotFound = true))
 @Import(MailSenderAutoConfiguration::class)
+@EnableCaching
 class BackendApplication : SpringBootServletInitializer() {
     override fun configure(builder: SpringApplicationBuilder): SpringApplicationBuilder = builder.sources(BackendApplication::class.java)
+}
 
-    companion object {
-        @JvmStatic
-        fun main(args: Array<String>) {
-            SpringApplication.run(BackendApplication::class.java, *args)
-        }
-    }
+fun main(args: Array<String>) {
+    SpringApplication.run(BackendApplication::class.java, *args)
 }

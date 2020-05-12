@@ -37,7 +37,8 @@ import javax.persistence.ManyToOne
  */
 @Entity
 class Bug(@OnDelete(action = OnDeleteAction.CASCADE)
-          @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.REFRESH], optional = false, fetch = FetchType.LAZY) @JsonIdentityReference(alwaysAsId = true)
+          @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.REFRESH], optional = false, fetch = FetchType.LAZY)
+          @JsonIdentityReference(alwaysAsId = true)
           @JsonIdentityInfo(generator = PropertyGenerator::class, property = "id")
           val app: App,
           stacktrace: String) {
