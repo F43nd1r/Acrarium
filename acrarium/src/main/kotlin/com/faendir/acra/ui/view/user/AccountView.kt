@@ -20,7 +20,7 @@ import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.base.HasAcrariumTitle
 import com.faendir.acra.ui.base.TranslatableText
 import com.faendir.acra.ui.component.UserEditor
-import com.faendir.acra.ui.view.MainView
+import com.faendir.acra.ui.view.main.MainView
 import com.faendir.acra.util.getCurrentUser
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.Composite

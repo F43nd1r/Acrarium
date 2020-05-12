@@ -51,5 +51,11 @@ open class ParentLayout() : FlexLayout(), RouterLayout {
         this.routerRoot = routerRoot
     }
 
+    fun removeRouterRoot(routerRoot: HasElement) {
+        if (this.routerRoot == routerRoot) {
+            this.routerRoot = this
+        }
+    }
+
     override fun showRouterLayoutContent(content: HasElement) = setContent(content, routerRoot)
 }

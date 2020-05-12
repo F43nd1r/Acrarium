@@ -19,6 +19,7 @@ import com.faendir.acra.i18n.Messages
 import com.faendir.acra.ui.base.HasAcrariumTitle
 import com.faendir.acra.ui.base.TranslatableText
 import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.view.main.MainView
 import com.faendir.acra.util.LocalSettings
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.formlayout.FormLayout
@@ -31,7 +32,6 @@ import com.vaadin.flow.server.VaadinSession
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
 import com.vaadin.flow.theme.lumo.Lumo
-import org.springframework.beans.factory.annotation.Autowired
 import java.util.function.Consumer
 
 /**

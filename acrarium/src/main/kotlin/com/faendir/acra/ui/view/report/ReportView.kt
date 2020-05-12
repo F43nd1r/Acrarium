@@ -36,7 +36,7 @@ import com.faendir.acra.ui.ext.setAlignItems
 import com.faendir.acra.ui.ext.setAlignSelf
 import com.faendir.acra.ui.ext.setColumnGap
 import com.faendir.acra.ui.ext.setJustifyItems
-import com.faendir.acra.ui.view.MainView
+import com.faendir.acra.ui.view.main.MainView
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
 import com.faendir.acra.util.retrace
 import com.github.appreciated.css.grid.sizes.Auto

@@ -30,12 +30,12 @@ import com.faendir.acra.ui.component.dialog.FluentDialog
 import com.faendir.acra.ui.component.dialog.ValidatedField
 import com.faendir.acra.ui.component.grid.AcrariumGrid
 import com.faendir.acra.ui.view.app.tabs.BugTab
+import com.faendir.acra.ui.view.main.MainView
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.ComponentEventListener
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
-import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope

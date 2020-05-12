@@ -23,8 +23,8 @@ import com.faendir.acra.model.User
 import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.jpa.impl.JPAQuery
 import org.apache.commons.text.RandomStringGenerator
-import org.springframework.lang.NonNull
-import org.springframework.lang.Nullable
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -46,6 +46,7 @@ class UserService(private val passwordEncoder: PasswordEncoder, private val rand
             .leftJoin(USER.permissions).fetchJoin()
             .where(USER.username.eq(username)).select(USER).fetchOne()
 
+    @CacheEvict(hasAdminCache)
     @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User\$Role).ADMIN)")
     fun createUser(username: String, password: String) {
@@ -65,35 +66,14 @@ class UserService(private val passwordEncoder: PasswordEncoder, private val rand
 
     fun checkPassword(user: User?, password: String?): Boolean = user != null && passwordEncoder.matches(password, user.password)
 
+    @CacheEvict(hasAdminCache)
     @Transactional
-    fun store(user: User): User = entityManager.merge(user.apply { if(hasPlainTextPassword()) password =  passwordEncoder.encode(user.getPlainTextPassword()) })
+    fun store(user: User): User = entityManager.merge(user.apply { if (hasPlainTextPassword()) password = passwordEncoder.encode(user.getPlainTextPassword()) })
 
+    @Cacheable(hasAdminCache)
     fun hasAdmin(): Boolean = JPAQuery<Any>(entityManager).from(USER).where(USER.roles.contains(User.Role.ADMIN)).select(Expressions.ONE).fetchFirst() != null
 
-    @Transactional
-    @PreAuthorize("authentication.name == #user.username")
-    fun changePassword(user: User, oldPassword: String?, newPassword: String): Boolean {
-        if (checkPassword(user, oldPassword)) {
-            user.password = passwordEncoder.encode(newPassword)
-            entityManager.merge(user)
-            return true
-        }
-        return false
-    }
-
-    @Transactional
-    @PreAuthorize("authentication.name == #user.username")
-    fun changeMail(user: User, mail: String?): Boolean {
-        val oldMail = user.mail
-        user.mail = mail
-        if (validator.validate(user).isNotEmpty()) {
-            user.mail = oldMail
-            return false
-        }
-        entityManager.merge(user)
-        return true
-    }
-
+    @CacheEvict(hasAdminCache)
     @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User\$Role).ADMIN)")
     fun setAdmin(user: User, admin: Boolean) {
@@ -132,6 +112,8 @@ class UserService(private val passwordEncoder: PasswordEncoder, private val rand
 
     companion object {
         private val USER = QUser.user
+
+        private const val hasAdminCache = "hasAdmin"
     }
 
 }
