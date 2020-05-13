@@ -17,10 +17,9 @@ package com.faendir.acra.ui.view.bug.tabs
 
 import com.faendir.acra.model.Bug
 import com.faendir.acra.service.DataService
-import com.faendir.acra.ui.base.HasRoute.ParametrizedParent
+import com.faendir.acra.ui.base.HasRoute
 import com.faendir.acra.ui.base.TabView
 import com.faendir.acra.ui.view.app.tabs.BugTab
-import com.faendir.acra.util.toNullable
 import com.vaadin.flow.component.Component
 
 /**
@@ -28,4 +27,4 @@ import com.vaadin.flow.component.Component
  * @since 19.11.18
  */
 abstract class BugTab<T : Component>(dataService: DataService) : TabView.Tab<T, Bug>(dataService, DataService::findBug, Bug::id, Bug::title,
-        { ParametrizedParent(BugTab::class.java, app.id) })
+        { HasRoute.ParametrizedParent(BugTab::class.java, app.id) })

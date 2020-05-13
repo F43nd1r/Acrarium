@@ -16,19 +16,29 @@
 package com.faendir.acra.ui.base
 
 import com.faendir.acra.security.SecurityUtils.isLoggedIn
+import com.faendir.acra.util.toNullable
+import com.vaadin.flow.router.BeforeEnterEvent
+import com.vaadin.flow.router.BeforeEnterObserver
 import com.vaadin.flow.router.BeforeEvent
-import com.vaadin.flow.router.HasUrlParameter
 
 /**
  * @author lukas
  * @since 19.11.18
  */
-interface HasSecureParameter<T> : HasUrlParameter<T> {
-    override fun setParameter(event: BeforeEvent?, parameter: T) {
-        if (isLoggedIn()) {
-            setParameterSecure(event, parameter)
+interface HasSecureParameter<T> : BeforeEnterObserver {
+    override fun beforeEnter(enterEvent: BeforeEnterEvent?) {
+        enterEvent?.let { event ->
+            if (isLoggedIn()) {
+                event.routeParameters[PARAM].toNullable()?.let { setParameterSecure(event, parseParameter(it))}
+            }
         }
     }
 
+    fun parseParameter(parameter: String) : T
+
     fun setParameterSecure(event: BeforeEvent?, parameter: T)
+
+    companion object {
+        const val PARAM = "param"
+    }
 }

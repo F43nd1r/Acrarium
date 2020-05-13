@@ -17,10 +17,17 @@
 package com.faendir.acra.navigation
 
 import com.vaadin.flow.component.Component
+import com.vaadin.flow.router.RouteParameters
 import com.vaadin.flow.router.internal.AbstractRouteRegistry
+import com.vaadin.flow.router.internal.NavigationRouteTarget
+import com.vaadin.flow.router.internal.RouteTarget
 import java.util.*
 
 class SpringRouteRegistry : AbstractRouteRegistry() {
+    override fun getRouteTarget(target: Class<out Component>?, parameters: RouteParameters?): RouteTarget = configuration.getRouteTarget(target, parameters)
+
+    override fun getNavigationRouteTarget(url: String?): NavigationRouteTarget = configuration.getNavigationRouteTarget(url)
+
     override fun getNavigationTarget(pathString: String?): Optional<Class<out Component>> = getNavigationTarget(pathString, mutableListOf())
 
     override fun getNavigationTarget(pathString: String?, segments: MutableList<String>?): Optional<Class<out Component>> = configuration.getRoute(pathString, segments)

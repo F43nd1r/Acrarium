@@ -17,7 +17,6 @@ package com.faendir.acra.ui.base
 
 import com.faendir.acra.ui.component.Path
 import com.vaadin.flow.router.AfterNavigationEvent
-import com.vaadin.flow.router.HasUrlParameter
 import org.springframework.context.ApplicationContext
 
 /**
@@ -45,8 +44,11 @@ interface HasRoute : HasAcrariumTitle {
         open operator fun get(applicationContext: ApplicationContext, afterNavigationEvent: AfterNavigationEvent?): T = applicationContext.getBean(parentClass)
     }
 
-    class ParametrizedParent<T, P>(parentClass: Class<T>, private val parameter: P) : Parent<T>(parentClass) where T : HasRoute, T : HasUrlParameter<P> {
+    class ParametrizedParent<T, P>(parentClass: Class<T>, private val parameter: P) : Parent<T>(parentClass) where T : HasRoute, T : HasSecureParameter<P> {
         override fun get(applicationContext: ApplicationContext, afterNavigationEvent: AfterNavigationEvent?): T =
-                super.get(applicationContext, afterNavigationEvent).apply { setParameter(null, parameter) }
+                super.get(applicationContext, afterNavigationEvent).apply { setParameterSecure(null, parameter) }
     }
 }
+
+inline fun <reified T : HasRoute> parent() = HasRoute.Parent(T::class.java)
+inline fun <reified T, P> parent(parameter: P) where T : HasRoute, T : HasSecureParameter<P> = HasRoute.ParametrizedParent(T::class.java, parameter)

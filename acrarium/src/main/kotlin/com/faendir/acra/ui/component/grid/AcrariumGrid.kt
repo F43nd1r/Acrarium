@@ -17,6 +17,8 @@ package com.faendir.acra.ui.component.grid
 
 import com.faendir.acra.dataprovider.QueryDslDataProvider
 import com.faendir.acra.dataprovider.QueryDslFilter
+import com.faendir.acra.ui.base.HasSecureParameter
+import com.faendir.acra.ui.base.HasSecureParameter.Companion.PARAM
 import com.querydsl.jpa.impl.JPAQuery
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.grid.Grid
@@ -25,6 +27,7 @@ import com.vaadin.flow.data.renderer.Renderer
 import com.vaadin.flow.function.ValueProvider
 import com.vaadin.flow.router.HasUrlParameter
 import com.vaadin.flow.router.RouteConfiguration
+import com.vaadin.flow.router.RouteParameters
 import java.util.function.BiFunction
 import java.util.function.Consumer
 
@@ -68,11 +71,11 @@ class AcrariumGrid<T>(val dataProvider: QueryDslDataProvider<T>) : Grid<T>() {
         throw UnsupportedOperationException()
     }
 
-    fun <C, R> addOnClickNavigation(target: Class<C>, transform: (T) -> R) where C : Component, C : HasUrlParameter<R> {
+    fun <C, R> addOnClickNavigation(target: Class<C>, transform: (T) -> R) where C : Component, C : HasSecureParameter<R> {
         addItemClickListener { e: ItemClickEvent<T> ->
             ui.ifPresent(if (e.button == 1 || e.isCtrlKey) Consumer {
-                it.page.executeJs("""window.open("${RouteConfiguration.forSessionScope().getUrl(target, transform(e.item))}", "blank", "");""")
-            } else Consumer { it.navigate(target, transform(e.item)) })
+                it.page.executeJs("""window.open("${RouteConfiguration.forSessionScope().getUrl(target, RouteParameters(PARAM, transform(e.item).toString()))}", "blank", "");""")
+            } else Consumer { it.navigate(target, RouteParameters(PARAM, transform(e.item).toString())) })
         }
     }
 }

@@ -17,6 +17,7 @@ package com.faendir.acra.ui.base
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.service.DataService
+import com.faendir.acra.ui.base.HasSecureParameter.Companion.PARAM
 import com.faendir.acra.ui.component.Path
 import com.faendir.acra.ui.component.Path.ParametrizedTextElement
 import com.faendir.acra.ui.component.SpringComposite
@@ -25,24 +26,27 @@ import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.util.indexOfFirstOrNull
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.HasElement
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.component.tabs.Tabs
 import com.vaadin.flow.router.BeforeEvent
 import com.vaadin.flow.router.HasUrlParameter
+import com.vaadin.flow.router.RouteParameters
 import java.io.Serializable
 
 /**
  * @author lukas
  * @since 03.12.18
  */
-open class TabView<T, P>(private vararg val tabs: TabInfo<out T, P>) : ParentLayout() where T : Component, T : HasUrlParameter<P> {
+open class TabView<T, P>(private val parse: (String) -> P, private vararg val tabs: TabInfo<out T, P>) : ParentLayout(), HasSecureParameter<P>
+        where T : Component, T : HasSecureParameter<P>{
     private val header: Tabs = Tabs()
     private var parameter: P? = null
 
     init {
         header.add(*tabs.map { Tab(it.labelId) }.toTypedArray())
-        header.addSelectedChangeListener { ui.ifPresent { ui: UI -> ui.navigate(tabs[it.source.selectedIndex].tabClass, parameter) } }
+        header.addSelectedChangeListener { ui.ifPresent { ui: UI -> ui.navigate(tabs[it.source.selectedIndex].tabClass, RouteParameters(PARAM,  parameter.toString())) } }
         setSizeFull()
         val content = FlexLayout()
         content.setWidthFull()
@@ -54,12 +58,20 @@ open class TabView<T, P>(private vararg val tabs: TabInfo<out T, P>) : ParentLay
         add(header, content)
     }
 
-    private fun setActiveChild(child: T, parameter: P) {
-        this.parameter = parameter
-        tabs.indexOfFirstOrNull { it.tabClass == child.javaClass }?.let { header.selectedIndex = it }
+    override fun parseParameter(parameter: String): P {
+        return parse(parameter)
     }
 
-    class TabInfo<T : HasUrlParameter<P>, P>(val tabClass: Class<T>, val labelId: String) : Serializable
+    override fun setParameterSecure(event: BeforeEvent?, parameter: P) {
+        this.parameter = parameter
+    }
+
+    override fun showRouterLayoutContent(content: HasElement) {
+        super.showRouterLayoutContent(content)
+        tabs.indexOfFirstOrNull { it.tabClass == content.javaClass }?.let { header.selectedIndex = it }
+    }
+
+    class TabInfo<T : HasSecureParameter<P>, P>(val tabClass: Class<T>, val labelId: String) : Serializable
 
     @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     abstract class Tab<T : Component, P : Any>(val dataService: DataService, private val getParameter: DataService.(Int) -> P?, private val getId: P.() -> Int,
@@ -71,26 +83,17 @@ open class TabView<T, P>(private vararg val tabs: TabInfo<out T, P>) : ParentLay
             dataService.getParameter(parameter)?.also { this.parameter = it } ?: event?.rerouteToError(IllegalArgumentException::class.java) ?: throw IllegalArgumentException()
         }
 
+        override fun parseParameter(parameter: String) = Integer.parseInt(parameter)
+
         override fun onAttach(attachEvent: AttachEvent) {
             super.onAttach(attachEvent)
             init(parameter)
-            var parent = parent
-            while (parent.isPresent) {
-                if (parent.get() is TabView<*, *>) {
-                    @Suppress("UNCHECKED_CAST")
-                    (parent.get() as TabView<Tab<*, *>, Int>).setActiveChild(this, parameter.getId())
-                    break
-                }
-                parent = parent.get().parent
-            }
         }
 
         override val pathElement: Path.Element<*>
             get() = ParametrizedTextElement<Tab<*, *>, Int>(javaClass, parameter.getId(), Messages.ONE_ARG, parameter.getTitle())
 
         override val logicalParent: HasRoute.Parent<*>?
-            get() {
-                return parameter.getParent()
-            }
+            get() = parameter.getParent()
     }
 }

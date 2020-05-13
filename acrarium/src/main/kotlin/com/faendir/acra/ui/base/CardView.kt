@@ -33,7 +33,7 @@ class CardView<C, P>(context: ApplicationContext) : FlexLayout(), Init<P> where 
 
     init {
         setWidthFull()
-        wrapMode = WrapMode.WRAP
+        flexWrap = FlexWrap.WRAP
         justifyContentMode = FlexComponent.JustifyContentMode.CENTER
         this.context = context
     }

@@ -20,8 +20,9 @@ import com.faendir.acra.model.Report
 import com.faendir.acra.service.AvatarService
 import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.base.HasRoute
-import com.faendir.acra.ui.base.HasRoute.ParametrizedParent
 import com.faendir.acra.ui.base.HasSecureParameter
+import com.faendir.acra.ui.base.HasSecureParameter.Companion.PARAM
+import com.faendir.acra.ui.base.parent
 import com.faendir.acra.ui.component.Card
 import com.faendir.acra.ui.component.InstallationView
 import com.faendir.acra.ui.component.Path
@@ -63,7 +64,7 @@ import kotlin.math.max
  */
 @UIScope
 @SpringComponent
-@Route(value = "report", layout = MainView::class)
+@Route(value = "report/:$PARAM", layout = MainView::class)
 class ReportView(private val dataService: DataService, avatarService: AvatarService) : Composite<Div>(), HasSecureParameter<String>, HasRoute {
     private val version: Label
     private val date: Label
@@ -121,7 +122,7 @@ class ReportView(private val dataService: DataService, avatarService: AvatarServ
             attachments.add(*dataService.findAttachments(report).map {
                 Anchor(StreamResource(it.filename, InputStreamFactory { it.content.binaryStream }), it.filename).apply { element.setAttribute("download", true) }
             }.toTypedArray())
-            details.removeAll()
+            details.removeContent()
             details.add(getLayoutForMap(report.jsonObject.toMap()))
         } ?: event?.rerouteToError(IllegalArgumentException::class.java) ?: throw IllegalArgumentException()
     }
@@ -151,6 +152,8 @@ class ReportView(private val dataService: DataService, avatarService: AvatarServ
     override val pathElement: Path.Element<*>
         get() = ParametrizedTextElement(javaClass, report.id, Messages.REPORT_FROM, prettyTime.formatUnrounded(report.date.toLocalDateTime()))
 
-    override val logicalParent: HasRoute.Parent<*>
-        get() = ParametrizedParent(ReportTab::class.java, report.stacktrace.bug.id)
+    override val logicalParent: HasRoute.Parent<ReportTab>
+        get() = parent(report.stacktrace.bug.id)
+
+    override fun parseParameter(parameter: String): String = parameter
 }

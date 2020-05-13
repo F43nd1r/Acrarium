@@ -16,13 +16,14 @@
 package com.faendir.acra.ui.view.app
 
 import com.faendir.acra.i18n.Messages
+import com.faendir.acra.ui.base.HasSecureParameter.Companion.PARAM
 import com.faendir.acra.ui.base.TabView
-import com.faendir.acra.ui.view.main.MainView
 import com.faendir.acra.ui.view.app.tabs.AdminTab
 import com.faendir.acra.ui.view.app.tabs.AppTab
 import com.faendir.acra.ui.view.app.tabs.BugTab
 import com.faendir.acra.ui.view.app.tabs.ReportTab
 import com.faendir.acra.ui.view.app.tabs.StatisticsTab
+import com.faendir.acra.ui.view.main.MainView
 import com.vaadin.flow.router.ParentLayout
 import com.vaadin.flow.router.RoutePrefix
 import com.vaadin.flow.spring.annotation.SpringComponent
@@ -34,9 +35,9 @@ import com.vaadin.flow.spring.annotation.UIScope
  */
 @UIScope
 @SpringComponent
-@RoutePrefix("app")
+@RoutePrefix("app/:$PARAM")
 @ParentLayout(MainView::class)
-class AppView : TabView<AppTab<*>, Int>(TabInfo(BugTab::class.java, Messages.BUGS),
+class AppView : TabView<AppTab<*>, Int>({ Integer.parseInt(it) }, TabInfo(BugTab::class.java, Messages.BUGS),
         TabInfo(ReportTab::class.java, Messages.REPORTS),
         TabInfo(StatisticsTab::class.java, Messages.STATISTICS),
         TabInfo(AdminTab::class.java, Messages.ADMIN)) 
