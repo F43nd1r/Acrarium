@@ -20,9 +20,7 @@ import com.faendir.acra.i18n.Messages
 import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.UserEditor
-import com.faendir.acra.ui.ext.FlexDirection
 import com.faendir.acra.ui.ext.Unit
-import com.faendir.acra.ui.ext.setFlexDirection
 import com.faendir.acra.ui.ext.setPaddingBottom
 import com.faendir.acra.ui.ext.setPaddingTop
 import com.faendir.acra.ui.ext.setWidth
@@ -40,14 +38,14 @@ class SetupLayout(userService: UserService) : Composite<FlexLayout>() {
         val welcomeLabel = Translatable.createLabel(Messages.WELCOME)
         welcomeLabel.style["font-size"] = "var(--lumo-font-size-xxl)"
         val header = FlexLayout(welcomeLabel, logo, Translatable.createLabel(Messages.CREATE_ADMIN))
-        header.setFlexDirection(FlexDirection.COLUMN)
+        header.setFlexDirection(FlexLayout.FlexDirection.COLUMN)
         header.setAlignSelf(FlexComponent.Alignment.CENTER, welcomeLabel)
         header.setWidth(0, Unit.PIXEL)
         val wrapper = FlexLayout(header)
         wrapper.expand(header)
         val userEditor = UserEditor(userService, null) { UI.getCurrent().page.reload() }
         content.add(wrapper, userEditor)
-        content.setFlexDirection(FlexDirection.COLUMN)
+        content.setFlexDirection(FlexLayout.FlexDirection.COLUMN)
         content.setSizeUndefined()
     }
 }

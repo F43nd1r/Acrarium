@@ -31,6 +31,9 @@ import com.vaadin.flow.component.formlayout.FormLayout
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.component.textfield.NumberField
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * @author lukas
@@ -54,17 +57,17 @@ class Statistics(app: App, private val baseExpression: BooleanExpression?, dataS
         properties.add(factory.createStringProperty(QReport.report.stacktrace.version.name, Messages.APP_VERSION, Messages.REPORTS_PER_APP_VERSION))
         properties.add(factory.createStringProperty(QReport.report.phoneModel, Messages.PHONE_MODEL, Messages.REPORTS_PER_PHONE_MODEL))
         properties.add(factory.createStringProperty(QReport.report.brand, Messages.PHONE_BRAND, Messages.REPORTS_PER_BRAND))
-        content.wrapMode = FlexLayout.WrapMode.WRAP
+        content.flexWrap = FlexLayout.FlexWrap.WRAP
         content.setWidthFull()
         content.removeAll()
         content.add(card)
         content.expand(card)
         properties.forEach { it.addTo(filterLayout, content) }
         filterLayout.add(Translatable.createButton(Messages.APPLY) { update() })
-        Thread {
-            Thread.sleep(100)
+        GlobalScope.launch {
+            delay(100)
             ui.ifPresent { it.access { update() } }
-        }.start()
+        }
     }
 
     private fun update() {

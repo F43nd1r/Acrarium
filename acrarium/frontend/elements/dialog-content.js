@@ -23,6 +23,10 @@ class AcrariumDialogContent extends PolymerElement {
         // language=HTML
         return html`
             <style>
+                :host {
+                    display: block;
+                    max-width: 1000px;
+                }
 
                 .footer {
                     background-color: var(--lumo-contrast-5pct);

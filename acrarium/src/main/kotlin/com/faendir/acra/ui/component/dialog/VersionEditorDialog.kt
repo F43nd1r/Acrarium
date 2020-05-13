@@ -20,8 +20,6 @@ import com.faendir.acra.model.App
 import com.faendir.acra.model.Version
 import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.ui.ext.FlexDirection
-import com.faendir.acra.ui.ext.setFlexDirection
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 
 /**
@@ -58,7 +56,7 @@ class VersionEditorDialog(dataService: DataService, app: App, onUpdate: (() -> U
         }
         setNegative(Messages.CANCEL)
         val layout = FlexLayout(code, name, upload)
-        layout.setFlexDirection(FlexDirection.COLUMN)
+        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN)
         add(layout)
     }
 }

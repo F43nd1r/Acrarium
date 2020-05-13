@@ -19,8 +19,6 @@ import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.Bug
 import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.ui.ext.FlexDirection
-import com.faendir.acra.ui.ext.setFlexDirection
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.spring.annotation.SpringComponent
@@ -43,7 +41,7 @@ class PropertiesCard(dataService: DataService) : AdminCard(dataService) {
             dataService.store(bug)
         }
         val layout = FlexLayout(title, save)
-        layout.setFlexDirection(FlexDirection.COLUMN)
+        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN)
         layout.alignItems = FlexComponent.Alignment.END
         add(layout)
     }

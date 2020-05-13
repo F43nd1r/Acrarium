@@ -35,6 +35,7 @@ import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.component.html.H3
 import com.vaadin.flow.component.html.Image
 import com.vaadin.flow.component.html.Label
+import com.vaadin.flow.component.html.Paragraph
 import com.vaadin.flow.component.select.Select
 import com.vaadin.flow.component.tabs.Tab
 import com.vaadin.flow.component.textfield.NumberField
@@ -131,5 +132,7 @@ open class Translatable<T : Component> protected constructor(protected val t: T,
         fun createDiv(captionId: String, vararg params: Any) = Translatable(Div(), Div::setText, captionId, *params)
 
         fun createRangeField(captionId: String, vararg params: Any) = ValidatedValue(RangeField(), RangeField::setLabel, captionId, *params)
+
+        fun createP(captionId: String, vararg params: Any) = Translatable(Paragraph(), Paragraph::setText, captionId, params)
     }
 }

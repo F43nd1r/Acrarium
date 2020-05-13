@@ -19,9 +19,7 @@ package com.faendir.acra.ui.view.main
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.User
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.ui.ext.FlexDirection
 import com.faendir.acra.ui.ext.Unit
-import com.faendir.acra.ui.ext.setFlexDirection
 import com.faendir.acra.ui.ext.setWidth
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.UI
@@ -52,7 +50,7 @@ class LoginLayout(private val authenticationManager: AuthenticationManager) : Co
             }
         }
         content.add(logoWrapper, loginForm)
-        content.setFlexDirection(FlexDirection.COLUMN)
+        content.setFlexDirection(FlexLayout.FlexDirection.COLUMN)
         content.setSizeUndefined()
     }
 

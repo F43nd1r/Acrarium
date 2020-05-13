@@ -23,6 +23,7 @@ import com.vaadin.flow.component.HasStyle
 import com.vaadin.flow.component.Tag
 import com.vaadin.flow.component.dependency.JsModule
 import com.vaadin.flow.component.polymertemplate.PolymerTemplate
+import com.vaadin.flow.templatemodel.TemplateModel
 
 /**
  * @author lukas
@@ -30,7 +31,9 @@ import com.vaadin.flow.component.polymertemplate.PolymerTemplate
  */
 @Tag("acrarium-dialog-content")
 @JsModule("./elements/dialog-content.js")
-class DialogContent : PolymerTemplate<CardModel?>(), HasSize, HasStyle, HasOrderedComponents {
+class DialogContent : PolymerTemplate<DialogContent.DialogContentModel>(), HasSize, HasStyle, HasOrderedComponents {
+    interface DialogContentModel : TemplateModel
+
     fun setHeader(header: HasElement) {
         header.element.setAttribute("slot", "header")
         element.appendChild(header.element)

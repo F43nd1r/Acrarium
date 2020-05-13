@@ -28,8 +28,6 @@ import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.FluentDialog
 import com.faendir.acra.ui.component.dialog.ValidatedField
 import com.faendir.acra.ui.component.grid.AcrariumGrid
-import com.faendir.acra.ui.ext.FlexDirection
-import com.faendir.acra.ui.ext.setFlexDirection
 import com.faendir.acra.ui.view.main.MainView
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.Composite
@@ -52,7 +50,7 @@ import com.vaadin.flow.spring.annotation.UIScope
 class UserManager(private val userService: UserService, private val dataService: DataService) : Composite<FlexLayout>(), HasAcrariumTitle {
 
     init {
-        content.setFlexDirection(FlexDirection.COLUMN)
+        content.setFlexDirection(FlexLayout.FlexDirection.COLUMN)
         content.setSizeFull()
     }
 

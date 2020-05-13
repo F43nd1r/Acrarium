@@ -17,8 +17,6 @@ package com.faendir.acra.ui.component.dialog
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.ui.ext.FlexDirection
-import com.faendir.acra.ui.ext.setFlexDirection
 import com.faendir.acra.util.tryOrNull
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.HasSize
@@ -69,7 +67,7 @@ class FluentDialog : AcrariumDialog() {
     }
 
     fun addText(captionId: String, vararg params: Any): FluentDialog {
-        components.add(Translatable.createText(captionId, *params))
+        components.add(Translatable.createP(captionId, *params))
         return this
     }
 
@@ -88,7 +86,7 @@ class FluentDialog : AcrariumDialog() {
     fun show() {
         components.filterIsInstance<HasSize>().forEach { tryOrNull { it.width = "100%" } }
         val layout = FlexLayout()
-        layout.setFlexDirection(FlexDirection.COLUMN)
+        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN)
         components.forEach { layout.add(it) }
         checkValid()
         add(layout)

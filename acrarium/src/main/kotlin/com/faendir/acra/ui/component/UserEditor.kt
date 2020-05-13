@@ -19,8 +19,6 @@ import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.User
 import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.component.Translatable.ValidatedValue
-import com.faendir.acra.ui.ext.FlexDirection
-import com.faendir.acra.ui.ext.setFlexDirection
 import com.faendir.acra.ui.ext.setMaxWidthFull
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent
 import com.vaadin.flow.component.Component
@@ -106,7 +104,7 @@ class UserEditor(userService: UserService, u: User?, onSuccess: () -> Unit) : Co
         button.content.isEnabled = false
         binder.addStatusChangeListener { button.content.isEnabled = it.binder.hasChanges() }
         content.add(button)
-        content.setFlexDirection(FlexDirection.COLUMN)
+        content.setFlexDirection(FlexLayout.FlexDirection.COLUMN)
         content.setMaxWidthFull()
         content.width = "calc(var(--lumo-size-m) * 10)"
     }
