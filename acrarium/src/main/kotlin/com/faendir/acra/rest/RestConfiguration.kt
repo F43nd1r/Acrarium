@@ -32,7 +32,4 @@ class RestConfiguration {
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     fun gzipFilter(): Filter = CompressingFilter()
-
-    @Bean
-    fun multipartResolver() = CommonsMultipartResolver()
 }
