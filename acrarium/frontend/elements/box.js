@@ -18,7 +18,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
 class AcrariumBox extends PolymerElement {
     static get template() {
-        // language=HTML
         return html`
             <style>
                 :host {
@@ -42,7 +41,7 @@ class AcrariumBox extends PolymerElement {
                 <slot name="details"></slot>
             </div>
             <slot name="action"></slot>
-        `
+        `;
     }
 }
 

@@ -18,7 +18,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
 class AcrariumCard extends PolymerElement {
     static get template() {
-        // language=HTML
         return html`
             <style>
                 :host {
@@ -45,7 +44,7 @@ class AcrariumCard extends PolymerElement {
                     width: 100%;
                     height: 100%;
                 }
-                
+
                 .acrarium-card-content-wrapper {
                     width: 100%;
                     flex: 1;
@@ -65,7 +64,7 @@ class AcrariumCard extends PolymerElement {
             <div class$="{{getContentClass(collapse, divider)}}">
                 <slot class="acrarium-card-content"></slot>
             </div>
-        `
+        `;
     }
 
     getContentClass(collapse, divider) {

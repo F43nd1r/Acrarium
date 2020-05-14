@@ -18,7 +18,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
 class AcrariumImageWithLabel extends PolymerElement {
     static get template() {
-        // language=HTML
         return html`
             <style>
                 :host {
@@ -38,7 +37,7 @@ class AcrariumImageWithLabel extends PolymerElement {
             </style>
             <img src$="[[image]]">
             <label>[[label]]</label>
-        `
+        `;
     }
 
     static get properties() {

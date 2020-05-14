@@ -20,7 +20,6 @@ import '@vaadin/vaadin-button/vaadin-button.js';
 
 class AcrariumDialogContent extends PolymerElement {
     static get template() {
-        // language=HTML
         return html`
             <style>
                 :host {
@@ -53,7 +52,7 @@ class AcrariumDialogContent extends PolymerElement {
                 <div class="spacer"></div>
                 <slot name="positive"></slot>
             </div>
-        `
+        `;
     }
 }
 
