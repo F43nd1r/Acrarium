@@ -21,12 +21,11 @@ import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.statistics.Statistics
 import com.faendir.acra.ui.view.bug.BugView
 import com.faendir.acra.util.LocalSettings
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.lang.NonNull
 
 /**
  * @author lukas
@@ -35,7 +34,7 @@ import org.springframework.lang.NonNull
 @UIScope
 @SpringComponent("bugStatisticsTab")
 @Route(value = "statistics", layout = BugView::class)
-class StatisticsTab(dataService: DataService, private val localSettings: LocalSettings) : BugTab<Div>(dataService) {
+class StatisticsTab(dataService: DataService) : BugTab<Div>(dataService) {
 
     init {
         content.setSizeFull()
@@ -43,6 +42,6 @@ class StatisticsTab(dataService: DataService, private val localSettings: LocalSe
 
     override fun init(bug: Bug) {
         content.removeAll()
-        content.add(Statistics(bug.app, QReport.report.stacktrace.bug.eq(bug), dataService, localSettings))
+        content.add(Statistics(bug.app, QReport.report.stacktrace.bug.eq(bug), dataService))
     }
 }

@@ -19,7 +19,6 @@ import com.faendir.acra.model.App
 import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.preventWhiteSpaceBreaking
-import com.faendir.acra.util.LocalSettings
 import com.querydsl.core.types.Expression
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.ComparableExpressionBase
@@ -44,21 +43,15 @@ import java.util.*
  * @since 01.06.18
  */
 internal class Property<F, C, T, E : HasValue.ValueChangeEvent<F>> private
-constructor(private val app: App, private val filterComponent: C, private val filter: (F) -> BooleanExpression, chart: Chart<T>,
-            private val dataService: DataService, select: Expression<T>, filterTextId: String, vararg params: Any)
+constructor(private val app: App, private val filterComponent: C, private val filter: (F) -> BooleanExpression, private val chart: Chart<T>,
+            private val dataService: DataService, private val select: Expression<T>, filterTextId: String, vararg params: Any)
         where C : Component, C : HasValue<E, F>, C : HasEnabled, C : HasSize, C : HasStyle {
-    private val checkBox: Translatable<Checkbox>
-    private val chart: Chart<T>
-    private val select: Expression<T>
+    private val checkBox = Translatable.createCheckbox(filterTextId, *params).with { preventWhiteSpaceBreaking() }
 
     init {
-        checkBox = Translatable.createCheckbox(filterTextId, *params)
-        checkBox.preventWhiteSpaceBreaking()
-        this.chart = chart
-        this.select = select
         filterComponent.isEnabled = false
         filterComponent.setWidthFull()
-        checkBox.content.addValueChangeListener { filterComponent.isEnabled = it.value }
+        checkBox.addValueChangeListener { filterComponent.isEnabled = it.value }
     }
 
     fun addTo(filterLayout: FormLayout, chartLayout: FlexComponent) {
@@ -77,7 +70,7 @@ constructor(private val app: App, private val filterComponent: C, private val fi
         chart.setContent(dataService.countReports(app, expression, select))
     }
 
-    internal class Factory(private val dataService: DataService, private val expression: BooleanExpression?, private val localSettings: LocalSettings, private val app: App) {
+    internal class Factory(private val dataService: DataService, private val expression: BooleanExpression?, private val app: App) {
         fun createStringProperty(stringExpression: ComparableExpressionBase<String>, filterTextId: String, chartTitleId: String): Property<*, *, *, *> {
             val list = dataService.getFromReports(app, expression, stringExpression)
             val select = Select(*list.toTypedArray())
@@ -91,7 +84,7 @@ constructor(private val app: App, private val filterComponent: C, private val fi
             val stepper = NumberField()
             stepper.value = 30.0
             return Property(app, stepper, { dateTimeExpression.after(ZonedDateTime.now().minus(it.toInt().toLong(), ChronoUnit.DAYS)) }, TimeChart(chartTitleId),
-                    dataService, SQLExpressions.date(Date::class.java, dateTimeExpression), filterTextId)
+                    dataService, SQLExpressions.date(dateTimeExpression), filterTextId)
         }
 
     }

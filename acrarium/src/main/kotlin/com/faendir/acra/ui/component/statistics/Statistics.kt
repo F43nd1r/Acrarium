@@ -23,10 +23,8 @@ import com.faendir.acra.ui.component.Card
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.Unit
 import com.faendir.acra.ui.ext.setWidth
-import com.faendir.acra.util.LocalSettings
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.vaadin.flow.component.Composite
-import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.formlayout.FormLayout
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep
 import com.vaadin.flow.component.orderedlayout.FlexLayout
@@ -39,7 +37,7 @@ import kotlinx.coroutines.launch
  * @author lukas
  * @since 21.05.18
  */
-class Statistics(app: App, private val baseExpression: BooleanExpression?, dataService: DataService, localSettings: LocalSettings) : Composite<FlexLayout>() {
+class Statistics(app: App, private val baseExpression: BooleanExpression?, dataService: DataService) : Composite<FlexLayout>() {
     private val properties: MutableList<Property<*, *, *, *>> = mutableListOf()
 
     init {
@@ -51,7 +49,7 @@ class Statistics(app: App, private val baseExpression: BooleanExpression?, dataS
         card.setWidth(500, Unit.PIXEL)
         val dayStepper = NumberField()
         dayStepper.value = 30.0
-        val factory = Property.Factory(dataService, baseExpression, localSettings, app)
+        val factory = Property.Factory(dataService, baseExpression, app)
         properties.add(factory.createAgeProperty(QReport.report.date, Messages.LAST_X_DAYS, Messages.REPORTS_OVER_TIME))
         properties.add(factory.createStringProperty(QReport.report.androidVersion, Messages.ANDROID_VERSION, Messages.REPORTS_PER_ANDROID_VERSION))
         properties.add(factory.createStringProperty(QReport.report.stacktrace.version.name, Messages.APP_VERSION, Messages.REPORTS_PER_APP_VERSION))

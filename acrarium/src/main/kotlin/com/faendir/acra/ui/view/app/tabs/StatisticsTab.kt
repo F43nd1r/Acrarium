@@ -20,12 +20,11 @@ import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.statistics.Statistics
 import com.faendir.acra.ui.view.app.AppView
 import com.faendir.acra.util.LocalSettings
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.lang.NonNull
 
 /**
  * @author lukas
@@ -34,7 +33,7 @@ import org.springframework.lang.NonNull
 @UIScope
 @SpringComponent
 @Route(value = "statistics", layout = AppView::class)
-class StatisticsTab(dataService: DataService, private val localSettings: LocalSettings) : AppTab<Div>(dataService) {
+class StatisticsTab(dataService: DataService) : AppTab<Div>(dataService) {
 
     init {
         content.setSizeFull()
@@ -42,6 +41,6 @@ class StatisticsTab(dataService: DataService, private val localSettings: LocalSe
 
     override fun init(app: App) {
         content.removeAll()
-        content.add(Statistics(app, null, dataService, localSettings))
+        content.add(Statistics(app, null, dataService))
     }
 }
