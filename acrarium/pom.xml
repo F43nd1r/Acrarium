@@ -17,7 +17,7 @@
         <java.version>8</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <vaadin.version>16.0.0.beta1</vaadin.version>
+        <vaadin.version>16.0.0.beta2</vaadin.version>
         <flow.version>3.2.0.alpha3</flow.version>
         <drivers.dir>${project.basedir}/drivers</drivers.dir>
         <drivers.downloader.phase>pre-integration-test</drivers.downloader.phase>
