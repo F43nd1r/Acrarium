@@ -17,6 +17,7 @@
 package com.faendir.acra.ui.view.main
 
 import com.faendir.acra.i18n.Messages
+import com.faendir.acra.model.User
 import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.UserEditor
@@ -43,7 +44,7 @@ class SetupLayout(userService: UserService) : Composite<FlexLayout>() {
         header.setWidth(0, Unit.PIXEL)
         val wrapper = FlexLayout(header)
         wrapper.expand(header)
-        val userEditor = UserEditor(userService, null) { UI.getCurrent().page.reload() }
+        val userEditor = UserEditor(userService, User("", "", mutableSetOf(User.Role.ADMIN, User.Role.USER)), false) { UI.getCurrent().page.reload() }
         content.add(wrapper, userEditor)
         content.setFlexDirection(FlexLayout.FlexDirection.COLUMN)
         content.setSizeUndefined()

@@ -38,8 +38,7 @@ import com.vaadin.flow.function.ValueProvider
  * @author lukas
  * @since 28.02.19
  */
-class UserEditor(userService: UserService, u: User?, onSuccess: () -> Unit) : Composite<FlexLayout>() {
-    private var user: User = (u ?: User("", "", mutableSetOf(User.Role.ADMIN, User.Role.USER)))
+class UserEditor(userService: UserService, private var user: User, isExistingUser: Boolean, onSuccess: () -> Unit) : Composite<FlexLayout>() {
 
     init {
         val binder = Binder<User>()
@@ -47,17 +46,17 @@ class UserEditor(userService: UserService, u: User?, onSuccess: () -> Unit) : Co
         exposeInput(username)
         username.setWidthFull()
         val usernameBindingBuilder = binder.forField(username)
-        if (u == null) {
+        if (!isExistingUser) {
             usernameBindingBuilder.asRequired(getTranslation(Messages.USERNAME_REQUIRED))
         }
         usernameBindingBuilder.withValidator({ it == user.username || userService.getUser(it) == null }, getTranslation(Messages.USERNAME_TAKEN))
-                .bind(ValueProvider { it.username }, if (u == null) Setter { user: User, value: String -> user.username = value } else null)
+                .bind(ValueProvider { it.username }, if (!isExistingUser) Setter { u: User, value: String -> u.username = value } else null)
         content.add(username)
         val mail = Translatable.createTextField(Messages.EMAIL)
         mail.setWidthFull()
         val emailValidator = EmailValidator(getTranslation(Messages.INVALID_MAIL))
         binder.forField(mail).withValidator { m: String, c: ValueContext? -> if (m.isEmpty()) ValidationResult.ok() else emailValidator.apply(m, c) }
-                .bind({ it.mail ?: ""}) { user: User, value: String? -> user.mail = value }
+                .bind({ it.mail ?: ""}) { u: User, value: String? -> u.mail = value }
         content.add(mail)
         val newPassword = Translatable.createPasswordField(Messages.NEW_PASSWORD)
         exposeInput(newPassword)
@@ -65,7 +64,7 @@ class UserEditor(userService: UserService, u: User?, onSuccess: () -> Unit) : Co
         val repeatPassword = Translatable.createPasswordField(Messages.REPEAT_PASSWORD)
         exposeInput(repeatPassword)
         repeatPassword.setWidthFull()
-        if (u != null) {
+        if (isExistingUser) {
             val oldPassword = Translatable.createPasswordField(Messages.OLD_PASSWORD)
             exposeInput(oldPassword)
             oldPassword.setWidthFull()
@@ -78,13 +77,13 @@ class UserEditor(userService: UserService, u: User?, onSuccess: () -> Unit) : Co
         }
         val newPasswordBindingBuilder = binder.forField(newPassword)
         val repeatPasswordBindingBuilder = binder.forField(repeatPassword)
-        if (u == null) {
+        if (!isExistingUser) {
             newPasswordBindingBuilder.asRequired(getTranslation(Messages.PASSWORD_REQUIRED))
             repeatPasswordBindingBuilder.asRequired(getTranslation(Messages.PASSWORD_REQUIRED))
         }
-        newPasswordBindingBuilder.bind({ "" }) { user: User, plainTextPassword: String? ->
+        newPasswordBindingBuilder.bind({ "" }) { u: User, plainTextPassword: String? ->
             if (plainTextPassword != null && "" != plainTextPassword) {
-                user.setPlainTextPassword(plainTextPassword)
+                u.setPlainTextPassword(plainTextPassword)
             }
         }
         content.add(newPassword)

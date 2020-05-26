@@ -50,7 +50,7 @@ class AccountView constructor(@field:NonNull @param:NonNull private val userServ
     override fun onAttach(attachEvent: AttachEvent) {
         content.removeAll()
         val user = userService.getCurrentUser()
-        val userEditor = UserEditor(userService, user) { Notification.show(getTranslation(Messages.SUCCESS)) }
+        val userEditor = UserEditor(userService, user, true) { Notification.show(getTranslation(Messages.SUCCESS)) }
         content.add(userEditor)
     }
 

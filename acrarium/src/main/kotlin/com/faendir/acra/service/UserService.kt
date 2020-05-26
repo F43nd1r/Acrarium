@@ -66,14 +66,14 @@ class UserService(private val passwordEncoder: PasswordEncoder, private val rand
 
     fun checkPassword(user: User?, password: String?): Boolean = user != null && passwordEncoder.matches(password, user.password)
 
-    @CacheEvict(hasAdminCache)
+    @CacheEvict(cacheNames = [hasAdminCache], allEntries = true)
     @Transactional
     fun store(user: User): User = entityManager.merge(user.apply { if (hasPlainTextPassword()) password = passwordEncoder.encode(user.getPlainTextPassword()) })
 
     @Cacheable(hasAdminCache)
     fun hasAdmin(): Boolean = JPAQuery<Any>(entityManager).from(USER).where(USER.roles.contains(User.Role.ADMIN)).select(Expressions.ONE).fetchFirst() != null
 
-    @CacheEvict(hasAdminCache)
+    @CacheEvict(cacheNames = [hasAdminCache], allEntries = true)
     @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasRole(T(com.faendir.acra.model.User\$Role).ADMIN)")
     fun setAdmin(user: User, admin: Boolean) {

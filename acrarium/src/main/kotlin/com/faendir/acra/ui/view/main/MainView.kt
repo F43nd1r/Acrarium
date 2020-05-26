@@ -18,6 +18,7 @@ package com.faendir.acra.ui.view.main
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.base.ParentLayout
+import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.dependency.JsModule
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode
@@ -33,16 +34,21 @@ import org.springframework.security.authentication.AuthenticationManager
 @JsModule("./styles/shared-styles.js")
 @UIScope
 @SpringComponent
-class MainView(authenticationManager: AuthenticationManager, applicationContext: ApplicationContext, userService: UserService) : ParentLayout() {
+class MainView(private val authenticationManager: AuthenticationManager, private val applicationContext: ApplicationContext, private val userService: UserService) :
+        ParentLayout() {
+    private val mainLayout: MainLayout = MainLayout(applicationContext)
 
     init {
         alignItems = FlexComponent.Alignment.CENTER
         justifyContentMode = JustifyContentMode.CENTER
         setSizeFull()
-        val layout = MainLayout(applicationContext)
-        setRouterRoot(layout)
+        setRouterRoot(mainLayout)
+    }
+
+    override fun onAttach(attachEvent: AttachEvent?) {
+        super.onAttach(attachEvent)
         content = when {
-            SecurityUtils.isLoggedIn() -> layout
+            SecurityUtils.isLoggedIn() -> mainLayout
             userService.hasAdmin() -> LoginLayout(authenticationManager)
             else -> SetupLayout(userService)
         }
