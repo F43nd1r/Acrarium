@@ -75,5 +75,8 @@
         <profile>
             <id>production</id>
         </profile>
+        <profile>
+            <id>war</id>
+        </profile>
     </profiles>
 </project>
