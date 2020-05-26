@@ -1,6 +1,16 @@
-FROM openjdk:13-slim
-VOLUME /tmp
-ARG DEPENDENCY=target/dependency
-COPY ${DEPENDENCY}/WEB-INF/lib /acrarium/lib
-COPY ${DEPENDENCY}/WEB-INF/classes /acrarium
-ENTRYPOINT ["java","-cp","acrarium:acrarium/lib/*","com.faendir.acra.BackendApplicationKt"]
+FROM adoptopenjdk:11-jre-hotspot as builder
+WORKDIR application
+ARG JAR_FILE=target/*.jar
+COPY ${JAR_FILE} application.jar
+RUN java -Djarmode=layertools -jar application.jar extract
+
+FROM adoptopenjdk:11-jre-hotspot
+WORKDIR application
+COPY --from=builder application/dependencies/ ./
+RUN true
+COPY --from=builder application/spring-boot-loader/ ./
+RUN true
+COPY --from=builder application/snapshot-dependencies/ ./
+RUN true
+COPY --from=builder application/application/ ./
+ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]

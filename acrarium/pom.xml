@@ -9,7 +9,7 @@
     </parent>
     <artifactId>acrarium</artifactId>
     <version>0.10.3-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>${packaging.type}</packaging>
     <name>Acrarium</name>
     <properties>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -24,6 +24,7 @@
         <docker.image.prefix>f43nd1r</docker.image.prefix>
         <kotlin.version>1.3.72</kotlin.version>
         <auto-service.version>1.0-rc7</auto-service.version>
+        <packaging.type>jar</packaging.type>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -346,6 +347,11 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <layers>
+                        <enabled>true</enabled>
+                    </layers>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>com.vaadin</groupId>
@@ -384,7 +390,7 @@
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>${project.artifactId}</artifactId>
                                     <version>${project.version}</version>
-                                    <type>war</type>
+                                    <type>${packaging.type}</type>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -518,6 +524,12 @@
                     <version>3.0.7</version>
                 </dependency>
             </dependencies>
+        </profile>
+        <profile>
+            <id>war</id>
+            <properties>
+                <packaging.type>war</packaging.type>
+            </properties>
         </profile>
     </profiles>
 </project>

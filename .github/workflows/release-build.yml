@@ -16,7 +16,7 @@ jobs:
       with:
         java-version: '1.13'
     - name: Build release
-      run: ./mvnw -B clean package -Pproduction
+      run: ./mvnw -B clean package -Pproduction -Pwar
     - name: Extract version
       id: version
       run: echo ::set-output name=value::$(./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep '^[0-9]')
