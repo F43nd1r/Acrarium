@@ -16,14 +16,16 @@
 
 package com.faendir.acra.liquibase.changelog
 
-import com.faendir.acra.liquibase.changelog.v0.m10.Main
+import com.faendir.acra.liquibase.changelog.v0.m10.V0_10
+import com.faendir.acra.liquibase.changelog.v0.m10.m7.V0_10_7
 import liquibase.changelog.DatabaseChangeLog
 import org.liquibase.kotlin.KotlinDatabaseChangeLogDefinition
 
 class MasterChangeLog : KotlinDatabaseChangeLogDefinition {
     override fun define(): DatabaseChangeLog {
         return changeLog {
-            include(Main::class.java)
+            include(V0_10::class.java)
+            include(V0_10_7::class.java)
         }
     }
 }

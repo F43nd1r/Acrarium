@@ -23,7 +23,7 @@ import liquibase.precondition.core.PreconditionContainer
 import org.liquibase.kotlin.KotlinDatabaseChangeLog
 import org.liquibase.kotlin.KotlinDatabaseChangeLogDefinition
 
-class Main : KotlinDatabaseChangeLogDefinition {
+class V0_10 : KotlinDatabaseChangeLogDefinition {
     override fun define(): DatabaseChangeLog = changeLog {
         include(User::class.java)
         include(Roles::class.java)
