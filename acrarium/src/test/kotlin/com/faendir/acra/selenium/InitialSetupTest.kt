@@ -18,7 +18,7 @@ import strikt.assertions.isTrue
 @ExtendWith(ContainerExtension::class, SpringExtension::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("/application-mysql.properties")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class InitialSetupTest {
 
     @LocalServerPort

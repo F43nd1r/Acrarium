@@ -45,7 +45,7 @@ import javax.validation.Validator
  */
 @DataJpaTest
 @ExtendWith(SpringExtension::class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ComponentScan(basePackageClasses = [BackendApplication::class],
         excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = [SpringLiquibase::class]), ComponentScan.Filter(

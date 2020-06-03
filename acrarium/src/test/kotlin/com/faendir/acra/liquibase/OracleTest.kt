@@ -15,11 +15,14 @@
  */
 package com.faendir.acra.liquibase
 
+import org.junit.Ignore
+import org.junit.jupiter.api.Disabled
 import org.springframework.test.context.TestPropertySource
 
 /**
  * @author lukas
  * @since 25.06.18
  */
+@Disabled
 @TestPropertySource("/application-oracle.properties")
 class OracleTest : LiquibaseTest()
