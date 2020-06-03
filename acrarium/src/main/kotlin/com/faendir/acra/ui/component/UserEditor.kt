@@ -45,6 +45,7 @@ class UserEditor(userService: UserService, private var user: User, isExistingUse
         val username = Translatable.createTextField(Messages.USERNAME)
         exposeInput(username)
         username.setWidthFull()
+        username.setId(USERNAME_ID)
         val usernameBindingBuilder = binder.forField(username)
         if (!isExistingUser) {
             usernameBindingBuilder.asRequired(getTranslation(Messages.USERNAME_REQUIRED))
@@ -54,6 +55,7 @@ class UserEditor(userService: UserService, private var user: User, isExistingUse
         content.add(username)
         val mail = Translatable.createTextField(Messages.EMAIL)
         mail.setWidthFull()
+        mail.setId(MAIL_ID)
         val emailValidator = EmailValidator(getTranslation(Messages.INVALID_MAIL))
         binder.forField(mail).withValidator { m: String, c: ValueContext? -> if (m.isEmpty()) ValidationResult.ok() else emailValidator.apply(m, c) }
                 .bind({ it.mail ?: ""}) { u: User, value: String? -> u.mail = value }
@@ -61,13 +63,16 @@ class UserEditor(userService: UserService, private var user: User, isExistingUse
         val newPassword = Translatable.createPasswordField(Messages.NEW_PASSWORD)
         exposeInput(newPassword)
         newPassword.setWidthFull()
+        newPassword.setId(PASSWORD_ID)
         val repeatPassword = Translatable.createPasswordField(Messages.REPEAT_PASSWORD)
         exposeInput(repeatPassword)
         repeatPassword.setWidthFull()
+        repeatPassword.setId(REPEAT_PASSWORD_ID)
         if (isExistingUser) {
             val oldPassword = Translatable.createPasswordField(Messages.OLD_PASSWORD)
             exposeInput(oldPassword)
             oldPassword.setWidthFull()
+            oldPassword.setId(OLD_PASSWORD_ID)
             val oldPasswordBinding = binder.forField(oldPassword).withValidator({
                 if (newPassword.value.isNotEmpty() || oldPassword.value.isNotEmpty()) userService.checkPassword(user, it) else true
             }, getTranslation(Messages.INCORRECT_PASSWORD)).bind({ "" }) { _: User?, _: String? -> }
@@ -100,6 +105,7 @@ class UserEditor(userService: UserService, private var user: User, isExistingUse
             }
         }
         button.setWidthFull()
+        button.setId(SUBMIT_ID)
         button.content.isEnabled = false
         binder.addStatusChangeListener { button.content.isEnabled = it.binder.hasChanges() }
         content.add(button)
@@ -117,5 +123,14 @@ class UserEditor(userService: UserService, private var user: User, isExistingUse
         val input = ElementFactory.createInput()
         input.setAttribute("slot", "input")
         field.getElement().appendChild(input)
+    }
+
+    companion object {
+        const val USERNAME_ID = "editorUsername"
+        const val MAIL_ID = "editorMail"
+        const val PASSWORD_ID = "editorPassword"
+        const val OLD_PASSWORD_ID = "editorOldPassword"
+        const val REPEAT_PASSWORD_ID = "editorRepeatPassword"
+        const val SUBMIT_ID = "editorSubmit"
     }
 }

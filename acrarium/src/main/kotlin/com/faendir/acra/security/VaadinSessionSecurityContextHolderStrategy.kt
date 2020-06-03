@@ -17,6 +17,7 @@ package com.faendir.acra.security
 
 import com.vaadin.flow.server.VaadinService
 import com.vaadin.flow.server.VaadinSession
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
@@ -27,6 +28,7 @@ import org.springframework.security.core.context.SecurityContextImpl
  * A custom [SecurityContextHolderStrategy] that stores the [SecurityContext] in the Vaadin Session.
  */
 @Configuration
+@ConditionalOnProperty(name = ["acrarium.live"], havingValue = "true", matchIfMissing = true)
 class VaadinSessionSecurityContextHolderStrategy : SecurityContextHolderStrategy {
     companion object {
         init {

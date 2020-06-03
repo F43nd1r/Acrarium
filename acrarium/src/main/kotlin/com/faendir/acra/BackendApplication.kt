@@ -21,6 +21,7 @@ import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfig
 import org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration
 import org.springframework.boot.autoconfigure.mustache.MustacheAutoConfiguration
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.cache.annotation.EnableCaching
@@ -28,7 +29,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.PropertySource
 import org.springframework.context.annotation.PropertySources
 
-@SpringBootApplication(exclude = [SecurityAutoConfiguration::class, MustacheAutoConfiguration::class])
+@SpringBootApplication(exclude = [SecurityAutoConfiguration::class, MustacheAutoConfiguration::class, ErrorMvcAutoConfiguration::class])
 @PropertySources(PropertySource("classpath:default.properties"),
         PropertySource(value = ["file:\${user.home}/.config/acrarium/application.properties"], ignoreResourceNotFound = true),
         PropertySource(value = ["file:\${user.home}/.acra/application.properties"], ignoreResourceNotFound = true))
