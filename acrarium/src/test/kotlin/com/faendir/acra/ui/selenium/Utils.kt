@@ -1,5 +1,7 @@
 package com.faendir.acra.ui.selenium
 
+import com.faendir.acra.model.User
+import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.component.UserEditor
 import com.vaadin.flow.server.VaadinService
 import com.vaadin.flow.server.VaadinSession
@@ -17,15 +19,6 @@ fun RemoteWebDriver.getPage(port: Int, page: String = "") {
     get("http://host.testcontainers.internal:$port/$page")
 }
 
-fun RemoteWebDriver.registerTestUser() {
-    findInputById(UserEditor.USERNAME_ID).sendKeys(USERNAME)
-    findInputById(UserEditor.PASSWORD_ID).sendKeys(PASSWORD)
-    findInputById(UserEditor.REPEAT_PASSWORD_ID).sendKeys(PASSWORD)
-    findElementById(UserEditor.SUBMIT_ID).click()
-}
-
-fun RemoteWebDriver.login() {
-    findInputById("vaadinLoginUsername").sendKeys(USERNAME)
-    findInputById("vaadinLoginPassword").sendKeys(PASSWORD)
-    findElementByCssSelector("""[part="vaadin-login-submit"]""").click()
+fun UserService.createTestUser() {
+    store(User(USERNAME, "", mutableSetOf(User.Role.ADMIN, User.Role.USER), PASSWORD))
 }

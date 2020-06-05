@@ -48,7 +48,7 @@ inline fun <reified T : Number> getConverter(): (Number) -> T {
     }
 }
 
-fun <T : Any> Optional<T>.toNullable(): T? = this.orElse(null);
+fun <T : Any> Optional<T>.toNullable(): T? = this.orElse(null)
 
 fun UserService.getCurrentUser() = getUser(SecurityUtils.getUsername())!!
 

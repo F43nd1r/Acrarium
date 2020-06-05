@@ -69,7 +69,7 @@ class BugTab constructor(dataService: DataService, private val bugMerger: BugMer
         bugs.sort(GridSortOrder.desc(dateColumn).build())
         bugs.addColumn { it.highestVersionCode }.setSortable(QReport.report.stacktrace.version.code.max()).setCaption(Messages.LATEST_VERSION)
         bugs.addColumn { it.userCount }.setSortable(QReport.report.installationId.countDistinct()).setCaption(Messages.AFFECTED_USERS)
-        bugs.addColumn { it.bug.title }.setSortableAndFilterable(QBug.bug.title).setCaption(Messages.TITLE).setAutoWidth(false).setFlexGrow(1)
+        bugs.addColumn { it.bug.title }.setSortableAndFilterable(QBug.bug.title).setCaption(Messages.TITLE).setAutoWidth(false).flexGrow = 1
         val versions = dataService.findAllVersions(app)
         bugs.addColumn(ComponentRenderer { bug: VBug ->
             Select(*versions.toTypedArray()).apply {
