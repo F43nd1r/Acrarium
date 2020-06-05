@@ -44,7 +44,7 @@ class UserService(private val passwordEncoder: PasswordEncoder, private val rand
     fun getUser(username: String): User? = JPAQuery<Any>(entityManager).from(USER)
             .leftJoin(USER.roles).fetchJoin()
             .leftJoin(USER.permissions).fetchJoin()
-            .where(USER.username.eq(username)).select(USER).fetchOne()
+            .where(USER.username.equalsIgnoreCase(username)).select(USER).fetchOne()
 
     @CacheEvict(hasAdminCache)
     @Transactional

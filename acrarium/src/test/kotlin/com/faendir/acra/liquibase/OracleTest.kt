@@ -15,7 +15,6 @@
  */
 package com.faendir.acra.liquibase
 
-import org.junit.Ignore
 import org.junit.jupiter.api.Disabled
 import org.springframework.test.context.TestPropertySource
 

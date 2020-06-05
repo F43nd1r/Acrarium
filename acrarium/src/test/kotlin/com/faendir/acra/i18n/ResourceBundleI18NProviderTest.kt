@@ -19,10 +19,10 @@ package com.faendir.acra.i18n
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
+import io.mockk.unmockkStatic
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNull
@@ -45,6 +45,11 @@ internal class ResourceBundleI18NProviderTest {
         every { ResourceBundle.getBundle(any(), any(), any(), any()) } returns null
         every { ResourceBundle.getBundle(any(), Locale.US, any(), any()) } returns bundle
         every { bundle.getString(test) } returns result
+    }
+
+    @AfterEach
+    fun teardown() {
+        unmockkStatic(ResourceBundle::class)
     }
 
     @Test

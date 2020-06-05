@@ -51,7 +51,7 @@ class UserEditor(userService: UserService, private var user: User, isExistingUse
             usernameBindingBuilder.asRequired(getTranslation(Messages.USERNAME_REQUIRED))
         }
         usernameBindingBuilder.withValidator({ it == user.username || userService.getUser(it) == null }, getTranslation(Messages.USERNAME_TAKEN))
-                .bind(ValueProvider { it.username }, if (!isExistingUser) Setter { u: User, value: String -> u.username = value } else null)
+                .bind(ValueProvider { it.username }, if (!isExistingUser) Setter { u: User, value: String -> u.username = value.toLowerCase() } else null)
         content.add(username)
         val mail = Translatable.createTextField(Messages.EMAIL)
         mail.setWidthFull()

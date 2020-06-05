@@ -1,25 +1,13 @@
-package com.faendir.acra.selenium
+package com.faendir.acra.ui.selenium
 
-import com.faendir.acra.ui.component.UserEditor
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.TestTemplateInvocationContext
 import org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.ArgumentsProvider
-import org.junit.jupiter.params.provider.ArgumentsSource
 import org.junit.platform.commons.util.ReflectionUtils
-import org.openqa.selenium.By
-import org.openqa.selenium.Capabilities
 import org.openqa.selenium.OutputType
-import org.openqa.selenium.chrome.ChromeOptions
-import org.openqa.selenium.firefox.FirefoxOptions
-import org.openqa.selenium.remote.RemoteWebDriver
-import org.testcontainers.containers.BrowserWebDriverContainer
 import java.io.IOException
-import java.lang.annotation.Inherited
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.nio.file.Files
@@ -27,30 +15,9 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
-import java.util.stream.Stream
 
-
-class KBrowserWebDriverContainer : BrowserWebDriverContainer<KBrowserWebDriverContainer>()
-
-class BrowserArgumentsProvider : ArgumentsProvider {
-    override fun provideArguments(context: ExtensionContext): Stream<out Arguments> {
-        return Stream.of(Arguments.of(createContainer(ChromeOptions()), "Chrome"),
-                Arguments.of(createContainer(FirefoxOptions()), "Firefox"))
-    }
-
-    private fun createContainer(options: Capabilities): KBrowserWebDriverContainer {
-        return KBrowserWebDriverContainer().withCapabilities(options)
-    }
-}
-
-@Target(AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
-@Inherited
-@ParameterizedTest(name = "[{index}] {1}")
-@ArgumentsSource(BrowserArgumentsProvider::class)
-annotation class SeleniumTest
-
-class ContainerExtension : BeforeTestExecutionCallback, AfterTestExecutionCallback {
+class ContainerExtension : BeforeTestExecutionCallback,
+        AfterTestExecutionCallback {
     override fun beforeTestExecution(context: ExtensionContext) {
         argumentsFrom(context).filterIsInstance<KBrowserWebDriverContainer>().forEach {
             it.start()
@@ -63,8 +30,7 @@ class ContainerExtension : BeforeTestExecutionCallback, AfterTestExecutionCallba
             if (context.executionException.isPresent) {
                 val screenshot = it.webDriver.getScreenshotAs(OutputType.BYTES)
                 try {
-                    val path: Path = Paths
-                            .get("target/selenium-screenshots")
+                    val path: Path = Paths.get("target/selenium-screenshots")
                             .resolve(String.format("%s-%s-%s.png",
                                     LocalDateTime.now(),
                                     context.requiredTestClass.name,
@@ -81,8 +47,10 @@ class ContainerExtension : BeforeTestExecutionCallback, AfterTestExecutionCallba
 
     private fun argumentsFrom(context: ExtensionContext): Array<Any?> {
         return try {
-            val method: Method = ReflectionUtils.findMethod(context.javaClass, "getTestDescriptor").orElse(null)
-            val descriptor = ReflectionUtils.invokeMethod(method, context) as TestMethodTestDescriptor
+            val method: Method = ReflectionUtils.findMethod(context.javaClass,
+                    "getTestDescriptor").orElse(null)
+            val descriptor = ReflectionUtils.invokeMethod(method,
+                    context) as TestMethodTestDescriptor
 
             //Get the TestTemplateInvocationContext
             val templateField: Field = descriptor.javaClass.getDeclaredField("invocationContext")
@@ -98,5 +66,3 @@ class ContainerExtension : BeforeTestExecutionCallback, AfterTestExecutionCallba
         }
     }
 }
-
-fun RemoteWebDriver.findInputById(id: String) = findElementById(id).findElement(By.tagName("input"))
