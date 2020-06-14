@@ -223,7 +223,7 @@
         <dependency>
             <groupId>io.github.microutils</groupId>
             <artifactId>kotlin-logging</artifactId>
-            <version>1.7.9</version>
+            <version>1.7.10</version>
         </dependency>
         <!-- dev -->
         <dependency>
