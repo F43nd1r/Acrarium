@@ -16,7 +16,9 @@ jobs:
       with:
         java-version: '1.13'
     - name: Build release
-      run: ./mvnw -B clean package -Pproduction -Pwar
+      run: |
+        ./mvnw -B clean package -Pproduction -Pwar
+        ./mvnw -B  package -Pproduction
     - name: Extract version
       id: version
       run: echo ::set-output name=value::$(./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep '^[0-9]')
@@ -30,8 +32,8 @@ jobs:
         release_name: ${{ github.ref }}
         draft: false
         prerelease: true   
-    - name: Upload Release Asset
-      id: upload-release-asset 
+    - name: Upload Release War
+      id: upload-release-asset-1
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -39,4 +41,14 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./acrarium/target/acrarium-${{ steps.version.outputs.value }}.war
         asset_name: acrarium-${{ steps.version.outputs.value }}.war
-        asset_content_type: application/zip  
+        asset_content_type: application/zip
+    - name: Upload Release Jar
+      id: upload-release-asset-2
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./acrarium/target/acrarium-${{ steps.version.outputs.value }}.jar
+        asset_name: acrarium-${{ steps.version.outputs.value }}.jar
+        asset_content_type: application/zip
