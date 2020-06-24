@@ -1,5 +1,6 @@
 package com.faendir.acra.ui.selenium
 
+import com.faendir.acra.ui.selenium.BaseSeleniumTest.Companion.WAIT_TIME_S
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -21,7 +22,7 @@ class ContainerExtension : BeforeTestExecutionCallback,
     override fun beforeTestExecution(context: ExtensionContext) {
         argumentsFrom(context).filterIsInstance<KBrowserWebDriverContainer>().forEach {
             it.start()
-            it.webDriver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS)
+            it.webDriver.manage().timeouts().implicitlyWait(WAIT_TIME_S, TimeUnit.SECONDS)
         }
     }
 

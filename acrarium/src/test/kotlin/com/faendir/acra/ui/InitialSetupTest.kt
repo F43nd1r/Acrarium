@@ -28,7 +28,7 @@ class InitialSetupTest : BaseSeleniumTest() {
         container.webDriver.findInputById(UserEditor.PASSWORD_ID).sendKeys(PASSWORD)
         container.webDriver.findInputById(UserEditor.REPEAT_PASSWORD_ID).sendKeys(PASSWORD)
         container.webDriver.findElementById(UserEditor.SUBMIT_ID).click()
-        Thread.sleep(5000)
+        explicitlyWait()
         expectThat(userService) {
             get { hasAdmin() }.isTrue()
             get { getUser(USERNAME) }.isNotNull()

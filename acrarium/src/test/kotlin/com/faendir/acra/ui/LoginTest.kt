@@ -29,7 +29,7 @@ class LoginTest : BaseSeleniumTest() {
         userService.createTestUser()
         container.webDriver.getPage(port)
         container.webDriver.tryLoginWith(USERNAME, PASSWORD)
-        Thread.sleep(5000)
+        explicitlyWait()
         expectThat(SecurityUtils.isLoggedIn()).isTrue()
     }
 
@@ -39,7 +39,7 @@ class LoginTest : BaseSeleniumTest() {
         userService.createTestUser()
         container.webDriver.getPage(port)
         container.webDriver.tryLoginWith("", PASSWORD)
-        Thread.sleep(5000)
+        explicitlyWait()
         expectThat(SecurityUtils.isLoggedIn()).isFalse()
     }
 
@@ -49,7 +49,7 @@ class LoginTest : BaseSeleniumTest() {
         userService.createTestUser()
         container.webDriver.getPage(port)
         container.webDriver.tryLoginWith(USERNAME, "")
-        Thread.sleep(5000)
+        explicitlyWait()
         expectThat(SecurityUtils.isLoggedIn()).isFalse()
     }
 
@@ -59,7 +59,7 @@ class LoginTest : BaseSeleniumTest() {
         userService.createTestUser()
         container.webDriver.getPage(port)
         container.webDriver.tryLoginWith("ThisUsernameDoesNotExist", PASSWORD)
-        Thread.sleep(5000)
+        explicitlyWait()
         expectThat(SecurityUtils.isLoggedIn()).isFalse()
     }
 
@@ -69,7 +69,7 @@ class LoginTest : BaseSeleniumTest() {
         userService.createTestUser()
         container.webDriver.getPage(port)
         container.webDriver.tryLoginWith(USERNAME, "WrongPassword")
-        Thread.sleep(5000)
+        explicitlyWait()
         expectThat(SecurityUtils.isLoggedIn()).isFalse()
     }
 
