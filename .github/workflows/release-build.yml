@@ -6,7 +6,7 @@ on:
     - 'v*'
 
 jobs:
-  build:
+  release:
 
     runs-on: ubuntu-latest
 
@@ -17,8 +17,8 @@ jobs:
         java-version: '1.13'
     - name: Build release
       run: |
-        ./mvnw -B clean package -Pproduction -Pwar
-        ./mvnw -B  package -Pproduction
+        ./mvnw -B clean package -Pproduction -Pwar -DskipTests
+        ./mvnw -B  package -Pproduction -DskipTests
     - name: Extract version
       id: version
       run: echo ::set-output name=value::$(./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep '^[0-9]')
