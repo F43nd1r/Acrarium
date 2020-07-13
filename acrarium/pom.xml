@@ -447,6 +447,7 @@
                             </annotationProcessorPaths>
                             <annotationProcessors>
                                 <annotationProcessor>com.querydsl.apt.jpa.JPAAnnotationProcessor</annotationProcessor>
+                                <annotationProcessor>com.google.auto.service.processor.AutoServiceProcessor</annotationProcessor>
                             </annotationProcessors>
                         </configuration>
                     </execution>
