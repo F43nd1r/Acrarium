@@ -18,6 +18,7 @@ package com.faendir.acra.ui.view
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.ui.base.HasAcrariumTitle
 import com.faendir.acra.ui.base.TranslatableText
+import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.view.main.MainView
 import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.component.orderedlayout.FlexComponent
@@ -26,23 +27,29 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.info.BuildProperties
+
 
 /**
  * @author lukas
  * @since 06.09.19
  */
+@Suppress("LeakingThis")
 @UIScope
 @SpringComponent
 @Route(value = "about", layout = MainView::class)
-class AboutView : FlexLayout(), HasAcrariumTitle {
+class AboutView(@Autowired val buildProperties: BuildProperties) : FlexLayout(), HasAcrariumTitle {
 
     init {
         setSizeFull()
         justifyContentMode = JustifyContentMode.CENTER
         alignItems = FlexComponent.Alignment.CENTER
-        val div = Div()
-        div.element.setProperty("innerHTML", getTranslation(Messages.FOOTER))
-        add(div)
+        setFlexDirection(FlexDirection.COLUMN)
+        val info = Div()
+        info.element.setProperty("innerHTML", getTranslation(Messages.FOOTER))
+        val version = Translatable.createDiv(Messages.ABOUT_VERSION, buildProperties.version)
+        add(info, version)
     }
 
     override val title = TranslatableText(Messages.ABOUT)
