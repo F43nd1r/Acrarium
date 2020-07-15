@@ -24,7 +24,7 @@ fun HasStyle.preventWhiteSpaceBreaking() {
 }
 
 fun HasStyle.setMargin(value: Int, unit: Unit) {
-    style["margin"] = "$value$unit.text"
+    style["margin"] = "$value${unit.text}"
 }
 
 fun HasStyle.setDefaultTextStyle() {

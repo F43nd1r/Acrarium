@@ -97,7 +97,7 @@ open class Translatable<T : Component> protected constructor(protected val t: T,
 
         fun createText(captionId: String, vararg params: Any) = Translatable(Text(""), HasText::setText, captionId, *params)
 
-        fun createButton(captionId: String, vararg params: Any, clickListener: ((ClickEvent<Button>) -> Unit)? = null) =
+        fun createButton(captionId: String, vararg params: Any, clickListener: ((ClickEvent<Button>) -> Unit) = {}) =
                 Translatable(Button("", clickListener).apply { addThemeVariants(ButtonVariant.LUMO_PRIMARY) }, HasText::setText, captionId, *params)
 
         fun createTextField(captionId: String, vararg params: Any) = ValidatedValue(TextField(), TextField::setLabel, captionId, *params)
