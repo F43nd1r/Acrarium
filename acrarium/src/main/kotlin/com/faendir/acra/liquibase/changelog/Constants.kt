@@ -25,6 +25,6 @@ object ColumnType {
     const val DATETIME = "DATETIME"
 }
 
-object AUTHOR {
+object Author {
     const val F43ND1R = "f43nd1r"
 }

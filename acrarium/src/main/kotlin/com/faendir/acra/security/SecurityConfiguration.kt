@@ -15,7 +15,6 @@
  */
 package com.faendir.acra.security
 
-import com.faendir.acra.liquibase.changelog.v0.m10.Roles
 import com.faendir.acra.model.User
 import com.faendir.acra.rest.RestApiInterface
 import com.faendir.acra.rest.RestApiInterface.Companion.API_PATH
