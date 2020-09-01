@@ -190,9 +190,9 @@
             <artifactId>hibernate-validator</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.ziplet</groupId>
+            <groupId>com.faendir.ziplet</groupId>
             <artifactId>ziplet</artifactId>
-            <version>2.4.1</version>
+            <version>2.4.3</version>
         </dependency>
         <!-- ui -->
         <dependency>
