@@ -390,6 +390,7 @@
                     <layers>
                         <enabled>true</enabled>
                     </layers>
+                    <mainClass>com.faendir.acra.BackendApplicationKt</mainClass>
                 </configuration>
                 <executions>
                     <execution>
