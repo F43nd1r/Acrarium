@@ -16,4 +16,4 @@ jobs:
       with:
         java-version: ${{ matrix.java }}
     - name: Maven tests on Java ${{ matrix.java }}
-      run: ./mvnw -B clean test
+      run: ./mvnw -B clean test -DargLine="-Dvaadin.proKey=${{ secrets.VAADIN_PROKEY }}"
