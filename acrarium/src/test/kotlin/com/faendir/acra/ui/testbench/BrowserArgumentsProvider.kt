@@ -1,4 +1,4 @@
-package com.faendir.acra.ui.selenium
+package com.faendir.acra.ui.testbench
 
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.params.provider.Arguments
@@ -10,12 +10,8 @@ import java.util.stream.Stream
 
 class BrowserArgumentsProvider : ArgumentsProvider {
     override fun provideArguments(context: ExtensionContext): Stream<out Arguments> {
-        return Stream.of(
-                Arguments.of(createContainer(ChromeOptions()), "Chrome"),
-                Arguments.of(createContainer(FirefoxOptions()), "Firefox"))
+        return Stream.of(Arguments.of(createContainer(ChromeOptions()), "Chrome"), Arguments.of(createContainer(FirefoxOptions()), "Firefox"))
     }
 
-    private fun createContainer(options: Capabilities): KBrowserWebDriverContainer {
-        return KBrowserWebDriverContainer().withCapabilities(options)
-    }
+    private fun createContainer(options: Capabilities) = KBrowserWebDriverContainer().withCapabilities(options)
 }

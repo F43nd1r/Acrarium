@@ -1,38 +1,53 @@
 package com.faendir.acra.ui
 
-import com.faendir.acra.ui.selenium.BaseSeleniumTest
-import com.faendir.acra.ui.selenium.KBrowserWebDriverContainer
-import com.faendir.acra.ui.selenium.PASSWORD
-import com.faendir.acra.ui.selenium.SeleniumTest
-import com.faendir.acra.ui.selenium.USERNAME
-import com.faendir.acra.ui.selenium.getPage
 import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.component.UserEditor
-import com.faendir.acra.ui.selenium.findInputById
+import com.faendir.acra.ui.testbench.BaseVaadinTest
+import com.faendir.acra.ui.testbench.KBrowserWebDriverContainer
+import com.faendir.acra.ui.testbench.PASSWORD
+import com.faendir.acra.ui.testbench.USERNAME
+import com.faendir.acra.ui.testbench.VaadinTest
+import com.faendir.acra.ui.testbench.getPage
+import com.vaadin.flow.component.button.testbench.ButtonElement
+import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement
+import com.vaadin.testbench.TestBenchElement
+import com.vaadin.testbench.annotations.Attribute
+import com.vaadin.testbench.elementsbase.Element
 import org.junit.platform.commons.annotation.Testable
 import org.springframework.beans.factory.annotation.Autowired
 import strikt.api.expectThat
 import strikt.assertions.isNotNull
 import strikt.assertions.isTrue
 
-class InitialSetupTest : BaseSeleniumTest() {
+class InitialSetupTest : BaseVaadinTest() {
 
     @Autowired
     private lateinit var userService: UserService
 
     @Testable
-    @SeleniumTest
-    fun setup(container: KBrowserWebDriverContainer, browserName: String) {
-        container.webDriver.getPage(port)
-        container.webDriver.findInputById(UserEditor.USERNAME_ID).sendKeys(USERNAME)
-        container.webDriver.findInputById(UserEditor.PASSWORD_ID).sendKeys(PASSWORD)
-        container.webDriver.findInputById(UserEditor.REPEAT_PASSWORD_ID).sendKeys(PASSWORD)
-        container.webDriver.findElementById(UserEditor.SUBMIT_ID).click()
-        explicitlyWait()
+    @VaadinTest
+    fun `perform initial user creation`(container: KBrowserWebDriverContainer, browserName: String) {
+        driver.getPage(port)
+        val editor = `$`(UserEditorElement::class.java).first()
+        editor.username.value = USERNAME
+        editor.password.value = PASSWORD
+        editor.repeatPassword.value = PASSWORD
+        editor.submit.click()
+        waitForVaadin()
         expectThat(userService) {
             get { hasAdmin() }.isTrue()
             get { getUser(USERNAME) }.isNotNull()
             get { checkPassword(getUser(USERNAME), PASSWORD) }.isTrue()
         }
     }
+}
+
+@Element("div")
+@Attribute(name = "id", value = UserEditor.EDITOR_ID)
+class UserEditorElement : TestBenchElement() {
+    val username: TextFieldElement get() = `$`(TextFieldElement::class.java).id(UserEditor.USERNAME_ID)
+    val password: PasswordFieldElement get() = `$`(PasswordFieldElement::class.java).id(UserEditor.PASSWORD_ID)
+    val repeatPassword: PasswordFieldElement get() = `$`(PasswordFieldElement::class.java).id(UserEditor.REPEAT_PASSWORD_ID)
+    val submit: ButtonElement get() = `$`(ButtonElement::class.java).id(UserEditor.SUBMIT_ID)
 }

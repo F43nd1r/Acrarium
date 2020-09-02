@@ -1,5 +1,7 @@
-package com.faendir.acra.ui.selenium
+package com.faendir.acra.ui.testbench
 
+import com.vaadin.testbench.TestBenchTestCase
+import com.vaadin.testbench.commands.TestBenchCommandExecutor
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
@@ -13,12 +15,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.testcontainers.Testcontainers
 
 @Testable
-@ExtendWith(
-        ContainerExtension::class, SpringExtension::class)
+@ExtendWith(ContainerExtension::class, SpringExtension::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("/application-mysql.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-abstract class BaseSeleniumTest {
+abstract class BaseVaadinTest : TestBenchTestCase() {
     @LocalServerPort
     protected var port: Int = 0
 
@@ -34,12 +35,7 @@ abstract class BaseSeleniumTest {
         SecurityContextHolder.setContext(null)
     }
 
-    fun explicitlyWait() {
-        Thread.sleep(WAIT_TIME_MS)
-    }
-
-    companion object {
-        const val WAIT_TIME_S: Long = 20
-        const val WAIT_TIME_MS = WAIT_TIME_S * 1000
+    fun waitForVaadin() {
+        (testBench() as TestBenchCommandExecutor).waitForVaadin()
     }
 }

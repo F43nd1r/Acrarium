@@ -263,6 +263,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-testbench</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>test</scope>
@@ -502,6 +507,7 @@
                         <option>all-open:annotation=javax.persistence.Entity</option>
                         <option>all-open:annotation=javax.persistence.MappedSuperclass</option>
                         <option>all-open:annotation=javax.persistence.Embeddable</option>
+                        <option>all-open:annotation=com.vaadin.testbench.elementsbase.Element</option>
                     </pluginOptions>
                 </configuration>
                 <dependencies>

@@ -41,6 +41,7 @@ import com.vaadin.flow.function.ValueProvider
 class UserEditor(userService: UserService, private var user: User, isExistingUser: Boolean, onSuccess: () -> Unit) : Composite<FlexLayout>() {
 
     init {
+        setId(EDITOR_ID)
         val binder = Binder<User>()
         val username = Translatable.createTextField(Messages.USERNAME)
         exposeInput(username)
@@ -122,10 +123,11 @@ class UserEditor(userService: UserService, private var user: User, isExistingUse
     private fun <T, V> exposeInput(field: ValidatedValue<T, *, V>) where T : Component, T : HasValue<ComponentValueChangeEvent<T, V>, V>, T : HasValidation {
         val input = ElementFactory.createInput()
         input.setAttribute("slot", "input")
-        field.getElement().appendChild(input)
+        field.element.appendChild(input)
     }
 
     companion object {
+        const val EDITOR_ID = "userEditor"
         const val USERNAME_ID = "editorUsername"
         const val MAIL_ID = "editorMail"
         const val PASSWORD_ID = "editorPassword"

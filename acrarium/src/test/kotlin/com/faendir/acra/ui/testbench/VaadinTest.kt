@@ -1,4 +1,4 @@
-package com.faendir.acra.ui.selenium
+package com.faendir.acra.ui.testbench
 
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ArgumentsSource
@@ -9,4 +9,4 @@ import java.lang.annotation.Inherited
 @Inherited
 @ParameterizedTest(name = "[{index}] {1}")
 @ArgumentsSource(BrowserArgumentsProvider::class)
-annotation class SeleniumTest
+annotation class VaadinTest

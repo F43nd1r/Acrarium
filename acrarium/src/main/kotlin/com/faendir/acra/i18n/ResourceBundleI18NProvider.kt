@@ -45,7 +45,7 @@ class ResourceBundleI18NProvider(private val baseName: String) : I18NProvider {
     override fun getTranslation(key: String, locale: Locale, vararg params: Any): String? =
             getResourceBundle(locale, true)?.tryOrNull { getString(key) }?.let { String.format(it, *params) }
 
-    private class MessageControl internal constructor(private val allowFallback: Boolean) : ResourceBundle.Control() {
+    private class MessageControl(private val allowFallback: Boolean) : ResourceBundle.Control() {
         override fun getFallbackLocale(baseName: String, locale: Locale): Locale? = if (allowFallback) super.getFallbackLocale(baseName, locale) else null
 
         override fun getCandidateLocales(baseName: String, locale: Locale): List<Locale> =
