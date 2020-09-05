@@ -16,7 +16,6 @@
 
 package com.faendir.acra.util
 
-import com.faendir.acra.model.App
 import com.faendir.acra.model.Stacktrace
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.UserService
@@ -55,7 +54,9 @@ fun UserService.getCurrentUser() = getUser(SecurityUtils.getUsername())!!
 
 inline fun <T> Array<out T>.indexOfFirstOrNull(predicate: (T) -> Boolean): Int? = indexOfFirst(predicate).let { if (it == -1) null else it }
 
-fun JSONObject.getIntOrNull(key: String): Int? = tryOrNull { getInt(key) }
+fun JSONObject.findInt(key: String): Int? = tryOrNull { getInt(key) }
+
+fun JSONObject.findString(key: String): String? = tryOrNull { getString(key) }
 
 fun String.ensureTrailing(suffix: String) = if (endsWith(suffix)) this else this + suffix
 
@@ -100,8 +101,8 @@ inline fun <T : Any, R> T.tryOrNull(f: T.() -> R): R? {
 }
 
 @Suppress("UNCHECKED_CAST")
-inline fun <T: Any, R> T.equalsBy(other: Any?, id: T.() -> R) : Boolean = when {
+inline fun <T : Any, R> T.equalsBy(other: Any?, id: T.() -> R): Boolean = when {
     this === other -> true
     other == null || javaClass != other.javaClass -> false
-    else ->  id() == (other as T).id()
+    else -> id() == (other as T).id()
 }

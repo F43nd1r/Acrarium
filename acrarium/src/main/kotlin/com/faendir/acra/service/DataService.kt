@@ -26,7 +26,6 @@ import com.faendir.acra.model.QBug
 import com.faendir.acra.model.QMailSettings
 import com.faendir.acra.model.QReport
 import com.faendir.acra.model.QStacktrace
-import com.faendir.acra.model.QUser
 import com.faendir.acra.model.QVersion
 import com.faendir.acra.model.Report
 import com.faendir.acra.model.Stacktrace
@@ -36,7 +35,9 @@ import com.faendir.acra.model.view.Queries
 import com.faendir.acra.model.view.VApp
 import com.faendir.acra.model.view.WhereExpressions.whereHasAppPermission
 import com.faendir.acra.util.ImportResult
-import com.faendir.acra.util.getIntOrNull
+import com.faendir.acra.util.catching
+import com.faendir.acra.util.findInt
+import com.faendir.acra.util.findString
 import com.faendir.acra.util.tryOrNull
 import com.querydsl.core.types.Expression
 import com.querydsl.core.types.Predicate
@@ -290,8 +291,8 @@ class DataService(private val userService: UserService, private val entityManage
 
     private fun getVersion(app: App, jsonObject: JSONObject): Version {
         val buildConfig: JSONObject? = jsonObject.optJSONObject(ReportField.BUILD_CONFIG.name)
-        val versionCode: Int = buildConfig?.getIntOrNull("VERSION_CODE") ?: jsonObject.optInt(ReportField.APP_VERSION_CODE.name)
-        val versionName: String = buildConfig?.getString("VERSION_NAME") ?: jsonObject.optString(ReportField.APP_VERSION_NAME.name, "N/A")
+        val versionCode: Int = buildConfig?.findInt("VERSION_CODE") ?: jsonObject.findInt(ReportField.APP_VERSION_CODE.name) ?: 0
+        val versionName: String = buildConfig?.findString("VERSION_NAME") ?: jsonObject.findString(ReportField.APP_VERSION_NAME.name) ?: "N/A"
         return findVersion(app, versionCode) ?: (Version(app, versionCode, versionName))
     }
 
