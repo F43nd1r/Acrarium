@@ -30,9 +30,6 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.util.*
-import kotlin.reflect.KMutableProperty0
-import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty0
 
 inline fun <reified T : Number> getConverter(): (Number) -> T {
     return when (T::class.java) {
@@ -52,17 +49,13 @@ fun <T : Any> Optional<T>.toNullable(): T? = this.orElse(null)
 fun UserService.getCurrentUser() = getUser(SecurityUtils.getUsername())!!
 
 
-inline fun <T> Array<out T>.indexOfFirstOrNull(predicate: (T) -> Boolean): Int? = indexOfFirst(predicate).let { if (it == -1) null else it }
+inline fun <T> Array<out T>.indexOfFirstOrNull(predicate: (T) -> Boolean): Int? = indexOfFirst(predicate).takeIf { it != -1 }
 
 fun JSONObject.findInt(key: String): Int? = tryOrNull { getInt(key) }
 
 fun JSONObject.findString(key: String): String? = tryOrNull { getString(key) }
 
 fun String.ensureTrailing(suffix: String) = if (endsWith(suffix)) this else this + suffix
-
-operator fun <T> KProperty0<T>.getValue(thisRef: Any?, property: KProperty<*>) = get()
-operator fun <T> KMutableProperty0<T>.setValue(thisRef: Any?, property: KProperty<*>, value: T) = set(value)
-
 
 private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
 
@@ -97,6 +90,13 @@ inline fun <T : Any, R> T.tryOrNull(f: T.() -> R): R? {
         f()
     } catch (e: Exception) {
         null
+    }
+}
+
+inline fun catching(f: () -> Unit) {
+    try {
+        f()
+    } catch (e: Throwable) {
     }
 }
 

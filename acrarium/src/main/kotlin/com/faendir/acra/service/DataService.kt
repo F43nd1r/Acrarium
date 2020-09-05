@@ -332,7 +332,7 @@ class DataService(private val userService: UserService, private val entityManage
         for (id in db.allDocIds) {
             if (!id.startsWith("_design")) {
                 total++
-                tryOrNull {
+                catching {
                     val report = JSONObject(IOUtils.toString(db.getAsStream(id), StandardCharsets.UTF_8))
                     fixStringIsArray(report, ReportField.STACK_TRACE)
                     fixStringIsArray(report, ReportField.LOGCAT)

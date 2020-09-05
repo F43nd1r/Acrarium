@@ -17,13 +17,11 @@ package com.faendir.acra.ui.component.dialog
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.util.tryOrNull
+import com.faendir.acra.util.catching
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.HasSize
-import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import org.springframework.data.util.Pair
-import java.util.*
 
 /**
  * @author Lukas
@@ -84,7 +82,7 @@ class FluentDialog : AcrariumDialog() {
     }
 
     fun show() {
-        components.filterIsInstance<HasSize>().forEach { tryOrNull { it.width = "100%" } }
+        components.filterIsInstance<HasSize>().forEach { catching { it.width = "100%" } }
         val layout = FlexLayout()
         layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN)
         components.forEach { layout.add(it) }

@@ -16,8 +16,6 @@
 package com.faendir.acra.ui.component
 
 import com.faendir.acra.ui.component.Card.CardModel
-import com.faendir.acra.util.getValue
-import com.faendir.acra.util.setValue
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.HasComponents
 import com.vaadin.flow.component.HasSize
