@@ -25,51 +25,58 @@ import com.faendir.acra.util.getCurrentUser
 import com.github.appreciated.css.grid.sizes.Auto
 import com.github.appreciated.css.grid.sizes.MaxContent
 import com.github.appreciated.layout.GridLayout
+import com.vaadin.flow.component.HasComponents
 import com.vaadin.flow.component.checkbox.Checkbox
-import com.vaadin.flow.component.html.Div
-import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
+import kotlin.reflect.KMutableProperty1
 
 @UIScope
 @SpringComponent
 class NotificationCard(private val userService: UserService, dataService: DataService) : AdminCard(dataService) {
+    private val notificationLayout = GridLayout().apply {
+        setTemplateColumns(Auto(), MaxContent())
+        setWidthFull()
+    }
+    private val lines = listOf(
+            Line(dataService, Messages.NEW_BUG_MAIL_LABEL, MailSettings::newBug),
+            Line(dataService, Messages.REGRESSION_MAIL_LABEL, MailSettings::regression),
+            Line(dataService, Messages.SPIKE_MAIL_LABEL, MailSettings::spike),
+            Line(dataService, Messages.WEEKLY_MAIL_LABEL, MailSettings::summary))
 
     init {
         setHeader(Translatable.createLabel(Messages.NOTIFICATIONS))
+        @Suppress("LeakingThis")
+        add(notificationLayout)
+        lines.forEach { it.addTo(notificationLayout) }
     }
 
     override fun init(app: App) {
-        removeContent()
-        val notificationLayout = GridLayout()
-        notificationLayout.setTemplateColumns(Auto(), MaxContent())
-        notificationLayout.setWidthFull()
         val user = userService.getCurrentUser()
         val settings = dataService.findMailSettings(app, user) ?: MailSettings(app, user)
-        notificationLayout.add(Translatable.createLabel(Messages.NEW_BUG_MAIL_LABEL), Checkbox("") {
-            settings.newBug = it.value
-            dataService.store(settings)
-        })
-        notificationLayout.add(Translatable.createLabel(Messages.REGRESSION_MAIL_LABEL), Checkbox("") {
-            settings.regression = it.value
-            dataService.store(settings)
-        })
-        notificationLayout.add(Translatable.createLabel(Messages.SPIKE_MAIL_LABEL), Checkbox("") {
-            settings.spike = it.value
-            dataService.store(settings)
-        })
-        notificationLayout.add(Translatable.createLabel(Messages.WEEKLY_MAIL_LABEL), Checkbox("") {
-            settings.summary = it.value
-            dataService.store(settings)
-        })
-        if (user.mail == null) {
-            val icon = VaadinIcon.WARNING.create()
-            icon.style["height"] = "var(--lumo-font-size-m)"
-            val div = Div(icon, Translatable.createText(Messages.NO_MAIL_SET))
-            div.style["color"] = "var(--lumo-error-color)"
-            div.style["font-style"] = "italic"
-            notificationLayout.add(div)
+        lines.forEach { it.attach(settings) }
+    }
+
+    private class Line(val dataService: DataService, val label: String, val property: KMutableProperty1<MailSettings, Boolean>) {
+        private var settings: MailSettings? = null
+        private val checkbox = Checkbox().apply {
+            addValueChangeListener { event ->
+                settings?.let {
+                    if (event.isFromClient) {
+                        property.set(it, event.value)
+                        dataService.store(it)
+                    }
+                }
+            }
         }
-        add(notificationLayout)
+
+        fun addTo(container: HasComponents) {
+            container.add(Translatable.createLabel(label), checkbox)
+        }
+
+        fun attach(mailSettings: MailSettings) {
+            settings = mailSettings
+            checkbox.value = property.get(mailSettings)
+        }
     }
 }
