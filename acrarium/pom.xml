@@ -156,11 +156,6 @@
             <version>1.9</version>
         </dependency>
         <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.7</version>
-        </dependency>
-        <dependency>
             <groupId>org.xbib</groupId>
             <artifactId>time</artifactId>
             <version>2.1.0</version>

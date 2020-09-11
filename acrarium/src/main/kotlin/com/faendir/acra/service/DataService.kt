@@ -47,7 +47,6 @@ import com.querydsl.jpa.impl.JPADeleteClause
 import com.querydsl.jpa.impl.JPAQuery
 import mu.KotlinLogging
 import org.acra.ReportField
-import org.apache.commons.io.IOUtils
 import org.ektorp.CouchDbConnector
 import org.ektorp.http.StdHttpClient
 import org.ektorp.impl.StdCouchDbConnector
@@ -64,7 +63,6 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
 import java.io.Serializable
-import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import javax.persistence.EntityManager
@@ -333,7 +331,7 @@ class DataService(private val userService: UserService, private val entityManage
             if (!id.startsWith("_design")) {
                 total++
                 catching {
-                    val report = JSONObject(IOUtils.toString(db.getAsStream(id), StandardCharsets.UTF_8))
+                    val report = JSONObject(db.getAsStream(id).reader(Charsets.UTF_8).use { it.readText() })
                     fixStringIsArray(report, ReportField.STACK_TRACE)
                     fixStringIsArray(report, ReportField.LOGCAT)
                     createNewReport(user.username, report.toString(), emptyList())
