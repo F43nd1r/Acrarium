@@ -17,7 +17,10 @@ jobs:
     - name: Checkout the code
       uses: actions/checkout@v2
     - name: Build the Docker image
-      run: docker build acrarium --file Dockerfile --tag localbuild/testimage:latest      
+      run: |
+        ./mvnw -B  package -Pproduction -DskipTests
+        docker build . --file Dockerfile --tag localbuild/testimage:latest
+      working-drectory: acrarium      
     - name: Run the local Anchore scan action itself with GitHub Advanced Security code scanning integration enabled
       uses: anchore/scan-action@v2
       with:
