@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.faendir</groupId>
     <artifactId>parent</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <packaging>pom</packaging>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -17,7 +17,7 @@
         <connection>scm:git:git://github.com:F43nd1r/Acrarium.git</connection>
         <developerConnection>scm:git:git@github.com:F43nd1r/Acrarium.git</developerConnection>
         <url>https://github.com/F43nd1r/Acrarium</url>
-      <tag>HEAD</tag>
+      <tag>v1.0.1</tag>
   </scm>
     <licenses>
         <license>
