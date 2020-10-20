@@ -20,6 +20,7 @@ import org.hibernate.annotations.OnDelete
 import org.hibernate.annotations.OnDeleteAction
 import org.hibernate.annotations.Type
 import java.util.*
+import javax.persistence.Basic
 import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.FetchType
@@ -38,6 +39,7 @@ class Version(@OnDelete(action = OnDeleteAction.CASCADE)
               private val app: App,
               val code: Int,
               var name: String,
+              @Basic(fetch = FetchType.LAZY)
               @Type(type = "text")
               var mappings: String? = null) : Comparable<Version> {
     @Id

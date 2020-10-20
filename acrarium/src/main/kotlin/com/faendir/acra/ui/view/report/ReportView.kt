@@ -118,6 +118,7 @@ class ReportView(private val dataService: DataService, avatarService: AvatarServ
             val mapping = report.stacktrace.version.mappings
             stacktrace.text = mapping?.let { report.stacktrace.retrace(it) } ?: report.stacktrace.stacktrace
             (if (mapping != null) unmappedStacktraceLabel else mappedStacktraceLabel).style["display"] = "none"
+            (if (mapping == null) unmappedStacktraceLabel else mappedStacktraceLabel).style["display"] = ""
             attachments.removeAll()
             attachments.add(*dataService.findAttachments(report).map {
                 Anchor(StreamResource(it.filename, InputStreamFactory { it.content.binaryStream }), it.filename).apply { element.setAttribute("download", true) }
