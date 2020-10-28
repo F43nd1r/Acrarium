@@ -232,6 +232,7 @@ class DataService(private val userService: UserService, private val entityManage
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     private fun findBug(app: App, stacktrace: String): Bug? = JPAQuery<Any>(entityManager).from(QStacktrace.stacktrace1)
             .join(QStacktrace.stacktrace1.bug, QBug.bug)
+            .leftJoin(QBug.bug.solvedVersion).fetchJoin()
             .where(QBug.bug.app.eq(app).and(QStacktrace.stacktrace1.stacktrace.like(stacktrace)))
             .select(QBug.bug)
             .fetchFirst()

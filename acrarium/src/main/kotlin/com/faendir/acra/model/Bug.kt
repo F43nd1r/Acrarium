@@ -45,7 +45,7 @@ class Bug(@OnDelete(action = OnDeleteAction.CASCADE)
     @Type(type = "text")
     var title: String = stacktrace.split("\n".toRegex(), 2).toTypedArray()[0]
 
-    @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.REFRESH], fetch = FetchType.EAGER)
+    @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.REFRESH], fetch = FetchType.LAZY)
     @JoinColumn(name = "solved_version")
     var solvedVersion: Version? = null
 

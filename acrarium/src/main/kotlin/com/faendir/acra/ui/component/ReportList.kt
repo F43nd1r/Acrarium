@@ -31,25 +31,27 @@ import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.GridSortOrder
-import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.component.icon.Icon
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.data.renderer.ComponentRenderer
-import com.vaadin.flow.function.ValueProvider
 
 /**
  * @author lukas
  * @since 17.09.18
  */
-class ReportList(app: App, private val dataProvider: QueryDslDataProvider<Report>, avatarService: AvatarService, deleteReport: (Report) -> Unit) : Composite<AcrariumGrid<Report>>() {
+class ReportList(app: App, private val dataProvider: QueryDslDataProvider<Report>, avatarService: AvatarService, deleteReport: (Report) -> Unit) :
+        Composite<AcrariumGrid<Report>>() {
     init {
         content.run {
             setSelectionMode(Grid.SelectionMode.NONE)
-            addColumn(ComponentRenderer { report: Report -> avatarService.getAvatar(report) }).setSortable(QReport.report.installationId).setCaption(Messages.USER)
+            addColumn(ComponentRenderer { report: Report -> avatarService.getAvatar(report) }).setSortable(QReport.report.installationId)
+                    .setCaption(Messages.USER)
                     .setWidth("50px").isAutoWidth = false
             val dateColumn = addColumn(TimeSpanRenderer { it.date }).setSortable(QReport.report.date).setCaption(Messages.DATE)
             sort(GridSortOrder.desc(dateColumn).build())
-            addColumn { it.stacktrace.version.code }.setSortableAndFilterable(QReport.report.stacktrace.version.code).setCaption(Messages.APP_VERSION)
+            addColumn { it.stacktrace.version.name }.setSortable(QReport.report.stacktrace.version.code)
+                    .setFilterable(QReport.report.stacktrace.version.name)
+                    .setCaption(Messages.APP_VERSION)
             addColumn { it.androidVersion }.setSortableAndFilterable(QReport.report.androidVersion).setCaption(Messages.ANDROID_VERSION)
             addColumn { it.phoneModel }.setSortableAndFilterable(QReport.report.phoneModel).setCaption(Messages.DEVICE)
             addColumn { it.stacktrace.stacktrace.split("\n".toRegex(), 2).toTypedArray()[0] }.setSortableAndFilterable(QReport.report.stacktrace.stacktrace)
