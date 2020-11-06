@@ -23,7 +23,7 @@
         <kotlin.version>1.4.10</kotlin.version>
         <auto-service.version>1.0-rc7</auto-service.version>
         <packaging.type>jar</packaging.type>
-        <testcontainers.version>1.14.3</testcontainers.version>
+        <testcontainers.version>1.15.0</testcontainers.version>
         <selenium.version>3.141.59</selenium.version>
     </properties>
     <dependencyManagement>
