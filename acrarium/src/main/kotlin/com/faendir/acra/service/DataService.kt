@@ -45,6 +45,7 @@ import com.querydsl.core.types.dsl.ComparableExpressionBase
 import com.querydsl.jpa.JPAExpressions
 import com.querydsl.jpa.impl.JPADeleteClause
 import com.querydsl.jpa.impl.JPAQuery
+import com.querydsl.jpa.impl.JPAUpdateClause
 import mu.KotlinLogging
 import org.acra.ReportField
 import org.ektorp.CouchDbConnector
@@ -128,12 +129,31 @@ class DataService(private val userService: UserService, private val entityManage
     @Transactional
     fun <T> store(entity: T): T = entityManager.merge(entity)
 
-    @Transactional
-    fun delete(entity: Any) {
+    private fun delete(entity: Any) {
         entityManager.remove(if (entityManager.contains(entity)) entity else entityManager.merge(entity))
-        if (entity is Report) {
-            applicationEventPublisher.publishEvent(ReportsDeleteEvent(this))
-        }
+    }
+
+    @Transactional
+    fun deleteVersion(version: Version) {
+        JPAUpdateClause(entityManager, QBug.bug).set(QBug.bug.solvedVersion, null as Version?).where(QBug.bug.solvedVersion.eq(version))
+        delete(version)
+        applicationEventPublisher.publishEvent(ReportsDeleteEvent(this))
+    }
+
+    @Transactional
+    fun deleteReport(report: Report) {
+        delete(report)
+        applicationEventPublisher.publishEvent(ReportsDeleteEvent(this))
+    }
+
+    @Transactional
+    fun deleteBug(bug: Bug) {
+        delete(bug)
+    }
+
+    @Transactional
+    fun deleteApp(app: App) {
+        delete(app)
     }
 
     /**
@@ -162,7 +182,10 @@ class DataService(private val userService: UserService, private val entityManage
     @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission\$Level).EDIT)")
     fun unmergeBug(bug: Bug) {
-        getStacktraces(bug).forEach { it.bug = Bug(bug.app, it.stacktrace) }
+        getStacktraces(bug).forEach {
+            it.bug = Bug(bug.app, it.stacktrace)
+            store(it)
+        }
         delete(bug)
     }
 
