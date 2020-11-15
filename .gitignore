@@ -3,7 +3,6 @@
 !gradle/wrapper/gradle-wrapper.jar
 /src/main/resources/VAADIN/widgetsets/
 *.css*
-application.properties
 local.properties
 
 

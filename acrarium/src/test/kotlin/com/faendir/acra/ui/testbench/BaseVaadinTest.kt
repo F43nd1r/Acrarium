@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.platform.commons.annotation.Testable
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.context.annotation.Import
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.TestPropertySource
@@ -16,8 +17,8 @@ import org.testcontainers.Testcontainers
 
 @Testable
 @ExtendWith(ContainerExtension::class, SpringExtension::class)
+@Import(GlobalPersistentSecurityContextHolderStrategy::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource("/application-mysql.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 abstract class BaseVaadinTest : TestBenchTestCase() {
     @LocalServerPort
