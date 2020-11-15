@@ -20,13 +20,17 @@ import com.vaadin.flow.spring.annotation.UIScope
 @Suppress("LeakingThis")
 @UIScope
 @SpringComponent
-class ErrorView : RouteNotFoundError(), HasErrorParameter<NotFoundException> {
+class ErrorView :
+        RouteNotFoundError() /*need to extend RouteNotFoundError due to vaadin-spring bug:
+        TODO: Remove when https://github.com/vaadin/spring/issues/661 is fixed*/,
+        HasErrorParameter<NotFoundException> {
     val layout = FlexLayout().apply {
         setSizeFull()
         setFlexDirection(FlexLayout.FlexDirection.COLUMN)
         alignItems = FlexComponent.Alignment.CENTER
         justifyContentMode = FlexComponent.JustifyContentMode.CENTER
     }
+
     init {
         element.appendChild(layout.element)
     }
