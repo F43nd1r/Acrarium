@@ -4,10 +4,10 @@
     <parent>
         <groupId>com.faendir</groupId>
         <artifactId>parent</artifactId>
-        <version>1.0.3</version>
+        <version>1.0.4-SNAPSHOT</version>
     </parent>
     <artifactId>acrarium</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4-SNAPSHOT</version>
     <packaging>${packaging.type}</packaging>
     <name>Acrarium</name>
     <properties>
