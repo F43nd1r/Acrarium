@@ -15,15 +15,21 @@
  */
 package com.faendir.acra.util
 
-import com.vaadin.flow.data.renderer.BasicRenderer
+import com.vaadin.flow.component.html.Span
+import com.vaadin.flow.data.renderer.ComponentRenderer
 import org.xbib.time.pretty.PrettyTime
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 /**
  * @author Lukas
  * @since 26.05.2017
  */
-class TimeSpanRenderer<T>(valueProvider: (T) -> ZonedDateTime?) : BasicRenderer<T, ZonedDateTime?>(valueProvider) {
-    override fun getFormattedValue(dateTime: ZonedDateTime?): String = dateTime?.let { PrettyTime(Locale.US).formatUnrounded(it.toLocalDateTime()) } ?: ""
-}
+class TimeSpanRenderer<T>(valueProvider: (T) -> ZonedDateTime?) : ComponentRenderer<Span, T>({ t: T ->
+    valueProvider(t)?.let {
+        Span(PrettyTime(Locale.US).formatUnrounded(it.toLocalDateTime())).apply {
+            element.setProperty("title", DateTimeFormatter.ISO_DATE_TIME.format(it))
+        }
+    } ?: Span()
+})
