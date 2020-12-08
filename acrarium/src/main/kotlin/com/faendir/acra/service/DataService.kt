@@ -54,6 +54,7 @@ import org.ektorp.impl.StdCouchDbConnector
 import org.ektorp.impl.StdCouchDbInstance
 import org.hibernate.Hibernate
 import org.hibernate.Session
+import org.hibernate.engine.spi.SessionImplementor
 import org.json.JSONObject
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.access.prepost.PostAuthorize
@@ -314,7 +315,7 @@ class DataService(private val userService: UserService, private val entityManage
             attachments.forEach {
                 try {
                     store(Attachment(report, it.originalFilename ?: it.name,
-                            Hibernate.getLobCreator(entityManager.unwrap(Session::class.java)).createBlob(it.inputStream, it.size)))
+                            Hibernate.getLobCreator(entityManager.unwrap(SessionImplementor::class.java)).createBlob(it.inputStream, it.size)))
                 } catch (e: IOException) {
                     logger.warn(e) { "Failed to load attachment with name ${it.originalFilename}" }
                 }
