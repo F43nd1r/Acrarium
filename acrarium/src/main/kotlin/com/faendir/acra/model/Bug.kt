@@ -37,7 +37,7 @@ import javax.persistence.ManyToOne
  */
 @Entity
 class Bug(@OnDelete(action = OnDeleteAction.CASCADE)
-          @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.REFRESH], optional = false, fetch = FetchType.LAZY)
+          @ManyToOne(cascade = [CascadeType.REFRESH], optional = false, fetch = FetchType.LAZY)
           @JsonIdentityReference(alwaysAsId = true)
           @JsonIdentityInfo(generator = PropertyGenerator::class, property = "id")
           val app: App,
@@ -45,7 +45,7 @@ class Bug(@OnDelete(action = OnDeleteAction.CASCADE)
     @Type(type = "text")
     var title: String = stacktrace.split("\n".toRegex(), 2).toTypedArray()[0]
 
-    @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.REFRESH], fetch = FetchType.LAZY)
+    @ManyToOne(cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY)
     @JoinColumn(name = "solved_version")
     var solvedVersion: Version? = null
 

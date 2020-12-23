@@ -42,6 +42,6 @@ class ReportTab(dataService: DataService, private val avatarService: AvatarServi
 
     override fun init(bug: Bug) {
         content.removeAll()
-        content.add(ReportList(bug.app, dataService.getReportProvider(bug), avatarService) { dataService.delete(it) })
+        content.add(ReportList(bug.app, dataService.getReportProvider(bug), avatarService) { dataService.deleteReport(it) })
     }
 }

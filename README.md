@@ -11,11 +11,11 @@ See [Wiki Setup guide](https://github.com/F43nd1r/acra-backend/wiki/Setup-guide)
 
 # Maturity
 
-This project is expected to enter stable phase soon, which means:
+This project entered stable phase recently, which means:
  - bug reports are very welcome
- - feature requests are welcome as well but might be delayed until after stable release
+ - feature requests are welcome
  - database backups are always good but shouldn't be vital anymore
- - future versions might not be compatible with current releases (especially 1.0 will drop some backwards-compatibility code)
+ - 1.0 and forward might not be fully compatible with databases created by prerelease versions
 
 # Screenshots
 

@@ -23,7 +23,6 @@ import com.faendir.acra.rest.RestReportInterface.Companion.PARAM_ID
 import com.faendir.acra.rest.RestReportInterface.Companion.PARAM_MAIL
 import com.faendir.acra.rest.RestReportInterface.Companion.REPORT
 import com.faendir.acra.rest.RestReportInterface.Companion.REPORT_PATH
-import com.faendir.acra.security.VaadinSessionSecurityContextHolderStrategy
 import com.faendir.acra.service.DataService
 import com.faendir.acra.service.UserService
 import com.ninjasquad.springmockk.MockkBean
@@ -64,8 +63,7 @@ import strikt.assertions.isEqualTo
  * @author lukas
  * @since 26.06.18
  */
-@WebMvcTest(controllers = [RestReportInterface::class], includeFilters = [ComponentScan.Filter(classes = [EnableWebSecurity::class])],
-        excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = [VaadinSessionSecurityContextHolderStrategy::class])])
+@WebMvcTest(controllers = [RestReportInterface::class], includeFilters = [ComponentScan.Filter(classes = [EnableWebSecurity::class])])
 @WithMockUser(roles = ["REPORTER", "USER"])
 class RestReportInterfaceTest {
 

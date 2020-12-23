@@ -55,8 +55,7 @@ class VersionCard(dataService: DataService) : AdminCard(dataService) {
         versionGrid.setHeight(100, Unit.PERCENTAGE)
         versionGrid.addColumn { it.code }.setSortable(QVersion.version.code).setCaption(Messages.VERSION_CODE).flexGrow = 1
         versionGrid.addColumn { it.name }.setSortable(QVersion.version.name).setCaption(Messages.VERSION).flexGrow = 1
-        versionGrid.addColumn(IconRenderer(SerializableFunction<Version, Component> { Icon(if (it.mappings != null) VaadinIcon.CHECK else VaadinIcon.CLOSE) },
-                ItemLabelGenerator { "" }))
+        versionGrid.addColumn(IconRenderer({ Icon(if (it.mappings != null) VaadinIcon.CHECK else VaadinIcon.CLOSE) }, { "" }))
                 .setSortable(QVersion.version.mappings.isNotNull)
                 .setCaption(Messages.PROGUARD_MAPPINGS)
         if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
@@ -68,7 +67,7 @@ class VersionCard(dataService: DataService) : AdminCard(dataService) {
                     FluentDialog()
                             .addComponent(Translatable.createText(Messages.DELETE_VERSION_CONFIRM, version.code))
                             .addConfirmButtons {
-                                dataService.delete(version)
+                                dataService.deleteVersion(version)
                                 versionGrid.dataProvider.refreshAll()
                             }.show()
                 }

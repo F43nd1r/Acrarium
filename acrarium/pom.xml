@@ -4,10 +4,10 @@
     <parent>
         <groupId>com.faendir</groupId>
         <artifactId>parent</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <version>1.0.4-SNAPSHOT</version>
     </parent>
     <artifactId>acrarium</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.4-SNAPSHOT</version>
     <packaging>${packaging.type}</packaging>
     <name>Acrarium</name>
     <properties>
@@ -16,14 +16,14 @@
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <vaadin.version>17.0.7</vaadin.version>
+        <vaadin.version>18.0.3</vaadin.version>
         <drivers.dir>${project.basedir}/drivers</drivers.dir>
         <drivers.downloader.phase>pre-integration-test</drivers.downloader.phase>
         <docker.image.prefix>f43nd1r</docker.image.prefix>
-        <kotlin.version>1.4.10</kotlin.version>
+        <kotlin.version>1.4.21</kotlin.version>
         <auto-service.version>1.0-rc7</auto-service.version>
         <packaging.type>jar</packaging.type>
-        <testcontainers.version>1.14.3</testcontainers.version>
+        <testcontainers.version>1.15.1</testcontainers.version>
         <selenium.version>3.141.59</selenium.version>
     </properties>
     <dependencyManagement>
@@ -218,12 +218,12 @@
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-coroutines-core</artifactId>
-            <version>1.4.0</version>
+            <version>1.4.2</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
-            <version>2.11.3</version>
+            <version>2.12.0</version>
         </dependency>
         <dependency>
             <groupId>io.github.microutils</groupId>
@@ -274,13 +274,13 @@
         <dependency>
             <groupId>com.ninja-squad</groupId>
             <artifactId>springmockk</artifactId>
-            <version>2.0.3</version>
+            <version>3.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.strikt</groupId>
             <artifactId>strikt-core</artifactId>
-            <version>0.28.0</version>
+            <version>0.28.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>

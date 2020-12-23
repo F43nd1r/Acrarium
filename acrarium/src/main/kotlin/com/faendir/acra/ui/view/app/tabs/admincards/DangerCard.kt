@@ -81,7 +81,7 @@ class DangerCard(dataService: DataService) : AdminCard(dataService) {
         })
         val deleteBox = Box(Translatable.createLabel(Messages.DELETE_APP), Translatable.createLabel(Messages.DELETE_APP_DETAILS), Translatable.createButton(Messages.DELETE) {
             FluentDialog().addText(Messages.DELETE_APP_CONFIRM).addConfirmButtons {
-                dataService.delete(app)
+                dataService.deleteApp(app)
                 UI.getCurrent().navigate(Overview::class.java)
             }.show()
         })

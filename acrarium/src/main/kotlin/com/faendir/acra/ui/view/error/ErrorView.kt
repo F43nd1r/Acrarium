@@ -20,16 +20,23 @@ import com.vaadin.flow.spring.annotation.UIScope
 @Suppress("LeakingThis")
 @UIScope
 @SpringComponent
-class ErrorView : FlexLayout(), HasErrorParameter<NotFoundException> {
-    init {
+class ErrorView :
+        RouteNotFoundError() /*need to extend RouteNotFoundError due to vaadin-spring bug:
+        TODO: Remove when https://github.com/vaadin/spring/issues/661 is fixed*/,
+        HasErrorParameter<NotFoundException> {
+    val layout = FlexLayout().apply {
         setSizeFull()
-        setFlexDirection(FlexDirection.COLUMN)
+        setFlexDirection(FlexLayout.FlexDirection.COLUMN)
         alignItems = FlexComponent.Alignment.CENTER
         justifyContentMode = FlexComponent.JustifyContentMode.CENTER
     }
 
+    init {
+        element.appendChild(layout.element)
+    }
+
     override fun setErrorParameter(event: BeforeEnterEvent?, parameter: ErrorParameter<NotFoundException>): Int {
-        removeAll()
+        layout.removeAll()
         val number = Paragraph("404")
         number.style["font-size"] = "200px"
         number.style["line-height"] = "80%"
@@ -38,7 +45,7 @@ class ErrorView : FlexLayout(), HasErrorParameter<NotFoundException> {
         val button = RouterLink("", Overview::class.java).apply {
             add(Translatable.createButton(Messages.GO_HOME))
         }
-        add(number, text, button)
+        layout.add(number, text, button)
         return 404
     }
 }

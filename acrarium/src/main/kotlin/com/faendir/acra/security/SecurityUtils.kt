@@ -18,7 +18,6 @@ package com.faendir.acra.security
 import com.faendir.acra.model.App
 import com.faendir.acra.model.Permission
 import com.faendir.acra.model.User
-import org.springframework.lang.NonNull
 import org.springframework.security.core.context.SecurityContextHolder
 
 object SecurityUtils {
@@ -26,7 +25,7 @@ object SecurityUtils {
     fun isLoggedIn(): Boolean = SecurityContextHolder.getContext().authentication?.isAuthenticated ?: false
 
     @JvmStatic
-    fun hasRole(role: User.Role): Boolean = SecurityContextHolder.getContext().authentication?.authorities?.contains(role) ?: false
+    fun hasRole(role: User.Role): Boolean = SecurityContextHolder.getContext().authentication?.authorities?.any { it.authority == role.authority } ?: false
 
     @JvmStatic
     fun getUsername(): String = SecurityContextHolder.getContext().authentication?.name ?: ""

@@ -16,7 +16,6 @@
 package com.faendir.acra.liquibase
 
 import com.faendir.acra.BackendApplication
-import com.faendir.acra.security.VaadinSessionSecurityContextHolderStrategy
 import liquibase.integration.spring.SpringLiquibase
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -48,11 +47,10 @@ import javax.validation.Validator
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ComponentScan(basePackageClasses = [BackendApplication::class],
-        excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = [SpringLiquibase::class]), ComponentScan.Filter(
-                type = FilterType.ASSIGNABLE_TYPE, value = [VaadinSessionSecurityContextHolderStrategy::class])])
+        excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = [SpringLiquibase::class])])
 @ImportAutoConfiguration(exclude = [LiquibaseAutoConfiguration::class, EmbeddedDataSourceConfiguration::class])
 @EnableConfigurationProperties(LiquibaseProperties::class)
-abstract class LiquibaseTest {
+class LiquibaseTest {
     @Autowired
     lateinit var resourceLoader: ResourceLoader
 

@@ -1,15 +1,13 @@
 package com.faendir.acra.ui.testbench
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.context.annotation.Configuration
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.context.SecurityContextHolderStrategy
 import org.springframework.security.core.context.SecurityContextImpl
 
 
-@Configuration
-@ConditionalOnProperty(name = ["acrarium.live"], havingValue = "false")
+@TestConfiguration
 internal class GlobalPersistentSecurityContextHolderStrategy : SecurityContextHolderStrategy {
     companion object {
         init {
