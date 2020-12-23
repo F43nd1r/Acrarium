@@ -33,6 +33,7 @@ object Queries {
             .on(QStacktrace.stacktrace1.bug.eq(QBug.bug))
             .leftJoin(QReport.report)
             .on(QReport.report.stacktrace.eq(QStacktrace.stacktrace1))
+            .leftJoin(QBug.bug.solvedVersion).fetchJoin()
             .select(QVBug(QBug.bug, QReport.report.date.max(), QReport.report.count(), QStacktrace.stacktrace1.version.code.max(), QReport.report.installationId.countDistinct()))
             .groupBy(QBug.bug)
     private val V_APP = JPAQuery<Any>().from(QApp.app)

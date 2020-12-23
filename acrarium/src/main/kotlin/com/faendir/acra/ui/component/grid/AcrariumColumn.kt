@@ -58,13 +58,17 @@ class AcrariumColumn<T>(private val acrariumGrid: AcrariumGrid<T>, columnId: Str
         return this
     }
 
-    fun setSortableAndFilterable(expr: StringExpression): AcrariumColumn<T> {
-        return setSortable(expr).setFilterable(Translatable.createTextFieldWithHint(Messages.FILTER), object : QueryDslFilterWithParameter<String?> {
+    fun setFilterable(expr: StringExpression): AcrariumColumn<T> {
+        return setFilterable(Translatable.createTextFieldWithHint(Messages.FILTER), object : QueryDslFilterWithParameter<String?> {
             override var parameter: String? = null
 
             override fun <T> apply(query: JPAQuery<T>): JPAQuery<T> = parameter?.let { query.where(expr.contains(it)) } ?: query
 
         })
+    }
+
+    fun setSortableAndFilterable(expr: StringExpression): AcrariumColumn<T> {
+        return setSortable(expr).setFilterable(expr)
     }
 
     inline fun <reified U> setSortableAndFilterable(expr: NumberExpression<U>): AcrariumColumn<T> where U : Number, U : Comparable<*> {
