@@ -20,7 +20,7 @@
         <drivers.dir>${project.basedir}/drivers</drivers.dir>
         <drivers.downloader.phase>pre-integration-test</drivers.downloader.phase>
         <docker.image.prefix>f43nd1r</docker.image.prefix>
-        <kotlin.version>1.4.21</kotlin.version>
+        <kotlin.version>1.4.21-2</kotlin.version>
         <auto-service.version>1.0-rc7</auto-service.version>
         <packaging.type>jar</packaging.type>
         <testcontainers.version>1.15.1</testcontainers.version>
