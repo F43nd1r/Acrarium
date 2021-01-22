@@ -16,12 +16,13 @@ import com.vaadin.flow.router.RouteNotFoundError
 import com.vaadin.flow.router.RouterLink
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
+import com.vaadin.flow.spring.router.SpringRouteNotFoundError
 
 @Suppress("LeakingThis")
 @UIScope
 @SpringComponent
 class ErrorView :
-        RouteNotFoundError() /*need to extend RouteNotFoundError due to vaadin-spring bug:
+		SpringRouteNotFoundError() /*need to extend RouteNotFoundError due to vaadin-spring bug:
         TODO: Remove when https://github.com/vaadin/spring/issues/661 is fixed*/,
         HasErrorParameter<NotFoundException> {
     val layout = FlexLayout().apply {
