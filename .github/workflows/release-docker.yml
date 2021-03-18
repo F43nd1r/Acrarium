@@ -17,9 +17,13 @@ jobs:
           java-version: '1.13'
       - name: Build release
         run: ./mvnw -B clean package -Pproduction -DskipTests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Extract version
         id: version
         run: echo ::set-output name=value::$(./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep '^[0-9]')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish to hub (latest)
         uses: elgohr/Publish-Docker-Github-Action@master
         with:

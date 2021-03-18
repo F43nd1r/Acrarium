@@ -19,9 +19,13 @@ jobs:
       run: |
         ./mvnw -B clean package -Pproduction -Pwar -DskipTests
         ./mvnw -B  package -Pproduction -DskipTests
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Extract version
       id: version
       run: echo ::set-output name=value::$(./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep '^[0-9]')
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
