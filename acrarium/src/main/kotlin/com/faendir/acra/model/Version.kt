@@ -36,7 +36,7 @@ import javax.persistence.ManyToOne
 @Entity
 class Version(@OnDelete(action = OnDeleteAction.CASCADE)
               @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.REFRESH], optional = false, fetch = FetchType.LAZY)
-              private val app: App,
+              val app: App,
               val code: Int,
               var name: String,
               @Basic(fetch = FetchType.LAZY)

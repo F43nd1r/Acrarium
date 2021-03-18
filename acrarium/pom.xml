@@ -25,6 +25,7 @@
         <packaging.type>jar</packaging.type>
         <testcontainers.version>1.15.2</testcontainers.version>
         <selenium.version>3.141.59</selenium.version>
+        <liquibase.version>4.3.1</liquibase.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -122,7 +123,7 @@
         <dependency>
             <groupId>com.faendir.liquibase</groupId>
             <artifactId>liquibase-kotlin-dsl</artifactId>
-            <version>3.0.0</version>
+            <version>3.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.querydsl</groupId>
@@ -320,6 +321,14 @@
         </dependency>
     </dependencies>
     <repositories>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>github</id>
+            <name>github</name>
+            <url>https://maven.pkg.github.com/f43nd1r/*</url>
+        </repository>
         <repository>
             <snapshots>
                 <enabled>false</enabled>

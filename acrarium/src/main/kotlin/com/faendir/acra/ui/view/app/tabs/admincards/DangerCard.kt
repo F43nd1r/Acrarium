@@ -27,10 +27,14 @@ import com.faendir.acra.ui.view.Overview
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
+import org.springframework.beans.factory.annotation.Value
 
 @UIScope
 @SpringComponent
 class DangerCard(dataService: DataService) : AdminCard(dataService) {
+
+    @Value("\${server.context-path}")
+    private val baseUrl: String? = null
 
     init {
         setHeader(Translatable.createLabel(Messages.DANGER_ZONE))
@@ -42,7 +46,7 @@ class DangerCard(dataService: DataService) : AdminCard(dataService) {
         removeContent()
         val configBox = Box(Translatable.createLabel(Messages.NEW_ACRA_CONFIG), Translatable.createLabel(Messages.NEW_ACRA_CONFIG_DETAILS), Translatable.createButton(Messages.CREATE) {
             FluentDialog().addText(Messages.NEW_ACRA_CONFIG_CONFIRM)
-                    .addConfirmButtons { FluentDialog().addComponent(ConfigurationLabel(dataService.recreateReporterUser(app))).addCloseButton().show() }
+                    .addConfirmButtons { FluentDialog().addComponent(ConfigurationLabel(baseUrl, dataService.recreateReporterUser(app))).addCloseButton().show() }
                     .show()
         })
         val matchingBox = Box(Translatable.createLabel(Messages.NEW_BUG_CONFIG), Translatable.createLabel(Messages.NEW_BUG_CONFIG_DETAILS), Translatable.createButton(Messages.CONFIGURE) {

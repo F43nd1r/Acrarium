@@ -39,6 +39,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
+import org.springframework.beans.factory.annotation.Value
 
 /**
  * @author lukas
@@ -48,6 +49,9 @@ import com.vaadin.flow.spring.annotation.UIScope
 @SpringComponent
 @Route(value = "", layout = MainView::class)
 class Overview(private val dataService: DataService) : VerticalLayout(), ComponentEventListener<AttachEvent>, HasAcrariumTitle {
+
+    @Value("\${server.context-path}")
+    private val baseUrl: String? = null
 
     init {
         addAttachListener(this)
@@ -65,7 +69,7 @@ class Overview(private val dataService: DataService) : VerticalLayout(), Compone
             grid.appendFooterRow().getCell(appColumn).setComponent(HorizontalLayout(Translatable.createButton(Messages.NEW_APP) {
                 val name = Translatable.createTextField(Messages.NAME)
                 FluentDialog().setTitle(Messages.NEW_APP).addComponent(name).addCreateButton {
-                    FluentDialog().addComponent(ConfigurationLabel(dataService.createNewApp(name.content.value))).addCloseButton().show()
+                    FluentDialog().addComponent(ConfigurationLabel(baseUrl, dataService.createNewApp(name.content.value))).addCloseButton().show()
                     grid.dataProvider.refreshAll()
                 }.show()
             }, Translatable.createButton(Messages.IMPORT_ACRALYZER) {
@@ -85,7 +89,7 @@ class Overview(private val dataService: DataService) : VerticalLayout(), Compone
                         .addCreateButton {
                             val importResult = dataService.importFromAcraStorage(host.content.value, port.value.toInt(), ssl.content.value, databaseName.content.value)
                             FluentDialog().addComponent(Translatable.createLabel(Messages.IMPORT_SUCCESS, importResult.successCount, importResult.totalCount))
-                                    .addComponent(ConfigurationLabel(importResult.user))
+                                    .addComponent(ConfigurationLabel(baseUrl, importResult.user))
                                     .addCloseButton()
                                     .show()
                             grid.dataProvider.refreshAll()

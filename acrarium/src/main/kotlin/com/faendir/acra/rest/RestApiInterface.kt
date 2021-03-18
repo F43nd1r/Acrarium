@@ -19,17 +19,19 @@ import com.faendir.acra.model.App
 import com.faendir.acra.model.Bug
 import com.faendir.acra.model.Report
 import com.faendir.acra.model.Stacktrace
+import com.faendir.acra.model.Version
 import com.faendir.acra.service.DataService
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.ZonedDateTime
-import java.util.*
 
 /**
  * @author lukas
@@ -61,12 +63,29 @@ class RestApiInterface(private val dataService: DataService) {
     fun listReports(@PathVariable id: Int): List<String> = dataService.findStacktrace(id)?.let { dataService.getReportIds(it) } ?: emptyList()
 
     @RequestMapping(value = ["apps/{id}/reports"], produces = [MediaType.APPLICATION_JSON_VALUE], method = [RequestMethod.GET])
-    fun listReportsOfApp(@PathVariable id: Int, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) before: ZonedDateTime?,
-                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) after: ZonedDateTime?): List<String> =
-            dataService.findApp(id)?.let { dataService.getReportIds(it, before, after) } ?: emptyList()
+    fun listReportsOfApp(
+        @PathVariable id: Int, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) before: ZonedDateTime?,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) after: ZonedDateTime?
+    ): List<String> =
+        dataService.findApp(id)?.let { dataService.getReportIds(it, before, after) } ?: emptyList()
 
     @RequestMapping(value = ["reports/{id}"], produces = [MediaType.APPLICATION_JSON_VALUE], method = [RequestMethod.GET])
     fun getReport(@PathVariable id: String): Report? = dataService.findReport(id)
+
+    @RequestMapping(value = ["apps/{id}/version/upload/{code}"], consumes = [MediaType.TEXT_PLAIN_VALUE], method = [RequestMethod.POST])
+    fun uploadProguardMapping(
+        @PathVariable id: Int,
+        @PathVariable code: Int,
+        @RequestParam(required = false) name: String?,
+        @RequestBody content: String
+    ): ResponseEntity<*> {
+        val app = dataService.findApp(id) ?: return ResponseEntity.notFound().build<Any>()
+        dataService.storeVersion(dataService.findVersion(app, code)?.also { version ->
+            name?.let { it -> version.name = it }
+            version.mappings = content
+        } ?: Version(app, code, name ?: "N/A", content))
+        return ResponseEntity.ok().build<Any>()
+    }
 
     companion object {
         const val API_PATH = "api"

@@ -134,6 +134,9 @@ class DataService(private val userService: UserService, private val entityManage
         entityManager.remove(if (entityManager.contains(entity)) entity else entityManager.merge(entity))
     }
 
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#version.app, T(com.faendir.acra.model.Permission\$Level).EDIT)")
+    fun storeVersion(version: Version) : Version = store(version)
+
     @Transactional
     fun deleteVersion(version: Version) {
         JPAUpdateClause(entityManager, QBug.bug).set(QBug.bug.solvedVersion, null as Version?).where(QBug.bug.solvedVersion.eq(version))
