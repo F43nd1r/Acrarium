@@ -36,6 +36,7 @@ package.json
 webpack.generated.js
 pnpm-lock.yaml
 pnpmfile.js
+.npmrc
 
 ### Maven ###
 **/target
