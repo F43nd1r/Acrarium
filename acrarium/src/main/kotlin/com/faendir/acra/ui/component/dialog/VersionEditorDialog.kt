@@ -45,11 +45,11 @@ class VersionEditorDialog(dataService: DataService, app: App, onUpdate: (() -> U
         }
         setPositive(if (old == null) Messages.CREATE else Messages.SAVE) {
             if (old == null) {
-                dataService.store(Version(app, code.value.toInt(), name.value, upload.value))
+                dataService.storeVersion(Version(app, code.value.toInt(), name.value, upload.value))
             } else {
                 old.name = name.value
                 old.mappings = upload.value
-                dataService.store(old)
+                dataService.storeVersion(old)
             }
             close()
             onUpdate.invoke()
