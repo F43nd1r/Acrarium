@@ -228,8 +228,8 @@
         </dependency>
         <dependency>
             <groupId>io.github.microutils</groupId>
-            <artifactId>kotlin-logging</artifactId>
-            <version>1.12.0</version>
+            <artifactId>kotlin-logging-jvm</artifactId>
+            <version>2.0.6</version>
         </dependency>
         <!-- dev -->
         <dependency>
