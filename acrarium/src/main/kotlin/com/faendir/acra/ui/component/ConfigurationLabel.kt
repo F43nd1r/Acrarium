@@ -25,15 +25,14 @@ import com.vaadin.flow.i18n.LocaleChangeEvent
 import com.vaadin.flow.i18n.LocaleChangeObserver
 import com.vaadin.flow.router.RouteConfiguration
 import com.vaadin.flow.server.VaadinRequest
-import org.springframework.lang.NonNull
 
 /**
  * @author lukas
  * @since 09.11.18
  */
-class ConfigurationLabel(private val user: User) : Label(""), LocaleChangeObserver {
+class ConfigurationLabel(private val baseUrl: String?, private val user: User) : Label(""), LocaleChangeObserver {
     override fun localeChange(event: LocaleChangeEvent) {
-        val baseUrl = VaadinRequest.getCurrent().getHeader("host")
+        val baseUrl = this.baseUrl ?: VaadinRequest.getCurrent().getHeader("host")
         element.setProperty("innerHTML", getTranslation(Messages.CONFIGURATION_LABEL,
                 baseUrl.ensureTrailing("/") + RouteConfiguration.forSessionScope().getUrl(Overview::class.java),
                 RestReportInterface.REPORT_PATH, user.username, user.getPlainTextPassword()))
