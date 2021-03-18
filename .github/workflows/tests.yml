@@ -17,3 +17,5 @@ jobs:
         java-version: ${{ matrix.java }}
     - name: Maven tests on Java ${{ matrix.java }}
       run: ./mvnw -B clean test -DargLine="-Dvaadin.proKey=${{ secrets.VAADIN_PROKEY }}"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
