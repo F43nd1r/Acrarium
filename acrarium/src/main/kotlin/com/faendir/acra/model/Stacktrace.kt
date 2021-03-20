@@ -22,6 +22,7 @@ import org.hibernate.annotations.OnDelete
 import org.hibernate.annotations.OnDeleteAction
 import org.hibernate.annotations.Type
 import javax.persistence.CascadeType
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
@@ -47,4 +48,7 @@ class Stacktrace(@OnDelete(action = OnDeleteAction.CASCADE)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id = 0
+
+    @Column(name = "class")
+    val className : String = stacktrace.substringBefore(":")
 }

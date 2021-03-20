@@ -28,3 +28,7 @@ object ColumnType {
 object Author {
     const val F43ND1R = "f43nd1r"
 }
+
+object Table {
+    const val STACKTRACE = "stacktrace"
+}

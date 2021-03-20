@@ -2,10 +2,11 @@ package com.faendir.acra.liquibase.changelog.v1_0_0
 
 import com.faendir.acra.liquibase.changelog.Author
 import com.faendir.acra.liquibase.changelog.ColumnType
+import com.faendir.acra.liquibase.changelog.Table
 
 databaseChangeLog {
     changeSet("1.0.0-create-stacktrace", Author.F43ND1R) {
-        createTable("stacktrace") {
+        createTable(Table.STACKTRACE) {
             column(name = "id", type = ColumnType.INT, autoIncrement = true) {
                 constraints(nullable = false, primaryKey = true, primaryKeyName = "PK_stacktrace")
             }
