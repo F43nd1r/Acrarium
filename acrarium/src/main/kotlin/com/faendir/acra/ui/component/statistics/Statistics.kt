@@ -62,10 +62,7 @@ class Statistics(app: App, private val baseExpression: BooleanExpression?, dataS
         content.expand(card)
         properties.forEach { it.addTo(filterLayout, content) }
         filterLayout.add(Translatable.createButton(Messages.APPLY) { update() })
-        GlobalScope.launch {
-            delay(100)
-            ui.ifPresent { it.access { update() } }
-        }
+        update()
     }
 
     private fun update() {

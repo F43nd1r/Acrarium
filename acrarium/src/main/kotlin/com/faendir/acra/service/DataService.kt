@@ -53,7 +53,6 @@ import org.ektorp.http.StdHttpClient
 import org.ektorp.impl.StdCouchDbConnector
 import org.ektorp.impl.StdCouchDbInstance
 import org.hibernate.Hibernate
-import org.hibernate.Session
 import org.hibernate.engine.spi.SessionImplementor
 import org.json.JSONObject
 import org.springframework.context.ApplicationEventPublisher
@@ -76,8 +75,10 @@ private val logger = KotlinLogging.logger {}
  * @since 16.05.18
  */
 @Service
-class DataService(private val userService: UserService, private val entityManager: EntityManager,
-                  private val applicationEventPublisher: ApplicationEventPublisher) : Serializable {
+class DataService(
+    private val userService: UserService, private val entityManager: EntityManager,
+    private val applicationEventPublisher: ApplicationEventPublisher
+) : Serializable {
     private val stacktraceLock = Any()
 
     fun getAppProvider(): QueryDslDataProvider<VApp> {
@@ -95,25 +96,29 @@ class DataService(private val userService: UserService, private val entityManage
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun getStacktraceIds(bug: Bug): List<Int> =
-            JPAQuery<Any>(entityManager).from(QStacktrace.stacktrace1).where(QStacktrace.stacktrace1.bug.eq(bug)).select(QStacktrace.stacktrace1.id).fetch()
+        JPAQuery<Any>(entityManager).from(QStacktrace.stacktrace1).where(QStacktrace.stacktrace1.bug.eq(bug)).select(QStacktrace.stacktrace1.id).fetch()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
-    fun getReportProvider(bug: Bug) = QueryDslDataProvider(JPAQuery<Any>(entityManager).from(QReport.report)
+    fun getReportProvider(bug: Bug) = QueryDslDataProvider(
+        JPAQuery<Any>(entityManager).from(QReport.report)
             .join(QReport.report.stacktrace, QStacktrace.stacktrace1).fetchJoin()
             .where(QStacktrace.stacktrace1.bug.eq(bug))
-            .select(QReport.report))
+            .select(QReport.report)
+    )
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
-    fun getReportProvider(app: App) = QueryDslDataProvider(JPAQuery<Any>(entityManager).from(QReport.report)
+    fun getReportProvider(app: App) = QueryDslDataProvider(
+        JPAQuery<Any>(entityManager).from(QReport.report)
             .join(QReport.report.stacktrace, QStacktrace.stacktrace1).fetchJoin()
             .join(QStacktrace.stacktrace1.bug, QBug.bug).fetchJoin()
             .join(QStacktrace.stacktrace1.version).fetchJoin()
             .where(QBug.bug.app.eq(app))
-            .select(QReport.report))
+            .select(QReport.report)
+    )
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#stacktrace.bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun getReportIds(stacktrace: Stacktrace): List<String> =
-            JPAQuery<Any>(entityManager).from(QReport.report).where(QReport.report.stacktrace.eq(stacktrace)).select(QReport.report.id).fetch()
+        JPAQuery<Any>(entityManager).from(QReport.report).where(QReport.report.stacktrace.eq(stacktrace)).select(QReport.report.id).fetch()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun getReportIds(app: App, before: ZonedDateTime?, after: ZonedDateTime?): List<String> {
@@ -125,7 +130,7 @@ class DataService(private val userService: UserService, private val entityManage
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun getVersionProvider(app: App) =
-            QueryDslDataProvider(JPAQuery<Any>(entityManager).from(QVersion.version).fetchAll().where(QVersion.version.app.eq(app)).select(QVersion.version))
+        QueryDslDataProvider(JPAQuery<Any>(entityManager).from(QVersion.version).fetchAll().where(QVersion.version.app.eq(app)).select(QVersion.version))
 
     @Transactional
     fun <T> store(entity: T): T = entityManager.merge(entity)
@@ -135,7 +140,7 @@ class DataService(private val userService: UserService, private val entityManage
     }
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#version.app, T(com.faendir.acra.model.Permission\$Level).EDIT)")
-    fun storeVersion(version: Version) : Version = store(version)
+    fun storeVersion(version: Version): Version = store(version)
 
     @Transactional
     fun deleteVersion(version: Version) {
@@ -194,6 +199,13 @@ class DataService(private val userService: UserService, private val entityManage
     }
 
     @Transactional
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#stacktrace.bug.app, T(com.faendir.acra.model.Permission\$Level).EDIT)")
+    fun unmergeStacktrace(stacktrace: Stacktrace) {
+        stacktrace.bug = Bug(stacktrace.bug.app, stacktrace.stacktrace)
+        store(stacktrace)
+    }
+
+    @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission\$Level).EDIT)")
     fun setBugSolved(bug: Bug, solved: Version?) {
         bug.solvedVersion = solved
@@ -201,77 +213,85 @@ class DataService(private val userService: UserService, private val entityManage
     }
 
     @PostAuthorize(
-            "returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.stacktrace.bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+        "returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.stacktrace.bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)"
+    )
     fun findReport(id: String): Report? = JPAQuery<Any>(entityManager).from(QReport.report)
-            .join(QReport.report.stacktrace, QStacktrace.stacktrace1)
-            .fetchJoin()
-            .join(QStacktrace.stacktrace1.version, QVersion.version)
-            .fetchAll()
-            .fetchJoin()
-            .join(QStacktrace.stacktrace1.bug, QBug.bug)
-            .fetchJoin()
-            .join(QBug.bug.app, QApp.app)
-            .fetchJoin()
-            .where(QReport.report.id.eq(id))
-            .select(QReport.report)
-            .fetchOne()
+        .join(QReport.report.stacktrace, QStacktrace.stacktrace1)
+        .fetchJoin()
+        .join(QStacktrace.stacktrace1.version, QVersion.version)
+        .fetchAll()
+        .fetchJoin()
+        .join(QStacktrace.stacktrace1.bug, QBug.bug)
+        .fetchJoin()
+        .join(QBug.bug.app, QApp.app)
+        .fetchJoin()
+        .where(QReport.report.id.eq(id))
+        .select(QReport.report)
+        .fetchOne()
 
     @PostAuthorize(
-            "returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+        "returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.app, T(com.faendir.acra.model.Permission\$Level).VIEW)"
+    )
     fun findBug(id: Int): Bug? =
-            JPAQuery<Any>(entityManager).from(QBug.bug).join(QBug.bug.app).fetchJoin().where(QBug.bug.id.eq(id)).select(QBug.bug).fetchOne()
+        JPAQuery<Any>(entityManager).from(QBug.bug).join(QBug.bug.app).fetchJoin().where(QBug.bug.id.eq(id)).select(QBug.bug).fetchOne()
 
     @PostAuthorize(
-            "returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+        "returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject, T(com.faendir.acra.model.Permission\$Level).VIEW)"
+    )
     fun findApp(encodedId: String): App? = tryOrNull { findApp(encodedId.toInt()) }
 
     @PostAuthorize(
-            "returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+        "returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject, T(com.faendir.acra.model.Permission\$Level).VIEW)"
+    )
     fun findApp(id: Int): App? = JPAQuery<Any>(entityManager).from(QApp.app).where(QApp.app.id.eq(id)).select(QApp.app).fetchOne()
 
     @PostFilter(
-            "hasRole(T(com.faendir.acra.model.User\$Role).ADMIN) || T(com.faendir.acra.security.SecurityUtils).hasPermission(filterObject, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+        "hasRole(T(com.faendir.acra.model.User\$Role).ADMIN) || T(com.faendir.acra.security.SecurityUtils).hasPermission(filterObject, T(com.faendir.acra.model.Permission\$Level).VIEW)"
+    )
     fun findAllApps(): List<App> = JPAQuery<Any>(entityManager).from(QApp.app).select(QApp.app).fetch()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#report.stacktrace.bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun findAttachments(report: Report): List<Attachment> =
-            JPAQuery<Any>(entityManager).from(QAttachment.attachment).where(QAttachment.attachment.report.eq(report)).select(QAttachment.attachment).fetch()
+        JPAQuery<Any>(entityManager).from(QAttachment.attachment).where(QAttachment.attachment.report.eq(report)).select(QAttachment.attachment).fetch()
 
     @PostAuthorize(
-            "returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+        "returnObject == null || T(com.faendir.acra.security.SecurityUtils).hasPermission(returnObject.bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)"
+    )
     fun findStacktrace(id: Int): Stacktrace? =
-            JPAQuery<Any>(entityManager).from(QStacktrace.stacktrace1).where(QStacktrace.stacktrace1.id.eq(id)).select(QStacktrace.stacktrace1).fetchOne()
+        JPAQuery<Any>(entityManager).from(QStacktrace.stacktrace1).where(QStacktrace.stacktrace1.id.eq(id)).select(QStacktrace.stacktrace1).fetchOne()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun findStacktrace(app: App, stacktrace: String, versionCode: Int): Stacktrace? = JPAQuery<Any>(entityManager).from(QStacktrace.stacktrace1)
-            .where(QStacktrace.stacktrace1.stacktrace.eq(stacktrace)
-                    .and(QStacktrace.stacktrace1.version.code.eq(versionCode))
-                    .and(QStacktrace.stacktrace1.bug.app.eq(app)))
-            .select(QStacktrace.stacktrace1)
-            .fetchOne()
+        .where(
+            QStacktrace.stacktrace1.stacktrace.eq(stacktrace)
+                .and(QStacktrace.stacktrace1.version.code.eq(versionCode))
+                .and(QStacktrace.stacktrace1.bug.app.eq(app))
+        )
+        .select(QStacktrace.stacktrace1)
+        .fetchOne()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun findVersion(app: App, versionCode: Int): Version? = JPAQuery<Any>(entityManager).from(QVersion.version)
-            .where(QVersion.version.code.eq(versionCode).and(QVersion.version.app.eq(app)))
-            .select(QVersion.version)
-            .fetchOne()
+        .where(QVersion.version.code.eq(versionCode).and(QVersion.version.app.eq(app)))
+        .select(QVersion.version)
+        .fetchOne()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     private fun findBug(app: App, stacktrace: String): Bug? = JPAQuery<Any>(entityManager).from(QStacktrace.stacktrace1)
-            .join(QStacktrace.stacktrace1.bug, QBug.bug)
-            .leftJoin(QBug.bug.solvedVersion).fetchJoin()
-            .where(QBug.bug.app.eq(app).and(QStacktrace.stacktrace1.stacktrace.like(stacktrace)))
-            .select(QBug.bug)
-            .fetchFirst()
+        .join(QStacktrace.stacktrace1.bug, QBug.bug)
+        .leftJoin(QBug.bug.solvedVersion).fetchJoin()
+        .where(QBug.bug.app.eq(app).and(QStacktrace.stacktrace1.stacktrace.like(stacktrace)))
+        .select(QBug.bug)
+        .fetchFirst()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun findAllVersions(app: App): List<Version> =
-            JPAQuery<Any>(entityManager).from(QVersion.version).where(QVersion.version.app.eq(app)).select(QVersion.version).fetch()
+        JPAQuery<Any>(entityManager).from(QVersion.version).where(QVersion.version.app.eq(app)).select(QVersion.version).fetch()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun findMailSettings(app: App, user: User): MailSettings? = JPAQuery<Any>(entityManager).from(QMailSettings.mailSettings)
-            .where(QMailSettings.mailSettings.app.eq(app).and(QMailSettings.mailSettings.user.eq(user)))
-            .select(QMailSettings.mailSettings).fetchOne()
+        .where(QMailSettings.mailSettings.app.eq(app).and(QMailSettings.mailSettings.user.eq(user)))
+        .select(QMailSettings.mailSettings).fetchOne()
 
     @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#a, T(com.faendir.acra.model.Permission\$Level).EDIT)")
@@ -287,9 +307,11 @@ class DataService(private val userService: UserService, private val entityManage
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).EDIT)")
     fun deleteReportsOlderThanDays(app: App, days: Int) {
         JPADeleteClause(entityManager, QReport.report).where(
-                QReport.report.stacktrace.`in`(
-                        JPAExpressions.select(QStacktrace.stacktrace1).from(QStacktrace.stacktrace1).where(QStacktrace.stacktrace1.bug.app.eq(app)))
-                        .and(QReport.report.date.before(ZonedDateTime.now().minus(days.toLong(), ChronoUnit.DAYS)))).execute()
+            QReport.report.stacktrace.`in`(
+                JPAExpressions.select(QStacktrace.stacktrace1).from(QStacktrace.stacktrace1).where(QStacktrace.stacktrace1.bug.app.eq(app))
+            )
+                .and(QReport.report.date.before(ZonedDateTime.now().minus(days.toLong(), ChronoUnit.DAYS)))
+        ).execute()
         entityManager.flush()
         applicationEventPublisher.publishEvent(ReportsDeleteEvent(this))
     }
@@ -298,9 +320,13 @@ class DataService(private val userService: UserService, private val entityManage
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).EDIT)")
     fun deleteReportsBeforeVersion(app: App, versionCode: Int) {
         JPADeleteClause(entityManager, QReport.report).where(
-                QReport.report.stacktrace.`in`(
-                        JPAExpressions.select(QStacktrace.stacktrace1).from(QStacktrace.stacktrace1).where(QStacktrace.stacktrace1.bug.app.eq(app)
-                                .and(QStacktrace.stacktrace1.version.code.lt(versionCode))))).execute()
+            QReport.report.stacktrace.`in`(
+                JPAExpressions.select(QStacktrace.stacktrace1).from(QStacktrace.stacktrace1).where(
+                    QStacktrace.stacktrace1.bug.app.eq(app)
+                        .and(QStacktrace.stacktrace1.version.code.lt(versionCode))
+                )
+            )
+        ).execute()
         entityManager.flush()
         applicationEventPublisher.publishEvent(ReportsDeleteEvent(this))
     }
@@ -318,8 +344,12 @@ class DataService(private val userService: UserService, private val entityManage
             val report = store(Report(stacktrace, content))
             attachments.forEach {
                 try {
-                    store(Attachment(report, it.originalFilename ?: it.name,
-                            Hibernate.getLobCreator(entityManager.unwrap(SessionImplementor::class.java)).createBlob(it.inputStream, it.size)))
+                    store(
+                        Attachment(
+                            report, it.originalFilename ?: it.name,
+                            Hibernate.getLobCreator(entityManager.unwrap(SessionImplementor::class.java)).createBlob(it.inputStream, it.size)
+                        )
+                    )
                 } catch (e: IOException) {
                     logger.warn(e) { "Failed to load attachment with name ${it.originalFilename}" }
                 }
@@ -339,33 +369,33 @@ class DataService(private val userService: UserService, private val entityManage
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun <T> countReports(app: App, where: Predicate?, select: Expression<T>): Map<T, Long> {
         val result = (JPAQuery<Any>(entityManager) as JPAQuery<*>).from(QReport.report)
-                .where(QReport.report.stacktrace.bug.app.eq(app).and(where))
-                .groupBy(select)
-                .select(select, QReport.report.id.count())
-                .fetch()
+            .where(QReport.report.stacktrace.bug.app.eq(app).and(where))
+            .groupBy(select)
+            .select(select, QReport.report.id.count())
+            .fetch()
         return result.map { it[select]!! to (it[QReport.report.id.count()] ?: 0L) }.toMap()
     }
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun <T : Comparable<*>> getFromReports(app: App, where: Predicate?, select: ComparableExpressionBase<T>): List<T> =
-            getFromReports(app, where, select, select)
+        getFromReports(app, where, select, select)
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun <T> getFromReports(app: App, where: Predicate?, select: Expression<T>, order: ComparableExpressionBase<*>): List<T> =
-            (JPAQuery<Any>(entityManager) as JPAQuery<*>).from(QReport.report).where(QReport.report.stacktrace.bug.app.eq(app).and(where))
-                    .select(select).distinct().orderBy(order.asc()).fetch()
+        (JPAQuery<Any>(entityManager) as JPAQuery<*>).from(QReport.report).where(QReport.report.stacktrace.bug.app.eq(app).and(where))
+            .select(select).distinct().orderBy(order.asc()).fetch()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun getStacktraces(bug: Bug): List<Stacktrace> =
-            JPAQuery<Any>(entityManager).from(QStacktrace.stacktrace1)
-                    .join(QStacktrace.stacktrace1.version, QVersion.version)
-                    .fetchAll()
-                    .fetchJoin()
-                    .where(QStacktrace.stacktrace1.bug.eq(bug)).select(QStacktrace.stacktrace1).fetch()
+        JPAQuery<Any>(entityManager).from(QStacktrace.stacktrace1)
+            .join(QStacktrace.stacktrace1.version, QVersion.version)
+            .fetchAll()
+            .fetchJoin()
+            .where(QStacktrace.stacktrace1.bug.eq(bug)).select(QStacktrace.stacktrace1).fetch()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun getMaxVersion(app: App): Int? =
-            JPAQuery<Any>(entityManager).from(QVersion.version).where(QVersion.version.app.eq(app)).select(QVersion.version.code.max()).fetchOne()
+        JPAQuery<Any>(entityManager).from(QVersion.version).where(QVersion.version.app.eq(app)).select(QVersion.version.code.max()).fetchOne()
 
     @Transactional
     @PreAuthorize("hasRole(T(com.faendir.acra.model.User\$Role).ADMIN)")

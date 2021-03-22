@@ -28,22 +28,16 @@ import com.vaadin.flow.spring.annotation.UIScope
 
 @UIScope
 @SpringComponent("bugDangerCard")
-class DangerCard(dataService: DataService?) : AdminCard(dataService!!) {
+class DangerCard(dataService: DataService) : AdminCard(dataService) {
     override fun init(bug: Bug) {
         removeContent()
-        val unmergeBox = Box(Translatable.createLabel(Messages.UNMERGE_BUG), Translatable.createLabel(Messages.UNMERGE_BUG_DETAILS), Translatable.createButton(Messages.UNMERGE) {
-            FluentDialog().addText(Messages.UNMERGE_BUG_CONFIRM).addConfirmButtons {
-                dataService.unmergeBug(bug)
-                UI.getCurrent().navigate(Overview::class.java)
-            }.show()
-        })
         val deleteBox = Box(Translatable.createLabel(Messages.DELETE_BUG), Translatable.createLabel(Messages.DELETE_BUG_DETAILS), Translatable.createButton(Messages.DELETE) {
             FluentDialog().addText(Messages.DELETE_BUG_CONFIRM).addConfirmButtons {
                 dataService.deleteBug(bug)
                 UI.getCurrent().navigate(Overview::class.java)
             }.show()
         })
-        add(unmergeBox, deleteBox)
+        add(deleteBox)
     }
 
     init {
