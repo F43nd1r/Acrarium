@@ -87,18 +87,21 @@ class BugMerger(private val entityManager: EntityManager) {
         val app = event.app
         val stacktrace2 = QStacktrace("stacktrace2")
         val bug2 = QBug("bug2")
-        JPAQuery<Any>(entityManager).from(stacktrace1).join(stacktrace1.bug, QBug.bug).join(stacktrace2).on(stacktrace1.id.lt(stacktrace2.id))
-            .join(stacktrace2.bug, bug2)
+        JPAQuery<Any>(entityManager).from(stacktrace1).join(stacktrace1.bug, QBug.bug).join(stacktrace2).on(
+            stacktrace1.className.eq(stacktrace2.className).and(stacktrace1.id.lt(stacktrace2.id))
+        ).join(stacktrace2.bug, bug2)
             .where(
-                QBug.bug.app.eq(app).and(bug2.app.eq(app)).and(
-                    JPAExpressions.selectFrom(QStacktraceMatch.stacktraceMatch).where(
-                        QStacktraceMatch.stacktraceMatch.left.eq(stacktrace1)
-                            .and(QStacktraceMatch.stacktraceMatch.right.eq(stacktrace2)).or(
-                                QStacktraceMatch.stacktraceMatch.left.eq(stacktrace2)
-                                    .and(QStacktraceMatch.stacktraceMatch.right.eq(stacktrace1))
-                            )
-                    ).notExists()
-                )
+                QBug.bug.app.eq(app)
+                    .and(bug2.app.eq(app))
+                    .and(
+                        JPAExpressions.selectFrom(QStacktraceMatch.stacktraceMatch).where(
+                            QStacktraceMatch.stacktraceMatch.left.eq(stacktrace1)
+                                .and(QStacktraceMatch.stacktraceMatch.right.eq(stacktrace2)).or(
+                                    QStacktraceMatch.stacktraceMatch.left.eq(stacktrace2)
+                                        .and(QStacktraceMatch.stacktraceMatch.right.eq(stacktrace1))
+                                )
+                        ).notExists()
+                    )
             )
             .select(stacktrace1, stacktrace2).iterate().use {
                 it.asSequence().forEach { tuple ->

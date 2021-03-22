@@ -7,8 +7,8 @@ import com.faendir.acra.liquibase.changelog.Table
 databaseChangeLog {
     changeSet("1.3.0-extract-stacktrace-class", Author.F43ND1R) {
         addColumn(Table.STACKTRACE) {
-            column(name = "class", type = ColumnType.STRING, defaultValueComputed = "SUBSTRING_INDEX(`stacktrace`,':',1)") {
-                constraints(nullable = true)
+            column(name = "class", type = ColumnType.STRING, valueComputed = "SUBSTRING_INDEX(`stacktrace`,':',1)") {
+                constraints(nullable = false)
             }
         }
     }
