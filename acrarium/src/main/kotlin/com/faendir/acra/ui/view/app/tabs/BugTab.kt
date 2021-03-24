@@ -15,7 +15,6 @@
  */
 package com.faendir.acra.ui.view.app.tabs
 
-import com.faendir.acra.dataprovider.QueryDslFilterWithParameter
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.App
 import com.faendir.acra.model.Permission
@@ -37,7 +36,6 @@ import com.faendir.acra.ui.ext.setMarginRight
 import com.faendir.acra.ui.view.app.AppView
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
 import com.faendir.acra.util.TimeSpanRenderer
-import com.querydsl.jpa.impl.JPAQuery
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.grid.Grid
@@ -91,10 +89,7 @@ class BugTab constructor(dataService: DataService, private val bugMerger: BugMer
                 addValueChangeListener { e: ComponentValueChangeEvent<Select<Version?>?, Version?> -> dataService.setBugSolved(bug.bug, e.value) }
             }
         }).setSortable(QBug.bug.solvedVersion).setCaption(Messages.SOLVED)
-            .setFilterable(Translatable.createCheckbox(Messages.HIDE_SOLVED).with { value = true }, object : QueryDslFilterWithParameter<Boolean> {
-                override var parameter: Boolean = true
-                override fun <T> apply(query: JPAQuery<T>): JPAQuery<T> = if (parameter) query.where(QBug.bug.solvedVersion.isNull) else query
-            })
+            .setFilterable(QBug.bug.solvedVersion.isNull, true, Messages.HIDE_SOLVED)
         bugs.addOnClickNavigation(ReportTab::class.java) { it.bug.id }
         val mergeButton = Translatable.createButton(Messages.MERGE_BUGS) {
             val selectedItems: List<VBug> = ArrayList(bugs.selectedItems)
@@ -126,5 +121,4 @@ class BugTab constructor(dataService: DataService, private val bugMerger: BugMer
         content.add(header, bugs)
         content.setFlexGrow(1.0, bugs)
     }
-
 }

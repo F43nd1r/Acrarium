@@ -31,4 +31,5 @@ object Author {
 
 object Table {
     const val STACKTRACE = "stacktrace"
+    const val REPORT = "report"
 }

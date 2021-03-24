@@ -65,8 +65,11 @@ class ReportList(app: App, dataProvider: QueryDslDataProvider<Report>, avatarSer
             addColumn { it.stacktrace.stacktrace.split("\n".toRegex(), 2).toTypedArray()[0] }.setSortableAndFilterable(
                 QReport.report.stacktrace.stacktrace,
                 Messages.STACKTRACE
-            )
-                .setCaption(Messages.STACKTRACE).setAutoWidth(false).setFlexGrow(1)
+            ).setCaption(Messages.STACKTRACE).setAutoWidth(false).setFlexGrow(1)
+            addColumn(ComponentRenderer { report -> Icon(if (report.isSilent) VaadinIcon.CHECK else VaadinIcon.CLOSE) })
+                .setSortable(QReport.report.isSilent)
+                .setFilterable(QReport.report.isSilent.eq(false), false, Messages.HIDE_SILENT)
+                .setCaption(Messages.SILENT)
             if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
                 addColumn(ComponentRenderer { report: Report ->
                     Button(Icon(VaadinIcon.TRASH)) {

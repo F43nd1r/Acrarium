@@ -19,9 +19,12 @@ package com.faendir.acra.ui.component.grid
 import com.faendir.acra.dataprovider.QueryDslFilter
 import com.faendir.acra.dataprovider.QueryDslFilterWithParameter
 import com.faendir.acra.dataprovider.QueryDslSortOrder
+import com.faendir.acra.i18n.Messages
+import com.faendir.acra.model.QReport
 import com.faendir.acra.ui.base.TranslatableText
 import com.faendir.acra.ui.component.Translatable
 import com.querydsl.core.types.Expression
+import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.StringExpression
 import com.querydsl.jpa.impl.JPAQuery
 import com.vaadin.flow.component.Component
@@ -62,13 +65,20 @@ class AcrariumColumn<T>(private val acrariumGrid: AcrariumGrid<T>, columnId: Str
     }
 
     fun setFilterable(expr: StringExpression, captionId: String, vararg params: Any): AcrariumColumn<T> {
-        return setFilterable(Translatable.createTextFieldWithHint(captionId, params).with {
+        return setFilterable(Translatable.createTextFieldWithHint(captionId, *params).with {
             valueChangeMode = ValueChangeMode.EAGER
         }, object : QueryDslFilterWithParameter<String?> {
             override var parameter: String? = null
 
             override fun <T> apply(query: JPAQuery<T>): JPAQuery<T> = parameter?.let { query.where(expr.contains(it)) } ?: query
 
+        })
+    }
+
+    fun setFilterable(expr: BooleanExpression, default: Boolean, captionId: String, vararg params: Any) : AcrariumColumn<T> {
+        return setFilterable(Translatable.createCheckbox(captionId, *params).with { value = default }, object : QueryDslFilterWithParameter<Boolean> {
+            override var parameter: Boolean = default
+            override fun <T> apply(query: JPAQuery<T>): JPAQuery<T> = if (parameter) query.where(expr) else query
         })
     }
 

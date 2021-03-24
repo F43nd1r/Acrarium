@@ -2,10 +2,11 @@ package com.faendir.acra.liquibase.changelog.v1_0_0
 
 import com.faendir.acra.liquibase.changelog.Author
 import com.faendir.acra.liquibase.changelog.ColumnType
+import com.faendir.acra.liquibase.changelog.Table
 
 databaseChangeLog {
     changeSet("1.0.0-create-report", Author.F43ND1R) {
-        createTable("report") {
+        createTable(Table.REPORT) {
             column(name = "id", type = ColumnType.STRING) {
                 constraints(nullable = false, primaryKey = true, primaryKeyName = "PK_report")
             }
@@ -34,7 +35,7 @@ databaseChangeLog {
                 constraints(nullable = false)
             }
             column(name = "stacktrace_id", type = ColumnType.INT) {
-                constraints(nullable = false, referencedTableName = "stacktrace", referencedColumnNames = "id", deleteCascade = true, foreignKeyName = "FK_report_stacktrace")
+                constraints(nullable = false, referencedTableName = Table.STACKTRACE, referencedColumnNames = "id", deleteCascade = true, foreignKeyName = "FK_report_stacktrace")
             }
         }
     }

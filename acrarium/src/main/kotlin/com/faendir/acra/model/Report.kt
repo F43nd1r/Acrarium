@@ -28,6 +28,7 @@ import org.hibernate.annotations.Type
 import org.json.JSONObject
 import java.time.ZonedDateTime
 import javax.persistence.CascadeType
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType
 import javax.persistence.Id
@@ -78,4 +79,7 @@ class Report(@OnDelete(action = OnDeleteAction.CASCADE)
     val brand: String = jsonObject.optString(ReportField.BRAND.name)
 
     val installationId: String = jsonObject.optString(ReportField.INSTALLATION_ID.name)
+
+    @Column(name = "is_silent")
+    val isSilent: Boolean = jsonObject.optBoolean(ReportField.IS_SILENT.name)
 }
