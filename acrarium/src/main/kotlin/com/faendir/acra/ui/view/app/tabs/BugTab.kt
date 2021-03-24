@@ -29,15 +29,23 @@ import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.FluentDialog
 import com.faendir.acra.ui.component.grid.AcrariumGrid
+import com.faendir.acra.ui.component.grid.GridColumnMenu
+import com.faendir.acra.ui.component.grid.GridFilterMenu
+import com.faendir.acra.ui.ext.Unit
+import com.faendir.acra.ui.ext.setFlexGrow
+import com.faendir.acra.ui.ext.setMarginRight
 import com.faendir.acra.ui.view.app.AppView
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
 import com.faendir.acra.util.TimeSpanRenderer
 import com.querydsl.jpa.impl.JPAQuery
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent
+import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.GridSortOrder
+import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.component.notification.Notification
 import com.vaadin.flow.component.orderedlayout.FlexComponent
+import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup
 import com.vaadin.flow.component.select.Select
@@ -64,14 +72,15 @@ class BugTab constructor(dataService: DataService, private val bugMerger: BugMer
     override fun init(app: App) {
         val bugs = AcrariumGrid(dataService.getBugProvider(app))
         bugs.setSelectionMode(Grid.SelectionMode.MULTI)
-        val countColumn = bugs.addColumn { it.reportCount }.setSortable(QReport.report.count()).setCaption(Messages.REPORTS)
+        bugs.addColumn { it.reportCount }.setSortable(QReport.report.count()).setCaption(Messages.REPORTS)
         val dateColumn = bugs.addColumn(TimeSpanRenderer { it.lastReport }).setSortable(QReport.report.date.max()).setCaption(Messages.LATEST_REPORT)
         bugs.sort(GridSortOrder.desc(dateColumn).build())
         val versions = dataService.findAllVersions(app)
         val versionCodeNameMap = versions.map { it.code to it.name }.toMap()
-        bugs.addColumn { versionCodeNameMap[it.highestVersionCode] }.setSortable(QReport.report.stacktrace.version.code.max()).setCaption(Messages.LATEST_VERSION)
+        bugs.addColumn { versionCodeNameMap[it.highestVersionCode] }.setSortable(QReport.report.stacktrace.version.code.max())
+            .setCaption(Messages.LATEST_VERSION)
         bugs.addColumn { it.userCount }.setSortable(QReport.report.installationId.countDistinct()).setCaption(Messages.AFFECTED_USERS)
-        bugs.addColumn { it.bug.title }.setSortableAndFilterable(QBug.bug.title).setCaption(Messages.TITLE).setAutoWidth(false).flexGrow = 1
+        bugs.addColumn { it.bug.title }.setSortableAndFilterable(QBug.bug.title, Messages.TITLE).setCaption(Messages.TITLE).flexGrow = 1
         bugs.addColumn(ComponentRenderer { bug: VBug ->
             Select(*versions.toTypedArray()).apply {
                 setTextRenderer { it.name }
@@ -82,12 +91,12 @@ class BugTab constructor(dataService: DataService, private val bugMerger: BugMer
                 addValueChangeListener { e: ComponentValueChangeEvent<Select<Version?>?, Version?> -> dataService.setBugSolved(bug.bug, e.value) }
             }
         }).setSortable(QBug.bug.solvedVersion).setCaption(Messages.SOLVED)
-                .setFilterable(Translatable.createCheckbox(Messages.HIDE_SOLVED).with { value = true }, object : QueryDslFilterWithParameter<Boolean> {
-                    override var parameter: Boolean = true
-                    override fun <T> apply(query: JPAQuery<T>): JPAQuery<T> = if (parameter) query.where(QBug.bug.solvedVersion.isNull) else query
-                })
+            .setFilterable(Translatable.createCheckbox(Messages.HIDE_SOLVED).with { value = true }, object : QueryDslFilterWithParameter<Boolean> {
+                override var parameter: Boolean = true
+                override fun <T> apply(query: JPAQuery<T>): JPAQuery<T> = if (parameter) query.where(QBug.bug.solvedVersion.isNull) else query
+            })
         bugs.addOnClickNavigation(ReportTab::class.java) { it.bug.id }
-        bugs.appendFooterRow().getCell(countColumn).setComponent(Translatable.createButton(Messages.MERGE_BUGS) {
+        val mergeButton = Translatable.createButton(Messages.MERGE_BUGS) {
             val selectedItems: List<VBug> = ArrayList(bugs.selectedItems)
             if (selectedItems.size > 1) {
                 val titles = RadioButtonGroup<String>()
@@ -101,9 +110,20 @@ class BugTab constructor(dataService: DataService, private val bugMerger: BugMer
             } else {
                 Notification.show(Messages.ONLY_ONE_BUG_SELECTED)
             }
-        })
+        }.with {
+            isEnabled = false
+            removeThemeVariants(ButtonVariant.LUMO_PRIMARY)
+        }
+        bugs.asMultiSelect().addSelectionListener { mergeButton.content.isEnabled = it.allSelectedItems.size >= 2 }
+        val header = FlexLayout(
+            mergeButton,
+            Div().apply { setFlexGrow(1) }, //spacer
+            GridFilterMenu(bugs).apply { content.setMarginRight(5.0, Unit.PIXEL) },
+            GridColumnMenu(bugs)
+        )
+        header.setWidthFull()
         content.removeAll()
-        content.add(bugs)
+        content.add(header, bugs)
         content.setFlexGrow(1.0, bugs)
     }
 

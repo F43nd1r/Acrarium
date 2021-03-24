@@ -1,0 +1,5 @@
+body {
+    --paper-menu-button: {
+        padding: 0;
+    }
+}

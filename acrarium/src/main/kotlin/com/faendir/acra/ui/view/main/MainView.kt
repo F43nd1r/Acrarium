@@ -19,6 +19,7 @@ import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.base.ParentLayout
 import com.vaadin.flow.component.AttachEvent
+import com.vaadin.flow.component.dependency.CssImport
 import com.vaadin.flow.component.dependency.JsModule
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode
@@ -32,6 +33,7 @@ import org.springframework.security.authentication.AuthenticationManager
  * @since 13.07.18
  */
 @JsModule("./styles/shared-styles.js")
+@CssImport("./styles/global.css")
 @UIScope
 @SpringComponent
 class MainView(private val authenticationManager: AuthenticationManager, private val applicationContext: ApplicationContext, private val userService: UserService) :

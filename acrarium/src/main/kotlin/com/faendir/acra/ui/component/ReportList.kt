@@ -25,37 +25,48 @@ import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.AvatarService
 import com.faendir.acra.ui.component.dialog.FluentDialog
 import com.faendir.acra.ui.component.grid.AcrariumGrid
+import com.faendir.acra.ui.component.grid.GridColumnMenu
+import com.faendir.acra.ui.component.grid.GridFilterMenu
+import com.faendir.acra.ui.ext.setFlexGrow
+import com.faendir.acra.ui.ext.setMarginRight
 import com.faendir.acra.ui.view.report.ReportView
 import com.faendir.acra.util.TimeSpanRenderer
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.GridSortOrder
+import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.component.icon.Icon
 import com.vaadin.flow.component.icon.VaadinIcon
+import com.vaadin.flow.component.orderedlayout.FlexLayout
+import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.data.renderer.ComponentRenderer
 
 /**
  * @author lukas
  * @since 17.09.18
  */
-class ReportList(app: App, private val dataProvider: QueryDslDataProvider<Report>, avatarService: AvatarService, deleteReport: (Report) -> Unit) :
-        Composite<AcrariumGrid<Report>>() {
+class ReportList(app: App, dataProvider: QueryDslDataProvider<Report>, avatarService: AvatarService, deleteReport: (Report) -> Unit) :
+    Composite<VerticalLayout>() {
     init {
-        content.run {
+        val grid = AcrariumGrid(dataProvider).apply {
             setSelectionMode(Grid.SelectionMode.NONE)
             addColumn(ComponentRenderer { report: Report -> avatarService.getAvatar(report) }).setSortable(QReport.report.installationId)
-                    .setCaption(Messages.USER)
-                    .setWidth("50px").isAutoWidth = false
+                .setCaption(Messages.USER)
+                .setWidth("50px").setAutoWidth(false)
             val dateColumn = addColumn(TimeSpanRenderer { it.date }).setSortable(QReport.report.date).setCaption(Messages.DATE)
             sort(GridSortOrder.desc(dateColumn).build())
             addColumn { it.stacktrace.version.name }.setSortable(QReport.report.stacktrace.version.code)
-                    .setFilterable(QReport.report.stacktrace.version.name)
-                    .setCaption(Messages.APP_VERSION)
-            addColumn { it.androidVersion }.setSortableAndFilterable(QReport.report.androidVersion).setCaption(Messages.ANDROID_VERSION)
-            addColumn { it.phoneModel }.setSortableAndFilterable(QReport.report.phoneModel).setCaption(Messages.DEVICE)
-            addColumn { it.stacktrace.stacktrace.split("\n".toRegex(), 2).toTypedArray()[0] }.setSortableAndFilterable(QReport.report.stacktrace.stacktrace)
-                    .setCaption(Messages.STACKTRACE).setAutoWidth(false).flexGrow = 1
+                .setFilterable(QReport.report.stacktrace.version.name, Messages.APP_VERSION)
+                .setCaption(Messages.APP_VERSION)
+            addColumn { it.androidVersion }.setSortableAndFilterable(QReport.report.androidVersion, Messages.ANDROID_VERSION)
+                .setCaption(Messages.ANDROID_VERSION)
+            addColumn { it.phoneModel }.setSortableAndFilterable(QReport.report.phoneModel, Messages.DEVICE).setCaption(Messages.DEVICE)
+            addColumn { it.stacktrace.stacktrace.split("\n".toRegex(), 2).toTypedArray()[0] }.setSortableAndFilterable(
+                QReport.report.stacktrace.stacktrace,
+                Messages.STACKTRACE
+            )
+                .setCaption(Messages.STACKTRACE).setAutoWidth(false).setFlexGrow(1)
             if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
                 addColumn(ComponentRenderer { report: Report ->
                     Button(Icon(VaadinIcon.TRASH)) {
@@ -64,13 +75,18 @@ class ReportList(app: App, private val dataProvider: QueryDslDataProvider<Report
                             dataProvider.refreshAll()
                         }.show()
                     }
-                })
+                }).setCaption(Messages.DELETE).setAutoWidth(false).setWidth("100px")
             }
             addOnClickNavigation(ReportView::class.java) { it.id }
         }
-    }
-
-    override fun initContent(): AcrariumGrid<Report> {
-        return AcrariumGrid(dataProvider)
+        val header = FlexLayout(
+            Div().apply { setFlexGrow(1) }, //spacer
+            GridFilterMenu(grid).apply { content.setMarginRight(5.0, com.faendir.acra.ui.ext.Unit.PIXEL) },
+            GridColumnMenu(grid)
+        )
+        header.setWidthFull()
+        content.add(header, grid)
+        content.setFlexGrow(1.0, grid)
+        content.setSizeFull()
     }
 }

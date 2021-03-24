@@ -19,12 +19,9 @@ package com.faendir.acra.ui.component.grid
 import com.faendir.acra.dataprovider.QueryDslFilter
 import com.faendir.acra.dataprovider.QueryDslFilterWithParameter
 import com.faendir.acra.dataprovider.QueryDslSortOrder
-import com.faendir.acra.i18n.Messages
 import com.faendir.acra.ui.base.TranslatableText
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.util.getConverter
 import com.querydsl.core.types.Expression
-import com.querydsl.core.types.dsl.NumberExpression
 import com.querydsl.core.types.dsl.StringExpression
 import com.querydsl.jpa.impl.JPAQuery
 import com.vaadin.flow.component.Component
@@ -33,13 +30,19 @@ import com.vaadin.flow.component.HasValue
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.data.provider.SortDirection
 import com.vaadin.flow.data.renderer.Renderer
+import com.vaadin.flow.data.value.ValueChangeMode
 import com.vaadin.flow.i18n.LocaleChangeEvent
 import com.vaadin.flow.i18n.LocaleChangeObserver
 import java.util.stream.Stream
 
-class AcrariumColumn<T>(private val acrariumGrid: AcrariumGrid<T>, columnId: String, renderer: Renderer<T>) : Grid.Column<T>(acrariumGrid, columnId, renderer), LocaleChangeObserver {
-    private var caption: TranslatableText? = null
-    internal var filter: QueryDslFilter? = null
+class AcrariumColumn<T>(private val acrariumGrid: AcrariumGrid<T>, columnId: String, renderer: Renderer<T>) : Grid.Column<T>(acrariumGrid, columnId, renderer),
+    LocaleChangeObserver {
+    var caption: TranslatableText? = null
+        private set
+    var filter: QueryDslFilter? = null
+        private set
+    var filterComponent: Component? = null
+        private set
 
     init {
         isResizable = true
@@ -58,8 +61,10 @@ class AcrariumColumn<T>(private val acrariumGrid: AcrariumGrid<T>, columnId: Str
         return this
     }
 
-    fun setFilterable(expr: StringExpression): AcrariumColumn<T> {
-        return setFilterable(Translatable.createTextFieldWithHint(Messages.FILTER), object : QueryDslFilterWithParameter<String?> {
+    fun setFilterable(expr: StringExpression, captionId: String, vararg params: Any): AcrariumColumn<T> {
+        return setFilterable(Translatable.createTextFieldWithHint(captionId, params).with {
+            valueChangeMode = ValueChangeMode.EAGER
+        }, object : QueryDslFilterWithParameter<String?> {
             override var parameter: String? = null
 
             override fun <T> apply(query: JPAQuery<T>): JPAQuery<T> = parameter?.let { query.where(expr.contains(it)) } ?: query
@@ -67,23 +72,17 @@ class AcrariumColumn<T>(private val acrariumGrid: AcrariumGrid<T>, columnId: Str
         })
     }
 
-    fun setSortableAndFilterable(expr: StringExpression): AcrariumColumn<T> {
-        return setSortable(expr).setFilterable(expr)
+    fun setSortableAndFilterable(expr: StringExpression, captionId: String, vararg params: Any): AcrariumColumn<T> {
+        return setSortable(expr).setFilterable(expr, captionId, params)
     }
 
-    inline fun <reified U> setSortableAndFilterable(expr: NumberExpression<U>): AcrariumColumn<T> where U : Number, U : Comparable<*> {
-        val converter = getConverter<U>()
-        return setSortable(expr).setFilterable(Translatable.createNumberFieldWithHint(Messages.FILTER), object : QueryDslFilterWithParameter<Double?> {
-            override var parameter: Double? = null
-
-            override fun <T> apply(query: JPAQuery<T>): JPAQuery<T> = parameter?.let { query.where(expr.eq(converter(it))) } ?: query
-        })
-    }
-
-    fun <C, U> setFilterable(filterField: C, filter: QueryDslFilterWithParameter<U>): AcrariumColumn<T> where C : Component, C : HasValue<out HasValue.ValueChangeEvent<U>, U>, C : HasSize {
+    fun <C, U> setFilterable(
+        filterField: C,
+        filter: QueryDslFilterWithParameter<U>
+    ): AcrariumColumn<T> where C : Component, C : HasValue<out HasValue.ValueChangeEvent<U>, U>, C : HasSize {
         filterField.setWidthFull()
-        acrariumGrid.filterRow.getCell(this).setComponent(filterField)
         this.filter = filter
+        this.filterComponent = filterField
         filterField.addValueChangeListener { event ->
             filter.parameter = event.value
             acrariumGrid.dataProvider.refreshAll()

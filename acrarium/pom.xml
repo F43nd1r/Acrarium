@@ -210,6 +210,16 @@
             <artifactId>vaadin-css-grid</artifactId>
             <version>2.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.storedobject.vaadin</groupId>
+            <artifactId>so-components</artifactId>
+            <version>9.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.appreciated</groupId>
+            <artifactId>vaadin-paper-menu-button</artifactId>
+            <version>2.0.2</version>
+        </dependency>
         <!-- kotlin -->
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>

@@ -27,29 +27,45 @@ fun HasStyle.setMargin(value: Int, unit: Unit) {
     style["margin"] = "$value${unit.text}"
 }
 
+fun HasStyle.setMarginLeft(value: Double, unit: Unit) {
+    style["margin-left"] = "$value${unit.text}"
+}
+
+fun HasStyle.setMarginTop(value: Double, unit: Unit) {
+    style["margin-top"] = "$value${unit.text}"
+}
+
+fun HasStyle.setMarginRight(value: Double, unit: Unit) {
+    style["margin-right"] = "$value${unit.text}"
+}
+
+fun HasStyle.setMarginBottom(value: Double, unit: Unit) {
+    style["margin-bottom"] = "$value${unit.text}"
+}
+
 fun HasStyle.setDefaultTextStyle() {
     style["text-decoration"] = "none"
     style["color"] = "inherit"
 }
 
 fun HasStyle.setPadding(value: Double, unit: Unit) {
-    style["padding"] = "$value$unit.text"
+    style["padding"] = "$value${unit.text}"
 }
 
 fun HasStyle.setPaddingLeft(value: Double, unit: Unit) {
-    style["padding-left"] = "$value$unit.text"
+    style["padding-left"] = "$value${unit.text}"
 }
 
 fun HasStyle.setPaddingTop(value: Double, unit: Unit) {
-    style["padding-top"] = "$value$unit.text"
+    style["padding-top"] = "$value${unit.text}"
 }
 
 fun HasStyle.setPaddingRight(value: Double, unit: Unit) {
-    style["padding-right"] = "$value$unit.text"
+    style["padding-right"] = "$value${unit.text}"
 }
 
 fun HasStyle.setPaddingBottom(value: Double, unit: Unit) {
-    style["padding-bottom"] = "$value$unit.text"
+    style["padding-bottom"] = "$value${unit.text}"
 }
 
 fun HasStyle.setFlexGrow(value: Int) {

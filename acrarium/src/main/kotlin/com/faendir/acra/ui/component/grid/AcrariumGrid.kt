@@ -36,7 +36,6 @@ import java.util.function.Consumer
  * @since 13.07.18
  */
 class AcrariumGrid<T>(val dataProvider: QueryDslDataProvider<T>) : Grid<T>() {
-    internal val filterRow by lazy { appendHeaderRow() }
     val acrariumColumns: List<AcrariumColumn<T>>
         get() = super.getColumns().filterIsInstance<AcrariumColumn<T>>()
 
@@ -47,8 +46,6 @@ class AcrariumGrid<T>(val dataProvider: QueryDslDataProvider<T>) : Grid<T>() {
         setSizeFull()
         isMultiSort = true
         isColumnReorderingAllowed = true
-        //create default header row
-        appendHeaderRow()
     }
 
     override fun getDefaultColumnFactory(): BiFunction<Renderer<T>, String, Column<T>> = BiFunction { renderer, columnId -> AcrariumColumn(this, columnId, renderer) }
