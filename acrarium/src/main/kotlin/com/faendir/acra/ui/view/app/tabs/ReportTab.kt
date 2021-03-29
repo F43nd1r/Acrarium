@@ -19,6 +19,7 @@ import com.faendir.acra.model.App
 import com.faendir.acra.model.Report
 import com.faendir.acra.service.AvatarService
 import com.faendir.acra.service.DataService
+import com.faendir.acra.settings.LocalSettings
 import com.faendir.acra.ui.component.ReportList
 import com.faendir.acra.ui.view.app.AppView
 import com.vaadin.flow.component.html.Div
@@ -36,7 +37,7 @@ import java.util.function.Consumer
 @UIScope
 @SpringComponent
 @Route(value = "report", layout = AppView::class)
-class ReportTab(dataService: DataService, private val avatarService: AvatarService) : AppTab<Div>(dataService) {
+class ReportTab(dataService: DataService, private val avatarService: AvatarService, private val localSettings: LocalSettings) : AppTab<Div>(dataService) {
 
     init {
         content.setSizeFull()
@@ -44,6 +45,6 @@ class ReportTab(dataService: DataService, private val avatarService: AvatarServi
 
     override fun init(app: App) {
         content.removeAll()
-        content.add(ReportList(app, dataService.getReportProvider(app), avatarService) { dataService.deleteReport(it) })
+        content.add(ReportList(app, dataService.getReportProvider(app), avatarService, localSettings) { dataService.deleteReport(it) })
     }
 }

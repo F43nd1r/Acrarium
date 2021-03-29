@@ -18,6 +18,7 @@ package com.faendir.acra.ui.view.bug.tabs
 import com.faendir.acra.model.Bug
 import com.faendir.acra.service.AvatarService
 import com.faendir.acra.service.DataService
+import com.faendir.acra.settings.LocalSettings
 import com.faendir.acra.ui.component.ReportList
 import com.faendir.acra.ui.view.bug.BugView
 import com.vaadin.flow.component.html.Div
@@ -34,7 +35,7 @@ import org.springframework.lang.NonNull
 @UIScope
 @SpringComponent("bugReportTab")
 @Route(value = "report", layout = BugView::class)
-class ReportTab(dataService: DataService, private val avatarService: AvatarService) : BugTab<Div>(dataService) {
+class ReportTab(dataService: DataService, private val avatarService: AvatarService, private val localSettings: LocalSettings) : BugTab<Div>(dataService) {
 
     init {
         content.setSizeFull()
@@ -42,6 +43,6 @@ class ReportTab(dataService: DataService, private val avatarService: AvatarServi
 
     override fun init(bug: Bug) {
         content.removeAll()
-        content.add(ReportList(bug.app, dataService.getReportProvider(bug), avatarService) { dataService.deleteReport(it) })
+        content.add(ReportList(bug.app, dataService.getReportProvider(bug), avatarService, localSettings) { dataService.deleteReport(it) })
     }
 }

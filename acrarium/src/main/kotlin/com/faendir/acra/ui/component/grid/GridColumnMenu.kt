@@ -16,6 +16,7 @@ class GridColumnMenu(grid: AcrariumGrid<*>) : PopupButton(VaadinIcon.WRENCH) {
         content.addSelectionListener { event ->
             event.addedSelection.forEach { it.isVisible = true }
             event.removedSelection.forEach { it.isVisible = false }
+            grid.recalculateColumnWidths()
         }
         val items = grid.acrariumColumns.filter { it.caption != null }
         content.setItems(items)

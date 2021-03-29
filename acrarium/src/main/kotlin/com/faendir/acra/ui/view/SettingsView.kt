@@ -20,7 +20,7 @@ import com.faendir.acra.ui.base.HasAcrariumTitle
 import com.faendir.acra.ui.base.TranslatableText
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.view.main.MainView
-import com.faendir.acra.util.LocalSettings
+import com.faendir.acra.settings.LocalSettings
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.formlayout.FormLayout
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep
@@ -28,6 +28,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.router.Route
+import com.vaadin.flow.server.VaadinService
 import com.vaadin.flow.server.VaadinSession
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
@@ -56,7 +57,7 @@ class SettingsView(localSettings: LocalSettings) : FlexLayout(), HasAcrariumTitl
                 localSettings.darkTheme = it.value
                 VaadinSession.getCurrent().uIs.forEach(Consumer { ui: UI -> ui.element.setAttribute("theme", if (it.value) Lumo.DARK else Lumo.LIGHT) })
             }
-        }, Translatable.createSelect(LocalSettings.i18NProvider.providedLocales, Messages.LOCALE).with {
+        }, Translatable.createSelect(VaadinService.getCurrent().instantiator.i18NProvider.providedLocales, Messages.LOCALE).with {
             setItemLabelGenerator { it.getDisplayName(localSettings.locale) }
             value = localSettings.locale
             addValueChangeListener {

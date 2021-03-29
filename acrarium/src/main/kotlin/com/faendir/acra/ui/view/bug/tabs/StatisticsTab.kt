@@ -20,8 +20,6 @@ import com.faendir.acra.model.QReport
 import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.statistics.Statistics
 import com.faendir.acra.ui.view.bug.BugView
-import com.faendir.acra.util.LocalSettings
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.spring.annotation.SpringComponent

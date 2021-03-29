@@ -23,33 +23,32 @@ import com.faendir.acra.model.QReport
 import com.faendir.acra.model.Report
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.AvatarService
+import com.faendir.acra.settings.LocalSettings
 import com.faendir.acra.ui.component.dialog.FluentDialog
-import com.faendir.acra.ui.component.grid.AcrariumGrid
-import com.faendir.acra.ui.component.grid.GridColumnMenu
-import com.faendir.acra.ui.component.grid.GridFilterMenu
-import com.faendir.acra.ui.ext.setFlexGrow
-import com.faendir.acra.ui.ext.setMarginRight
+import com.faendir.acra.ui.component.grid.AcrariumGridView
 import com.faendir.acra.ui.view.report.ReportView
 import com.faendir.acra.util.TimeSpanRenderer
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.GridSortOrder
-import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.component.icon.Icon
 import com.vaadin.flow.component.icon.VaadinIcon
-import com.vaadin.flow.component.orderedlayout.FlexLayout
-import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.data.renderer.ComponentRenderer
 
 /**
  * @author lukas
  * @since 17.09.18
  */
-class ReportList(app: App, dataProvider: QueryDslDataProvider<Report>, avatarService: AvatarService, deleteReport: (Report) -> Unit) :
-    Composite<VerticalLayout>() {
-    init {
-        val grid = AcrariumGrid(dataProvider).apply {
+class ReportList(
+    private val app: App,
+    private val dataProvider: QueryDslDataProvider<Report>,
+    private val avatarService: AvatarService,
+    private val localSettings: LocalSettings,
+    private val deleteReport: (Report) -> Unit
+) : Composite<AcrariumGridView<Report>>() {
+    override fun initContent(): AcrariumGridView<Report> {
+        return AcrariumGridView(dataProvider, localSettings::reportGridSettings) {
             setSelectionMode(Grid.SelectionMode.NONE)
             addColumn(ComponentRenderer { report: Report -> avatarService.getAvatar(report) }).setSortable(QReport.report.installationId)
                 .setCaption(Messages.USER)
@@ -82,14 +81,5 @@ class ReportList(app: App, dataProvider: QueryDslDataProvider<Report>, avatarSer
             }
             addOnClickNavigation(ReportView::class.java) { it.id }
         }
-        val header = FlexLayout(
-            Div().apply { setFlexGrow(1) }, //spacer
-            GridFilterMenu(grid).apply { content.setMarginRight(5.0, com.faendir.acra.ui.ext.Unit.PIXEL) },
-            GridColumnMenu(grid)
-        )
-        header.setWidthFull()
-        content.add(header, grid)
-        content.setFlexGrow(1.0, grid)
-        content.setSizeFull()
     }
 }

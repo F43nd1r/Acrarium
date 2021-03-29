@@ -17,6 +17,7 @@ package com.faendir.acra.ui.component.grid
 
 import com.faendir.acra.dataprovider.QueryDslDataProvider
 import com.faendir.acra.dataprovider.QueryDslFilter
+import com.faendir.acra.settings.GridSettings
 import com.faendir.acra.ui.base.HasSecureParameter
 import com.faendir.acra.ui.base.HasSecureParameter.Companion.PARAM
 import com.querydsl.jpa.impl.JPAQuery
@@ -25,7 +26,6 @@ import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.ItemClickEvent
 import com.vaadin.flow.data.renderer.Renderer
 import com.vaadin.flow.function.ValueProvider
-import com.vaadin.flow.router.HasUrlParameter
 import com.vaadin.flow.router.RouteConfiguration
 import com.vaadin.flow.router.RouteParameters
 import java.util.function.BiFunction
@@ -35,7 +35,7 @@ import java.util.function.Consumer
  * @author lukas
  * @since 13.07.18
  */
-class AcrariumGrid<T>(val dataProvider: QueryDslDataProvider<T>) : Grid<T>() {
+class AcrariumGrid<T>(val dataProvider: QueryDslDataProvider<T>, var gridSettings: GridSettings? = null) : Grid<T>() {
     val acrariumColumns: List<AcrariumColumn<T>>
         get() = super.getColumns().filterIsInstance<AcrariumColumn<T>>()
 
@@ -48,7 +48,8 @@ class AcrariumGrid<T>(val dataProvider: QueryDslDataProvider<T>) : Grid<T>() {
         isColumnReorderingAllowed = true
     }
 
-    override fun getDefaultColumnFactory(): BiFunction<Renderer<T>, String, Column<T>> = BiFunction { renderer, columnId -> AcrariumColumn(this, columnId, renderer) }
+    override fun getDefaultColumnFactory(): BiFunction<Renderer<T>, String, Column<T>> =
+        BiFunction { renderer, columnId -> AcrariumColumn(this, columnId, renderer) }
 
     override fun addColumn(propertyName: String): AcrariumColumn<T> = super.addColumn(propertyName) as AcrariumColumn<T>
 
@@ -68,11 +69,49 @@ class AcrariumGrid<T>(val dataProvider: QueryDslDataProvider<T>) : Grid<T>() {
         throw UnsupportedOperationException()
     }
 
+    /**
+     * workaround https://github.com/vaadin/vaadin-grid/issues/1864
+     */
+    override fun recalculateColumnWidths() {
+        getElement().executeJs("setTimeout(() => { this.recalculateColumnWidths() }, 10)");
+    }
+
     fun <C, R> addOnClickNavigation(target: Class<C>, transform: (T) -> R) where C : Component, C : HasSecureParameter<R> {
         addItemClickListener { e: ItemClickEvent<T> ->
             ui.ifPresent(if (e.button == 1 || e.isCtrlKey) Consumer {
-                it.page.executeJs("""window.open("${RouteConfiguration.forSessionScope().getUrl(target, RouteParameters(PARAM, transform(e.item).toString()))}", "blank", "");""")
+                it.page.executeJs(
+                    """window.open("${
+                        RouteConfiguration.forSessionScope().getUrl(target, RouteParameters(PARAM, transform(e.item).toString()))
+                    }", "blank", "");"""
+                )
             } else Consumer { it.navigate(target, RouteParameters(PARAM, transform(e.item).toString())) })
+        }
+    }
+
+    /**
+     * call when all columns were added
+     */
+    fun loadLayout() {
+        gridSettings?.apply {
+            val orderedColumns = columnOrder.mapNotNull { key -> acrariumColumns.find { it.key == key } }
+            val unorderedColumns = acrariumColumns - orderedColumns
+            setColumnOrder(orderedColumns + unorderedColumns)
+            hiddenColumns.forEach { key -> acrariumColumns.find { it.key == key }?.isVisible = false }
+        }
+    }
+
+    fun addOnLayoutChangedListener(listener: (gridSettings: GridSettings) -> Unit) {
+        addColumnReorderListener { event ->
+            val settings = GridSettings(event.columns.mapNotNull { it.key }, gridSettings?.hiddenColumns ?: emptyList())
+            gridSettings = settings
+            listener(settings)
+        }
+        acrariumColumns.forEach { column ->
+            column.addVisibilityChangeListener {
+                val settings = GridSettings(gridSettings?.columnOrder ?: columns.mapNotNull { it.key }, columns.filter { !it.isVisible }.mapNotNull { it.key })
+                gridSettings = settings
+                listener(settings)
+            }
         }
     }
 }

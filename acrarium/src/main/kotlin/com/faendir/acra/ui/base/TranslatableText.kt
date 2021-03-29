@@ -15,9 +15,10 @@
  */
 package com.faendir.acra.ui.base
 
-import com.faendir.acra.util.LocalSettings
+import com.vaadin.flow.component.UI
 import com.vaadin.flow.i18n.I18NProvider
 import com.vaadin.flow.server.VaadinService
+import java.util.*
 
 /**
  * @author lukas
@@ -26,7 +27,11 @@ import com.vaadin.flow.server.VaadinService
 open class TranslatableText(val id: String, vararg val params: Any) {
 
     fun translate(): String {
-        return i18NProvider.getTranslation(id, LocalSettings.currentLocale, *params)
+        return i18NProvider.getTranslation(
+            id,
+            UI.getCurrent()?.locale ?: VaadinService.getCurrent().instantiator.i18NProvider.providedLocales?.firstOrNull() ?: Locale.getDefault(),
+            *params
+        )
     }
 
     private val i18NProvider: I18NProvider

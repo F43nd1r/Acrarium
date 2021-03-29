@@ -25,9 +25,11 @@ import com.faendir.acra.model.view.VBug
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.BugMerger
 import com.faendir.acra.service.DataService
+import com.faendir.acra.settings.LocalSettings
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.FluentDialog
 import com.faendir.acra.ui.component.grid.AcrariumGrid
+import com.faendir.acra.ui.component.grid.AcrariumGridView
 import com.faendir.acra.ui.component.grid.GridColumnMenu
 import com.faendir.acra.ui.component.grid.GridFilterMenu
 import com.faendir.acra.ui.ext.Unit
@@ -60,47 +62,49 @@ import java.util.*
 @UIScope
 @SpringComponent
 @Route(value = "bug", layout = AppView::class)
-class BugTab constructor(dataService: DataService, private val bugMerger: BugMerger) : AppTab<VerticalLayout>(dataService) {
+class BugTab(dataService: DataService, private val bugMerger: BugMerger, private val localSettings: LocalSettings) :
+    AppTab<Div>(dataService) {
 
     init {
-        content.alignItems = FlexComponent.Alignment.START
         content.setSizeFull()
     }
 
     override fun init(app: App) {
-        val bugs = AcrariumGrid(dataService.getBugProvider(app))
-        bugs.setSelectionMode(Grid.SelectionMode.MULTI)
-        bugs.addColumn { it.reportCount }.setSortable(QReport.report.count()).setCaption(Messages.REPORTS)
-        val dateColumn = bugs.addColumn(TimeSpanRenderer { it.lastReport }).setSortable(QReport.report.date.max()).setCaption(Messages.LATEST_REPORT)
-        bugs.sort(GridSortOrder.desc(dateColumn).build())
-        val versions = dataService.findAllVersions(app)
-        val versionCodeNameMap = versions.map { it.code to it.name }.toMap()
-        bugs.addColumn { versionCodeNameMap[it.highestVersionCode] }.setSortable(QReport.report.stacktrace.version.code.max())
-            .setCaption(Messages.LATEST_VERSION)
-        bugs.addColumn { it.userCount }.setSortable(QReport.report.installationId.countDistinct()).setCaption(Messages.AFFECTED_USERS)
-        bugs.addColumn { it.bug.title }.setSortableAndFilterable(QBug.bug.title, Messages.TITLE).setCaption(Messages.TITLE).flexGrow = 1
-        bugs.addColumn(ComponentRenderer { bug: VBug ->
-            Select(*versions.toTypedArray()).apply {
-                setTextRenderer { it.name }
-                isEmptySelectionAllowed = true
-                emptySelectionCaption = getTranslation(Messages.NOT_SOLVED)
-                value = bug.bug.solvedVersion
-                isEnabled = SecurityUtils.hasPermission(app, Permission.Level.EDIT)
-                addValueChangeListener { e: ComponentValueChangeEvent<Select<Version?>?, Version?> -> dataService.setBugSolved(bug.bug, e.value) }
-            }
-        }).setSortable(QBug.bug.solvedVersion).setCaption(Messages.SOLVED)
-            .setFilterable(QBug.bug.solvedVersion.isNull, true, Messages.HIDE_SOLVED)
-        bugs.addOnClickNavigation(ReportTab::class.java) { it.bug.id }
+        content.removeAll()
+        val gridView = AcrariumGridView(dataService.getBugProvider(app), localSettings::bugGridSettings) {
+            setSelectionMode(Grid.SelectionMode.MULTI)
+            addColumn { it.reportCount }.setSortable(QReport.report.count()).setCaption(Messages.REPORTS)
+            val dateColumn = addColumn(TimeSpanRenderer { it.lastReport }).setSortable(QReport.report.date.max()).setCaption(Messages.LATEST_REPORT)
+            sort(GridSortOrder.desc(dateColumn).build())
+            val versions = dataService.findAllVersions(app)
+            val versionCodeNameMap = versions.map { it.code to it.name }.toMap()
+            addColumn { versionCodeNameMap[it.highestVersionCode] }.setSortable(QReport.report.stacktrace.version.code.max())
+                .setCaption(Messages.LATEST_VERSION)
+            addColumn { it.userCount }.setSortable(QReport.report.installationId.countDistinct()).setCaption(Messages.AFFECTED_USERS)
+            addColumn { it.bug.title }.setSortableAndFilterable(QBug.bug.title, Messages.TITLE).setCaption(Messages.TITLE).setAutoWidth(false).setFlexGrow(1)
+            addColumn(ComponentRenderer { bug: VBug ->
+                Select(*versions.toTypedArray()).apply {
+                    setTextRenderer { it.name }
+                    isEmptySelectionAllowed = true
+                    emptySelectionCaption = getTranslation(Messages.NOT_SOLVED)
+                    value = bug.bug.solvedVersion
+                    isEnabled = SecurityUtils.hasPermission(app, Permission.Level.EDIT)
+                    addValueChangeListener { e: ComponentValueChangeEvent<Select<Version?>?, Version?> -> dataService.setBugSolved(bug.bug, e.value) }
+                }
+            }).setSortable(QBug.bug.solvedVersion).setCaption(Messages.SOLVED)
+                .setFilterable(QBug.bug.solvedVersion.isNull, true, Messages.HIDE_SOLVED)
+            addOnClickNavigation(ReportTab::class.java) { it.bug.id }
+        }
         val mergeButton = Translatable.createButton(Messages.MERGE_BUGS) {
-            val selectedItems: List<VBug> = ArrayList(bugs.selectedItems)
+            val selectedItems: List<VBug> = ArrayList(gridView.grid.selectedItems)
             if (selectedItems.size > 1) {
                 val titles = RadioButtonGroup<String>()
                 titles.setItems(selectedItems.map { bug: VBug -> bug.bug.title })
                 titles.value = selectedItems[0].bug.title
                 FluentDialog().setTitle(Messages.CHOOSE_BUG_GROUP_TITLE).addComponent(titles).addCreateButton {
                     bugMerger.mergeBugs(selectedItems.map { it.bug }, titles.value)
-                    bugs.deselectAll()
-                    bugs.dataProvider.refreshAll()
+                    gridView.grid.deselectAll()
+                    gridView.grid.dataProvider.refreshAll()
                 }.show()
             } else {
                 Notification.show(Messages.ONLY_ONE_BUG_SELECTED)
@@ -109,16 +113,8 @@ class BugTab constructor(dataService: DataService, private val bugMerger: BugMer
             isEnabled = false
             removeThemeVariants(ButtonVariant.LUMO_PRIMARY)
         }
-        bugs.asMultiSelect().addSelectionListener { mergeButton.content.isEnabled = it.allSelectedItems.size >= 2 }
-        val header = FlexLayout(
-            mergeButton,
-            Div().apply { setFlexGrow(1) }, //spacer
-            GridFilterMenu(bugs).apply { content.setMarginRight(5.0, Unit.PIXEL) },
-            GridColumnMenu(bugs)
-        )
-        header.setWidthFull()
-        content.removeAll()
-        content.add(header, bugs)
-        content.setFlexGrow(1.0, bugs)
+        gridView.grid.asMultiSelect().addSelectionListener { mergeButton.content.isEnabled = it.allSelectedItems.size >= 2 }
+        gridView.header.add(mergeButton)
+        content.add(gridView)
     }
 }

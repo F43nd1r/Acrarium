@@ -19,8 +19,6 @@ package com.faendir.acra.ui.component.grid
 import com.faendir.acra.dataprovider.QueryDslFilter
 import com.faendir.acra.dataprovider.QueryDslFilterWithParameter
 import com.faendir.acra.dataprovider.QueryDslSortOrder
-import com.faendir.acra.i18n.Messages
-import com.faendir.acra.model.QReport
 import com.faendir.acra.ui.base.TranslatableText
 import com.faendir.acra.ui.component.Translatable
 import com.querydsl.core.types.Expression
@@ -46,6 +44,7 @@ class AcrariumColumn<T>(private val acrariumGrid: AcrariumGrid<T>, columnId: Str
         private set
     var filterComponent: Component? = null
         private set
+    private val visibilityChangeListeners = mutableListOf<() -> Unit>()
 
     init {
         isResizable = true
@@ -53,8 +52,21 @@ class AcrariumColumn<T>(private val acrariumGrid: AcrariumGrid<T>, columnId: Str
         flexGrow = 0
     }
 
+    override fun setVisible(visible: Boolean) {
+        val oldValue = isVisible
+        super.setVisible(visible)
+        if (oldValue != visible) {
+            visibilityChangeListeners.forEach { it() }
+        }
+    }
+
+    fun addVisibilityChangeListener(listener: () -> Unit) {
+        visibilityChangeListeners.add(listener)
+    }
+
     fun setCaption(id: String, vararg params: Any): AcrariumColumn<T> {
         caption = TranslatableText(id, *params)
+        key = id
         return this
     }
 
@@ -75,7 +87,7 @@ class AcrariumColumn<T>(private val acrariumGrid: AcrariumGrid<T>, columnId: Str
         })
     }
 
-    fun setFilterable(expr: BooleanExpression, default: Boolean, captionId: String, vararg params: Any) : AcrariumColumn<T> {
+    fun setFilterable(expr: BooleanExpression, default: Boolean, captionId: String, vararg params: Any): AcrariumColumn<T> {
         return setFilterable(Translatable.createCheckbox(captionId, *params).with { value = default }, object : QueryDslFilterWithParameter<Boolean> {
             override var parameter: Boolean = default
             override fun <T> apply(query: JPAQuery<T>): JPAQuery<T> = if (parameter) query.where(expr) else query

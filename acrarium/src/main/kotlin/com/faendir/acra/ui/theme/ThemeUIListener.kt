@@ -15,15 +15,13 @@
  */
 package com.faendir.acra.ui.theme
 
-import com.faendir.acra.util.LocalSettings
+import com.faendir.acra.settings.LocalSettings
 import com.vaadin.flow.server.UIInitEvent
 import com.vaadin.flow.server.UIInitListener
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.VaadinSessionScope
 import com.vaadin.flow.theme.lumo.Lumo
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
-import org.springframework.lang.NonNull
 
 @VaadinSessionScope
 @SpringComponent
