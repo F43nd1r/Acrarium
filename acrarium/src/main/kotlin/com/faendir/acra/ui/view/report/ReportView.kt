@@ -41,6 +41,7 @@ import com.faendir.acra.ui.view.main.MainView
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
 import com.faendir.acra.util.retrace
 import com.github.appreciated.css.grid.sizes.Auto
+import com.github.appreciated.css.grid.sizes.MaxContent
 import com.github.appreciated.layout.GridLayout
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.Composite
@@ -81,7 +82,7 @@ class ReportView(private val dataService: DataService, avatarService: AvatarServ
 
     init {
         val summaryLayout = GridLayout()
-        summaryLayout.setTemplateColumns(Auto(), Auto())
+        summaryLayout.setTemplateColumns(MaxContent(), MaxContent())
         summaryLayout.setColumnGap(1, Unit.EM)
         summaryLayout.setJustifyItems(JustifyItems.START)
         summaryLayout.setAlignItems(Align.FIRST_BASELINE)
@@ -130,7 +131,7 @@ class ReportView(private val dataService: DataService, avatarService: AvatarServ
 
     private fun getLayoutForMap(map: Map<String, *>): Component {
         val layout = GridLayout()
-        layout.setTemplateColumns(Auto(), Auto())
+        layout.setTemplateColumns(MaxContent(), MaxContent())
         layout.setColumnGap(1, Unit.EM)
         layout.setJustifyItems(JustifyItems.START)
         map.entries.sortedBy { it.key }.forEach { layout.add(Label(it.key).secondary(), getComponentForContent(it.value)) }
