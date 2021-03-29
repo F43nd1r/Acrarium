@@ -19,6 +19,7 @@ import com.faendir.acra.dataprovider.QueryDslDataProvider
 import com.faendir.acra.model.App
 import com.faendir.acra.model.Attachment
 import com.faendir.acra.model.Bug
+import com.faendir.acra.model.Device
 import com.faendir.acra.model.MailSettings
 import com.faendir.acra.model.QApp
 import com.faendir.acra.model.QAttachment
@@ -33,6 +34,7 @@ import com.faendir.acra.model.User
 import com.faendir.acra.model.Version
 import com.faendir.acra.model.view.Queries
 import com.faendir.acra.model.view.VApp
+import com.faendir.acra.model.view.VReport
 import com.faendir.acra.model.view.WhereExpressions.whereHasAppPermission
 import com.faendir.acra.util.ImportResult
 import com.faendir.acra.util.catching
@@ -100,20 +102,16 @@ class DataService(
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun getReportProvider(bug: Bug) = QueryDslDataProvider(
-        JPAQuery<Any>(entityManager).from(QReport.report)
-            .join(QReport.report.stacktrace, QStacktrace.stacktrace1).fetchJoin()
+        Queries.selectVReport(entityManager)
             .where(QStacktrace.stacktrace1.bug.eq(bug))
-            .select(QReport.report)
     )
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun getReportProvider(app: App) = QueryDslDataProvider(
-        JPAQuery<Any>(entityManager).from(QReport.report)
-            .join(QReport.report.stacktrace, QStacktrace.stacktrace1).fetchJoin()
+        Queries.selectVReport(entityManager)
             .join(QStacktrace.stacktrace1.bug, QBug.bug).fetchJoin()
             .join(QStacktrace.stacktrace1.version).fetchJoin()
             .where(QBug.bug.app.eq(app))
-            .select(QReport.report)
     )
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#stacktrace.bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
@@ -150,8 +148,8 @@ class DataService(
     }
 
     @Transactional
-    fun deleteReport(report: Report) {
-        delete(report)
+    fun deleteReport(report: VReport) {
+        JPADeleteClause(entityManager, QReport.report).where(QReport.report.id.eq(report.id)).execute()
         applicationEventPublisher.publishEvent(ReportsDeleteEvent(this))
     }
 
@@ -423,6 +421,11 @@ class DataService(
 
     private fun fixStringIsArray(report: JSONObject, reportField: ReportField) {
         report.optJSONArray(reportField.name)?.let { report.put(reportField.name, it.filterIsInstance<String>().joinToString("\n")) }
+    }
+
+    @Transactional
+    fun updateDeviceTable(devices: List<Device>) {
+        devices.forEach { store(it) }
     }
 
 }

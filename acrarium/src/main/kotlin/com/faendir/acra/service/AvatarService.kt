@@ -15,7 +15,7 @@
  */
 package com.faendir.acra.service
 
-import com.faendir.acra.model.Report
+import com.faendir.acra.model.view.VReport
 import com.talanlabs.avatargenerator.Avatar
 import com.talanlabs.avatargenerator.IdenticonAvatar
 import com.vaadin.flow.component.Component
@@ -23,8 +23,6 @@ import com.vaadin.flow.component.html.Image
 import com.vaadin.flow.server.InputStreamFactory
 import com.vaadin.flow.server.StreamResource
 import org.springframework.cache.annotation.Cacheable
-import org.springframework.cache.annotation.EnableCaching
-import org.springframework.lang.NonNull
 import org.springframework.stereotype.Service
 import java.io.ByteArrayInputStream
 import javax.annotation.Resource
@@ -40,7 +38,7 @@ class AvatarService {
     @Resource
     private lateinit var self: AvatarService
 
-    fun getAvatar(report: Report): Component = Image(self.getAvatar(report.installationId), report.installationId)
+    fun getAvatar(report: VReport): Component = Image(self.getAvatar(report.installationId), report.installationId)
 
     @Cacheable("avatars")
     fun getAvatar(installationId: String): StreamResource {

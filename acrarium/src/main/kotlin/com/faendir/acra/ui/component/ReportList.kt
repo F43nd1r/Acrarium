@@ -19,8 +19,9 @@ import com.faendir.acra.dataprovider.QueryDslDataProvider
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.App
 import com.faendir.acra.model.Permission
+import com.faendir.acra.model.QDevice
 import com.faendir.acra.model.QReport
-import com.faendir.acra.model.Report
+import com.faendir.acra.model.view.VReport
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.AvatarService
 import com.faendir.acra.settings.LocalSettings
@@ -32,6 +33,7 @@ import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.GridSortOrder
+import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.icon.Icon
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.data.renderer.ComponentRenderer
@@ -42,15 +44,15 @@ import com.vaadin.flow.data.renderer.ComponentRenderer
  */
 class ReportList(
     private val app: App,
-    private val dataProvider: QueryDslDataProvider<Report>,
+    private val dataProvider: QueryDslDataProvider<VReport>,
     private val avatarService: AvatarService,
     private val localSettings: LocalSettings,
-    private val deleteReport: (Report) -> Unit
-) : Composite<AcrariumGridView<Report>>() {
-    override fun initContent(): AcrariumGridView<Report> {
+    private val deleteReport: (VReport) -> Unit
+) : Composite<AcrariumGridView<VReport>>() {
+    override fun initContent(): AcrariumGridView<VReport> {
         return AcrariumGridView(dataProvider, localSettings::reportGridSettings) {
             setSelectionMode(Grid.SelectionMode.NONE)
-            addColumn(ComponentRenderer { report: Report -> avatarService.getAvatar(report) }).setSortable(QReport.report.installationId)
+            addColumn(ComponentRenderer { report -> avatarService.getAvatar(report) }).setSortable(QReport.report.installationId)
                 .setCaption(Messages.USER)
                 .setWidth("50px").setAutoWidth(false)
             val dateColumn = addColumn(TimeSpanRenderer { it.date }).setSortable(QReport.report.date).setCaption(Messages.DATE)
@@ -60,7 +62,9 @@ class ReportList(
                 .setCaption(Messages.APP_VERSION)
             addColumn { it.androidVersion }.setSortableAndFilterable(QReport.report.androidVersion, Messages.ANDROID_VERSION)
                 .setCaption(Messages.ANDROID_VERSION)
-            addColumn { it.phoneModel }.setSortableAndFilterable(QReport.report.phoneModel, Messages.DEVICE).setCaption(Messages.DEVICE)
+            addColumn(ComponentRenderer { report -> Span(report.marketingName ?: report.phoneModel).apply { element.setProperty("title", report.phoneModel) } })
+                .setSortableAndFilterable(QDevice.device1.marketingName.coalesce(QReport.report.phoneModel).asString(), Messages.DEVICE)
+                .setCaption(Messages.DEVICE)
             addColumn { it.stacktrace.stacktrace.split("\n".toRegex(), 2).toTypedArray()[0] }.setSortableAndFilterable(
                 QReport.report.stacktrace.stacktrace,
                 Messages.STACKTRACE
@@ -70,7 +74,7 @@ class ReportList(
                 .setFilterable(QReport.report.isSilent.eq(false), false, Messages.HIDE_SILENT)
                 .setCaption(Messages.SILENT)
             if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-                addColumn(ComponentRenderer { report: Report ->
+                addColumn(ComponentRenderer { report ->
                     Button(Icon(VaadinIcon.TRASH)) {
                         FluentDialog().addText(Messages.DELETE_REPORT_CONFIRM).addConfirmButtons {
                             deleteReport(report)

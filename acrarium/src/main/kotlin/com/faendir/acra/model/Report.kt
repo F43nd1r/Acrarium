@@ -82,4 +82,6 @@ class Report(@OnDelete(action = OnDeleteAction.CASCADE)
 
     @Column(name = "is_silent")
     val isSilent: Boolean = jsonObject.optBoolean(ReportField.IS_SILENT.name)
+
+    val device: String = jsonObject.optJSONObject(ReportField.BUILD.name)?.optString("DEVICE") ?: ""
 }

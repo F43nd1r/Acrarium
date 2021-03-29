@@ -16,14 +16,13 @@ class AcrariumGridView<T>(
     initializer: AcrariumGrid<T>.() -> Unit
 ) :
     VerticalLayout() {
-    val grid: AcrariumGrid<T>
+    val grid: AcrariumGrid<T> = AcrariumGrid(dataProvider, gridSettings.get()).apply {
+        initializer()
+        loadLayout()
+        addOnLayoutChangedListener { gridSettings.set(it) }
+    }
     val header: HasComponents
     init {
-        grid = AcrariumGrid(dataProvider, gridSettings.get()).apply {
-            initializer()
-            loadLayout()
-            addOnLayoutChangedListener { gridSettings.set(it) }
-        }
         header = FlexLayout(
             Div().apply { setFlexGrow(1) }, //spacer
             GridFilterMenu(grid).apply { content.setMarginRight(5.0, com.faendir.acra.ui.ext.Unit.PIXEL) },

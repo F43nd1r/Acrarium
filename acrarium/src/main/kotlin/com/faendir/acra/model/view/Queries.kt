@@ -17,10 +17,10 @@ package com.faendir.acra.model.view
 
 import com.faendir.acra.model.QApp
 import com.faendir.acra.model.QBug
+import com.faendir.acra.model.QDevice
 import com.faendir.acra.model.QReport
 import com.faendir.acra.model.QStacktrace
 import com.querydsl.jpa.impl.JPAQuery
-import org.springframework.lang.NonNull
 import javax.persistence.EntityManager
 
 /**
@@ -29,22 +29,45 @@ import javax.persistence.EntityManager
  */
 object Queries {
     private val V_BUG = JPAQuery<Any>().from(QBug.bug)
-            .leftJoin(QStacktrace.stacktrace1)
-            .on(QStacktrace.stacktrace1.bug.eq(QBug.bug))
-            .leftJoin(QReport.report)
-            .on(QReport.report.stacktrace.eq(QStacktrace.stacktrace1))
-            .leftJoin(QBug.bug.solvedVersion).fetchJoin()
-            .select(QVBug(QBug.bug, QReport.report.date.max(), QReport.report.count(), QStacktrace.stacktrace1.version.code.max(), QReport.report.installationId.countDistinct()))
-            .groupBy(QBug.bug)
+        .leftJoin(QStacktrace.stacktrace1)
+        .on(QStacktrace.stacktrace1.bug.eq(QBug.bug))
+        .leftJoin(QReport.report)
+        .on(QReport.report.stacktrace.eq(QStacktrace.stacktrace1))
+        .leftJoin(QBug.bug.solvedVersion).fetchJoin()
+        .select(
+            QVBug(
+                QBug.bug,
+                QReport.report.date.max(),
+                QReport.report.count(),
+                QStacktrace.stacktrace1.version.code.max(),
+                QReport.report.installationId.countDistinct()
+            )
+        )
+        .groupBy(QBug.bug)
     private val V_APP = JPAQuery<Any>().from(QApp.app)
-            .leftJoin(QBug.bug)
-            .on(QBug.bug.app.eq(QApp.app))
-            .leftJoin(QStacktrace.stacktrace1)
-            .on(QStacktrace.stacktrace1.bug.eq(QBug.bug))
-            .leftJoin(QReport.report)
-            .on(QReport.report.stacktrace.eq(QStacktrace.stacktrace1))
-            .select(QVApp(QApp.app, QBug.bug.countDistinct(), QReport.report.count()))
-            .groupBy(QApp.app)
+        .leftJoin(QBug.bug)
+        .on(QBug.bug.app.eq(QApp.app))
+        .leftJoin(QStacktrace.stacktrace1)
+        .on(QStacktrace.stacktrace1.bug.eq(QBug.bug))
+        .leftJoin(QReport.report)
+        .on(QReport.report.stacktrace.eq(QStacktrace.stacktrace1))
+        .select(QVApp(QApp.app, QBug.bug.countDistinct(), QReport.report.count()))
+        .groupBy(QApp.app)
+    private val V_REPORT = JPAQuery<Any>().from(QReport.report)
+        .leftJoin(QStacktrace.stacktrace1).on(QStacktrace.stacktrace1.eq(QReport.report.stacktrace))
+        .leftJoin(QDevice.device1).on(QReport.report.phoneModel.eq(QDevice.device1.model).and(QReport.report.device.eq(QDevice.device1.device)))
+        .select(
+            QVReport(
+                QStacktrace.stacktrace1,
+                QReport.report.id,
+                QReport.report.date,
+                QReport.report.androidVersion,
+                QReport.report.phoneModel,
+                QReport.report.installationId,
+                QReport.report.isSilent,
+                QDevice.device1.marketingName.coalesce(QReport.report.phoneModel)
+            )
+        )
 
     fun selectVBug(entityManager: EntityManager): JPAQuery<VBug> {
         return V_BUG.clone(entityManager)
@@ -52,5 +75,9 @@ object Queries {
 
     fun selectVApp(entityManager: EntityManager): JPAQuery<VApp> {
         return V_APP.clone(entityManager)
+    }
+
+    fun selectVReport(entityManager: EntityManager): JPAQuery<VReport> {
+        return V_REPORT.clone(entityManager)
     }
 }

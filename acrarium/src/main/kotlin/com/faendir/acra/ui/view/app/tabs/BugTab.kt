@@ -114,7 +114,7 @@ class BugTab(dataService: DataService, private val bugMerger: BugMerger, private
             removeThemeVariants(ButtonVariant.LUMO_PRIMARY)
         }
         gridView.grid.asMultiSelect().addSelectionListener { mergeButton.content.isEnabled = it.allSelectedItems.size >= 2 }
-        gridView.header.add(mergeButton)
+        gridView.header.addComponentAsFirst(mergeButton)
         content.add(gridView)
     }
 }

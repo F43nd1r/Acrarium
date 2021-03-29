@@ -18,6 +18,7 @@ package com.faendir.acra.liquibase.changelog
 
 object ColumnType {
     const val STRING = "VARCHAR(255)"
+    const val STRING_CS = "VARCHAR(255) BINARY"
     const val INT = "INT"
     const val BOOLEAN = "BOOLEAN"
     const val BLOB = "LONGBLOB"

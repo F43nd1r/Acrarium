@@ -25,8 +25,6 @@ import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.lang.NonNull
 
 /**
  * @author lukas
