@@ -6,7 +6,7 @@ import com.faendir.acra.ui.testbench.BaseVaadinTest
 import com.faendir.acra.ui.testbench.KBrowserWebDriverContainer
 import com.faendir.acra.ui.testbench.PASSWORD
 import com.faendir.acra.ui.testbench.USERNAME
-import com.faendir.acra.ui.testbench.VaadinTest
+import com.faendir.acra.annotation.VaadinTest
 import com.faendir.acra.ui.testbench.getPage
 import com.vaadin.flow.component.button.testbench.ButtonElement
 import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement

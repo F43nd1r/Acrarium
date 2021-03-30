@@ -16,6 +16,7 @@
 package com.faendir.acra.liquibase
 
 import com.faendir.acra.BackendApplication
+import com.faendir.acra.annotation.AcrariumTest
 import liquibase.integration.spring.SpringLiquibase
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -43,8 +44,7 @@ import javax.validation.Validator
  * @since 25.06.18
  */
 @DataJpaTest
-@ExtendWith(SpringExtension::class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@AcrariumTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ComponentScan(basePackageClasses = [BackendApplication::class],
         excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = [SpringLiquibase::class])])

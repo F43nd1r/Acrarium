@@ -1,7 +1,9 @@
 package com.faendir.acra.service
 
+import com.faendir.acra.annotation.AcrariumTest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.annotation.DirtiesContext
@@ -11,9 +13,9 @@ import strikt.api.expectThat
 import strikt.assertions.hasSize
 import strikt.assertions.isEmpty
 
+@AcrariumTest
 @SpringBootTest
 @ContextConfiguration
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @WithMockUser(roles = ["REPORTER", "USER", "ADMIN"])
 class VersionDeleteTest {
 

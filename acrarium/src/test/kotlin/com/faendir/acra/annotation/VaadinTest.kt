@@ -1,5 +1,6 @@
-package com.faendir.acra.ui.testbench
+package com.faendir.acra.annotation
 
+import com.faendir.acra.ui.testbench.BrowserArgumentsProvider
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ArgumentsSource
 import java.lang.annotation.Inherited

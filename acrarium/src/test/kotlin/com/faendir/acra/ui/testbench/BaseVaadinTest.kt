@@ -2,6 +2,8 @@ package com.faendir.acra.ui.testbench
 
 import ch.vorburger.mariadb4j.springboot.autoconfigure.MariaDB4jSpringConfiguration
 import com.faendir.acra.MariaDBTestConfiguration
+import com.faendir.acra.annotation.AcrariumTest
+import com.faendir.acra.setup.DeviceSetup
 import com.vaadin.testbench.TestBenchTestCase
 import com.vaadin.testbench.commands.TestBenchCommandExecutor
 import org.junit.jupiter.api.AfterEach
@@ -18,11 +20,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.testcontainers.Testcontainers
 
 @Testable
-@ExtendWith(ContainerExtension::class, SpringExtension::class)
-@Import(value = [GlobalPersistentSecurityContextHolderStrategy::class, MariaDBTestConfiguration::class])
+@AcrariumTest
+@ExtendWith(ContainerExtension::class)
+@Import(GlobalPersistentSecurityContextHolderStrategy::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@EnableAutoConfiguration(exclude = [MariaDB4jSpringConfiguration::class])
 abstract class BaseVaadinTest : TestBenchTestCase() {
     @LocalServerPort
     protected var port: Int = 0
