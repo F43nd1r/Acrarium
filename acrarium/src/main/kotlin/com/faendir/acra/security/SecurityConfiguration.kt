@@ -16,19 +16,15 @@
 package com.faendir.acra.security
 
 import com.faendir.acra.model.User
-import com.faendir.acra.rest.RestApiInterface
 import com.faendir.acra.rest.RestApiInterface.Companion.API_PATH
-import com.faendir.acra.rest.RestReportInterface
 import com.faendir.acra.rest.RestReportInterface.Companion.REPORT_PATH
 import com.faendir.acra.service.UserService
 import org.apache.commons.text.CharacterPredicate
 import org.apache.commons.text.RandomStringGenerator
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
-import org.springframework.lang.NonNull
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.BadCredentialsException
@@ -45,6 +41,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint
+import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint
 import java.security.SecureRandom
 
 /**
@@ -59,7 +56,8 @@ class SecurityConfiguration(private val userService: UserService) : WebSecurityC
         auth.authenticationProvider(object : AuthenticationProvider {
             override fun authenticate(authentication: Authentication): Authentication? {
                 if (authentication is UsernamePasswordAuthenticationToken) {
-                    val user = userService.getUser(authentication.getName()) ?: throw UsernameNotFoundException("Username ${authentication.getName()} not found")
+                    val user =
+                        userService.getUser(authentication.getName()) ?: throw UsernameNotFoundException("Username ${authentication.getName()} not found")
                     if (userService.checkPassword(user, authentication.getCredentials() as String)) {
                         return UsernamePasswordAuthenticationToken(user.username, user.password, user.authorities)
                     }
@@ -79,11 +77,11 @@ class SecurityConfiguration(private val userService: UserService) : WebSecurityC
     class ReportConfigurer : WebSecurityConfigurerAdapter() {
         override fun configure(http: HttpSecurity) {
             http.csrf().disable()
-                    .headers().disable()
-                    .anonymous().disable()
-                    .exceptionHandling().authenticationEntryPoint(Http403ForbiddenEntryPoint()).and()
-                    .regexMatcher("/$REPORT_PATH").authorizeRequests().anyRequest().hasRole(User.Role.REPORTER.name)
-                    .and().httpBasic()
+                .headers().disable()
+                .anonymous().disable()
+                .exceptionHandling().authenticationEntryPoint(Http403ForbiddenEntryPoint()).and()
+                .regexMatcher("/$REPORT_PATH").authorizeRequests { it.anyRequest().hasRole(User.Role.API.name) }
+                .httpBasic()
         }
     }
 
@@ -92,23 +90,24 @@ class SecurityConfiguration(private val userService: UserService) : WebSecurityC
     class ApiConfigurer : WebSecurityConfigurerAdapter() {
         override fun configure(http: HttpSecurity) {
             http.csrf().disable()
-                    .headers().disable()
-                    .anonymous().disable()
-                    .exceptionHandling().authenticationEntryPoint(Http403ForbiddenEntryPoint()).and()
-                    .regexMatcher("/$API_PATH/.*").authorizeRequests().anyRequest().hasRole(User.Role.API.name)
-                    .and().httpBasic()
+                .headers().disable()
+                .anonymous().disable()
+                .exceptionHandling().authenticationEntryPoint(Http403ForbiddenEntryPoint()).and()
+                .regexMatcher("/$API_PATH/.*").authorizeRequests { it.anyRequest().hasRole(User.Role.API.name) }
+                .httpBasic()
         }
     }
+
     @Configuration
     @Order(3)
     class ActuatorConfigurer : WebSecurityConfigurerAdapter() {
         override fun configure(http: HttpSecurity) {
             http.csrf().disable()
-                    .headers().disable()
-                    .anonymous().disable()
-                    .exceptionHandling().authenticationEntryPoint(Http403ForbiddenEntryPoint()).and()
-                    .requestMatcher(EndpointRequest.toAnyEndpoint()).authorizeRequests().anyRequest().hasRole(User.Role.API.name)
-                    .and().httpBasic()
+                .headers().disable()
+                .anonymous().disable()
+                .exceptionHandling().authenticationEntryPoint(BasicAuthenticationEntryPoint()).and()
+                .requestMatcher(EndpointRequest.toAnyEndpoint()).authorizeRequests { it.anyRequest().hasRole(User.Role.API.name) }
+                .httpBasic()
         }
     }
 
@@ -117,10 +116,10 @@ class SecurityConfiguration(private val userService: UserService) : WebSecurityC
     class VaadinConfigurer : WebSecurityConfigurerAdapter() {
         override fun configure(http: HttpSecurity) {
             http.csrf().disable()
-                    .headers().disable()
-                    .anonymous().disable()
-                    .exceptionHandling().authenticationEntryPoint(Http403ForbiddenEntryPoint()).and()
-                    .sessionManagement()
+                .headers().disable()
+                .anonymous().disable()
+                .exceptionHandling().authenticationEntryPoint(Http403ForbiddenEntryPoint()).and()
+                .sessionManagement()
         }
     }
 
@@ -136,11 +135,12 @@ class SecurityConfiguration(private val userService: UserService) : WebSecurityC
 
         @Bean
         fun randomStringGenerator(secureRandom: SecureRandom): RandomStringGenerator =
-                RandomStringGenerator.Builder().usingRandom { secureRandom.nextInt(it) }.withinRange('0'.toInt(), 'z'.toInt())
-                        .filteredBy(CharacterPredicate { Character.isLetterOrDigit(it) }).build()
+            RandomStringGenerator.Builder().usingRandom { secureRandom.nextInt(it) }.withinRange('0'.toInt(), 'z'.toInt())
+                .filteredBy(CharacterPredicate { Character.isLetterOrDigit(it) }).build()
 
         @Bean
-        fun grantedAuthoritiesMapper() = GrantedAuthoritiesMapper { authorities -> User.Role.values().filter { role -> authorities.any { it?.authority == role.authority } } }
+        fun grantedAuthoritiesMapper() =
+            GrantedAuthoritiesMapper { authorities -> User.Role.values().filter { role -> authorities.any { it?.authority == role.authority } } }
     }
 
 }
