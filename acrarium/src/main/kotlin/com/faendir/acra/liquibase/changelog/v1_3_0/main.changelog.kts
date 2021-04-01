@@ -6,6 +6,9 @@ import com.faendir.acra.liquibase.changelog.Table
 import org.liquibase.kotlin.databaseChangeLog
 
 databaseChangeLog {
+    changeSet("1.3.0-report-set-json-type", Author.F43ND1R) {
+        modifyDataType(Table.REPORT, "content", ColumnType.JSON)
+    }
     changeSet("1.3.0-extract-stacktrace-class", Author.F43ND1R) {
         addColumn(Table.STACKTRACE) {
             column(name = "class", type = ColumnType.STRING, valueComputed = "SUBSTRING_INDEX(`stacktrace`,':',1)") {
@@ -15,7 +18,7 @@ databaseChangeLog {
     }
     changeSet("1.3.0-add-silent", Author.F43ND1R) {
         addColumn(Table.REPORT) {
-            column(name = "is_silent", type = ColumnType.BOOLEAN, valueComputed = "`content` LIKE '%\\\"IS_SILENT\\\":true%'") {
+            column(name = "is_silent", type = ColumnType.BOOLEAN, valueComputed = "JSON_EXTRACT(`content`, '$.IS_SILENT') = true") {
                 constraints(nullable = false)
             }
         }
@@ -33,7 +36,9 @@ databaseChangeLog {
             }
         }
         addColumn(Table.REPORT) {
-            column(name = "device", type = ColumnType.STRING, valueComputed = "SUBSTRING_INDEX(SUBSTRING_INDEX(`content`,'\\\"DEVICE\\\":\\\"',-1), '\\\",',1)")
+            column(name = "device", type = ColumnType.STRING, valueComputed = "IFNULL(JSON_UNQUOTE(JSON_EXTRACT(`content`,'$.BUILD.DEVICE')), '')") {
+                constraints(nullable = false)
+            }
         }
     }
 }

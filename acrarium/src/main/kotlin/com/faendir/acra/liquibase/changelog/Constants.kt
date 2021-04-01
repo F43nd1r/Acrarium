@@ -24,6 +24,7 @@ object ColumnType {
     const val BLOB = "LONGBLOB"
     const val TEXT = "LONGTEXT"
     const val DATETIME = "DATETIME"
+    const val JSON = "JSON"
 }
 
 object Author {
