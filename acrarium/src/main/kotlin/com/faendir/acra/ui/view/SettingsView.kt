@@ -16,13 +16,18 @@
 package com.faendir.acra.ui.view
 
 import com.faendir.acra.i18n.Messages
+import com.faendir.acra.navigation.View
+import com.faendir.acra.settings.LocalSettings
 import com.faendir.acra.ui.base.HasAcrariumTitle
 import com.faendir.acra.ui.base.TranslatableText
-import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.ext.Align
+import com.faendir.acra.ui.ext.content
+import com.faendir.acra.ui.ext.formLayout
+import com.faendir.acra.ui.ext.setAlignSelf
+import com.faendir.acra.ui.ext.translatableCheckbox
+import com.faendir.acra.ui.ext.translatableSelect
 import com.faendir.acra.ui.view.main.MainView
-import com.faendir.acra.settings.LocalSettings
-import com.vaadin.flow.component.UI
-import com.vaadin.flow.component.formlayout.FormLayout
+import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode
@@ -33,39 +38,40 @@ import com.vaadin.flow.server.VaadinSession
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
 import com.vaadin.flow.theme.lumo.Lumo
-import java.util.function.Consumer
 
 /**
  * @author lukas
  * @since 10.09.19
  */
-@UIScope
-@SpringComponent
+@View
 @Route(value = "settings", layout = MainView::class)
-class SettingsView(localSettings: LocalSettings) : FlexLayout(), HasAcrariumTitle {
+class SettingsView(localSettings: LocalSettings) : Composite<FlexLayout>(), HasAcrariumTitle {
 
     init {
-        setSizeFull()
-        justifyContentMode = JustifyContentMode.CENTER
-        alignItems = FlexComponent.Alignment.CENTER
-        val layout = FormLayout()
-        layout.setResponsiveSteps(ResponsiveStep("0px", 1))
-        layout.style["align-self"] = "auto"
-        layout.add(Translatable.createCheckbox(Messages.DARK_THEME).with {
-            value = localSettings.darkTheme
-            addValueChangeListener {
-                localSettings.darkTheme = it.value
-                VaadinSession.getCurrent().uIs.forEach(Consumer { ui: UI -> ui.element.setAttribute("theme", if (it.value) Lumo.DARK else Lumo.LIGHT) })
+        content {
+            setSizeFull()
+            justifyContentMode = JustifyContentMode.CENTER
+            alignItems = FlexComponent.Alignment.CENTER
+            formLayout {
+                setResponsiveSteps(ResponsiveStep("0px", 1))
+                setAlignSelf(Align.AUTO)
+                translatableCheckbox(Messages.DARK_THEME) {
+                    value = localSettings.darkTheme
+                    addValueChangeListener {
+                        localSettings.darkTheme = it.value
+                        VaadinSession.getCurrent().uIs.forEach { ui -> ui.element.setAttribute("theme", if (it.value) Lumo.DARK else Lumo.LIGHT) }
+                    }
+                }
+                translatableSelect(VaadinService.getCurrent().instantiator.i18NProvider.providedLocales, Messages.LOCALE) {
+                    setItemLabelGenerator { it.getDisplayName(localSettings.locale) }
+                    value = localSettings.locale
+                    addValueChangeListener {
+                        localSettings.locale = it.value
+                        VaadinSession.getCurrent().locale = it.value
+                    }
+                }
             }
-        }, Translatable.createSelect(VaadinService.getCurrent().instantiator.i18NProvider.providedLocales, Messages.LOCALE).with {
-            setItemLabelGenerator { it.getDisplayName(localSettings.locale) }
-            value = localSettings.locale
-            addValueChangeListener {
-                localSettings.locale = it.value
-                VaadinSession.getCurrent().locale = it.value
-            }
-        })
-        add(layout)
+        }
     }
 
     override val title = TranslatableText(Messages.SETTINGS)

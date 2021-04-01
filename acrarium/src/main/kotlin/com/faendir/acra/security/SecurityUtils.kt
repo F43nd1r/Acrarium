@@ -18,11 +18,16 @@ package com.faendir.acra.security
 import com.faendir.acra.model.App
 import com.faendir.acra.model.Permission
 import com.faendir.acra.model.User
+import com.vaadin.flow.server.HandlerHelper.RequestType
+import com.vaadin.flow.shared.ApplicationConstants
+import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import javax.servlet.http.HttpServletRequest
+
 
 object SecurityUtils {
     @JvmStatic
-    fun isLoggedIn(): Boolean = SecurityContextHolder.getContext().authentication?.isAuthenticated ?: false
+    fun isLoggedIn(): Boolean = SecurityContextHolder.getContext().authentication?.takeIf { it !is AnonymousAuthenticationToken }?.isAuthenticated ?: false
 
     @JvmStatic
     fun hasRole(role: User.Role): Boolean = SecurityContextHolder.getContext().authentication?.authorities?.any { it.authority == role.authority } ?: false
@@ -39,5 +44,12 @@ object SecurityUtils {
     fun getPermission(app: App, user: User): Permission.Level = getPermission(app, user.permissions) { user.roles.contains(User.Role.ADMIN) }
 
     private fun getPermission(app: App, permissionStream: Collection<Permission>, isAdmin: () -> Boolean): Permission.Level =
-            permissionStream.firstOrNull { it.app == app }?.level ?: if (isAdmin()) Permission.Level.ADMIN else Permission.Level.NONE
+        permissionStream.firstOrNull { it.app == app }?.level ?: if (isAdmin()) Permission.Level.ADMIN else Permission.Level.NONE
+
+
+    @JvmStatic
+    fun isFrameworkInternalRequest(request: HttpServletRequest): Boolean {
+        val parameterValue = request.getParameter(ApplicationConstants.REQUEST_TYPE_PARAMETER)
+        return (parameterValue != null && RequestType.values().any { it.getIdentifier() == parameterValue })
+    }
 }

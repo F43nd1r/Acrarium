@@ -15,18 +15,39 @@
  */
 package com.faendir.acra.ui.view.main
 
+import com.faendir.acra.i18n.Messages
+import com.faendir.acra.model.User
 import com.faendir.acra.security.SecurityUtils
-import com.faendir.acra.service.UserService
-import com.faendir.acra.ui.base.ParentLayout
-import com.vaadin.flow.component.AttachEvent
+import com.faendir.acra.ui.component.Path
+import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.ext.SizeUnit
+import com.faendir.acra.ui.ext.content
+import com.faendir.acra.ui.ext.setFlexGrow
+import com.faendir.acra.ui.ext.setHeight
+import com.faendir.acra.ui.ext.setPaddingRight
+import com.faendir.acra.ui.view.AboutView
+import com.faendir.acra.ui.view.Overview
+import com.faendir.acra.ui.view.SettingsView
+import com.faendir.acra.ui.view.user.AccountView
+import com.faendir.acra.ui.view.user.UserManager
+import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.Composite
+import com.vaadin.flow.component.HasElement
+import com.vaadin.flow.component.applayout.AppLayout
+import com.vaadin.flow.component.applayout.DrawerToggle
+import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.dependency.CssImport
 import com.vaadin.flow.component.dependency.JsModule
-import com.vaadin.flow.component.orderedlayout.FlexComponent
-import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode
+import com.vaadin.flow.component.html.Div
+import com.vaadin.flow.component.icon.VaadinIcon
+import com.vaadin.flow.component.tabs.Tab
+import com.vaadin.flow.component.tabs.Tabs
+import com.vaadin.flow.router.RouterLayout
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
 import org.springframework.context.ApplicationContext
-import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.context.support.GenericApplicationContext
+import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  * @author lukas
@@ -36,23 +57,59 @@ import org.springframework.security.authentication.AuthenticationManager
 @CssImport("./styles/global.css")
 @UIScope
 @SpringComponent
-class MainView(private val authenticationManager: AuthenticationManager, private val applicationContext: ApplicationContext, private val userService: UserService) :
-        ParentLayout() {
-    private val mainLayout: MainLayout = MainLayout(applicationContext)
+class MainView(applicationContext: GenericApplicationContext) : Composite<AppLayout>(), RouterLayout {
+    private val targets: LinkedHashMap<Tab, Class<out Component>> = LinkedHashMap()
+    private val tabs: Tabs
 
     init {
-        alignItems = FlexComponent.Alignment.CENTER
-        justifyContentMode = JustifyContentMode.CENTER
-        setSizeFull()
-        setRouterRoot(mainLayout)
+        targets[com.faendir.acra.ui.component.Tab(Messages.HOME)] = Overview::class.java
+        targets[Path(applicationContext)] = Component::class.java
+        targets[com.faendir.acra.ui.component.Tab(Messages.ACCOUNT)] = AccountView::class.java
+        if (SecurityUtils.hasRole(User.Role.ADMIN)) {
+            targets[com.faendir.acra.ui.component.Tab(Messages.USER_MANAGER)] = UserManager::class.java
+        }
+        targets[com.faendir.acra.ui.component.Tab(Messages.SETTINGS)] = SettingsView::class.java
+        targets[com.faendir.acra.ui.component.Tab(Messages.ABOUT)] = AboutView::class.java
+        tabs = Tabs(*targets.keys.toTypedArray()).apply {
+            orientation = Tabs.Orientation.VERTICAL
+            addSelectedChangeListener { event ->
+                val target = targets[event.selectedTab]
+                if (target != null && target != Component::class.java) {
+                    ui.ifPresent { it.navigate(target) }
+                }
+            }
+        }
+        content {
+            element.style["width"] = "100%"
+            element.style["height"] = "100%"
+            primarySection = AppLayout.Section.DRAWER
+            addToDrawer(tabs)
+            addToNavbar(
+                DrawerToggle(),
+                Translatable.createImage("frontend/logo.png", Messages.ACRARIUM).with {
+                    setHeight(32, SizeUnit.PIXEL)
+                },
+                Div().apply { setFlexGrow(1) },
+                Translatable.createButton(Messages.LOGOUT) { logout() }.with {
+                    icon = VaadinIcon.POWER_OFF.create()
+                    removeThemeVariants(ButtonVariant.LUMO_PRIMARY)
+                    addThemeVariants(ButtonVariant.LUMO_TERTIARY)
+                    setPaddingRight(10.0, SizeUnit.PIXEL)
+                }
+            )
+        }
     }
 
-    override fun onAttach(attachEvent: AttachEvent?) {
-        super.onAttach(attachEvent)
-        content = when {
-            SecurityUtils.isLoggedIn() -> mainLayout
-            userService.hasAdmin() -> LoginLayout(authenticationManager)
-            else -> SetupLayout(userService)
+    private fun logout() {
+        SecurityContextHolder.clearContext()
+        ui.ifPresent {
+            it.page.reload()
+            it.session.close()
         }
+    }
+
+    override fun showRouterLayoutContent(content: HasElement) {
+        super.showRouterLayoutContent(content)
+        targets.entries.firstOrNull { content.javaClass == it.value }?.let { tabs.selectedTab = it.key }
     }
 }

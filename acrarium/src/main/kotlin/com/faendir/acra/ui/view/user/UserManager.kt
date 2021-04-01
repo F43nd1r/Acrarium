@@ -19,6 +19,7 @@ import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.Permission
 import com.faendir.acra.model.QUser
 import com.faendir.acra.model.User
+import com.faendir.acra.navigation.View
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.DataService
 import com.faendir.acra.service.UserService
@@ -44,8 +45,7 @@ import com.vaadin.flow.spring.annotation.UIScope
  * @author lukas
  * @since 15.11.18
  */
-@UIScope
-@SpringComponent
+@View
 @Route(value = "user-manager", layout = MainView::class)
 class UserManager(private val userService: UserService, private val dataService: DataService) : Composite<FlexLayout>(), HasAcrariumTitle {
 

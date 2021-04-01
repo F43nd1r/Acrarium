@@ -27,24 +27,16 @@ import kotlin.streams.asSequence
 
 @SpringComponent
 @Scope(scopeName = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-class CardView<C, P>(context: ApplicationContext) : FlexLayout(), Init<P> where C : Card, C : Init<P> {
-    private val context: ApplicationContext
-    private var parameter: P? = null
+class CardView<C : Card, P>(private val context: ApplicationContext) : FlexLayout() {
 
     init {
         setWidthFull()
         flexWrap = FlexWrap.WRAP
         justifyContentMode = FlexComponent.JustifyContentMode.CENTER
-        this.context = context
     }
 
     @SafeVarargs
     fun add(vararg cards: Class<out C>) {
-        add(*cards.map { context.getBean(it) }.onEach { parameter?.run { it.init(this) } }.map { it as Component }.toTypedArray())
-    }
-
-    override fun init(p: P) {
-        parameter = p
-        children.asSequence().filterIsInstance<Init<P>>().forEach { it.init(p) }
+        add(*cards.map { context.getBean(it) }.map { it as Component }.toTypedArray())
     }
 }

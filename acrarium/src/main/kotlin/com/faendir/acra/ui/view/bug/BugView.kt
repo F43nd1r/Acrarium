@@ -16,14 +16,14 @@
 package com.faendir.acra.ui.view.bug
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.ui.base.HasSecureParameter.Companion.PARAM
+import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.base.TabView
-import com.faendir.acra.ui.view.main.MainView
 import com.faendir.acra.ui.view.bug.tabs.AdminTab
 import com.faendir.acra.ui.view.bug.tabs.BugTab
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
 import com.faendir.acra.ui.view.bug.tabs.StacktraceTab
 import com.faendir.acra.ui.view.bug.tabs.StatisticsTab
+import com.faendir.acra.ui.view.main.MainView
 import com.vaadin.flow.router.ParentLayout
 import com.vaadin.flow.router.RoutePrefix
 import com.vaadin.flow.spring.annotation.SpringComponent
@@ -37,7 +37,9 @@ import com.vaadin.flow.spring.annotation.UIScope
 @SpringComponent
 @RoutePrefix("bug/:$PARAM")
 @ParentLayout(MainView::class)
-class BugView : TabView<BugTab<*>, Int>({ Integer.parseInt(it) }, TabInfo(ReportTab::class.java, Messages.REPORTS),
-        TabInfo(StacktraceTab::class.java, Messages.STACKTRACES),
-        TabInfo(StatisticsTab::class.java, Messages.STATISTICS),
-        TabInfo(AdminTab::class.java, Messages.ADMIN)) 
+class BugView : TabView<BugTab<*>>(
+    TabInfo(ReportTab::class.java, Messages.REPORTS),
+    TabInfo(StacktraceTab::class.java, Messages.STACKTRACES),
+    TabInfo(StatisticsTab::class.java, Messages.STATISTICS),
+    TabInfo(AdminTab::class.java, Messages.ADMIN)
+)

@@ -16,35 +16,31 @@
 package com.faendir.acra.ui.view.app.tabs
 
 import com.faendir.acra.model.App
-import com.faendir.acra.model.Report
+import com.faendir.acra.navigation.View
 import com.faendir.acra.service.AvatarService
 import com.faendir.acra.service.DataService
 import com.faendir.acra.settings.LocalSettings
+import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.ReportList
 import com.faendir.acra.ui.view.app.AppView
-import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.router.Route
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.lang.NonNull
-import java.util.function.Consumer
+import org.springframework.beans.factory.annotation.Qualifier
 
 /**
  * @author lukas
  * @since 14.07.18
  */
-@UIScope
-@SpringComponent
+@View
 @Route(value = "report", layout = AppView::class)
-class ReportTab(dataService: DataService, private val avatarService: AvatarService, private val localSettings: LocalSettings) : AppTab<Div>(dataService) {
+class ReportTab(
+    private val dataService: DataService,
+    private val avatarService: AvatarService,
+    private val localSettings: LocalSettings,
+    @Qualifier(PARAM)
+    private val app: App
+) : AppTab<ReportList>(app) {
 
-    init {
-        content.setSizeFull()
-    }
-
-    override fun init(app: App) {
-        content.removeAll()
-        content.add(ReportList(app, dataService.getReportProvider(app), avatarService, localSettings) { dataService.deleteReport(it) })
+    override fun initContent(): ReportList {
+        return ReportList(app, dataService.getReportProvider(app), avatarService, localSettings) { dataService.deleteReport(it) }
     }
 }

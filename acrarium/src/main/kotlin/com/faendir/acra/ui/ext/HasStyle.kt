@@ -23,23 +23,23 @@ fun HasStyle.preventWhiteSpaceBreaking() {
     style["white-space"] = "nowrap"
 }
 
-fun HasStyle.setMargin(value: Int, unit: Unit) {
+fun HasStyle.setMargin(value: Int, unit: SizeUnit) {
     style["margin"] = "$value${unit.text}"
 }
 
-fun HasStyle.setMarginLeft(value: Double, unit: Unit) {
+fun HasStyle.setMarginLeft(value: Double, unit: SizeUnit) {
     style["margin-left"] = "$value${unit.text}"
 }
 
-fun HasStyle.setMarginTop(value: Double, unit: Unit) {
+fun HasStyle.setMarginTop(value: Double, unit: SizeUnit) {
     style["margin-top"] = "$value${unit.text}"
 }
 
-fun HasStyle.setMarginRight(value: Double, unit: Unit) {
+fun HasStyle.setMarginRight(value: Double, unit: SizeUnit) {
     style["margin-right"] = "$value${unit.text}"
 }
 
-fun HasStyle.setMarginBottom(value: Double, unit: Unit) {
+fun HasStyle.setMarginBottom(value: Double, unit: SizeUnit) {
     style["margin-bottom"] = "$value${unit.text}"
 }
 
@@ -48,23 +48,23 @@ fun HasStyle.setDefaultTextStyle() {
     style["color"] = "inherit"
 }
 
-fun HasStyle.setPadding(value: Double, unit: Unit) {
+fun HasStyle.setPadding(value: Double, unit: SizeUnit) {
     style["padding"] = "$value${unit.text}"
 }
 
-fun HasStyle.setPaddingLeft(value: Double, unit: Unit) {
+fun HasStyle.setPaddingLeft(value: Double, unit: SizeUnit) {
     style["padding-left"] = "$value${unit.text}"
 }
 
-fun HasStyle.setPaddingTop(value: Double, unit: Unit) {
+fun HasStyle.setPaddingTop(value: Double, unit: SizeUnit) {
     style["padding-top"] = "$value${unit.text}"
 }
 
-fun HasStyle.setPaddingRight(value: Double, unit: Unit) {
+fun HasStyle.setPaddingRight(value: Double, unit: SizeUnit) {
     style["padding-right"] = "$value${unit.text}"
 }
 
-fun HasStyle.setPaddingBottom(value: Double, unit: Unit) {
+fun HasStyle.setPaddingBottom(value: Double, unit: SizeUnit) {
     style["padding-bottom"] = "$value${unit.text}"
 }
 

@@ -106,3 +106,5 @@ inline fun <T : Any, R> T.equalsBy(other: Any?, id: T.() -> R): Boolean = when {
     other == null || javaClass != other.javaClass -> false
     else -> id() == (other as T).id()
 }
+
+const val PARAM = "param"

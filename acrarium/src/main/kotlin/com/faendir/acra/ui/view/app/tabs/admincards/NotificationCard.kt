@@ -20,6 +20,7 @@ import com.faendir.acra.model.App
 import com.faendir.acra.model.MailSettings
 import com.faendir.acra.service.DataService
 import com.faendir.acra.service.UserService
+import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.util.getCurrentUser
 import com.github.appreciated.css.grid.sizes.Auto
@@ -29,11 +30,12 @@ import com.vaadin.flow.component.HasComponents
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
+import org.springframework.beans.factory.annotation.Qualifier
 import kotlin.reflect.KMutableProperty1
 
 @UIScope
 @SpringComponent
-class NotificationCard(private val userService: UserService, dataService: DataService) : AdminCard(dataService) {
+class NotificationCard(userService: UserService, dataService: DataService, @Qualifier(PARAM) app: App) : AdminCard(dataService) {
     private val notificationLayout = GridLayout().apply {
         setTemplateColumns(Auto(), MaxContent())
         setWidthFull()
@@ -49,9 +51,6 @@ class NotificationCard(private val userService: UserService, dataService: DataSe
         @Suppress("LeakingThis")
         add(notificationLayout)
         lines.forEach { it.addTo(notificationLayout) }
-    }
-
-    override fun init(app: App) {
         val user = userService.getCurrentUser()
         val settings = dataService.findMailSettings(app, user) ?: MailSettings(app, user)
         lines.forEach { it.attach(settings) }

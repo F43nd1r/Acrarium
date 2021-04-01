@@ -13,8 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.base
+package com.faendir.acra.vaadin
 
-interface Init<T> {
-    fun init(t: T)
+import com.vaadin.flow.server.ServiceInitEvent
+import com.vaadin.flow.server.UIInitListener
+import com.vaadin.flow.server.VaadinServiceInitListener
+import com.vaadin.flow.spring.annotation.SpringComponent
+import org.springframework.beans.factory.ObjectProvider
+
+@SpringComponent
+class ServiceInitListener(private val uiInitListenerProvider: ObjectProvider<List<UIInitListener>>) : VaadinServiceInitListener {
+    override fun serviceInit(event: ServiceInitEvent) {
+        event.source.addUIInitListener { e -> uiInitListenerProvider.ifAvailable?.let { list -> list.forEach { it.uiInit(e) } } }
+    }
+
 }

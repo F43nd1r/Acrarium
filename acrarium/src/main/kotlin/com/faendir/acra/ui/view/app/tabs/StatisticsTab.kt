@@ -16,29 +16,22 @@
 package com.faendir.acra.ui.view.app.tabs
 
 import com.faendir.acra.model.App
+import com.faendir.acra.navigation.View
 import com.faendir.acra.service.DataService
+import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.statistics.Statistics
 import com.faendir.acra.ui.view.app.AppView
-import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.router.Route
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
+import org.springframework.beans.factory.annotation.Qualifier
 
 /**
  * @author lukas
  * @since 11.10.18
  */
-@UIScope
-@SpringComponent
+@View
 @Route(value = "statistics", layout = AppView::class)
-class StatisticsTab(dataService: DataService) : AppTab<Div>(dataService) {
-
-    init {
-        content.setSizeFull()
-    }
-
-    override fun init(app: App) {
-        content.removeAll()
-        content.add(Statistics(app, null, dataService))
+class StatisticsTab(private val dataService: DataService, @Qualifier(PARAM) private val app: App) : AppTab<Statistics>(app) {
+    override fun initContent(): Statistics {
+        return Statistics(app, null, dataService)
     }
 }

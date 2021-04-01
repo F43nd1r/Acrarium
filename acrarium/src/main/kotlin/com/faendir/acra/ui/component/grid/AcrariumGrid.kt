@@ -18,8 +18,7 @@ package com.faendir.acra.ui.component.grid
 import com.faendir.acra.dataprovider.QueryDslDataProvider
 import com.faendir.acra.dataprovider.QueryDslFilter
 import com.faendir.acra.settings.GridSettings
-import com.faendir.acra.ui.base.HasSecureParameter
-import com.faendir.acra.ui.base.HasSecureParameter.Companion.PARAM
+import com.faendir.acra.util.PARAM
 import com.querydsl.jpa.impl.JPAQuery
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.grid.Grid
@@ -76,7 +75,7 @@ class AcrariumGrid<T>(val dataProvider: QueryDslDataProvider<T>, var gridSetting
         getElement().executeJs("setTimeout(() => { this.recalculateColumnWidths() }, 10)");
     }
 
-    fun <C, R> addOnClickNavigation(target: Class<C>, transform: (T) -> R) where C : Component, C : HasSecureParameter<R> {
+    fun <C, R> addOnClickNavigation(target: Class<C>, transform: (T) -> R) where C : Component {
         addItemClickListener { e: ItemClickEvent<T> ->
             ui.ifPresent(if (e.button == 1 || e.isCtrlKey) Consumer {
                 it.page.executeJs(

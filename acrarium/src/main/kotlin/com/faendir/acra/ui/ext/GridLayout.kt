@@ -20,6 +20,6 @@ import com.github.appreciated.css.grid.sizes.Length
 import com.github.appreciated.layout.GridLayout
 
 
-fun GridLayout.setColumnGap(size: Int, unit: Unit) {
+fun GridLayout.setColumnGap(size: Int, unit: SizeUnit) {
     setColumnGap(Length(size.toString() + unit.text))
 }

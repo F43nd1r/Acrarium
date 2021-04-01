@@ -15,22 +15,20 @@
  */
 package com.faendir.acra.ui.view.bug.tabs.admincards
 
-import com.faendir.acra.model.Bug
 import com.faendir.acra.service.DataService
-import com.faendir.acra.ui.base.Init
 import com.faendir.acra.ui.component.Card
-import com.faendir.acra.ui.ext.Unit
+import com.faendir.acra.ui.ext.SizeUnit
 import com.faendir.acra.ui.ext.setFlexGrow
 import com.faendir.acra.ui.ext.setMaxHeight
 import com.faendir.acra.ui.ext.setMaxWidth
 import com.faendir.acra.ui.ext.setWidth
 
-abstract class AdminCard(val dataService: DataService) : Card(), Init<Bug> {
+abstract class AdminCard(val dataService: DataService) : Card() {
 
     init {
-        setWidth(500, Unit.PIXEL)
-        setMaxWidth(1000, Unit.PIXEL)
-        setMaxHeight(500, Unit.PIXEL)
+        setWidth(500, SizeUnit.PIXEL)
+        setMaxWidth(1000, SizeUnit.PIXEL)
+        setMaxHeight(500, SizeUnit.PIXEL)
         setFlexGrow(1)
     }
 }

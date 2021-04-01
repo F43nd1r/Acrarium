@@ -18,31 +18,28 @@ package com.faendir.acra.ui.view.bug.tabs.admincards
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.Bug
 import com.faendir.acra.service.DataService
-import com.faendir.acra.ui.component.Box
+import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.FluentDialog
+import com.faendir.acra.ui.ext.box
 import com.faendir.acra.ui.view.Overview
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
+import org.springframework.beans.factory.annotation.Qualifier
 
 @UIScope
 @SpringComponent("bugDangerCard")
-class DangerCard(dataService: DataService) : AdminCard(dataService) {
-    override fun init(bug: Bug) {
-        removeContent()
-        val deleteBox = Box(Translatable.createLabel(Messages.DELETE_BUG), Translatable.createLabel(Messages.DELETE_BUG_DETAILS), Translatable.createButton(Messages.DELETE) {
-            FluentDialog().addText(Messages.DELETE_BUG_CONFIRM).addConfirmButtons {
-                dataService.deleteBug(bug)
-                UI.getCurrent().navigate(Overview::class.java)
-            }.show()
-        })
-        add(deleteBox)
-    }
-
+class DangerCard(dataService: DataService, @Qualifier(PARAM) bug: Bug) : AdminCard(dataService) {
     init {
         setHeader(Translatable.createLabel(Messages.DANGER_ZONE))
         setHeaderColor("var(--lumo-error-contrast-color)", "var(--lumo-error-color)")
         enableDivider()
+        box(Messages.DELETE_BUG, Messages.DELETE_BUG_DETAILS, Messages.DELETE){
+            FluentDialog().addText(Messages.DELETE_BUG_CONFIRM).addConfirmButtons {
+                dataService.deleteBug(bug)
+                UI.getCurrent().navigate(Overview::class.java)
+            }.show()
+        }
     }
 }

@@ -17,43 +17,45 @@ package com.faendir.acra.ui.view.report
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.Report
+import com.faendir.acra.navigation.ParseParameter
+import com.faendir.acra.navigation.ReportParser
+import com.faendir.acra.navigation.View
 import com.faendir.acra.service.AvatarService
 import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.base.HasRoute
-import com.faendir.acra.ui.base.HasSecureParameter
-import com.faendir.acra.ui.base.HasSecureParameter.Companion.PARAM
-import com.faendir.acra.ui.base.parent
-import com.faendir.acra.ui.component.Card
-import com.faendir.acra.ui.component.InstallationView
+import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.Path
 import com.faendir.acra.ui.component.Path.ParametrizedTextElement
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.Align
 import com.faendir.acra.ui.ext.JustifyItems
-import com.faendir.acra.ui.ext.Unit
+import com.faendir.acra.ui.ext.SizeUnit
+import com.faendir.acra.ui.ext.anchor
+import com.faendir.acra.ui.ext.card
+import com.faendir.acra.ui.ext.content
+import com.faendir.acra.ui.ext.div
+import com.faendir.acra.ui.ext.forEach
+import com.faendir.acra.ui.ext.gridLayout
 import com.faendir.acra.ui.ext.honorWhitespaces
+import com.faendir.acra.ui.ext.installationView
+import com.faendir.acra.ui.ext.label
 import com.faendir.acra.ui.ext.secondary
 import com.faendir.acra.ui.ext.setAlignItems
 import com.faendir.acra.ui.ext.setAlignSelf
 import com.faendir.acra.ui.ext.setColumnGap
 import com.faendir.acra.ui.ext.setJustifyItems
-import com.faendir.acra.ui.view.main.MainView
+import com.faendir.acra.ui.ext.translatableLabel
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
+import com.faendir.acra.ui.view.main.MainView
 import com.faendir.acra.util.retrace
-import com.github.appreciated.css.grid.sizes.Auto
 import com.github.appreciated.css.grid.sizes.MaxContent
-import com.github.appreciated.layout.GridLayout
-import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.Composite
-import com.vaadin.flow.component.html.Anchor
+import com.vaadin.flow.component.HasComponents
 import com.vaadin.flow.component.html.Div
-import com.vaadin.flow.component.html.Label
-import com.vaadin.flow.router.BeforeEvent
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.server.InputStreamFactory
 import com.vaadin.flow.server.StreamResource
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
+import org.springframework.beans.factory.annotation.Qualifier
 import org.xbib.time.pretty.PrettyTime
 import java.util.*
 import kotlin.math.log10
@@ -63,99 +65,84 @@ import kotlin.math.max
  * @author lukas
  * @since 17.09.18
  */
-@UIScope
-@SpringComponent
+@View
 @Route(value = "report/:$PARAM", layout = MainView::class)
-class ReportView(private val dataService: DataService, avatarService: AvatarService) : Composite<Div>(), HasSecureParameter<String>, HasRoute {
-    private val version: Label
-    private val date: Label
-    private val installation: InstallationView
-    private val email: Label
-    private val comment: Label
-    private val mappedStacktraceLabel: Translatable<Label>
-    private val unmappedStacktraceLabel: Translatable<Label>
-    private val stacktrace: Label
-    private val attachments: Div
-    private val details: Card
-    private lateinit var report: Report
+@ParseParameter(ReportParser::class)
+class ReportView(private val dataService: DataService, avatarService: AvatarService, @Qualifier(PARAM) private val report: Report) : Composite<Div>(),
+    HasRoute {
     private val prettyTime: PrettyTime = PrettyTime(Locale.US)
 
     init {
-        val summaryLayout = GridLayout()
-        summaryLayout.setTemplateColumns(MaxContent(), MaxContent())
-        summaryLayout.setColumnGap(1, Unit.EM)
-        summaryLayout.setJustifyItems(JustifyItems.START)
-        summaryLayout.setAlignItems(Align.FIRST_BASELINE)
-        val installationLabel = Translatable.createLabel(Messages.USER).with { secondary() }
-        version = Label()
-        date = Label()
-        installation = InstallationView(avatarService)
-        email = Label()
-        comment = Label()
-        mappedStacktraceLabel = Translatable.createLabel(Messages.DE_OBFUSCATED_STACKTRACE).with { secondary() }
-        unmappedStacktraceLabel = Translatable.createLabel(Messages.NO_MAPPING_STACKTRACE).with { secondary() }
-        stacktrace = Label().honorWhitespaces()
-        attachments = Div()
-        summaryLayout.add(Translatable.createLabel(Messages.VERSION).with { secondary() }, version, Translatable.createLabel(Messages.DATE).with { secondary() }, date,
-                installationLabel, installation, Translatable.createLabel(Messages.EMAIL).with { secondary() }, email,
-                Translatable.createLabel(Messages.COMMENT).with { secondary() }, comment, mappedStacktraceLabel, unmappedStacktraceLabel, stacktrace,
-                Translatable.createLabel(Messages.ATTACHMENTS).with { secondary() }, attachments)
-        installationLabel.setAlignSelf(Align.CENTER)
-        val summary = Card(summaryLayout)
-        summary.setHeader(Translatable.createLabel(Messages.SUMMARY))
-        details = Card()
-        details.setHeader(Translatable.createLabel(Messages.DETAILS))
-        content.add(summary, details)
-    }
+        content {
+            card {
+                setHeader(Translatable.createLabel(Messages.SUMMARY))
+                gridLayout {
+                    setTemplateColumns(MaxContent(), MaxContent())
+                    setColumnGap(1, SizeUnit.EM)
+                    setJustifyItems(JustifyItems.START)
+                    setAlignItems(Align.FIRST_BASELINE)
 
-    override fun setParameterSecure(event: BeforeEvent?, parameter: String) {
-        dataService.findReport(parameter)?.let { r ->
-            report = r
-            version.text = report.stacktrace.version.name
-            date.text = prettyTime.formatUnrounded(report.date.toLocalDateTime())
-            installation.setInstallationId(report.installationId)
-            email.text = report.userEmail
-            comment.text = report.userComment
-            val mapping = report.stacktrace.version.mappings
-            stacktrace.text = mapping?.let { report.stacktrace.retrace(it) } ?: report.stacktrace.stacktrace
-            (if (mapping != null) unmappedStacktraceLabel else mappedStacktraceLabel).style["display"] = "none"
-            (if (mapping == null) unmappedStacktraceLabel else mappedStacktraceLabel).style["display"] = ""
-            attachments.removeAll()
-            attachments.add(*dataService.findAttachments(report).map {
-                Anchor(StreamResource(it.filename, InputStreamFactory { it.content.binaryStream }), it.filename).apply { element.setAttribute("download", true) }
-            }.toTypedArray())
-            details.removeContent()
-            details.add(getLayoutForMap(report.jsonObject.toMap()))
-        } ?: event?.rerouteToError(IllegalArgumentException::class.java) ?: throw IllegalArgumentException()
-    }
-
-    private fun getLayoutForMap(map: Map<String, *>): Component {
-        val layout = GridLayout()
-        layout.setTemplateColumns(MaxContent(), MaxContent())
-        layout.setColumnGap(1, Unit.EM)
-        layout.setJustifyItems(JustifyItems.START)
-        map.entries.sortedBy { it.key }.forEach { layout.add(Label(it.key).secondary(), getComponentForContent(it.value)) }
-        return layout
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun getComponentForContent(value: Any?): Component {
-        return when (value) {
-            is Map<*, *> -> getLayoutForMap(value as Map<String, *>)
-            is List<*> -> {
-                val values = value as List<Any>
-                val format = "%0${max(log10(values.size - 1.0), 0.0).toInt() + 1}d"
-                getLayoutForMap(values.mapIndexed { i, v -> String.format(format, i) to v }.toMap())
+                    translatableLabel(Messages.VERSION) { secondary() }
+                    label(report.stacktrace.version.name)
+                    translatableLabel(Messages.DATE) { secondary() }
+                    label(prettyTime.formatUnrounded(report.date.toLocalDateTime()))
+                    translatableLabel(Messages.USER) {
+                        secondary()
+                        setAlignSelf(Align.CENTER)
+                    }
+                    installationView(avatarService, report.installationId)
+                    translatableLabel(Messages.EMAIL) { secondary() }
+                    label(report.userEmail)
+                    translatableLabel(Messages.COMMENT) { secondary() }
+                    label(report.userComment)
+                    val mapping = report.stacktrace.version.mappings
+                    translatableLabel(if (mapping != null) Messages.DE_OBFUSCATED_STACKTRACE else Messages.NO_MAPPING_STACKTRACE) { secondary() }
+                    label(mapping?.let { report.stacktrace.retrace(it) } ?: report.stacktrace.stacktrace) { honorWhitespaces() }
+                    translatableLabel(Messages.ATTACHMENTS) { secondary() }
+                    div {
+                        forEach(dataService.findAttachments(report)) {
+                            anchor(StreamResource(it.filename, InputStreamFactory { it.content.binaryStream }), it.filename) {
+                                element.setAttribute("download", true)
+                            }
+                        }
+                    }
+                }
             }
-            else -> Label(value.toString()).honorWhitespaces()
+            card {
+                setHeader(Translatable.createLabel(Messages.DETAILS))
+                layoutForMap(report.jsonObject.toMap())
+            }
         }
     }
 
-    override val pathElement: Path.Element<*>
-        get() = ParametrizedTextElement(javaClass, report.id, Messages.REPORT_FROM, prettyTime.formatUnrounded(report.date.toLocalDateTime()))
+    private fun HasComponents.layoutForMap(map: Map<String, *>) {
+        gridLayout {
+            setTemplateColumns(MaxContent(), MaxContent())
+            setColumnGap(1, SizeUnit.EM)
+            setJustifyItems(JustifyItems.START)
 
-    override val logicalParent: HasRoute.Parent<ReportTab>
-        get() = parent(report.stacktrace.bug.id)
+            forEach(map.entries.sortedBy { it.key }) {
+                label(it.key) { secondary() }
+                componentForContent(it.value)
+            }
+        }
+    }
 
-    override fun parseParameter(parameter: String): String = parameter
+    @Suppress("UNCHECKED_CAST")
+    private fun HasComponents.componentForContent(value: Any?) {
+        when (value) {
+            is Map<*, *> -> layoutForMap(value as Map<String, *>)
+            is List<*> -> {
+                val values = value as List<Any>
+                val format = "%0${max(log10(values.size - 1.0), 0.0).toInt() + 1}d"
+                layoutForMap(values.mapIndexed { i, v -> String.format(format, i) to v }.toMap())
+            }
+            else -> label(value.toString()) { honorWhitespaces() }
+        }
+    }
+
+    override val pathElement: Path.Element<*> =
+        ParametrizedTextElement(javaClass, report.id, Messages.REPORT_FROM, prettyTime.formatUnrounded(report.date.toLocalDateTime()))
+
+    override val logicalParent: HasRoute.Parent<ReportTab> = HasRoute.ParametrizedParent(ReportTab::class.java, report.stacktrace.bug)
 }

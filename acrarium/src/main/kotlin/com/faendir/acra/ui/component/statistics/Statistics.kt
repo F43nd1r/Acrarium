@@ -21,7 +21,7 @@ import com.faendir.acra.model.QReport
 import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.Card
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.ui.ext.Unit
+import com.faendir.acra.ui.ext.SizeUnit
 import com.faendir.acra.ui.ext.setWidth
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.vaadin.flow.component.Composite
@@ -29,9 +29,6 @@ import com.vaadin.flow.component.formlayout.FormLayout
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.component.textfield.NumberField
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 /**
  * @author lukas
@@ -46,7 +43,7 @@ class Statistics(app: App, private val baseExpression: BooleanExpression?, dataS
         filterLayout.setWidthFull()
         val card = Card(filterLayout)
         card.setHeader(Translatable.createLabel(Messages.FILTER))
-        card.setWidth(500, Unit.PIXEL)
+        card.setWidth(500, SizeUnit.PIXEL)
         val dayStepper = NumberField()
         dayStepper.value = 30.0
         val factory = Property.Factory(dataService, baseExpression, app)

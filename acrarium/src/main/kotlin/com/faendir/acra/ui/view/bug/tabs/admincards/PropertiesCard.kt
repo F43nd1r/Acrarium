@@ -18,31 +18,34 @@ package com.faendir.acra.ui.view.bug.tabs.admincards
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.Bug
 import com.faendir.acra.service.DataService
+import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.ext.flexLayout
+import com.faendir.acra.ui.ext.translatableButton
+import com.faendir.acra.ui.ext.translatableTextArea
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
+import org.springframework.beans.factory.annotation.Qualifier
 
 @UIScope
 @SpringComponent
-class PropertiesCard(dataService: DataService) : AdminCard(dataService) {
+class PropertiesCard(dataService: DataService, @Qualifier(PARAM) bug: Bug) : AdminCard(dataService) {
 
     init {
         setHeader(Translatable.createLabel(Messages.PROPERTIES))
-    }
-
-    override fun init(bug: Bug) {
-        removeContent()
-        val title = Translatable.createTextArea(Messages.TITLE).with { value = bug.title }
-        title.setWidthFull()
-        val save = Translatable.createButton(Messages.SAVE) {
-            bug.title = title.content.value
-            dataService.store(bug)
+        flexLayout {
+            setFlexDirection(FlexLayout.FlexDirection.COLUMN)
+            alignItems = FlexComponent.Alignment.END
+            val title = translatableTextArea(Messages.TITLE) {
+                value = bug.title
+                setWidthFull()
+            }
+            translatableButton(Messages.SAVE) {
+                bug.title = title.content.value
+                dataService.store(bug)
+            }
         }
-        val layout = FlexLayout(title, save)
-        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN)
-        layout.alignItems = FlexComponent.Alignment.END
-        add(layout)
     }
 }

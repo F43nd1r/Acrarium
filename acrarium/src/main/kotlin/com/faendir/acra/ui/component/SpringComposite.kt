@@ -18,7 +18,10 @@ package com.faendir.acra.ui.component
 import com.googlecode.gentyref.GenericTypeReflector
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.Composite
+import com.vaadin.flow.di.Instantiator
 import com.vaadin.flow.internal.ReflectTools
+import com.vaadin.flow.server.VaadinService
+import com.vaadin.flow.server.VaadinSession
 import com.vaadin.flow.spring.annotation.SpringComponent
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -29,23 +32,13 @@ import java.lang.reflect.TypeVariable
 
 @SpringComponent
 abstract class SpringComposite<T : Component> : Composite<T>() {
-    private lateinit var applicationContext: ApplicationContext
 
     @Suppress("UNCHECKED_CAST")
     override fun initContent(): T {
         val contentType = findContentType(javaClass as Class<out Composite<*>?>)
         return if (AnnotationUtils.findAnnotation(contentType, org.springframework.stereotype.Component::class.java) != null) {
-            if (::applicationContext.isInitialized) {
-                applicationContext.getBean(contentType) as T
-            } else {
-                throw IllegalStateException("Cannot access Composite content before bean initialization")
-            }
+            VaadinService.getCurrent().instantiator.createComponent(contentType) as T
         } else ReflectTools.createInstance(contentType) as T
-    }
-
-    @Autowired
-    fun setApplicationContext(applicationContext: ApplicationContext) {
-        this.applicationContext = applicationContext
     }
 
     companion object {

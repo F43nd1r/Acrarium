@@ -22,15 +22,13 @@ import com.faendir.acra.model.QMailSettings
 import com.faendir.acra.model.QReport
 import com.faendir.acra.model.QStacktrace
 import com.faendir.acra.model.User
-import com.faendir.acra.ui.base.HasSecureParameter
-import com.faendir.acra.ui.base.HasSecureParameter.Companion.PARAM
+import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
 import com.faendir.acra.util.ensureTrailing
 import com.querydsl.core.Tuple
 import com.querydsl.jpa.impl.JPAQuery
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.i18n.I18NProvider
-import com.vaadin.flow.router.HasUrlParameter
 import com.vaadin.flow.router.RouteConfiguration
 import com.vaadin.flow.router.RouteParameters
 import org.springframework.beans.factory.annotation.Value
@@ -47,7 +45,6 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
-import java.util.stream.Collectors
 import java.util.stream.LongStream
 import javax.mail.MessagingException
 import javax.persistence.EntityManager
@@ -150,7 +147,7 @@ class MailService(private val entityManager: EntityManager, private val i18nProv
         return i18nProvider.getTranslation(messageId, Locale.ENGLISH, *params)
     }
 
-    private fun <T, C> getFullUrl(navigationTarget: Class<out C?>, parameter: T): String where C : Component, C : HasSecureParameter<T> {
+    private fun <T, C : Component > getFullUrl(navigationTarget: Class<out C?>, parameter: T): String {
         return baseUrl?.ensureTrailing("/") + routeConfiguration.getUrl(navigationTarget, RouteParameters(PARAM, parameter.toString()))
     }
 

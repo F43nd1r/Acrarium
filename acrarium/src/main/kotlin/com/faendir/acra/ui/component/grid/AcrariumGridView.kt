@@ -13,7 +13,7 @@ import kotlin.reflect.KMutableProperty0
 class AcrariumGridView<T>(
     dataProvider: QueryDslDataProvider<T>,
     gridSettings: KMutableProperty0<GridSettings?>,
-    initializer: AcrariumGrid<T>.() -> Unit
+    initializer: AcrariumGrid<T>.() -> Unit = {}
 ) :
     VerticalLayout() {
     val grid: AcrariumGrid<T> = AcrariumGrid(dataProvider, gridSettings.get()).apply {
@@ -25,7 +25,7 @@ class AcrariumGridView<T>(
     init {
         header = FlexLayout(
             Div().apply { setFlexGrow(1) }, //spacer
-            GridFilterMenu(grid).apply { content.setMarginRight(5.0, com.faendir.acra.ui.ext.Unit.PIXEL) },
+            GridFilterMenu(grid).apply { content.setMarginRight(5.0, com.faendir.acra.ui.ext.SizeUnit.PIXEL) },
             GridColumnMenu(grid)
         )
         header.setWidthFull()

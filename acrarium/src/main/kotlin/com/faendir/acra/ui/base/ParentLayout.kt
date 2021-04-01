@@ -33,7 +33,7 @@ open class ParentLayout() : FlexLayout(), RouterLayout {
     }
 
     private fun setContent(content: HasElement, root: HasElement) {
-        if (root === this) this._content = if (content is Component) content else null
+        this._content = if (content is Component) content else null
         if (root != this && root is RouterLayout) root.showRouterLayoutContent(content)
         else {
             root.element.removeAllChildren()

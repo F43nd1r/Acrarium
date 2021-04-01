@@ -22,19 +22,15 @@ import com.faendir.acra.model.QBug
 import com.faendir.acra.model.QReport
 import com.faendir.acra.model.Version
 import com.faendir.acra.model.view.VBug
+import com.faendir.acra.navigation.View
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.BugMerger
 import com.faendir.acra.service.DataService
 import com.faendir.acra.settings.LocalSettings
+import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.FluentDialog
-import com.faendir.acra.ui.component.grid.AcrariumGrid
 import com.faendir.acra.ui.component.grid.AcrariumGridView
-import com.faendir.acra.ui.component.grid.GridColumnMenu
-import com.faendir.acra.ui.component.grid.GridFilterMenu
-import com.faendir.acra.ui.ext.Unit
-import com.faendir.acra.ui.ext.setFlexGrow
-import com.faendir.acra.ui.ext.setMarginRight
 import com.faendir.acra.ui.view.app.AppView
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
 import com.faendir.acra.util.TimeSpanRenderer
@@ -42,36 +38,49 @@ import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.GridSortOrder
-import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.component.notification.Notification
-import com.vaadin.flow.component.orderedlayout.FlexComponent
-import com.vaadin.flow.component.orderedlayout.FlexLayout
-import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup
 import com.vaadin.flow.component.select.Select
 import com.vaadin.flow.data.renderer.ComponentRenderer
 import com.vaadin.flow.router.Route
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
+import org.springframework.beans.factory.annotation.Qualifier
 import java.util.*
 
 /**
  * @author lukas
  * @since 14.07.18
  */
-@UIScope
-@SpringComponent
+@View
 @Route(value = "bug", layout = AppView::class)
-class BugTab(dataService: DataService, private val bugMerger: BugMerger, private val localSettings: LocalSettings) :
-    AppTab<Div>(dataService) {
+class BugTab(private val dataService: DataService, private val bugMerger: BugMerger, private val localSettings: LocalSettings,
+             @Qualifier(PARAM) private val app: App) :
+    AppTab<AcrariumGridView<VBug>>(app) {
 
     init {
-        content.setSizeFull()
+        val mergeButton = Translatable.createButton(Messages.MERGE_BUGS) {
+            val selectedItems: List<VBug> = ArrayList(content.grid.selectedItems)
+            if (selectedItems.size > 1) {
+                val titles = RadioButtonGroup<String>()
+                titles.setItems(selectedItems.map { bug: VBug -> bug.bug.title })
+                titles.value = selectedItems[0].bug.title
+                FluentDialog().setTitle(Messages.CHOOSE_BUG_GROUP_TITLE).addComponent(titles).addCreateButton {
+                    bugMerger.mergeBugs(selectedItems.map { it.bug }, titles.value)
+                    this@BugTab.content.grid.deselectAll()
+                    this@BugTab.content.grid.dataProvider.refreshAll()
+                }.show()
+            } else {
+                Notification.show(Messages.ONLY_ONE_BUG_SELECTED)
+            }
+        }.with {
+            isEnabled = false
+            removeThemeVariants(ButtonVariant.LUMO_PRIMARY)
+        }
+        content.grid.asMultiSelect().addSelectionListener { mergeButton.content.isEnabled = it.allSelectedItems.size >= 2 }
+        content.header.addComponentAsFirst(mergeButton)
     }
 
-    override fun init(app: App) {
-        content.removeAll()
-        val gridView = AcrariumGridView(dataService.getBugProvider(app), localSettings::bugGridSettings) {
+    override fun initContent(): AcrariumGridView<VBug> {
+        return AcrariumGridView(dataService.getBugProvider(app), localSettings::bugGridSettings) {
             setSelectionMode(Grid.SelectionMode.MULTI)
             addColumn { it.reportCount }.setSortable(QReport.report.count()).setCaption(Messages.REPORTS)
             val dateColumn = addColumn(TimeSpanRenderer { it.lastReport }).setSortable(QReport.report.date.max()).setCaption(Messages.LATEST_REPORT)
@@ -95,26 +104,5 @@ class BugTab(dataService: DataService, private val bugMerger: BugMerger, private
                 .setFilterable(QBug.bug.solvedVersion.isNull, true, Messages.HIDE_SOLVED)
             addOnClickNavigation(ReportTab::class.java) { it.bug.id }
         }
-        val mergeButton = Translatable.createButton(Messages.MERGE_BUGS) {
-            val selectedItems: List<VBug> = ArrayList(gridView.grid.selectedItems)
-            if (selectedItems.size > 1) {
-                val titles = RadioButtonGroup<String>()
-                titles.setItems(selectedItems.map { bug: VBug -> bug.bug.title })
-                titles.value = selectedItems[0].bug.title
-                FluentDialog().setTitle(Messages.CHOOSE_BUG_GROUP_TITLE).addComponent(titles).addCreateButton {
-                    bugMerger.mergeBugs(selectedItems.map { it.bug }, titles.value)
-                    gridView.grid.deselectAll()
-                    gridView.grid.dataProvider.refreshAll()
-                }.show()
-            } else {
-                Notification.show(Messages.ONLY_ONE_BUG_SELECTED)
-            }
-        }.with {
-            isEnabled = false
-            removeThemeVariants(ButtonVariant.LUMO_PRIMARY)
-        }
-        gridView.grid.asMultiSelect().addSelectionListener { mergeButton.content.isEnabled = it.allSelectedItems.size >= 2 }
-        gridView.header.addComponentAsFirst(mergeButton)
-        content.add(gridView)
     }
 }

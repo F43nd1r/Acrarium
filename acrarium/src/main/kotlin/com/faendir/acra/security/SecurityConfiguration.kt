@@ -16,9 +16,12 @@
 package com.faendir.acra.security
 
 import com.faendir.acra.model.User
+import com.faendir.acra.navigation.LoginRequestCache
 import com.faendir.acra.rest.RestApiInterface.Companion.API_PATH
 import com.faendir.acra.rest.RestReportInterface.Companion.REPORT_PATH
 import com.faendir.acra.service.UserService
+import com.faendir.acra.ui.view.login.LoginView
+import com.faendir.acra.ui.view.login.SetupView
 import org.apache.commons.text.CharacterPredicate
 import org.apache.commons.text.RandomStringGenerator
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest
@@ -43,6 +46,9 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint
 import java.security.SecureRandom
+import org.springframework.security.config.annotation.web.builders.WebSecurity
+import java.lang.Exception
+
 
 /**
  * @author Lukas
@@ -52,6 +58,7 @@ import java.security.SecureRandom
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 class SecurityConfiguration(private val userService: UserService) : WebSecurityConfigurerAdapter() {
+
     override fun configure(auth: AuthenticationManagerBuilder) {
         auth.authenticationProvider(object : AuthenticationProvider {
             override fun authenticate(authentication: Authentication): Authentication? {
@@ -70,6 +77,18 @@ class SecurityConfiguration(private val userService: UserService) : WebSecurityC
                 return UsernamePasswordAuthenticationToken::class.java.isAssignableFrom(authentication)
             }
         })
+    }
+
+    override fun configure(web: WebSecurity) {
+        web.ignoring().antMatchers(
+            "/VAADIN/**",
+            "/favicon.ico",
+            "/robots.txt",
+            "/frontend/**",
+            "/webjars/**",
+            "/frontend-es5/**",
+            "/frontend-es6/**"
+        )
     }
 
     @Configuration
@@ -114,13 +133,22 @@ class SecurityConfiguration(private val userService: UserService) : WebSecurityC
     @Configuration
     @Order(4)
     class VaadinConfigurer : WebSecurityConfigurerAdapter() {
+        private val requestCache = LoginRequestCache()
+
         override fun configure(http: HttpSecurity) {
             http.csrf().disable()
                 .headers().disable()
-                .anonymous().disable()
-                .exceptionHandling().authenticationEntryPoint(Http403ForbiddenEntryPoint()).and()
-                .sessionManagement()
+                .requestCache().requestCache(requestCache)
+                .and().authorizeRequests()
+                .requestMatchers(SecurityUtils::isFrameworkInternalRequest).permitAll()
+                .regexMatchers("/${SetupView.ROUTE}").permitAll()
+                .anyRequest().authenticated()
+                .and().formLogin().loginPage("/${LoginView.ROUTE}").permitAll()
+                .and().sessionManagement()
         }
+
+        @Bean
+        fun requestCache(): LoginRequestCache = requestCache
     }
 
     @Bean(name = [BeanIds.AUTHENTICATION_MANAGER])

@@ -16,13 +16,17 @@
 package com.faendir.acra.ui.view.app.tabs
 
 import com.faendir.acra.model.App
-import com.faendir.acra.service.DataService
+import com.faendir.acra.navigation.AppParser
+import com.faendir.acra.navigation.ParseParameter
 import com.faendir.acra.ui.base.TabView
-import com.faendir.acra.util.toNullable
 import com.vaadin.flow.component.Component
 
 /**
  * @author lukas
  * @since 14.07.18
  */
-abstract class AppTab<T : Component>(dataService: DataService) : TabView.Tab<T, App>(dataService, DataService::findApp, App::id, App::name, { null })
+@ParseParameter(AppParser::class)
+abstract class AppTab<T : Component>(app: App) : TabView.Tab<T>() {
+    override val id: Int = app.id
+    override val name: String = app.name
+}

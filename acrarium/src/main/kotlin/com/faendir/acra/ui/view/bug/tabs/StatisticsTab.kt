@@ -17,29 +17,23 @@ package com.faendir.acra.ui.view.bug.tabs
 
 import com.faendir.acra.model.Bug
 import com.faendir.acra.model.QReport
+import com.faendir.acra.navigation.View
 import com.faendir.acra.service.DataService
+import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.statistics.Statistics
 import com.faendir.acra.ui.view.bug.BugView
-import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.router.Route
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
+import org.springframework.beans.factory.annotation.Qualifier
 
 /**
  * @author lukas
  * @since 11.10.18
  */
-@UIScope
-@SpringComponent("bugStatisticsTab")
+@View("bugStatisticsTab")
 @Route(value = "statistics", layout = BugView::class)
-class StatisticsTab(dataService: DataService) : BugTab<Div>(dataService) {
+class StatisticsTab(private val dataService: DataService, @Qualifier(PARAM) private val bug: Bug) : BugTab<Statistics>(bug) {
 
-    init {
-        content.setSizeFull()
-    }
-
-    override fun init(bug: Bug) {
-        content.removeAll()
-        content.add(Statistics(bug.app, QReport.report.stacktrace.bug.eq(bug), dataService))
+    override fun initContent(): Statistics {
+        return Statistics(bug.app, QReport.report.stacktrace.bug.eq(bug), dataService)
     }
 }

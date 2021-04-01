@@ -39,8 +39,7 @@ class SpringRouteConfigurationInitializer : AbstractRouteRegistryInitializer() {
         return RouteConfiguration.forRegistry(registry).also { it.update { setAnnotatedRoutes(it, routes) } }
     }
 
-    private fun setAnnotatedRoutes(routeConfiguration: RouteConfiguration,
-                                   routes: Set<Class<out Component?>>) {
+    private fun setAnnotatedRoutes(routeConfiguration: RouteConfiguration, routes: Set<Class<out Component>>) {
         routeConfiguration.handledRegistry.clean()
         routes.forEach {
             try {

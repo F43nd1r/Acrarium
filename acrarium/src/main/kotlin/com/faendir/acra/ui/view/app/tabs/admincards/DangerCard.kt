@@ -19,19 +19,21 @@ import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.App
 import com.faendir.acra.model.QReport
 import com.faendir.acra.service.DataService
-import com.faendir.acra.ui.component.Box
+import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.ConfigurationLabel
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.FluentDialog
+import com.faendir.acra.ui.ext.box
 import com.faendir.acra.ui.view.Overview
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 
 @UIScope
 @SpringComponent
-class DangerCard(dataService: DataService) : AdminCard(dataService) {
+class DangerCard(dataService: DataService, @Qualifier(PARAM) app: App) : AdminCard(dataService) {
 
     @Value("\${server.context-path}")
     private val baseUrl: String? = null
@@ -40,27 +42,23 @@ class DangerCard(dataService: DataService) : AdminCard(dataService) {
         setHeader(Translatable.createLabel(Messages.DANGER_ZONE))
         enableDivider()
         setHeaderColor("var(--lumo-error-contrast-color)", "var(--lumo-error-color)")
-    }
-
-    override fun init(app: App) {
-        removeContent()
-        val configBox = Box(Translatable.createLabel(Messages.NEW_ACRA_CONFIG), Translatable.createLabel(Messages.NEW_ACRA_CONFIG_DETAILS), Translatable.createButton(Messages.CREATE) {
+        box(Messages.NEW_ACRA_CONFIG, Messages.NEW_ACRA_CONFIG_DETAILS, Messages.CREATE) {
             FluentDialog().addText(Messages.NEW_ACRA_CONFIG_CONFIRM)
-                    .addConfirmButtons { FluentDialog().addComponent(ConfigurationLabel(baseUrl, dataService.recreateReporterUser(app))).addCloseButton().show() }
-                    .show()
-        })
-        val matchingBox = Box(Translatable.createLabel(Messages.NEW_BUG_CONFIG), Translatable.createLabel(Messages.NEW_BUG_CONFIG_DETAILS), Translatable.createButton(Messages.CONFIGURE) {
+                .addConfirmButtons { FluentDialog().addComponent(ConfigurationLabel(baseUrl, dataService.recreateReporterUser(app))).addCloseButton().show() }
+                .show()
+        }
+        box(Messages.NEW_BUG_CONFIG, Messages.NEW_BUG_CONFIG_DETAILS, Messages.CONFIGURE) {
             val score = Translatable.createRangeField(Messages.SCORE).with {
                 min = 0.0
                 max = 100.0
                 value = app.configuration.minScore.toDouble()
             }
             FluentDialog().addComponent(score)
-                    .addText(Messages.NEW_BUG_CONFIG_CONFIRM)
-                    .addConfirmButtons { dataService.changeConfiguration(app, App.Configuration(score.value.toInt())) }
-                    .show()
-        })
-        val purgeAgeBox = Box(Translatable.createLabel(Messages.PURGE_OLD), Translatable.createLabel(Messages.PURGE_OLD_DETAILS), Translatable.createButton(Messages.PURGE) {
+                .addText(Messages.NEW_BUG_CONFIG_CONFIRM)
+                .addConfirmButtons { dataService.changeConfiguration(app, App.Configuration(score.value.toInt())) }
+                .show()
+        }
+        box(Messages.PURGE_OLD, Messages.PURGE_OLD_DETAILS, Messages.PURGE) {
             val age = Translatable.createNumberField(Messages.REPORTS_OLDER_THAN1).with {
                 value = 30.0
                 step = 1.0
@@ -70,25 +68,25 @@ class DangerCard(dataService: DataService) : AdminCard(dataService) {
                 suffixComponent = Translatable.createLabel(Messages.REPORTS_OLDER_THAN2)
             }
             FluentDialog().addComponent(age)
-                    .setTitle(Messages.PURGE)
-                    .addConfirmButtons { dataService.deleteReportsOlderThanDays(app, age.value.toInt()) }.show()
-        })
-        val purgeVersionBox = Box(Translatable.createLabel(Messages.PURGE_VERSION), Translatable.createLabel(Messages.PURGE_VERSION_DETAILS), Translatable.createButton(Messages.PURGE) {
-            val versionBox = Translatable.createComboBox(dataService.getFromReports(app, null, QReport.report.stacktrace.version.code), Messages.REPORTS_BEFORE_VERSION)
+                .setTitle(Messages.PURGE)
+                .addConfirmButtons { dataService.deleteReportsOlderThanDays(app, age.value.toInt()) }.show()
+        }
+        box(Messages.PURGE_VERSION, Messages.PURGE_VERSION_DETAILS, Messages.PURGE) {
+            val versionBox =
+                Translatable.createComboBox(dataService.getFromReports(app, null, QReport.report.stacktrace.version.code), Messages.REPORTS_BEFORE_VERSION)
             FluentDialog().addComponent(versionBox)
-                    .setTitle(Messages.PURGE)
-                    .addConfirmButtons {
-                        if (versionBox.value != null) {
-                            dataService.deleteReportsBeforeVersion(app, versionBox.value!!)
-                        }
-                    }.show()
-        })
-        val deleteBox = Box(Translatable.createLabel(Messages.DELETE_APP), Translatable.createLabel(Messages.DELETE_APP_DETAILS), Translatable.createButton(Messages.DELETE) {
+                .setTitle(Messages.PURGE)
+                .addConfirmButtons {
+                    if (versionBox.value != null) {
+                        dataService.deleteReportsBeforeVersion(app, versionBox.value!!)
+                    }
+                }.show()
+        }
+        box(Messages.DELETE_APP, Messages.DELETE_APP_DETAILS, Messages.DELETE) {
             FluentDialog().addText(Messages.DELETE_APP_CONFIRM).addConfirmButtons {
                 dataService.deleteApp(app)
                 UI.getCurrent().navigate(Overview::class.java)
             }.show()
-        })
-        add(configBox, matchingBox, purgeAgeBox, purgeVersionBox, deleteBox)
+        }
     }
 }

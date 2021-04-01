@@ -16,27 +16,24 @@
 package com.faendir.acra.ui.component
 
 import com.faendir.acra.ui.base.HasRoute
-import com.faendir.acra.ui.base.HasSecureParameter
-import com.faendir.acra.ui.base.HasSecureParameter.Companion.PARAM
+import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.base.TranslatableText
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.DetachEvent
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.tabs.Tab
-import com.vaadin.flow.component.tabs.Tabs.SelectedChangeEvent
 import com.vaadin.flow.router.AfterNavigationEvent
 import com.vaadin.flow.router.AfterNavigationListener
-import com.vaadin.flow.router.HasUrlParameter
 import com.vaadin.flow.router.RouteParameters
 import com.vaadin.flow.shared.Registration
-import org.springframework.context.ApplicationContext
+import org.springframework.context.support.GenericApplicationContext
 
 /**
  * @author lukas
  * @since 18.10.18
  */
-class Path(private val applicationContext: ApplicationContext) : SubTabs(), AfterNavigationListener {
+class Path(private val applicationContext: GenericApplicationContext) : SubTabs(), AfterNavigationListener {
     private val actions: MutableMap<Tab, () -> Unit> = mutableMapOf()
     private var registration: Registration? = null
 
@@ -79,7 +76,7 @@ class Path(private val applicationContext: ApplicationContext) : SubTabs(), Afte
     }
 
     class ParametrizedTextElement<T, P>(target: Class<T>, private val parameter: P, titleId: String, vararg params: Any) : Element<T>(target, titleId, *params)
-            where T : Component, T : HasSecureParameter<P> {
+            where T : Component {
         override val action: () -> Unit = { UI.getCurrent().navigate(target, RouteParameters(PARAM, parameter.toString())) }
     }
 }

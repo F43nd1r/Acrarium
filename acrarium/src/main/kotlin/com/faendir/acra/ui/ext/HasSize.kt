@@ -19,49 +19,49 @@ package com.faendir.acra.ui.ext
 import com.vaadin.flow.component.HasSize
 
 
-enum class Unit(val text: String) {
+enum class SizeUnit(val text: String) {
     PERCENTAGE("%"), 
     PIXEL("px"), 
     REM("rem"), 
     EM("em");
 }
 
-fun HasSize.setWidth(value: Int, unit: Unit) {
+fun HasSize.setWidth(value: Int, unit: SizeUnit) {
     width = value.toString() + unit.text
 }
 
-fun HasSize.setMaxWidth(value: Int, unit: Unit) {
+fun HasSize.setMaxWidth(value: Int, unit: SizeUnit) {
     maxWidth = value.toString() + unit.text
 }
 
 fun HasSize.setMaxWidthFull() {
-    setMaxWidth(100, Unit.PERCENTAGE)
+    setMaxWidth(100, SizeUnit.PERCENTAGE)
 }
 
-fun HasSize.setMinWidth(value: Int, unit: Unit) {
+fun HasSize.setMinWidth(value: Int, unit: SizeUnit) {
     minWidth = value.toString() + unit.text
 }
 
 fun HasSize.setMinWidthFull() {
-    setMinWidth(100, Unit.PERCENTAGE)
+    setMinWidth(100, SizeUnit.PERCENTAGE)
 }
 
-fun HasSize.setHeight(value: Int, unit: Unit) {
+fun HasSize.setHeight(value: Int, unit: SizeUnit) {
     height = value.toString() + unit.text
 }
 
-fun HasSize.setMaxHeight(value: Int, unit: Unit) {
+fun HasSize.setMaxHeight(value: Int, unit: SizeUnit) {
     maxHeight = value.toString() + unit.text
 }
 
 fun HasSize.setMaxHeightFull() {
-    setMaxHeight(100, Unit.PERCENTAGE)
+    setMaxHeight(100, SizeUnit.PERCENTAGE)
 }
 
-fun HasSize.setMinHeight(value: Int, unit: Unit) {
+fun HasSize.setMinHeight(value: Int, unit: SizeUnit) {
     minHeight =  value.toString() + unit.text
 }
 
 fun HasSize.setMinHeightFull() {
-    setMinHeight(100, Unit.PERCENTAGE)
+    setMinHeight(100, SizeUnit.PERCENTAGE)
 }

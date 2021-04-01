@@ -16,32 +16,24 @@
 package com.faendir.acra.ui.view.bug.tabs
 
 import com.faendir.acra.model.Bug
-import com.faendir.acra.service.DataService
+import com.faendir.acra.navigation.View
 import com.faendir.acra.ui.base.CardView
+import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.view.bug.BugView
 import com.faendir.acra.ui.view.bug.tabs.admincards.AdminCard
 import com.faendir.acra.ui.view.bug.tabs.admincards.DangerCard
 import com.faendir.acra.ui.view.bug.tabs.admincards.PropertiesCard
 import com.vaadin.flow.router.Route
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
-import org.springframework.beans.factory.annotation.Autowired
-import javax.annotation.PostConstruct
+import org.springframework.beans.factory.annotation.Qualifier
 
 /**
  * @author lukas
  * @since 18.10.18
  */
-@UIScope
-@SpringComponent("bugAdminTab")
+@View("bugAdminTab")
 @Route(value = "admin", layout = BugView::class)
-class AdminTab(dataService: DataService) : BugTab<CardView<AdminCard, Bug>>(dataService) {
-    @PostConstruct
-    fun setupContent() {
+class AdminTab(@Qualifier(PARAM) bug: Bug) : BugTab<CardView<AdminCard, Bug>>(bug) {
+    init {
         content.add(PropertiesCard::class.java, DangerCard::class.java)
-    }
-
-    override fun init(bug: Bug) {
-        content.init(bug)
     }
 }

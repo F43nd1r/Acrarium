@@ -16,6 +16,7 @@
 package com.faendir.acra.ui.view.user
 
 import com.faendir.acra.i18n.Messages
+import com.faendir.acra.navigation.View
 import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.base.HasAcrariumTitle
 import com.faendir.acra.ui.base.TranslatableText
@@ -36,8 +37,7 @@ import org.springframework.lang.NonNull
  * @author lukas
  * @since 26.02.19
  */
-@UIScope
-@SpringComponent
+@View
 @Route(value = "account", layout = MainView::class)
 class AccountView constructor(@field:NonNull @param:NonNull private val userService: UserService) : Composite<FlexLayout>(), HasAcrariumTitle {
 

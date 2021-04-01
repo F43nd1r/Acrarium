@@ -16,8 +16,8 @@
 package com.faendir.acra.ui.view.app.tabs
 
 import com.faendir.acra.model.App
-import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.base.CardView
+import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.view.app.AppView
 import com.faendir.acra.ui.view.app.tabs.admincards.AdminCard
 import com.faendir.acra.ui.view.app.tabs.admincards.DangerCard
@@ -27,7 +27,7 @@ import com.faendir.acra.ui.view.app.tabs.admincards.VersionCard
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
-import javax.annotation.PostConstruct
+import org.springframework.beans.factory.annotation.Qualifier
 
 /**
  * @author lukas
@@ -36,13 +36,8 @@ import javax.annotation.PostConstruct
 @UIScope
 @SpringComponent
 @Route(value = "admin", layout = AppView::class)
-class AdminTab(dataService: DataService) : AppTab<CardView<AdminCard, App>>(dataService) {
-    @PostConstruct
-    fun setupContent() {
+class AdminTab(@Qualifier(PARAM) app: App) : AppTab<CardView<AdminCard, App>>(app) {
+    init {
         content.add(VersionCard::class.java, NotificationCard::class.java, ExportCard::class.java, DangerCard::class.java)
-    }
-
-    override fun init(app: App) {
-        content.init(app)
     }
 }

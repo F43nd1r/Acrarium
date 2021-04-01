@@ -17,7 +17,7 @@ package com.faendir.acra.ui.component.statistics
 
 import com.faendir.acra.ui.component.Card
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.ui.ext.Unit
+import com.faendir.acra.ui.ext.SizeUnit
 import com.faendir.acra.ui.ext.setMaxWidthFull
 import com.faendir.acra.ui.ext.setWidth
 import com.github.appreciated.apexcharts.ApexCharts
@@ -30,7 +30,7 @@ import com.vaadin.flow.component.Composite
 internal abstract class Chart<T>(captionId: String, vararg params: Any) : Composite<Card>() {
 
     init {
-        content.setWidth(500, Unit.PIXEL)
+        content.setWidth(500, SizeUnit.PIXEL)
         content.setMaxWidthFull()
         content.setHeader(Translatable.createLabel(captionId, *params))
     }

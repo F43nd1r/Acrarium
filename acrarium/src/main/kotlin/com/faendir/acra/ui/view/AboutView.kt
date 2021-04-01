@@ -16,6 +16,7 @@
 package com.faendir.acra.ui.view
 
 import com.faendir.acra.i18n.Messages
+import com.faendir.acra.navigation.View
 import com.faendir.acra.ui.base.HasAcrariumTitle
 import com.faendir.acra.ui.base.TranslatableText
 import com.faendir.acra.ui.component.Translatable
@@ -25,8 +26,6 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.router.Route
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.info.BuildProperties
 
@@ -36,8 +35,7 @@ import org.springframework.boot.info.BuildProperties
  * @since 06.09.19
  */
 @Suppress("LeakingThis")
-@UIScope
-@SpringComponent
+@View
 @Route(value = "about", layout = MainView::class)
 class AboutView(@Autowired val buildProperties: BuildProperties) : FlexLayout(), HasAcrariumTitle {
 
