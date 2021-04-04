@@ -13,10 +13,10 @@ import kotlin.reflect.KMutableProperty0
 class AcrariumGridView<T>(
     dataProvider: QueryDslDataProvider<T>,
     gridSettings: KMutableProperty0<GridSettings?>,
-    initializer: AcrariumGrid<T>.() -> Unit = {}
+    initializer: QueryDslAcrariumGrid<T>.() -> Unit = {}
 ) :
     VerticalLayout() {
-    val grid: AcrariumGrid<T> = AcrariumGrid(dataProvider, gridSettings.get()).apply {
+    val grid: QueryDslAcrariumGrid<T> = QueryDslAcrariumGrid(dataProvider, gridSettings.get()).apply {
         initializer()
         loadLayout()
         addOnLayoutChangedListener { gridSettings.set(it) }

@@ -22,6 +22,9 @@ import org.hibernate.annotations.OnDeleteAction
 import javax.persistence.Access
 import javax.persistence.AccessType
 import javax.persistence.CascadeType
+import javax.persistence.CollectionTable
+import javax.persistence.Column
+import javax.persistence.ElementCollection
 import javax.persistence.Embeddable
 import javax.persistence.Entity
 import javax.persistence.FetchType
@@ -35,11 +38,13 @@ import javax.persistence.OneToOne
  * @since 08.12.2017
  */
 @Entity
-class App(val name: String,
-          @JsonIgnore
-          @OneToOne(cascade = [CascadeType.ALL], optional = false, orphanRemoval = true, fetch = FetchType.LAZY)
-          @OnDelete(action = OnDeleteAction.CASCADE)
-          var reporter: User) {
+class App(
+    val name: String,
+    @JsonIgnore
+    @OneToOne(cascade = [CascadeType.ALL], optional = false, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    var reporter: User
+) {
 
     var configuration: Configuration = Configuration()
 
@@ -52,5 +57,11 @@ class App(val name: String,
     override fun hashCode() = id
 
     @Embeddable
-    class Configuration(@Access(AccessType.FIELD) val minScore: Int = 95)
+    class Configuration(
+        var minScore: Int = 95,
+        @ElementCollection(fetch = FetchType.EAGER)
+        @CollectionTable(name = "app_report_columns")
+        @Column(name = "path")
+        var customReportColumns: MutableList<String> = mutableListOf()
+    )
 }

@@ -16,19 +16,23 @@
 package com.faendir.acra.ui.component
 
 import com.faendir.acra.dataprovider.QueryDslDataProvider
+import com.faendir.acra.dataprovider.QueryDslFilterWithParameter
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.App
 import com.faendir.acra.model.Permission
 import com.faendir.acra.model.QDevice
 import com.faendir.acra.model.QReport
+import com.faendir.acra.model.view.Queries
 import com.faendir.acra.model.view.VReport
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.AvatarService
 import com.faendir.acra.settings.LocalSettings
 import com.faendir.acra.ui.component.dialog.FluentDialog
 import com.faendir.acra.ui.component.grid.AcrariumGridView
+import com.faendir.acra.ui.component.grid.column
 import com.faendir.acra.ui.view.report.ReportView
 import com.faendir.acra.util.TimeSpanRenderer
+import com.querydsl.jpa.impl.JPAQuery
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.grid.Grid
@@ -37,6 +41,7 @@ import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.icon.Icon
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.data.renderer.ComponentRenderer
+import com.vaadin.flow.data.value.ValueChangeMode
 
 /**
  * @author lukas
@@ -73,6 +78,12 @@ class ReportList(
                 .setSortable(QReport.report.isSilent)
                 .setFilterable(QReport.report.isSilent.eq(false), false, Messages.HIDE_SILENT)
                 .setCaption(Messages.SILENT)
+            for ((index, column) in app.configuration.customReportColumns.withIndex()) {
+                column({it.customColumns[index]}) {
+                    setCaption(Messages.ONE_ARG, column)
+                    setSortableAndFilterable(Queries.customReportColumnExpression(column), Messages.ONE_ARG, column)
+                }
+            }
             if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
                 addColumn(ComponentRenderer { report ->
                     Button(Icon(VaadinIcon.TRASH)) {

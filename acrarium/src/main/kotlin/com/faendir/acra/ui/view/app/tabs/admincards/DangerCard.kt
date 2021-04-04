@@ -18,6 +18,7 @@ package com.faendir.acra.ui.view.app.tabs.admincards
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.App
 import com.faendir.acra.model.QReport
+import com.faendir.acra.navigation.View
 import com.faendir.acra.service.DataService
 import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.ConfigurationLabel
@@ -31,8 +32,7 @@ import com.vaadin.flow.spring.annotation.UIScope
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 
-@UIScope
-@SpringComponent
+@View
 class DangerCard(dataService: DataService, @Qualifier(PARAM) app: App) : AdminCard(dataService) {
 
     @Value("\${server.context-path}")

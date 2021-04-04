@@ -20,6 +20,7 @@ import com.faendir.acra.ui.base.CardView
 import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.view.app.AppView
 import com.faendir.acra.ui.view.app.tabs.admincards.AdminCard
+import com.faendir.acra.ui.view.app.tabs.admincards.CustomColumnCard
 import com.faendir.acra.ui.view.app.tabs.admincards.DangerCard
 import com.faendir.acra.ui.view.app.tabs.admincards.ExportCard
 import com.faendir.acra.ui.view.app.tabs.admincards.NotificationCard
@@ -38,6 +39,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 @Route(value = "admin", layout = AppView::class)
 class AdminTab(@Qualifier(PARAM) app: App) : AppTab<CardView<AdminCard, App>>(app) {
     init {
-        content.add(VersionCard::class.java, NotificationCard::class.java, ExportCard::class.java, DangerCard::class.java)
+        content.add(VersionCard::class.java, NotificationCard::class.java, ExportCard::class.java, CustomColumnCard::class.java, DangerCard::class.java)
     }
 }

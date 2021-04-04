@@ -15,11 +15,16 @@
  */
 package com.faendir.acra.model.view
 
+import com.faendir.acra.model.App
 import com.faendir.acra.model.QApp
 import com.faendir.acra.model.QBug
 import com.faendir.acra.model.QDevice
 import com.faendir.acra.model.QReport
 import com.faendir.acra.model.QStacktrace
+import com.querydsl.core.types.Expression
+import com.querydsl.core.types.Projections
+import com.querydsl.core.types.dsl.Expressions
+import com.querydsl.core.types.dsl.StringTemplate
 import com.querydsl.jpa.impl.JPAQuery
 import javax.persistence.EntityManager
 
@@ -56,18 +61,7 @@ object Queries {
     private val V_REPORT = JPAQuery<Any>().from(QReport.report)
         .leftJoin(QStacktrace.stacktrace1).on(QStacktrace.stacktrace1.eq(QReport.report.stacktrace))
         .leftJoin(QDevice.device1).on(QReport.report.phoneModel.eq(QDevice.device1.model).and(QReport.report.device.eq(QDevice.device1.device)))
-        .select(
-            QVReport(
-                QStacktrace.stacktrace1,
-                QReport.report.id,
-                QReport.report.date,
-                QReport.report.androidVersion,
-                QReport.report.phoneModel,
-                QReport.report.installationId,
-                QReport.report.isSilent,
-                QDevice.device1.marketingName.coalesce(QReport.report.phoneModel)
-            )
-        )
+
 
     fun selectVBug(entityManager: EntityManager): JPAQuery<VBug> {
         return V_BUG.clone(entityManager)
@@ -77,7 +71,25 @@ object Queries {
         return V_APP.clone(entityManager)
     }
 
-    fun selectVReport(entityManager: EntityManager): JPAQuery<VReport> {
-        return V_REPORT.clone(entityManager)
+    @Suppress("UNCHECKED_CAST")
+    fun selectVReport(entityManager: EntityManager, app: App): JPAQuery<VReport> {
+        return V_REPORT.clone(entityManager).select(
+            QVReport(
+                QStacktrace.stacktrace1,
+                QReport.report.id,
+                QReport.report.date,
+                QReport.report.androidVersion,
+                QReport.report.phoneModel,
+                QReport.report.installationId,
+                QReport.report.isSilent,
+                QDevice.device1.marketingName.coalesce(QReport.report.phoneModel),
+                Projections.list(*app.configuration.customReportColumns.map { customReportColumnExpression(it) }.toTypedArray()) as Expression<out List<String>>
+            )
+        )
     }
+
+    fun customReportColumnExpression(customColumn: String): StringTemplate = Expressions.stringTemplate(
+        "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(content, {0})), '')",
+        "$.$customColumn"
+    )
 }

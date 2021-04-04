@@ -8,10 +8,10 @@ import com.vaadin.flow.component.listbox.MultiSelectListBox
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.data.renderer.TextRenderer
 
-class GridColumnMenu(grid: AcrariumGrid<*>) : PopupButton(VaadinIcon.WRENCH) {
+class GridColumnMenu(grid: QueryDslAcrariumGrid<*>) : PopupButton(VaadinIcon.WRENCH) {
 
     init {
-        val content = MultiSelectListBox<AcrariumColumn<*>>()
+        val content = MultiSelectListBox<QueryDslAcrariumColumn<*>>()
         content.setRenderer(TextRenderer{ it.caption?.translate() })
         content.addSelectionListener { event ->
             event.addedSelection.forEach { it.isVisible = true }

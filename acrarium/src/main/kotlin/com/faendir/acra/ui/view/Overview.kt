@@ -30,7 +30,7 @@ import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.FluentDialog
 import com.faendir.acra.ui.component.dialog.ValidatedField
 import com.faendir.acra.ui.ext.SizeUnit
-import com.faendir.acra.ui.ext.acrariumGrid
+import com.faendir.acra.ui.ext.queryDslAcrariumGrid
 import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.flexLayout
 import com.faendir.acra.ui.ext.setMarginRight
@@ -57,7 +57,7 @@ class Overview(private val dataService: DataService) : Composite<VerticalLayout>
     init {
         content {
             setSizeFull()
-            val grid = acrariumGrid(dataService.getAppProvider()) {
+            val grid = queryDslAcrariumGrid(dataService.getAppProvider()) {
                 setSelectionMode(Grid.SelectionMode.NONE)
                 addColumn { it.name }.setSortable(QApp.app.name).setCaption(Messages.NAME).setFlexGrow(1)
                 addColumn { it.bugCount }.setSortable(QBug.bug.countDistinct()).setCaption(Messages.BUGS)

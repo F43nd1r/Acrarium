@@ -28,7 +28,7 @@ import com.faendir.acra.ui.base.TranslatableText
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.FluentDialog
 import com.faendir.acra.ui.component.dialog.ValidatedField
-import com.faendir.acra.ui.component.grid.AcrariumGrid
+import com.faendir.acra.ui.component.grid.QueryDslAcrariumGrid
 import com.faendir.acra.ui.view.main.MainView
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.Composite
@@ -38,8 +38,6 @@ import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.data.renderer.ComponentRenderer
 import com.vaadin.flow.router.Route
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
 
 /**
  * @author lukas
@@ -57,7 +55,7 @@ class UserManager(private val userService: UserService, private val dataService:
     override fun onAttach(attachEvent: AttachEvent) {
         super.onAttach(attachEvent)
         content.removeAll()
-        val userGrid = AcrariumGrid(userService.getUserProvider())
+        val userGrid = QueryDslAcrariumGrid(userService.getUserProvider())
         userGrid.setWidthFull()
         userGrid.setSelectionMode(Grid.SelectionMode.NONE)
         userGrid.addColumn { it.username }.setSortable(QUser.user.username).setCaption(Messages.USERNAME).flexGrow = 1

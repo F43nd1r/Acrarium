@@ -490,7 +490,7 @@
                                 <path>
                                     <groupId>com.faendir.querydsl</groupId>
                                     <artifactId>querydsl-kotlin</artifactId>
-                                    <version>4.3.4</version>
+                                    <version>4.3.5</version>
                                 </path>
                                 <path>
                                     <groupId>com.google.auto.service</groupId>

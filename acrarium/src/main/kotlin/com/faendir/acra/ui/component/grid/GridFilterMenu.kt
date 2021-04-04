@@ -6,7 +6,7 @@ import com.faendir.acra.ui.component.Translatable
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 
-class GridFilterMenu(grid: AcrariumGrid<*>) : PopupButton(VaadinIcon.FILTER) {
+class GridFilterMenu(grid: QueryDslAcrariumGrid<*>) : PopupButton(VaadinIcon.FILTER) {
 
     init {
         val content = VerticalLayout()

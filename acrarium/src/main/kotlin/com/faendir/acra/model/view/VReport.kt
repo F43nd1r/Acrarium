@@ -12,5 +12,6 @@ class VReport @QueryProjection constructor(
     val phoneModel: String,
     val installationId: String,
     val isSilent: Boolean,
-    val marketingName: String?
+    val marketingName: String?,
+    val customColumns: List<String>
 )

@@ -18,6 +18,7 @@ package com.faendir.acra.ui.view.app.tabs.admincards
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.App
 import com.faendir.acra.model.MailSettings
+import com.faendir.acra.navigation.View
 import com.faendir.acra.service.DataService
 import com.faendir.acra.service.UserService
 import com.faendir.acra.util.PARAM
@@ -33,8 +34,7 @@ import com.vaadin.flow.spring.annotation.UIScope
 import org.springframework.beans.factory.annotation.Qualifier
 import kotlin.reflect.KMutableProperty1
 
-@UIScope
-@SpringComponent
+@View
 class NotificationCard(userService: UserService, dataService: DataService, @Qualifier(PARAM) app: App) : AdminCard(dataService) {
     private val notificationLayout = GridLayout().apply {
         setTemplateColumns(Auto(), MaxContent())

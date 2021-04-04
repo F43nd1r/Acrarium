@@ -12,6 +12,7 @@ import com.faendir.acra.ui.component.Tab
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.UserEditor
 import com.faendir.acra.ui.component.grid.AcrariumGrid
+import com.faendir.acra.ui.component.grid.QueryDslAcrariumGrid
 import com.github.appreciated.layout.GridLayout
 import com.vaadin.flow.component.AbstractField
 import com.vaadin.flow.component.ClickEvent
@@ -20,6 +21,7 @@ import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.combobox.ComboBox
 import com.vaadin.flow.component.formlayout.FormLayout
+import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.html.Anchor
 import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.component.html.Image
@@ -80,8 +82,8 @@ fun HasComponents.userEditor(userService: UserService, user: User, isExistingUse
     add(UserEditor(userService, user, isExistingUser, onSuccess))
 }
 
-fun <T> HasComponents.acrariumGrid(dataProvider: QueryDslDataProvider<T>, initializer: AcrariumGrid<T>.() -> Unit): AcrariumGrid<T> {
-    val grid = AcrariumGrid(dataProvider)
+fun <T> HasComponents.queryDslAcrariumGrid(dataProvider: QueryDslDataProvider<T>, initializer: QueryDslAcrariumGrid<T>.() -> Unit): QueryDslAcrariumGrid<T> {
+    val grid = QueryDslAcrariumGrid(dataProvider)
     grid.initializer()
     add(grid)
     return grid
@@ -127,4 +129,8 @@ fun HasComponents.downloadButton(resource: AbstractStreamResource, captionId: St
 fun HasComponents.translatableTextArea(captionId: String, vararg params: Any, initializer: TextArea.() -> Unit = {})
         : Translatable.ValidatedValue<TextArea, AbstractField.ComponentValueChangeEvent<TextArea, String>, String> {
     return Translatable.createTextArea(captionId, *params).with(initializer).also { add(it) }
+}
+
+fun <T> HasComponents.acrariumGrid(content: Collection<T>, initializer: AcrariumGrid<T>.() -> Unit): Grid<T> {
+    return AcrariumGrid<T>().apply { setItems(content) }.apply(initializer).also { add(it) }
 }

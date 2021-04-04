@@ -19,6 +19,7 @@ import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.App
 import com.faendir.acra.model.Permission
 import com.faendir.acra.model.QVersion
+import com.faendir.acra.navigation.View
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.DataService
 import com.faendir.acra.util.PARAM
@@ -26,7 +27,7 @@ import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.FluentDialog
 import com.faendir.acra.ui.component.dialog.VersionEditorDialog
 import com.faendir.acra.ui.ext.SizeUnit
-import com.faendir.acra.ui.ext.acrariumGrid
+import com.faendir.acra.ui.ext.queryDslAcrariumGrid
 import com.faendir.acra.ui.ext.setHeight
 import com.faendir.acra.ui.ext.setMinHeight
 import com.vaadin.flow.component.button.Button
@@ -38,13 +39,12 @@ import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
 import org.springframework.beans.factory.annotation.Qualifier
 
-@UIScope
-@SpringComponent
+@View
 class VersionCard(dataService: DataService, @Qualifier(PARAM) app: App) : AdminCard(dataService) {
 
     init {
         setHeader(Translatable.createLabel(Messages.VERSIONS))
-        acrariumGrid(dataService.getVersionProvider(app)) {
+        queryDslAcrariumGrid(dataService.getVersionProvider(app)) {
             setMinHeight(280, SizeUnit.PIXEL)
             setHeight(100, SizeUnit.PERCENTAGE)
             addColumn { it.code }.setSortable(QVersion.version.code).setCaption(Messages.VERSION_CODE).flexGrow = 1

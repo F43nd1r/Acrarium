@@ -18,6 +18,7 @@ package com.faendir.acra.ui.view.app.tabs.admincards
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.App
 import com.faendir.acra.model.QReport
+import com.faendir.acra.navigation.View
 import com.faendir.acra.service.DataService
 import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.Translatable
@@ -32,8 +33,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 
-@UIScope
-@SpringComponent
+@View
 class ExportCard(dataService: DataService, @Qualifier(PARAM) app: App) : AdminCard(dataService) {
     init {
         setHeader(Translatable.createLabel(Messages.EXPORT))

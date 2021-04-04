@@ -17,6 +17,7 @@ package com.faendir.acra.ui.view.bug.tabs.admincards
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.Bug
+import com.faendir.acra.navigation.View
 import com.faendir.acra.service.DataService
 import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.Translatable
@@ -28,8 +29,7 @@ import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
 import org.springframework.beans.factory.annotation.Qualifier
 
-@UIScope
-@SpringComponent("bugDangerCard")
+@View("bugDangerCard")
 class DangerCard(dataService: DataService, @Qualifier(PARAM) bug: Bug) : AdminCard(dataService) {
     init {
         setHeader(Translatable.createLabel(Messages.DANGER_ZONE))

@@ -100,8 +100,9 @@ class BugTab(private val dataService: DataService, private val bugMerger: BugMer
                     isEnabled = SecurityUtils.hasPermission(app, Permission.Level.EDIT)
                     addValueChangeListener { e: ComponentValueChangeEvent<Select<Version?>?, Version?> -> dataService.setBugSolved(bug.bug, e.value) }
                 }
-            }).setSortable(QBug.bug.solvedVersion).setCaption(Messages.SOLVED)
+            }).setSortable(QBug.bug.solvedVersion)
                 .setFilterable(QBug.bug.solvedVersion.isNull, true, Messages.HIDE_SOLVED)
+                .setCaption(Messages.SOLVED)
             addOnClickNavigation(ReportTab::class.java) { it.bug.id }
         }
     }
