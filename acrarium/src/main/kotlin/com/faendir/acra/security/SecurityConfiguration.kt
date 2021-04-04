@@ -99,7 +99,7 @@ class SecurityConfiguration(private val userService: UserService) : WebSecurityC
                 .headers().disable()
                 .anonymous().disable()
                 .exceptionHandling().authenticationEntryPoint(Http403ForbiddenEntryPoint()).and()
-                .regexMatcher("/$REPORT_PATH").authorizeRequests { it.anyRequest().hasRole(User.Role.API.name) }
+                .regexMatcher("/$REPORT_PATH").authorizeRequests { it.anyRequest().hasRole(User.Role.REPORTER.name) }
                 .httpBasic()
         }
     }
