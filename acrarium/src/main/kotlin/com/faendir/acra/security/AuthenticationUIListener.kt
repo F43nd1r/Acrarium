@@ -18,6 +18,8 @@ class AuthenticationUIListener(private val userService: UserService) : UIInitLis
                 LoginView::class.java -> {
                     if (SecurityUtils.isLoggedIn()) {
                         it.rerouteTo(Overview::class.java)
+                    } else if (!userService.hasAdmin()) {
+                        it.rerouteTo(SetupView::class.java)
                     }
                 }
                 SetupView::class.java -> {
