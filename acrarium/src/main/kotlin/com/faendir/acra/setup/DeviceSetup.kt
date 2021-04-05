@@ -24,7 +24,7 @@ class DeviceSetup(private val dataService: DataService) {
         CsvParser(CsvParserSettings().apply {
             isHeaderExtractionEnabled = true
             setProcessor(processor)
-        }).parse(URL("https://storage.googleapis.com/play_public/supported_devices.csv").openStream())
+        }).parse(URL("https://storage.googleapis.com/play_public/supported_devices.csv").openStream().bufferedReader(Charsets.UTF_16LE))
         dataService.updateDeviceTable(processor.beans.filter { it.marketingName != null })
     }
 }
