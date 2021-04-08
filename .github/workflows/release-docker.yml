@@ -33,4 +33,4 @@ jobs:
         with:
           context: acrarium
           push: true
-          name: f43nd1r/acrarium:latest,f43nd1r/acrarium:${{ steps.version.outputs.value }}
+          tags: f43nd1r/acrarium:latest,f43nd1r/acrarium:${{ steps.version.outputs.value }}
