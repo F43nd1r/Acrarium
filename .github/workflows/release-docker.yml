@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
-          java-version: '1.15'
+          java-version: '15'
       - name: Build release
         run: ./mvnw -B clean package -Pproduction -DskipTests
         env:
