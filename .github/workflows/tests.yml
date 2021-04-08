@@ -8,14 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ '1.11', '1.14' ]
-
+        java: [ '1.11', '1.15' ]
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions/setup-java@v1
-      with:
-        java-version: ${{ matrix.java }}
-    - name: Maven tests on Java ${{ matrix.java }}
-      run: ./mvnw -B clean test -DargLine="-Dvaadin.proKey=${{ secrets.VAADIN_PROKEY }}"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: ${{ matrix.java }}
+      - name: Maven tests on Java ${{ matrix.java }}
+        run: ./mvnw -B clean test -DargLine="-Dvaadin.proKey=${{ secrets.VAADIN_PROKEY }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
