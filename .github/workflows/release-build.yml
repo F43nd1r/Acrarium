@@ -38,7 +38,7 @@ jobs:
           draft: false
       - name: Upload Release War
         id: upload-release-asset-1
-        uses: actions/upload-release-asset@v1.0.1
+        uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -48,7 +48,7 @@ jobs:
           asset_content_type: application/zip
       - name: Upload Release Jar
         id: upload-release-asset-2
-        uses: actions/upload-release-asset@v1.0.1
+        uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
