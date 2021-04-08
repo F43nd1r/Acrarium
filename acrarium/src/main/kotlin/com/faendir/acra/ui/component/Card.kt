@@ -15,48 +15,33 @@
  */
 package com.faendir.acra.ui.component
 
-import com.faendir.acra.ui.component.Card.CardModel
+import com.faendir.acra.ui.ext.booleanProperty
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.HasComponents
 import com.vaadin.flow.component.HasSize
 import com.vaadin.flow.component.HasStyle
 import com.vaadin.flow.component.Tag
 import com.vaadin.flow.component.dependency.JsModule
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate
-import com.vaadin.flow.templatemodel.TemplateModel
+import com.vaadin.flow.component.littemplate.LitTemplate
 
 /**
  * @author lukas
  * @since 18.10.18
  */
 @Tag("acrarium-card")
-@JsModule("./elements/card.js")
-open class Card() : PolymerTemplate<CardModel>(), HasSize, HasStyle, HasComponents {
-    constructor(vararg components: Component?) : this() {
+@JsModule("./elements/card.ts")
+open class Card() : LitTemplate(), HasSize, HasStyle, HasComponents, HasSlottedComponents<Card.Slot> {
+    constructor(vararg components: Component) : this() {
         add(*components)
     }
 
     fun setHeader(vararg components: Component) {
-        components.forEach { it.element.setAttribute("slot", "header") }
-        add(*components)
+        add(Slot.HEADER, *components)
     }
 
-    var allowCollapse by model::canCollapse
-
-    fun collapse() {
-        model.collapse = true
-    }
-
-    fun expand() {
-        model.collapse = false
-    }
-
-    val isCollapsed: Boolean
-        get() = model.collapse
-
-    fun enableDivider() {
-        model.divider = true
-    }
+    var allowCollapse by booleanProperty("canCollapse")
+    var isCollapsed by booleanProperty("isCollapsed")
+    var dividerEnabled by booleanProperty("divider")
 
     fun setHeaderColor(textColor: String?, backgroundColor: String?) {
         style["--acrarium-card-header-text-color"] = textColor
@@ -67,9 +52,7 @@ open class Card() : PolymerTemplate<CardModel>(), HasSize, HasStyle, HasComponen
         children.filter { it.element.getAttribute("slot") == null }.forEach { this.remove(it) }
     }
 
-    interface CardModel : TemplateModel {
-        var canCollapse: Boolean
-        var collapse: Boolean
-        var divider: Boolean
+    enum class Slot : HasSlottedComponents.Slot {
+        HEADER
     }
 }

@@ -34,7 +34,7 @@ open class AcrariumDialog private constructor(private val dialogContent: DialogC
     }
 
     fun setHeader(captionId: String, vararg params: Any) {
-        dialogContent.setHeader(Translatable.createH3(captionId, *params))
+        dialogContent.add(DialogContent.Slot.HEADER, Translatable.createH3(captionId, *params))
     }
 
     fun setPositive(captionId: String, vararg params: Any, clickListener: (ClickEvent<Button>) -> Unit = {}) {
@@ -42,7 +42,7 @@ open class AcrariumDialog private constructor(private val dialogContent: DialogC
             close()
             clickListener(it)
         }
-        dialogContent.setPositive(button)
+        dialogContent.add(DialogContent.Slot.POSITIVE, button)
     }
 
     val positive: Translatable<Button>?
@@ -60,7 +60,7 @@ open class AcrariumDialog private constructor(private val dialogContent: DialogC
             removeThemeVariants(ButtonVariant.LUMO_PRIMARY)
             addThemeVariants(ButtonVariant.LUMO_TERTIARY)
         }
-        dialogContent.setNegative(button)
+        dialogContent.add(DialogContent.Slot.NEGATIVE, button)
     }
 
     override fun removeAll() {

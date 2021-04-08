@@ -15,37 +15,22 @@
  */
 package com.faendir.acra.ui.component.dialog
 
-import com.faendir.acra.ui.component.Card.CardModel
-import com.vaadin.flow.component.HasElement
-import com.vaadin.flow.component.HasOrderedComponents
+import com.faendir.acra.ui.component.HasSlottedComponents
+import com.vaadin.flow.component.HasComponents
 import com.vaadin.flow.component.HasSize
 import com.vaadin.flow.component.HasStyle
 import com.vaadin.flow.component.Tag
 import com.vaadin.flow.component.dependency.JsModule
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate
-import com.vaadin.flow.templatemodel.TemplateModel
+import com.vaadin.flow.component.littemplate.LitTemplate
 
 /**
  * @author lukas
  * @since 24.04.19
  */
 @Tag("acrarium-dialog-content")
-@JsModule("./elements/dialog-content.js")
-class DialogContent : PolymerTemplate<DialogContent.DialogContentModel>(), HasSize, HasStyle, HasOrderedComponents {
-    interface DialogContentModel : TemplateModel
-
-    fun setHeader(header: HasElement) {
-        header.element.setAttribute("slot", "header")
-        element.appendChild(header.element)
-    }
-
-    fun setNegative(negative: HasElement) {
-        negative.element.setAttribute("slot", "negative")
-        element.appendChild(negative.element)
-    }
-
-    fun setPositive(positive: HasElement) {
-        positive.element.setAttribute("slot", "positive")
-        element.appendChild(positive.element)
+@JsModule("./elements/dialog-content.ts")
+class DialogContent : LitTemplate(), HasSize, HasStyle, HasComponents, HasSlottedComponents<DialogContent.Slot> {
+    enum class Slot : HasSlottedComponents.Slot {
+        HEADER, NEGATIVE, POSITIVE
     }
 }

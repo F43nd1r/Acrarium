@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
-import '@vaadin/vaadin-dialog/vaadin-dialog.js';
-import '@vaadin/vaadin-button/vaadin-button.js';
+import {css, customElement, html, LitElement} from 'lit-element'
 
-class AcrariumDialogContent extends PolymerElement {
-    static get template() {
-        return html`
-            <style>
+@customElement("acrarium-dialog-content")
+export default class DialogContent extends LitElement {
+    static get styles() {
+        return css`
                 :host {
                     display: block;
                     max-width: 1000px;
@@ -42,7 +40,11 @@ class AcrariumDialogContent extends PolymerElement {
                 slot[name="header"]::slotted(*) {
                     margin-top: var(--lumo-space-s) !important;
                 }
-            </style>
+        `
+    }
+
+    render() {
+        return html`
             <div class="header">
                 <slot name="header"></slot>
             </div>
@@ -52,8 +54,6 @@ class AcrariumDialogContent extends PolymerElement {
                 <div class="spacer"></div>
                 <slot name="positive"></slot>
             </div>
-        `;
+        `
     }
 }
-
-customElements.define("acrarium-dialog-content", AcrariumDialogContent);

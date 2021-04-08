@@ -16,33 +16,34 @@
 package com.faendir.acra.ui.component
 
 import com.faendir.acra.service.AvatarService
-import com.faendir.acra.ui.component.InstallationView.InstallationModel
+import com.faendir.acra.ui.ext.stringProperty
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.DetachEvent
 import com.vaadin.flow.component.Tag
 import com.vaadin.flow.component.dependency.JsModule
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate
+import com.vaadin.flow.component.littemplate.LitTemplate
 import com.vaadin.flow.server.StreamRegistration
 import com.vaadin.flow.server.StreamResource
 import com.vaadin.flow.server.StreamResourceRegistry
 import com.vaadin.flow.server.VaadinSession
-import com.vaadin.flow.templatemodel.TemplateModel
-import org.springframework.lang.NonNull
 
 /**
  * @author lukas
  * @since 23.04.19
  */
 @Tag("acrarium-image-with-label")
-@JsModule("./elements/image-with-label.js")
-class InstallationView(private val avatarService: AvatarService) : PolymerTemplate<InstallationModel>() {
+@JsModule("./elements/image-with-label.ts")
+class InstallationView(private val avatarService: AvatarService) : LitTemplate() {
     private var resource: StreamResource? = null
     private var registration: StreamRegistration? = null
 
+    private var image by stringProperty("image")
+    private var label by stringProperty("label")
+
     fun setInstallationId(installationId: String) {
         resource = avatarService.getAvatar(installationId)
-        model.image = StreamResourceRegistry.getURI(resource).toASCIIString()
-        model.label = installationId
+        image = StreamResourceRegistry.getURI(resource).toASCIIString()
+        label = installationId
         if (parent.isPresent) {
             register()
         }
@@ -63,10 +64,4 @@ class InstallationView(private val avatarService: AvatarService) : PolymerTempla
         super.onDetach(detachEvent)
         registration?.unregister()
     }
-
-    interface InstallationModel : TemplateModel {
-        var image: String?
-        var label: String?
-    }
-
 }

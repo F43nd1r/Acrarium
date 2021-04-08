@@ -63,7 +63,7 @@ class StacktraceTab(private val dataService: DataService, @Qualifier(PARAM) priv
                     val trace = mapping?.let { stacktrace.retrace(it) } ?: stacktrace.stacktrace
                     allowCollapse = true
                     setHeader(Translatable.createLabel(Messages.STACKTRACE_TITLE, stacktrace.version.name, trace.lines().first()))
-                    this@content.children.findAny().ifPresent { collapse() }
+                    this@content.children.findAny().ifPresent { isCollapsed = true }
                     flexLayout {
                         setFlexDirection(FlexLayout.FlexDirection.COLUMN)
                         label(trace) { honorWhitespaces() }

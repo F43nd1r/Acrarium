@@ -34,7 +34,7 @@ class DangerCard(dataService: DataService, @Qualifier(PARAM) bug: Bug) : AdminCa
     init {
         setHeader(Translatable.createLabel(Messages.DANGER_ZONE))
         setHeaderColor("var(--lumo-error-contrast-color)", "var(--lumo-error-color)")
-        enableDivider()
+        dividerEnabled = true
         box(Messages.DELETE_BUG, Messages.DELETE_BUG_DETAILS, Messages.DELETE){
             FluentDialog().addText(Messages.DELETE_BUG_CONFIRM).addConfirmButtons {
                 dataService.deleteBug(bug)

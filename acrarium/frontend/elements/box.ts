@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
+import {css, customElement, html, LitElement} from 'lit-element'
 
-class AcrariumBox extends PolymerElement {
-    static get template() {
-        return html`
-            <style>
+@customElement("acrarium-box")
+export default class Box extends LitElement {
+    static get styles() {
+        return css`
                 :host {
                     display: flex;
                     flex-direction: row;
@@ -35,14 +35,16 @@ class AcrariumBox extends PolymerElement {
                     flex-direction: column;
                     flex: 1;
                 }
-            </style>
+        `
+    }
+
+    render() {
+        return html`
             <div class="acrarium-box-text">
                 <slot name="title" class="acrarium-box-title"></slot>
                 <slot name="details"></slot>
             </div>
             <slot name="action"></slot>
-        `;
+        `
     }
 }
-
-customElements.define("acrarium-box", AcrariumBox);

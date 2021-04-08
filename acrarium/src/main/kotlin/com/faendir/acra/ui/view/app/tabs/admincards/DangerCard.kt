@@ -40,7 +40,7 @@ class DangerCard(dataService: DataService, @Qualifier(PARAM) app: App) : AdminCa
 
     init {
         setHeader(Translatable.createLabel(Messages.DANGER_ZONE))
-        enableDivider()
+        dividerEnabled = true
         setHeaderColor("var(--lumo-error-contrast-color)", "var(--lumo-error-color)")
         box(Messages.NEW_ACRA_CONFIG, Messages.NEW_ACRA_CONFIG_DETAILS, Messages.CREATE) {
             FluentDialog().addText(Messages.NEW_ACRA_CONFIG_CONFIRM)

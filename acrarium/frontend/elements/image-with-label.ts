@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
+import {css, customElement, html, LitElement, property} from 'lit-element'
 
-class AcrariumImageWithLabel extends PolymerElement {
-    static get template() {
-        return html`
-            <style>
+@customElement("acrarium-image-with-label")
+export default class ImageWithLabel extends LitElement {
+    @property() image: String = ""
+    @property() label: String = ""
+
+    static get styles() {
+        return css`
                 :host {
                     display: flex;
                     flex-direction: row;
@@ -34,18 +37,13 @@ class AcrariumImageWithLabel extends PolymerElement {
                 label {
                     padding-left: var(--lumo-space-s);
                 }
-            </style>
-            <img src$="[[image]]">
-            <label>[[label]]</label>
-        `;
+        `
     }
 
-    static get properties() {
-        return {
-            image: String,
-            label: String
-        }
+    render() {
+        return html`
+            <img src="${this.image}" alt="${this.label}">
+            <label>${this.label}</label>
+        `
     }
 }
-
-customElements.define("acrarium-image-with-label", AcrariumImageWithLabel);

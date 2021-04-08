@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
+import {css, customElement, html, LitElement, property} from 'lit-element'
 
-class AcrariumCard extends PolymerElement {
-    static get template() {
-        return html`
-            <style>
+@customElement("acrarium-card")
+export default class Card extends LitElement {
+    @property() canCollapse: Boolean = false
+    @property() isCollapsed: Boolean = false
+    @property() divider: Boolean = false
+
+    static get styles() {
+        return css`
                 :host {
                     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
                     border-radius: 2px;
@@ -59,34 +63,21 @@ class AcrariumCard extends PolymerElement {
                     border-top: 1px solid var(--lumo-contrast-20pct);
                     margin-top: 0.5em;
                 }
-            </style>
-            <slot name="header" class="acrarium-card-header" on-click="handleClick"></slot>
-            <div class$="{{getContentClass(collapse, divider)}}">
+        `
+    }
+
+    render() {
+        return html`
+            <slot name="header" class="acrarium-card-header" @click="${this.handleClick}"></slot>
+            <div class="acrarium-card-content-wrapper ${this.isCollapsed ? "collapse" : this.divider ? "divider" : ""}">
                 <slot class="acrarium-card-content"></slot>
             </div>
-        `;
-    }
-
-    getContentClass(collapse, divider) {
-        let classes = "acrarium-card-content-wrapper";
-        if (collapse) classes += " collapse";
-        if (divider) classes += " divider";
-        return classes;
-    }
-
-    static get properties() {
-        return {
-            canCollapse: Boolean,
-            collapse: Boolean,
-            divider: Boolean
-        }
+        `
     }
 
     handleClick() {
         if (this.canCollapse) {
-            this.collapse = !this.collapse;
+            this.isCollapsed = !this.isCollapsed;
         }
     }
 }
-
-customElements.define("acrarium-card", AcrariumCard);
