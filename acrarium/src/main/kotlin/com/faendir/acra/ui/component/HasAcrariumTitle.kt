@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2019 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,29 @@
  */
 package com.faendir.acra.ui.component
 
-import com.vaadin.flow.component.tabs.Tab
+import com.faendir.acra.i18n.Messages
+import com.faendir.acra.i18n.TranslatableText
+import com.faendir.acra.security.SecurityUtils.isLoggedIn
+import com.vaadin.flow.component.UI
 import com.vaadin.flow.i18n.LocaleChangeEvent
 import com.vaadin.flow.i18n.LocaleChangeObserver
-import org.springframework.lang.NonNull
+import com.vaadin.flow.router.HasDynamicTitle
 
 /**
  * @author lukas
- * @since 15.11.18
+ * @since 06.09.19
  */
-open class Tab(private val captionId: String, private vararg val params: Any) : Tab(), LocaleChangeObserver {
+interface HasAcrariumTitle : HasDynamicTitle, LocaleChangeObserver {
+    val title: TranslatableText
+    override fun getPageTitle(): String {
+        var result = TranslatableText(Messages.ACRARIUM).translate()
+        if (isLoggedIn()) {
+            result = title.translate() + " - " + result
+        }
+        return result
+    }
+
     override fun localeChange(event: LocaleChangeEvent) {
-        label = getTranslation(captionId, *params)
+        UI.getCurrent().page.setTitle(pageTitle)
     }
 }

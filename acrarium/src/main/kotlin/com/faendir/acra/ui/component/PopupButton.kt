@@ -13,9 +13,7 @@ open class PopupButton(private val icon: VaadinIcon) : Composite<PaperMenuButton
     private val container = FlexLayout()
 
     override fun initContent(): PaperMenuButton {
-        return PaperMenuButton(Button(Icon(icon)).apply {
-            element.appendChild(Icon(VaadinIcon.CHEVRON_DOWN_SMALL).element)
-        }, container).apply {
+        return PaperMenuButton(Button(Icon(icon)).apply { element.appendChild(Icon(VaadinIcon.CHEVRON_DOWN_SMALL).element) }, container).apply {
             setDynamicAlign(true)
         }
     }

@@ -113,8 +113,12 @@ fun HasComponents.tab(captionId: String, vararg params: Any, initializer: Tab.()
     add(Tab(captionId, *params).apply(initializer))
 }
 
-fun HasComponents.box(titleId: String, detailsId: String, buttonId: String, clickListener: ((ClickEvent<Button>) -> Unit) = {}): Box {
-    return Box(Translatable.createLabel(titleId), Translatable.createLabel(detailsId), Translatable.createButton(buttonId, clickListener)).also { add(it) }
+fun HasComponents.box(titleId: String, detailsId: String, buttonId: String, clickListener: (ClickEvent<Button>) -> Unit = {}): Box {
+    return Box(
+        Translatable.createLabel(titleId),
+        Translatable.createLabel(detailsId),
+        Translatable.createButton(buttonId, clickListener = clickListener)
+    ).also { add(it) }
 }
 
 fun <T> HasComponents.comboBox(items: Collection<T>, captionId: String, vararg params: Any, initializer: ComboBox<T>.() -> Unit = {})

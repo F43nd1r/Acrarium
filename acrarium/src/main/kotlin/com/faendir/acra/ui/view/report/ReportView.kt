@@ -22,7 +22,7 @@ import com.faendir.acra.navigation.ReportParser
 import com.faendir.acra.navigation.View
 import com.faendir.acra.service.AvatarService
 import com.faendir.acra.service.DataService
-import com.faendir.acra.ui.base.HasRoute
+import com.faendir.acra.ui.component.HasRoute
 import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.Path
 import com.faendir.acra.ui.component.Path.ParametrizedTextElement

@@ -23,8 +23,8 @@ import com.faendir.acra.navigation.View
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.DataService
 import com.faendir.acra.service.UserService
-import com.faendir.acra.ui.base.HasAcrariumTitle
-import com.faendir.acra.ui.base.TranslatableText
+import com.faendir.acra.ui.component.HasAcrariumTitle
+import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.FluentDialog
 import com.faendir.acra.ui.component.dialog.ValidatedField

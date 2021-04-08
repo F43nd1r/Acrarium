@@ -15,14 +15,14 @@
  */
 package com.faendir.acra.ui.component
 
-import com.faendir.acra.ui.base.HasRoute
+import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.util.PARAM
-import com.faendir.acra.ui.base.TranslatableText
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.DetachEvent
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.tabs.Tab
+import com.vaadin.flow.i18n.LocaleChangeEvent
 import com.vaadin.flow.router.AfterNavigationEvent
 import com.vaadin.flow.router.AfterNavigationListener
 import com.vaadin.flow.router.RouteParameters
@@ -44,7 +44,7 @@ class Path(private val applicationContext: GenericApplicationContext) : SubTabs(
     override fun afterNavigation(event: AfterNavigationEvent) {
         removeAll()
         actions.clear()
-        event.activeChain.filterIsInstance<HasRoute>().flatMap { it.getPathElements(applicationContext, event) }.reversed().forEach { element ->
+        for (element in event.activeChain.filterIsInstance<HasRoute>().flatMap { it.getPathElements(applicationContext, event) }.reversed()) {
             val tab = element.toTab()
             add(tab)
             selectedTab = tab

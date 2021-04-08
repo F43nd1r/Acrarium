@@ -17,7 +17,7 @@ package com.faendir.acra.ui.view.bug.tabs
 
 import com.faendir.acra.model.Bug
 import com.faendir.acra.navigation.View
-import com.faendir.acra.ui.base.CardView
+import com.faendir.acra.ui.component.CardView
 import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.view.bug.BugView
 import com.faendir.acra.ui.view.bug.tabs.admincards.AdminCard

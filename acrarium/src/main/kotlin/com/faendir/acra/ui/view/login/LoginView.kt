@@ -20,8 +20,8 @@ import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.User
 import com.faendir.acra.navigation.LoginRequestCache
 import com.faendir.acra.navigation.View
-import com.faendir.acra.ui.base.HasAcrariumTitle
-import com.faendir.acra.ui.base.TranslatableText
+import com.faendir.acra.ui.component.HasAcrariumTitle
+import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.ui.ext.SizeUnit
 import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.flexLayout

@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.base
+package com.faendir.acra.ui.component
 
-import com.faendir.acra.ui.component.Path
+import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.util.PARAM
 import com.vaadin.flow.router.AfterNavigationEvent
 import org.springframework.context.support.GenericApplicationContext
@@ -43,12 +43,13 @@ interface HasRoute : HasAcrariumTitle {
     fun getTranslation(key: String, vararg params: Any): String
 
     open class Parent<T : HasRoute>(private val parentClass: Class<T>) {
-        open operator fun get(applicationContext: GenericApplicationContext, afterNavigationEvent: AfterNavigationEvent?): T = applicationContext.getBean(parentClass)
+        open operator fun get(applicationContext: GenericApplicationContext, afterNavigationEvent: AfterNavigationEvent?): T =
+            applicationContext.getBean(parentClass)
     }
 
     class ParametrizedParent<T, P : Any>(parentClass: Class<T>, private val parameter: P) : Parent<T>(parentClass) where T : HasRoute {
         override fun get(applicationContext: GenericApplicationContext, afterNavigationEvent: AfterNavigationEvent?): T {
-            applicationContext.registerBean(PARAM, parameter.javaClass, Supplier{parameter})
+            applicationContext.registerBean(PARAM, parameter.javaClass, Supplier { parameter })
             val parent = super.get(applicationContext, afterNavigationEvent)
             applicationContext.removeBeanDefinition(PARAM)
             return parent

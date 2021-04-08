@@ -17,9 +17,8 @@ package com.faendir.acra.ui.view.app
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.util.PARAM
-import com.faendir.acra.ui.base.TabView
+import com.faendir.acra.ui.component.TabView
 import com.faendir.acra.ui.view.app.tabs.AdminTab
-import com.faendir.acra.ui.view.app.tabs.AppTab
 import com.faendir.acra.ui.view.app.tabs.BugTab
 import com.faendir.acra.ui.view.app.tabs.ReportTab
 import com.faendir.acra.ui.view.app.tabs.StatisticsTab
@@ -37,7 +36,7 @@ import com.vaadin.flow.spring.annotation.UIScope
 @SpringComponent
 @RoutePrefix("app/:$PARAM")
 @ParentLayout(MainView::class)
-class AppView : TabView<AppTab<*>>(
+class AppView : TabView(
     TabInfo(BugTab::class.java, Messages.BUGS),
     TabInfo(ReportTab::class.java, Messages.REPORTS),
     TabInfo(StatisticsTab::class.java, Messages.STATISTICS),

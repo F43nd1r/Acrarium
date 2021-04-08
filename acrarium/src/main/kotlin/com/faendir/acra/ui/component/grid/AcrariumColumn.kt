@@ -1,6 +1,6 @@
 package com.faendir.acra.ui.component.grid
 
-import com.faendir.acra.ui.base.TranslatableText
+import com.faendir.acra.i18n.TranslatableText
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.data.renderer.Renderer
 import com.vaadin.flow.i18n.LocaleChangeEvent

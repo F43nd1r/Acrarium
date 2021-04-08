@@ -18,8 +18,8 @@ package com.faendir.acra.ui.view.user
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.navigation.View
 import com.faendir.acra.service.UserService
-import com.faendir.acra.ui.base.HasAcrariumTitle
-import com.faendir.acra.ui.base.TranslatableText
+import com.faendir.acra.ui.component.HasAcrariumTitle
+import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.ui.component.UserEditor
 import com.faendir.acra.ui.view.main.MainView
 import com.faendir.acra.util.getCurrentUser
@@ -29,8 +29,6 @@ import com.vaadin.flow.component.notification.Notification
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.router.Route
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
 import org.springframework.lang.NonNull
 
 /**

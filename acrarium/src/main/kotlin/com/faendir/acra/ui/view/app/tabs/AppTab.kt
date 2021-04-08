@@ -18,7 +18,7 @@ package com.faendir.acra.ui.view.app.tabs
 import com.faendir.acra.model.App
 import com.faendir.acra.navigation.AppParser
 import com.faendir.acra.navigation.ParseParameter
-import com.faendir.acra.ui.base.TabView
+import com.faendir.acra.ui.component.TabView
 import com.vaadin.flow.component.Component
 
 /**
@@ -26,7 +26,7 @@ import com.vaadin.flow.component.Component
  * @since 14.07.18
  */
 @ParseParameter(AppParser::class)
-abstract class AppTab<T : Component>(app: App) : TabView.Tab<T>() {
+abstract class AppTab<T : Component>(app: App) : TabView.TabContent<T>() {
     override val id: Int = app.id
     override val name: String = app.name
 }

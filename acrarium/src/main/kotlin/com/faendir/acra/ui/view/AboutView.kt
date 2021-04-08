@@ -17,8 +17,8 @@ package com.faendir.acra.ui.view
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.navigation.View
-import com.faendir.acra.ui.base.HasAcrariumTitle
-import com.faendir.acra.ui.base.TranslatableText
+import com.faendir.acra.ui.component.HasAcrariumTitle
+import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.view.main.MainView
 import com.vaadin.flow.component.html.Div

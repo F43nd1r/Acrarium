@@ -13,30 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.base
+package com.faendir.acra.i18n
 
-import com.faendir.acra.i18n.Messages
-import com.faendir.acra.security.SecurityUtils.isLoggedIn
 import com.vaadin.flow.component.UI
-import com.vaadin.flow.i18n.LocaleChangeEvent
-import com.vaadin.flow.i18n.LocaleChangeObserver
-import com.vaadin.flow.router.HasDynamicTitle
+import com.vaadin.flow.i18n.I18NProvider
+import com.vaadin.flow.server.VaadinService
+import java.util.*
 
 /**
  * @author lukas
  * @since 06.09.19
  */
-interface HasAcrariumTitle : HasDynamicTitle, LocaleChangeObserver {
-    val title: TranslatableText
-    override fun getPageTitle(): String {
-        var result = TranslatableText(Messages.ACRARIUM).translate()
-        if (isLoggedIn()) {
-            result = title.translate() + " - " + result
-        }
-        return result
+open class TranslatableText(val id: String, vararg val params: Any) {
+
+    fun translate(): String {
+        return i18NProvider.getTranslation(
+            id,
+            UI.getCurrent()?.locale ?: VaadinService.getCurrent().instantiator.i18NProvider.providedLocales?.firstOrNull() ?: Locale.getDefault(),
+            *params
+        )
     }
 
-    override fun localeChange(event: LocaleChangeEvent) {
-        UI.getCurrent().page.setTitle(pageTitle)
-    }
+    private val i18NProvider: I18NProvider
+        get() = VaadinService.getCurrent().instantiator.i18NProvider
 }

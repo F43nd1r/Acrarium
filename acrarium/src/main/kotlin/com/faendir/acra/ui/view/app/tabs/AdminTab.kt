@@ -16,7 +16,7 @@
 package com.faendir.acra.ui.view.app.tabs
 
 import com.faendir.acra.model.App
-import com.faendir.acra.ui.base.CardView
+import com.faendir.acra.ui.component.CardView
 import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.view.app.AppView
 import com.faendir.acra.ui.view.app.tabs.admincards.AdminCard

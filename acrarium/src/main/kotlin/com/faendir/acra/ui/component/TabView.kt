@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.base
+package com.faendir.acra.ui.component
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.ui.component.Path
 import com.faendir.acra.ui.component.Path.ParametrizedTextElement
-import com.faendir.acra.ui.component.SpringComposite
-import com.faendir.acra.ui.ext.flexLayout
 import com.faendir.acra.ui.ext.forEach
 import com.faendir.acra.ui.ext.setFlexGrow
 import com.faendir.acra.ui.ext.tab
@@ -28,8 +25,11 @@ import com.faendir.acra.util.PARAM
 import com.faendir.acra.util.indexOfFirstOrNull
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.HasElement
+import com.vaadin.flow.component.HasStyle
+import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.component.tabs.Tabs
 import com.vaadin.flow.router.RouteParameters
+import com.vaadin.flow.router.RouterLayout
 import java.io.Serializable
 
 /**
@@ -37,9 +37,9 @@ import java.io.Serializable
  * @since 03.12.18
  */
 @Suppress("LeakingThis")
-open class TabView<T>(private vararg val tabs: TabInfo<out T>) : ParentLayout()
-        where T : Component {
+open class TabView(private vararg val tabs: TabInfo<out TabContent<*>>) : FlexLayout() , RouterLayout {
     private val header: Tabs
+    lateinit var content: TabContent<*>
 
     init {
         setSizeFull()
@@ -50,29 +50,31 @@ open class TabView<T>(private vararg val tabs: TabInfo<out T>) : ParentLayout()
             }
             addSelectedChangeListener {
                 ui.ifPresent { ui ->
-                    ui.navigate(tabs[it.source.selectedIndex].tabClass, RouteParameters(PARAM, (content as Tab<T>).id.toString()))
+                    ui.navigate(tabs[it.source.selectedIndex].tabClass, RouteParameters(PARAM, content.id.toString()))
                 }
             }
         }
-        setRouterRoot(flexLayout {
-            setWidthFull()
-            setFlexGrow(1)
-            style["overflow"] = "auto"
-        })
     }
 
     override fun showRouterLayoutContent(content: HasElement) {
-        super.showRouterLayoutContent(content)
-        tabs.indexOfFirstOrNull { it.tabClass == content.javaClass }?.let { header.selectedIndex = it }
+        if(content is TabContent<*>) {
+            if (this::content.isInitialized) {
+                remove(this.content)
+            }
+            this.content = content
+            content.setFlexGrow(1)
+            tabs.indexOfFirstOrNull { it.tabClass == content.javaClass }?.let { header.selectedIndex = it }
+            add(content)
+        }
     }
 
     class TabInfo<T>(val tabClass: Class<T>, val labelId: String) : Serializable
 
-    abstract class Tab<T : Component> : SpringComposite<T>(), HasRoute {
+    abstract class TabContent<T : Component> : SpringComposite<T>(), HasRoute, HasStyle {
         abstract val id: Int
         abstract val name: String
 
         override val pathElement: Path.Element<*>
-            get() = ParametrizedTextElement<Tab<*>, Int>(javaClass, id, Messages.ONE_ARG, name)
+            get() = ParametrizedTextElement<TabContent<*>, Int>(javaClass, id, Messages.ONE_ARG, name)
     }
 }

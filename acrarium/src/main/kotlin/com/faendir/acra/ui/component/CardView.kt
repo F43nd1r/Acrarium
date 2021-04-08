@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.base
+package com.faendir.acra.ui.component
 
-import com.faendir.acra.ui.component.Card
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexLayout
@@ -23,7 +22,6 @@ import com.vaadin.flow.spring.annotation.SpringComponent
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Scope
-import kotlin.streams.asSequence
 
 @SpringComponent
 @Scope(scopeName = ConfigurableBeanFactory.SCOPE_PROTOTYPE)

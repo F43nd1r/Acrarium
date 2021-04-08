@@ -65,7 +65,7 @@ class FluentDialog : AcrariumDialog() {
     }
 
     fun addText(captionId: String, vararg params: Any): FluentDialog {
-        components.add(Translatable.createP(captionId, *params))
+        components.add(Translatable.createP(captionId, *params).apply { style.set("white-space", "pre-wrap") })
         return this
     }
 
