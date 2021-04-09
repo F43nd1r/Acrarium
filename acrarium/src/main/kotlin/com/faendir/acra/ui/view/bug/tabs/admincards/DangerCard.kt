@@ -19,27 +19,34 @@ import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.Bug
 import com.faendir.acra.navigation.View
 import com.faendir.acra.service.DataService
-import com.faendir.acra.util.PARAM
+import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.ui.component.dialog.FluentDialog
+import com.faendir.acra.ui.component.dialog.confirmButtons
+import com.faendir.acra.ui.component.dialog.showFluentDialog
 import com.faendir.acra.ui.ext.box
+import com.faendir.acra.ui.ext.content
+import com.faendir.acra.ui.ext.translatableText
 import com.faendir.acra.ui.view.Overview
+import com.faendir.acra.util.PARAM
 import com.vaadin.flow.component.UI
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
 import org.springframework.beans.factory.annotation.Qualifier
 
 @View("bugDangerCard")
 class DangerCard(dataService: DataService, @Qualifier(PARAM) bug: Bug) : AdminCard(dataService) {
     init {
-        setHeader(Translatable.createLabel(Messages.DANGER_ZONE))
-        setHeaderColor("var(--lumo-error-contrast-color)", "var(--lumo-error-color)")
-        dividerEnabled = true
-        box(Messages.DELETE_BUG, Messages.DELETE_BUG_DETAILS, Messages.DELETE){
-            FluentDialog().addText(Messages.DELETE_BUG_CONFIRM).addConfirmButtons {
-                dataService.deleteBug(bug)
-                UI.getCurrent().navigate(Overview::class.java)
-            }.show()
+        content {
+            setHeader(Translatable.createLabel(Messages.DANGER_ZONE))
+            setHeaderColor("var(--lumo-error-contrast-color)", "var(--lumo-error-color)")
+            dividerEnabled = true
+            box(Messages.DELETE_BUG, Messages.DELETE_BUG_DETAILS, Messages.DELETE) {
+                showFluentDialog {
+                    translatableText(Messages.DELETE_BUG_CONFIRM)
+                    confirmButtons {
+                        dataService.deleteBug(bug)
+                        UI.getCurrent().navigate(Overview::class.java)
+                    }
+                }
+            }
         }
     }
 }

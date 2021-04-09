@@ -1,7 +1,8 @@
 package com.faendir.acra.ui.component.dialog
 
+import com.faendir.acra.i18n.Messages
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.util.toNullable
+import com.faendir.acra.ui.ext.content
 import com.vaadin.flow.component.ClickEvent
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.Composite
@@ -10,10 +11,9 @@ import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.dialog.Dialog
 import com.vaadin.flow.dom.Element
-import kotlin.streams.asSequence
 
-open class AcrariumDialog private constructor(private val dialogContent: DialogContent) : Composite<Dialog>(), HasComponents {
-    constructor() : this(DialogContent())
+open class AcrariumDialog : Composite<Dialog>(), HasComponents {
+    private val dialogContent: DialogContent = DialogContent()
 
     init {
         content.add(dialogContent)
@@ -33,42 +33,27 @@ open class AcrariumDialog private constructor(private val dialogContent: DialogC
         content.close()
     }
 
-    fun setHeader(captionId: String, vararg params: Any) {
+    fun header(captionId: String, vararg params: Any) {
         dialogContent.add(DialogContent.Slot.HEADER, Translatable.createH3(captionId, *params))
     }
 
-    fun setPositive(captionId: String, vararg params: Any, clickListener: (ClickEvent<Button>) -> Unit = {}) {
-        val button = Translatable.createButton(captionId, *params) {
+    fun positiveAction(captionId: String, vararg params: Any, clickListener: (ClickEvent<Button>) -> Unit = {}) {
+        dialogContent.add(DialogContent.Slot.POSITIVE, Translatable.createButton(captionId, *params) {
             close()
             clickListener(it)
-        }
-        dialogContent.add(DialogContent.Slot.POSITIVE, button)
+        })
     }
 
     val positive: Translatable<Button>?
-        get() = dialogContent.element.children.asSequence()
-                .filter { it.getAttribute("slot") == "positive" }
-                .map { it.component.toNullable() }
-                .filterIsInstance<Translatable<Button>>()
-                .firstOrNull()
+        get() = dialogContent.get(DialogContent.Slot.POSITIVE)
+            .filterIsInstance<Translatable<Button>>()
+            .firstOrNull()
 
-    fun setNegative(captionId: String, vararg params: Any, clickListener: (ClickEvent<Button>) -> Unit = {}) {
-        val button = Translatable.createButton(captionId, *params) {
+    fun negativeAction(captionId: String, vararg params: Any, clickListener: (ClickEvent<Button>) -> Unit = {}) {
+        dialogContent.add(DialogContent.Slot.NEGATIVE, Translatable.createButton(captionId, *params, theme = ButtonVariant.LUMO_TERTIARY) {
             close()
             clickListener(it)
-        }.with {
-            removeThemeVariants(ButtonVariant.LUMO_PRIMARY)
-            addThemeVariants(ButtonVariant.LUMO_TERTIARY)
-        }
-        dialogContent.add(DialogContent.Slot.NEGATIVE, button)
-    }
-
-    override fun removeAll() {
-        dialogContent.removeAll()
-    }
-
-    override fun addComponentAsFirst(component: Component?) {
-        dialogContent.addComponentAsFirst(component)
+        })
     }
 
     override fun add(vararg components: Component?) {
@@ -83,7 +68,29 @@ open class AcrariumDialog private constructor(private val dialogContent: DialogC
         dialogContent.remove(*components)
     }
 
+    override fun removeAll() {
+        dialogContent.removeAll()
+    }
+
     override fun addComponentAtIndex(index: Int, component: Component?) {
         dialogContent.addComponentAtIndex(index, component)
     }
+
+    override fun addComponentAsFirst(component: Component?) {
+        dialogContent.addComponentAsFirst(component)
+    }
+}
+
+fun AcrariumDialog.createButton(onCreateAction: AcrariumDialog.() -> Unit) {
+    positiveAction(Messages.CREATE) { onCreateAction() }
+    negativeAction(Messages.CANCEL)
+}
+
+fun AcrariumDialog.closeButton() {
+    positiveAction(Messages.CLOSE)
+}
+
+fun AcrariumDialog.confirmButtons(onYesAction: AcrariumDialog.() -> Unit) {
+    positiveAction(Messages.CONFIRM) { onYesAction() }
+    negativeAction(Messages.CANCEL)
 }

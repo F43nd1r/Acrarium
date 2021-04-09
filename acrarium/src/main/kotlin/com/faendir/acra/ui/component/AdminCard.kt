@@ -13,22 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.view.app.tabs.admincards
+package com.faendir.acra.ui.component
 
 import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.Card
 import com.faendir.acra.ui.ext.SizeUnit
+import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.setFlexGrow
 import com.faendir.acra.ui.ext.setMaxHeight
 import com.faendir.acra.ui.ext.setMaxWidth
 import com.faendir.acra.ui.ext.setWidth
+import com.vaadin.flow.component.Composite
 
-abstract class AdminCard(protected val dataService: DataService) : Card() {
-
+abstract class AdminCard(protected val dataService: DataService) : Composite<Card>() {
     init {
-        setWidth(500, SizeUnit.PIXEL)
-        setMaxWidth(1000, SizeUnit.PIXEL)
-        setMaxHeight(500, SizeUnit.PIXEL)
-        setFlexGrow(1)
+        content {
+            setWidth(500, SizeUnit.PIXEL)
+            setMaxWidth(1000, SizeUnit.PIXEL)
+            setMaxHeight(500, SizeUnit.PIXEL)
+            setFlexGrow(1)
+        }
     }
 }

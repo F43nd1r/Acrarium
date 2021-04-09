@@ -21,61 +21,49 @@ import com.faendir.acra.model.MailSettings
 import com.faendir.acra.navigation.View
 import com.faendir.acra.service.DataService
 import com.faendir.acra.service.UserService
-import com.faendir.acra.util.PARAM
+import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.ext.checkbox
+import com.faendir.acra.ui.ext.content
+import com.faendir.acra.ui.ext.forEach
+import com.faendir.acra.ui.ext.gridLayout
+import com.faendir.acra.ui.ext.translatableLabel
+import com.faendir.acra.util.PARAM
 import com.faendir.acra.util.getCurrentUser
 import com.github.appreciated.css.grid.sizes.Auto
 import com.github.appreciated.css.grid.sizes.MaxContent
-import com.github.appreciated.layout.GridLayout
-import com.vaadin.flow.component.HasComponents
-import com.vaadin.flow.component.checkbox.Checkbox
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
 import org.springframework.beans.factory.annotation.Qualifier
-import kotlin.reflect.KMutableProperty1
 
 @View
 class NotificationCard(userService: UserService, dataService: DataService, @Qualifier(PARAM) app: App) : AdminCard(dataService) {
-    private val notificationLayout = GridLayout().apply {
-        setTemplateColumns(Auto(), MaxContent())
-        setWidthFull()
-    }
-    private val lines = listOf(
-            Line(dataService, Messages.NEW_BUG_MAIL_LABEL, MailSettings::newBug),
-            Line(dataService, Messages.REGRESSION_MAIL_LABEL, MailSettings::regression),
-            Line(dataService, Messages.SPIKE_MAIL_LABEL, MailSettings::spike),
-            Line(dataService, Messages.WEEKLY_MAIL_LABEL, MailSettings::summary))
-
     init {
-        setHeader(Translatable.createLabel(Messages.NOTIFICATIONS))
-        @Suppress("LeakingThis")
-        add(notificationLayout)
-        lines.forEach { it.addTo(notificationLayout) }
-        val user = userService.getCurrentUser()
-        val settings = dataService.findMailSettings(app, user) ?: MailSettings(app, user)
-        lines.forEach { it.attach(settings) }
-    }
-
-    private class Line(val dataService: DataService, val label: String, val property: KMutableProperty1<MailSettings, Boolean>) {
-        private var settings: MailSettings? = null
-        private val checkbox = Checkbox().apply {
-            addValueChangeListener { event ->
-                settings?.let {
-                    if (event.isFromClient) {
-                        property.set(it, event.value)
-                        dataService.store(it)
+        content {
+            setHeader(Translatable.createLabel(Messages.NOTIFICATIONS))
+            gridLayout {
+                setTemplateColumns(Auto(), MaxContent())
+                setWidthFull()
+                val user = userService.getCurrentUser()
+                val settings = dataService.findMailSettings(app, user) ?: MailSettings(app, user)
+                forEach(
+                    listOf(
+                        Messages.NEW_BUG_MAIL_LABEL to MailSettings::newBug,
+                        Messages.REGRESSION_MAIL_LABEL to MailSettings::regression,
+                        Messages.SPIKE_MAIL_LABEL to MailSettings::spike,
+                        Messages.WEEKLY_MAIL_LABEL to MailSettings::summary
+                    )
+                ) { (label, property) ->
+                    translatableLabel(label)
+                    checkbox {
+                        value = property.get(settings)
+                        addValueChangeListener { event ->
+                            if (event.isFromClient) {
+                                property.set(settings, event.value)
+                                dataService.store(settings)
+                            }
+                        }
                     }
                 }
             }
-        }
-
-        fun addTo(container: HasComponents) {
-            container.add(Translatable.createLabel(label), checkbox)
-        }
-
-        fun attach(mailSettings: MailSettings) {
-            settings = mailSettings
-            checkbox.value = property.get(mailSettings)
         }
     }
 }

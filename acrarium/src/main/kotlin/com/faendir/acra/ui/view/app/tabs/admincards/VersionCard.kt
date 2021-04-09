@@ -22,52 +22,61 @@ import com.faendir.acra.model.QVersion
 import com.faendir.acra.navigation.View
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.DataService
-import com.faendir.acra.util.PARAM
+import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.ui.component.dialog.FluentDialog
 import com.faendir.acra.ui.component.dialog.VersionEditorDialog
+import com.faendir.acra.ui.component.dialog.confirmButtons
+import com.faendir.acra.ui.component.dialog.showFluentDialog
+import com.faendir.acra.ui.component.grid.ButtonRenderer
+import com.faendir.acra.ui.component.grid.column
 import com.faendir.acra.ui.ext.SizeUnit
+import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.queryDslAcrariumGrid
 import com.faendir.acra.ui.ext.setHeight
 import com.faendir.acra.ui.ext.setMinHeight
-import com.vaadin.flow.component.button.Button
+import com.faendir.acra.ui.ext.translatableText
+import com.faendir.acra.util.PARAM
 import com.vaadin.flow.component.icon.Icon
 import com.vaadin.flow.component.icon.VaadinIcon
-import com.vaadin.flow.data.renderer.ComponentRenderer
 import com.vaadin.flow.data.renderer.IconRenderer
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
 import org.springframework.beans.factory.annotation.Qualifier
 
 @View
 class VersionCard(dataService: DataService, @Qualifier(PARAM) app: App) : AdminCard(dataService) {
-
     init {
-        setHeader(Translatable.createLabel(Messages.VERSIONS))
-        queryDslAcrariumGrid(dataService.getVersionProvider(app)) {
-            setMinHeight(280, SizeUnit.PIXEL)
-            setHeight(100, SizeUnit.PERCENTAGE)
-            addColumn { it.code }.setSortable(QVersion.version.code).setCaption(Messages.VERSION_CODE).flexGrow = 1
-            addColumn { it.name }.setSortable(QVersion.version.name).setCaption(Messages.VERSION).flexGrow = 1
-            addColumn(IconRenderer({ Icon(if (it.mappings != null) VaadinIcon.CHECK else VaadinIcon.CLOSE) }, { "" }))
-                .setSortable(QVersion.version.mappings.isNotNull)
-                .setCaption(Messages.PROGUARD_MAPPINGS)
-            if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-                addColumn(ComponentRenderer { version ->
-                    Button(Icon(VaadinIcon.EDIT)) { VersionEditorDialog(dataService, app, { dataProvider.refreshAll() }, version).open() }
-                })
-                addColumn(ComponentRenderer { version ->
-                    Button(Icon(VaadinIcon.TRASH)) {
-                        FluentDialog()
-                            .addComponent(Translatable.createText(Messages.DELETE_VERSION_CONFIRM, version.code))
-                            .addConfirmButtons {
-                                dataService.deleteVersion(version)
+        content {
+            setHeader(Translatable.createLabel(Messages.VERSIONS))
+            queryDslAcrariumGrid(dataService.getVersionProvider(app)) {
+                setMinHeight(280, SizeUnit.PIXEL)
+                setHeight(100, SizeUnit.PERCENTAGE)
+                column({ it.code }) {
+                    setSortable(QVersion.version.code)
+                    setCaption(Messages.VERSION_CODE)
+                    flexGrow = 1
+                }
+                column({ it.name }) {
+                    setSortable(QVersion.version.name)
+                    setCaption(Messages.VERSION)
+                    flexGrow = 1
+                }
+                column(IconRenderer({ Icon(if (it.mappings != null) VaadinIcon.CHECK else VaadinIcon.CLOSE) }, { "" })) {
+                    setSortable(QVersion.version.mappings.isNotNull)
+                    setCaption(Messages.PROGUARD_MAPPINGS)
+                }
+                if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
+                    column(ButtonRenderer(VaadinIcon.EDIT) { VersionEditorDialog(dataService, app, { dataProvider.refreshAll() }, it).open() })
+                    column(ButtonRenderer(VaadinIcon.TRASH) {
+                        showFluentDialog {
+                            translatableText(Messages.DELETE_VERSION_CONFIRM, it.code)
+                            confirmButtons {
+                                dataService.deleteVersion(it)
                                 dataProvider.refreshAll()
-                            }.show()
-                    }
-                })
-                appendFooterRow().getCell(columns[0]).setComponent(
-                    Translatable.createButton(Messages.NEW_VERSION) { VersionEditorDialog(dataService, app, {dataProvider.refreshAll() }).open() })
+                            }
+                        }
+                    })
+                    appendFooterRow().getCell(columns[0]).setComponent(
+                        Translatable.createButton(Messages.NEW_VERSION) { VersionEditorDialog(dataService, app, { dataProvider.refreshAll() }).open() })
+                }
             }
         }
     }

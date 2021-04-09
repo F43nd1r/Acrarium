@@ -25,17 +25,30 @@ import com.vaadin.flow.i18n.LocaleChangeEvent
 import com.vaadin.flow.i18n.LocaleChangeObserver
 import com.vaadin.flow.router.RouteConfiguration
 import com.vaadin.flow.server.VaadinRequest
+import com.vaadin.flow.server.VaadinService
+import org.springframework.beans.factory.annotation.Value
 
 /**
  * @author lukas
  * @since 09.11.18
  */
-class ConfigurationLabel(private val baseUrl: String?, private val user: User) : Label(""), LocaleChangeObserver {
+class ConfigurationLabel private constructor(@Value("\${server.context-path}") private val baseUrl: String?) : Label(""), LocaleChangeObserver {
+    private lateinit var user: User
+
     override fun localeChange(event: LocaleChangeEvent) {
         val baseUrl = this.baseUrl ?: VaadinRequest.getCurrent().getHeader("host")
-        element.setProperty("innerHTML", getTranslation(Messages.CONFIGURATION_LABEL,
+        element.setProperty(
+            "innerHTML", getTranslation(
+                Messages.CONFIGURATION_LABEL,
                 baseUrl.ensureTrailing("/") + RouteConfiguration.forSessionScope().getUrl(Overview::class.java),
-                RestReportInterface.REPORT_PATH, user.username, user.getPlainTextPassword()))
+                RestReportInterface.REPORT_PATH, user.username, user.getPlainTextPassword()
+            )
+        )
+    }
+
+    companion object {
+        fun forUser(user: User): ConfigurationLabel =
+            VaadinService.getCurrent().instantiator.createComponent(ConfigurationLabel::class.java).also { it.user = user }
     }
 
 }

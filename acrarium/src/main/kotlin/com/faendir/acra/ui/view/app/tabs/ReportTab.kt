@@ -17,12 +17,10 @@ package com.faendir.acra.ui.view.app.tabs
 
 import com.faendir.acra.model.App
 import com.faendir.acra.navigation.View
-import com.faendir.acra.service.AvatarService
 import com.faendir.acra.service.DataService
-import com.faendir.acra.settings.LocalSettings
-import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.ReportList
 import com.faendir.acra.ui.view.app.AppView
+import com.faendir.acra.util.PARAM
 import com.vaadin.flow.router.Route
 import org.springframework.beans.factory.annotation.Qualifier
 
@@ -34,13 +32,12 @@ import org.springframework.beans.factory.annotation.Qualifier
 @Route(value = "report", layout = AppView::class)
 class ReportTab(
     private val dataService: DataService,
-    private val avatarService: AvatarService,
-    private val localSettings: LocalSettings,
+    private val reportListFactory: ReportList.Factory,
     @Qualifier(PARAM)
     private val app: App
 ) : AppTab<ReportList>(app) {
 
     override fun initContent(): ReportList {
-        return ReportList(app, dataService.getReportProvider(app), avatarService, localSettings) { dataService.deleteReport(it) }
+        return reportListFactory.create(app, dataService.getReportProvider(app)) { dataService.deleteReport(it) }
     }
 }

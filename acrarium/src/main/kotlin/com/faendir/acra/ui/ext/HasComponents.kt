@@ -6,8 +6,10 @@ import com.faendir.acra.service.AvatarService
 import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.component.Box
 import com.faendir.acra.ui.component.Card
+import com.faendir.acra.ui.component.ConfigurationLabel
 import com.faendir.acra.ui.component.DownloadButton
 import com.faendir.acra.ui.component.InstallationView
+import com.faendir.acra.ui.component.RangeField
 import com.faendir.acra.ui.component.Tab
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.UserEditor
@@ -17,6 +19,7 @@ import com.github.appreciated.layout.GridLayout
 import com.vaadin.flow.component.AbstractField
 import com.vaadin.flow.component.ClickEvent
 import com.vaadin.flow.component.HasComponents
+import com.vaadin.flow.component.Text
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.combobox.ComboBox
@@ -26,12 +29,15 @@ import com.vaadin.flow.component.html.Anchor
 import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.component.html.Image
 import com.vaadin.flow.component.html.Label
+import com.vaadin.flow.component.html.Paragraph
 import com.vaadin.flow.component.login.LoginForm
 import com.vaadin.flow.component.login.LoginI18n
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.component.select.Select
 import com.vaadin.flow.component.tabs.Tabs
+import com.vaadin.flow.component.textfield.NumberField
 import com.vaadin.flow.component.textfield.TextArea
+import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.server.AbstractStreamResource
 
 fun HasComponents.gridLayout(initializer: GridLayout.() -> Unit = {}) {
@@ -97,8 +103,12 @@ fun HasComponents.formLayout(initializer: FormLayout.() -> Unit = {}) {
     add(FormLayout().apply(initializer))
 }
 
-fun HasComponents.translatableCheckbox(captionId: String, vararg params: Any, initializer: Checkbox.() -> Unit = {}) {
-    add(Translatable.createCheckbox(captionId, *params).with(initializer))
+fun HasComponents.translatableCheckbox(captionId: String, vararg params: Any, initializer: Checkbox.() -> Unit = {}): Translatable.Value<Checkbox, *, Boolean> {
+    return Translatable.createCheckbox(captionId, *params).with(initializer).also { add(it) }
+}
+
+fun HasComponents.checkbox(initializer: Checkbox.() -> Unit = {}) {
+    add(Checkbox().apply(initializer))
 }
 
 fun <T> HasComponents.translatableSelect(items: Collection<T>, captionId: String, vararg params: Any, initializer: Select<T>.() -> Unit = {}) {
@@ -137,4 +147,44 @@ fun HasComponents.translatableTextArea(captionId: String, vararg params: Any, in
 
 fun <T> HasComponents.acrariumGrid(content: Collection<T>, initializer: AcrariumGrid<T>.() -> Unit): Grid<T> {
     return AcrariumGrid<T>().apply { setItems(content) }.apply(initializer).also { add(it) }
+}
+
+fun HasComponents.translatableText(captionId: String, vararg params: Any, initializer: Text.() -> Unit = {}) {
+    add(Translatable.createText(captionId, *params).with(initializer))
+}
+
+fun HasComponents.configurationLabel(user: User) {
+    add(ConfigurationLabel.forUser(user))
+}
+
+fun HasComponents.translatableRangeField(
+    captionId: String,
+    vararg params: Any,
+    initializer: RangeField.() -> Unit = {}
+): Translatable.ValidatedValue<RangeField, *, Double> {
+    return Translatable.createRangeField(captionId, params).with(initializer).also { add(it) }
+}
+
+fun HasComponents.translatableNumberField(
+    captionId: String,
+    vararg params: Any,
+    initializer: NumberField.() -> Unit = {}
+): Translatable.ValidatedValue<NumberField, *, Double> {
+    return Translatable.createNumberField(captionId, params).with(initializer).also { add(it) }
+}
+
+fun HasComponents.paragraph(text: String, initializer: Paragraph.() -> Unit = {}) {
+    add(Paragraph(text).apply(initializer))
+}
+
+fun HasComponents.translatableParagraph(captionId: String, vararg params: Any, initializer: Paragraph.() -> Unit = {}) {
+    add(Translatable.createP(captionId, *params).with(initializer))
+}
+
+fun HasComponents.translatableTextField(
+    captionId: String,
+    vararg params: Any,
+    initializer: TextField.() -> Unit = {}
+): Translatable.ValidatedValue<TextField, *, String> {
+    return Translatable.createTextField(captionId, params).with(initializer).also { add(it) }
 }

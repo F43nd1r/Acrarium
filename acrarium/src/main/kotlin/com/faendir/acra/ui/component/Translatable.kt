@@ -19,7 +19,6 @@ import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent
 import com.vaadin.flow.component.ClickEvent
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.ComponentEvent
-import com.vaadin.flow.component.ComponentEventListener
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.HasSize
 import com.vaadin.flow.component.HasStyle
@@ -37,7 +36,6 @@ import com.vaadin.flow.component.html.Image
 import com.vaadin.flow.component.html.Label
 import com.vaadin.flow.component.html.Paragraph
 import com.vaadin.flow.component.select.Select
-import com.vaadin.flow.component.tabs.Tab
 import com.vaadin.flow.component.textfield.NumberField
 import com.vaadin.flow.component.textfield.PasswordField
 import com.vaadin.flow.component.textfield.TextArea
@@ -51,7 +49,7 @@ import com.vaadin.flow.shared.Registration
  * @since 14.11.18
  */
 open class Translatable<T : Component> protected constructor(protected val t: T, private val setter: T.() -> Unit) :
-        Composite<T>(), LocaleChangeObserver, HasSize, HasStyle {
+    Composite<T>(), LocaleChangeObserver, HasSize, HasStyle {
     constructor(t: T, property: T.(String) -> Unit, captionId: String, vararg params: Any) : this(t, { t.property(t.getTranslation(captionId, *params)) })
 
     override fun initContent(): T {
@@ -97,8 +95,12 @@ open class Translatable<T : Component> protected constructor(protected val t: T,
 
         fun createText(captionId: String, vararg params: Any) = Translatable(Text(""), HasText::setText, captionId, *params)
 
-        fun createButton(captionId: String, vararg params: Any, clickListener: (ClickEvent<Button>) -> Unit = {}) =
-                Translatable(Button("", clickListener).apply { addThemeVariants(ButtonVariant.LUMO_PRIMARY) }, HasText::setText, captionId, *params)
+        fun createButton(
+            captionId: String,
+            vararg params: Any,
+            theme: ButtonVariant = ButtonVariant.LUMO_PRIMARY,
+            clickListener: (ClickEvent<Button>) -> Unit = {}
+        ) = Translatable(Button("", clickListener).apply { addThemeVariants(theme) }, HasText::setText, captionId, *params)
 
         fun createTextField(captionId: String, vararg params: Any) = ValidatedValue(TextField(), TextField::setLabel, captionId, *params)
 
@@ -108,7 +110,8 @@ open class Translatable<T : Component> protected constructor(protected val t: T,
 
         fun createTextArea(captionId: String, vararg params: Any) = ValidatedValue(TextArea(), TextArea::setLabel, captionId, *params)
 
-        fun <T> createComboBox(items: Collection<T>, captionId: String, vararg params: Any) = ValidatedValue(ComboBox("", items), ComboBox<T>::setLabel, captionId, *params)
+        fun <T> createComboBox(items: Collection<T>, captionId: String, vararg params: Any) =
+            ValidatedValue(ComboBox("", items), ComboBox<T>::setLabel, captionId, *params)
 
         fun <T> createSelect(items: Collection<T>, captionId: String, vararg params: Any) = Translatable(Select<T>().apply { setItems(items) }) {
             label = getTranslation(captionId, *params)

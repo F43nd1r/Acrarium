@@ -16,6 +16,7 @@
 package com.faendir.acra.ui.view
 
 import com.faendir.acra.i18n.Messages
+import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.model.QApp
 import com.faendir.acra.model.QBug
 import com.faendir.acra.model.QReport
@@ -24,24 +25,26 @@ import com.faendir.acra.navigation.View
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.HasAcrariumTitle
-import com.faendir.acra.i18n.TranslatableText
-import com.faendir.acra.ui.component.ConfigurationLabel
-import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.ui.component.dialog.FluentDialog
-import com.faendir.acra.ui.component.dialog.ValidatedField
+import com.faendir.acra.ui.component.dialog.closeButton
+import com.faendir.acra.ui.component.dialog.createButton
+import com.faendir.acra.ui.component.dialog.showFluentDialog
 import com.faendir.acra.ui.ext.SizeUnit
-import com.faendir.acra.ui.ext.queryDslAcrariumGrid
+import com.faendir.acra.ui.ext.configurationLabel
 import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.flexLayout
+import com.faendir.acra.ui.ext.queryDslAcrariumGrid
 import com.faendir.acra.ui.ext.setMarginRight
 import com.faendir.acra.ui.ext.translatableButton
+import com.faendir.acra.ui.ext.translatableCheckbox
+import com.faendir.acra.ui.ext.translatableLabel
+import com.faendir.acra.ui.ext.translatableNumberField
+import com.faendir.acra.ui.ext.translatableTextField
 import com.faendir.acra.ui.view.app.tabs.BugTab
 import com.faendir.acra.ui.view.main.MainView
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.router.Route
-import org.springframework.beans.factory.annotation.Value
 
 /**
  * @author lukas
@@ -50,10 +53,6 @@ import org.springframework.beans.factory.annotation.Value
 @View
 @Route(value = "", layout = MainView::class)
 class Overview(private val dataService: DataService) : Composite<VerticalLayout>(), HasAcrariumTitle {
-
-    @Value("\${server.context-path}")
-    private val baseUrl: String? = null
-
     init {
         content {
             setSizeFull()
@@ -67,37 +66,39 @@ class Overview(private val dataService: DataService) : Composite<VerticalLayout>
             if (SecurityUtils.hasRole(User.Role.ADMIN)) {
                 flexLayout {
                     translatableButton(Messages.NEW_APP) {
-                        val name = Translatable.createTextField(Messages.NAME)
-                        FluentDialog().setTitle(Messages.NEW_APP).addComponent(name).addCreateButton {
-                            FluentDialog().addComponent(ConfigurationLabel(baseUrl, dataService.createNewApp(name.content.value))).addCloseButton().show()
-                            grid.dataProvider.refreshAll()
-                        }.show()
+                        showFluentDialog {
+                            header(Messages.NEW_APP)
+                            val name = translatableTextField(Messages.NAME)
+                            createButton {
+                                showFluentDialog {
+                                    configurationLabel(dataService.createNewApp(name.content.value))
+                                    closeButton()
+                                }
+                                grid.dataProvider.refreshAll()
+                            }
+                        }
                     }.with { setMarginRight(5.0, SizeUnit.PIXEL) }
                     translatableButton(Messages.IMPORT_ACRALYZER) {
-                        val host = Translatable.createTextField(Messages.HOST).with { value = "localhost" }
-                        val port = Translatable.createNumberField(Messages.PORT).with {
-                            value = 5984.0
-                            min = 0.0
-                            max = 65535.0
-                        }
-                        val ssl = Translatable.createCheckbox(Messages.SSL)
-                        val databaseName = Translatable.createTextField(Messages.DATABASE_NAME).with { value = "acra-myapp" }
-                        FluentDialog().setTitle(Messages.IMPORT_ACRALYZER)
-                            .addComponent(host)
-                            .addComponent(port)
-                            .addComponent(ssl)
-                            .addValidatedField(ValidatedField.of(databaseName), true)
-                            .addCreateButton {
-                                val importResult =
-                                    dataService.importFromAcraStorage(host.content.value, port.value.toInt(), ssl.content.value, databaseName.content.value)
-                                FluentDialog().addComponent(
-                                    Translatable.createLabel(Messages.IMPORT_SUCCESS, importResult.successCount, importResult.totalCount)
-                                )
-                                    .addComponent(ConfigurationLabel(baseUrl, importResult.user))
-                                    .addCloseButton()
-                                    .show()
+                        showFluentDialog {
+                            header(Messages.IMPORT_ACRALYZER)
+                            val host = translatableTextField(Messages.HOST) { value = "localhost" }
+                            val port = translatableNumberField(Messages.PORT) {
+                                value = 5984.0
+                                min = 0.0
+                                max = 65535.0
+                            }
+                            val ssl = translatableCheckbox(Messages.SSL)
+                            val databaseName = translatableTextField(Messages.DATABASE_NAME) { value = "acra-myapp" }
+                            createButton {
+                                val importResult = dataService.importFromAcraStorage(host.value, port.value.toInt(), ssl.value, databaseName.value)
+                                showFluentDialog {
+                                    translatableLabel(Messages.IMPORT_SUCCESS, importResult.successCount, importResult.totalCount)
+                                    configurationLabel(importResult.user)
+                                    closeButton()
+                                }
                                 grid.dataProvider.refreshAll()
-                            }.show()
+                            }
+                        }
                     }
                 }
             }

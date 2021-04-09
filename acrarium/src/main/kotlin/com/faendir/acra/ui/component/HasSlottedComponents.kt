@@ -1,10 +1,12 @@
 package com.faendir.acra.ui.component
 
+import com.faendir.acra.util.toNullable
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.HasComponents
 import com.vaadin.flow.component.HasElement
 import com.vaadin.flow.component.Text
 import org.slf4j.LoggerFactory
+import kotlin.streams.toList
 
 interface HasSlottedComponents<S : HasSlottedComponents.Slot> : HasElement {
     companion object {
@@ -38,6 +40,10 @@ interface HasSlottedComponents<S : HasSlottedComponents.Slot> : HasElement {
             }
         }.map { it.element }.toTypedArray())
     }
+
+    fun get(slot: S): List<Component> = element.children.toList()
+        .filter { it.getAttribute(SLOT) == slot.name.toLowerCase() }
+        .mapNotNull { it.component.toNullable() }
 
     fun removeAll(slot: S) {
         element.removeChild(*element.children.filter { it.getAttribute(SLOT) == slot.name.toLowerCase() }.toArray { arrayOfNulls(it) })

@@ -34,3 +34,7 @@ class AcrariumGridView<T>(
         setSizeFull()
     }
 }
+
+fun <T> AcrariumGridView<T>.grid(initializer: QueryDslAcrariumGrid<T>.() -> Unit) {
+    grid.apply(initializer)
+}

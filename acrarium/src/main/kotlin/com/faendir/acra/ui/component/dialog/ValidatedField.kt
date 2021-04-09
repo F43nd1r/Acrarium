@@ -67,7 +67,7 @@ class ValidatedField<V, T : Component> private constructor(val field: T, private
         }
 
         fun <V, T> of(field: T, getValue: () -> V, registerListener: ((V) -> Unit) -> Unit): ValidatedField<V, T> where T : Component, T : HasValue<*, V>, T : HasValidation {
-            return ValidatedField(field, getValue, registerListener,  { field.errorMessage = it })
+            return ValidatedField(field, getValue, registerListener) { field.errorMessage = it }
         }
     }
 }

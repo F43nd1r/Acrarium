@@ -42,7 +42,7 @@ interface HasRoute : HasAcrariumTitle {
 
     fun getTranslation(key: String, vararg params: Any): String
 
-    open class Parent<T : HasRoute>(private val parentClass: Class<T>) {
+    open class Parent<T : HasRoute>(protected val parentClass: Class<T>) {
         open operator fun get(applicationContext: GenericApplicationContext, afterNavigationEvent: AfterNavigationEvent?): T =
             applicationContext.getBean(parentClass)
     }

@@ -30,7 +30,7 @@ import com.vaadin.flow.component.littemplate.LitTemplate
  */
 @Tag("acrarium-card")
 @JsModule("./elements/card.ts")
-open class Card() : LitTemplate(), HasSize, HasStyle, HasComponents, HasSlottedComponents<Card.Slot> {
+class Card() : LitTemplate(), HasSize, HasStyle, HasComponents, HasSlottedComponents<Card.Slot> {
     constructor(vararg components: Component) : this() {
         add(*components)
     }

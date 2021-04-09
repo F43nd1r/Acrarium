@@ -16,64 +16,25 @@
 package com.faendir.acra.ui.component.dialog
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.util.catching
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.HasSize
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import org.springframework.data.util.Pair
+import kotlin.streams.asSequence
 
 /**
  * @author Lukas
  * @since 19.12.2017
  */
 class FluentDialog : AcrariumDialog() {
-    private val components: MutableList<Component> = mutableListOf()
     private val fields: MutableMap<ValidatedField<*, *>, Pair<Boolean, (Boolean) -> Unit>> = mutableMapOf()
 
-    fun setTitle(titleId: String, vararg params: Any): FluentDialog {
-        setHeader(titleId, *params)
-        return this
-    }
-
-    fun addCreateButton(onCreateAction: FluentDialog.() -> Unit): FluentDialog {
-        setPositive(Messages.CREATE) { this.onCreateAction() }
-        setNegative(Messages.CANCEL)
-        return this
-    }
-
-    fun addCloseButton(): FluentDialog {
-        setPositive(Messages.CLOSE)
-        return this
-    }
-
-    fun addYesNoButtons(onYesAction: FluentDialog.() -> Unit): FluentDialog {
-        setPositive(Messages.YES) { onYesAction() }
-        setNegative(Messages.NO)
-        return this
-    }
-
-    fun addConfirmButtons(onYesAction: FluentDialog.() -> Unit): FluentDialog {
-        setPositive(Messages.CONFIRM) { onYesAction() }
-        setNegative(Messages.CANCEL)
-        return this
-    }
-
-    fun addComponent(component: Component): FluentDialog {
-        components.add(component)
-        return this
-    }
-
-    fun addText(captionId: String, vararg params: Any): FluentDialog {
-        components.add(Translatable.createP(captionId, *params).apply { style.set("white-space", "pre-wrap") })
-        return this
-    }
-
-    fun addValidatedField(validatedField: ValidatedField<*, *>, isInitialValid: Boolean = false): FluentDialog {
-        val listener: (Boolean) -> Unit =  { updateField(validatedField, it) }
+    fun validatedField(validatedField: ValidatedField<*, *>, isInitialValid: Boolean = false) {
+        val listener: (Boolean) -> Unit = { updateField(validatedField, it) }
         validatedField.addListener(listener)
         fields[validatedField] = Pair.of(isInitialValid, listener)
-        return addComponent(validatedField.field)
+        add(validatedField.field)
     }
 
     private fun updateField(field: ValidatedField<*, *>, value: Boolean) {
@@ -82,12 +43,7 @@ class FluentDialog : AcrariumDialog() {
     }
 
     fun show() {
-        components.filterIsInstance<HasSize>().forEach { catching { it.width = "100%" } }
-        val layout = FlexLayout()
-        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN)
-        components.forEach { layout.add(it) }
         checkValid()
-        add(layout)
         if (!isOpened) {
             open()
         }
@@ -97,4 +53,10 @@ class FluentDialog : AcrariumDialog() {
         val valid = fields.values.map { it.first }.fold(true) { a, b -> a && b }
         positive?.let { it.content.isEnabled = valid }
     }
+}
+
+fun showFluentDialog(initializer: FluentDialog.() -> Unit) {
+    val dialog = FluentDialog()
+    dialog.initializer()
+    dialog.show()
 }

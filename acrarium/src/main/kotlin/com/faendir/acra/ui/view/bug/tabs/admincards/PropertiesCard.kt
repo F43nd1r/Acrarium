@@ -19,8 +19,10 @@ import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.Bug
 import com.faendir.acra.navigation.View
 import com.faendir.acra.service.DataService
+import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.flexLayout
 import com.faendir.acra.ui.ext.translatableButton
 import com.faendir.acra.ui.ext.translatableTextArea
@@ -34,17 +36,19 @@ import org.springframework.beans.factory.annotation.Qualifier
 class PropertiesCard(dataService: DataService, @Qualifier(PARAM) bug: Bug) : AdminCard(dataService) {
 
     init {
-        setHeader(Translatable.createLabel(Messages.PROPERTIES))
-        flexLayout {
-            setFlexDirection(FlexLayout.FlexDirection.COLUMN)
-            alignItems = FlexComponent.Alignment.END
-            val title = translatableTextArea(Messages.TITLE) {
-                value = bug.title
-                setWidthFull()
-            }
-            translatableButton(Messages.SAVE) {
-                bug.title = title.content.value
-                dataService.store(bug)
+        content {
+            setHeader(Translatable.createLabel(Messages.PROPERTIES))
+            flexLayout {
+                setFlexDirection(FlexLayout.FlexDirection.COLUMN)
+                alignItems = FlexComponent.Alignment.END
+                val title = translatableTextArea(Messages.TITLE) {
+                    value = bug.title
+                    setWidthFull()
+                }
+                translatableButton(Messages.SAVE) {
+                    bug.title = title.content.value
+                    dataService.store(bug)
+                }
             }
         }
     }

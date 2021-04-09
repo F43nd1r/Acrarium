@@ -554,7 +554,7 @@
                 <executions>
                     <execution>
                         <configuration>
-                            <failOnError>true</failOnError>
+                            <failOnError>false</failOnError>
                             <enableLazyInitialization>true</enableLazyInitialization>
                         </configuration>
                         <goals>

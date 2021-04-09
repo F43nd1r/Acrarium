@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.util
+package com.faendir.acra.ui.component.grid
 
 import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.data.renderer.ComponentRenderer

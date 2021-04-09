@@ -19,10 +19,16 @@ import {css, customElement, html, LitElement} from 'lit-element'
 @customElement("acrarium-dialog-content")
 export default class DialogContent extends LitElement {
     static get styles() {
+        //language=css
         return css`
                 :host {
                     display: block;
                     max-width: 1000px;
+                }
+                
+                .content {
+                    display: flex;
+                    flex-direction: column;
                 }
 
                 .footer {
@@ -48,7 +54,9 @@ export default class DialogContent extends LitElement {
             <div class="header">
                 <slot name="header"></slot>
             </div>
-            <slot></slot>
+            <div class="content">
+                <slot></slot>
+            </div>
             <div class="footer">
                 <slot name="negative"></slot>
                 <div class="spacer"></div>

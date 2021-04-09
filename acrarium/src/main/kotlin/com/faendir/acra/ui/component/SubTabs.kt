@@ -15,6 +15,7 @@
  */
 package com.faendir.acra.ui.component
 
+import com.faendir.acra.util.toNullable
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.ComponentEventListener
@@ -30,7 +31,7 @@ import com.vaadin.flow.shared.Registration
  * @author lukas
  * @since 06.09.19
  */
-open class SubTabs(vararg tabs: Tab?) : Tab(), HasComponents {
+open class SubTabs(vararg tabs: Tab) : Tab(), HasComponents {
     private val content: Tabs = Tabs(false, *tabs)
     private var registration: Registration? = null
 
@@ -49,13 +50,13 @@ open class SubTabs(vararg tabs: Tab?) : Tab(), HasComponents {
     }
 
     override fun onAttach(attachEvent: AttachEvent) {
-        parent.ifPresent { parent: Component? ->
+        parent.ifPresent { parent: Component ->
             if (parent is Tabs) {
-                registration = parent.addSelectedChangeListener { e: SelectedChangeEvent ->
+                registration = parent.addSelectedChangeListener {
                     if (isVisible) {
-                        if (e.selectedTab === this) {
+                        if (it.selectedTab === this) {
                             content.selectedIndex = 0
-                        } else if (e.selectedTab != null) {
+                        } else if (it.selectedTab != null) {
                             content.selectedIndex = -1
                         }
                     }
@@ -65,9 +66,7 @@ open class SubTabs(vararg tabs: Tab?) : Tab(), HasComponents {
     }
 
     override fun onDetach(detachEvent: DetachEvent) {
-        if (registration != null) {
-            registration!!.remove()
-        }
+        registration?.remove()
     }
 
     override fun add(vararg components: Component) {
@@ -100,17 +99,9 @@ open class SubTabs(vararg tabs: Tab?) : Tab(), HasComponents {
     }
 
     @get:Synchronize(property = "selected", value = ["selected-changed"])
-    var selectedIndex: Int
-        get() = content.selectedIndex
-        set(selectedIndex) {
-            content.selectedIndex = selectedIndex
-        }
+    var selectedIndex: Int by content::selectedIndex
 
-    var selectedTab: Tab?
-        get() = content.selectedTab
-        set(selectedTab) {
-            content.selectedTab = selectedTab
-        }
+    var selectedTab: Tab? by content::selectedTab
 
     private fun hideIfEmpty() {
         isVisible = content.componentCount > 0

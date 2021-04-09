@@ -17,12 +17,10 @@ package com.faendir.acra.ui.view.bug.tabs
 
 import com.faendir.acra.model.Bug
 import com.faendir.acra.navigation.View
-import com.faendir.acra.service.AvatarService
 import com.faendir.acra.service.DataService
-import com.faendir.acra.settings.LocalSettings
-import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.ReportList
 import com.faendir.acra.ui.view.bug.BugView
+import com.faendir.acra.util.PARAM
 import com.vaadin.flow.router.Route
 import org.springframework.beans.factory.annotation.Qualifier
 
@@ -34,13 +32,12 @@ import org.springframework.beans.factory.annotation.Qualifier
 @Route(value = "report", layout = BugView::class)
 class ReportTab(
     private val dataService: DataService,
-    private val avatarService: AvatarService,
-    private val localSettings: LocalSettings,
+    private val reportListFactory: ReportList.Factory,
     @Qualifier(PARAM)
     private val bug: Bug
 ) : BugTab<ReportList>(bug) {
 
     override fun initContent(): ReportList {
-        return ReportList(bug.app, dataService.getReportProvider(bug), avatarService, localSettings) { dataService.deleteReport(it) }
+        return reportListFactory.create(bug.app, dataService.getReportProvider(bug)) { dataService.deleteReport(it) }
     }
 }

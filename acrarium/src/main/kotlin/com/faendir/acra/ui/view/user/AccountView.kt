@@ -16,14 +16,14 @@
 package com.faendir.acra.ui.view.user
 
 import com.faendir.acra.i18n.Messages
+import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.navigation.View
 import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.component.HasAcrariumTitle
-import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.ui.component.UserEditor
+import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.view.main.MainView
 import com.faendir.acra.util.getCurrentUser
-import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.notification.Notification
 import com.vaadin.flow.component.orderedlayout.FlexComponent
@@ -38,18 +38,14 @@ import org.springframework.lang.NonNull
 @View
 @Route(value = "account", layout = MainView::class)
 class AccountView constructor(@field:NonNull @param:NonNull private val userService: UserService) : Composite<FlexLayout>(), HasAcrariumTitle {
-
     init {
-        content.setSizeFull()
-        content.justifyContentMode = FlexComponent.JustifyContentMode.CENTER
-        content.alignItems = FlexComponent.Alignment.CENTER
-    }
-
-    override fun onAttach(attachEvent: AttachEvent) {
-        content.removeAll()
-        val user = userService.getCurrentUser()
-        val userEditor = UserEditor(userService, user, true) { Notification.show(getTranslation(Messages.SUCCESS)) }
-        content.add(userEditor)
+        content {
+            setSizeFull()
+            justifyContentMode = FlexComponent.JustifyContentMode.CENTER
+            alignItems = FlexComponent.Alignment.CENTER
+            val user = userService.getCurrentUser()
+            add(UserEditor(userService, user, true) { Notification.show(getTranslation(Messages.SUCCESS)) })
+        }
     }
 
     override val title = TranslatableText(Messages.ACCOUNT)

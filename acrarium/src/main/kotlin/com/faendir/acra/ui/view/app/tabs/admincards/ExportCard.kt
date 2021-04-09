@@ -20,15 +20,16 @@ import com.faendir.acra.model.App
 import com.faendir.acra.model.QReport
 import com.faendir.acra.navigation.View
 import com.faendir.acra.service.DataService
-import com.faendir.acra.util.PARAM
+import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.comboBox
+import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.downloadButton
+import com.faendir.acra.util.PARAM
 import com.querydsl.core.types.dsl.BooleanExpression
+import com.querydsl.core.types.dsl.StringPath
 import com.vaadin.flow.server.InputStreamFactory
 import com.vaadin.flow.server.StreamResource
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
 import org.springframework.beans.factory.annotation.Qualifier
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
@@ -36,27 +37,27 @@ import java.nio.charset.StandardCharsets
 @View
 class ExportCard(dataService: DataService, @Qualifier(PARAM) app: App) : AdminCard(dataService) {
     init {
-        setHeader(Translatable.createLabel(Messages.EXPORT))
-        val mailBox = comboBox(dataService.getFromReports(app, null, QReport.report.userEmail), Messages.BY_MAIL) {
-            setWidthFull()
-        }
-        val idBox = comboBox(dataService.getFromReports(app, null, QReport.report.installationId), Messages.BY_ID) {
-            setWidthFull()
-        }
-        downloadButton(StreamResource("reports.json", InputStreamFactory {
-            var where: BooleanExpression? = null
-            val mail = mailBox.content.value
-            val id = idBox.content.value
-            if (mail != null && mail.isNotEmpty()) {
-                where = QReport.report.userEmail.eq(mail)
+        content {
+            setHeader(Translatable.createLabel(Messages.EXPORT))
+            val mailBox = comboBox(dataService.getFromReports(app, null, QReport.report.userEmail), Messages.BY_MAIL) {
+                setWidthFull()
             }
-            if (id != null && id.isNotEmpty()) {
-                where = QReport.report.installationId.eq(id).and(where)
+            val idBox = comboBox(dataService.getFromReports(app, null, QReport.report.installationId), Messages.BY_ID) {
+                setWidthFull()
             }
-            ByteArrayInputStream(if (where == null) ByteArray(0) else dataService.getFromReports(app, where, QReport.report.content, QReport.report.id)
-                .joinToString(", ", "[", "]").toByteArray(StandardCharsets.UTF_8))
-        }), Messages.DOWNLOAD) {
-            setSizeFull()
+            downloadButton(StreamResource("reports.json", InputStreamFactory {
+                val where = null.eqIfNotBlank(QReport.report.userEmail, mailBox.value).eqIfNotBlank(QReport.report.installationId, idBox.value)
+                ByteArrayInputStream(
+                    if (where == null) ByteArray(0) else dataService.getFromReports(app, where, QReport.report.content, QReport.report.id)
+                        .joinToString(", ", "[", "]").toByteArray(StandardCharsets.UTF_8)
+                )
+            }), Messages.DOWNLOAD) {
+                setSizeFull()
+            }
         }
+    }
+
+    private fun BooleanExpression?.eqIfNotBlank(path: StringPath, value: String?): BooleanExpression? {
+        return value?.takeIf { it.isNotBlank() }?.let { path.eq(it).and(this) } ?: this
     }
 }

@@ -20,73 +20,90 @@ import com.faendir.acra.model.App
 import com.faendir.acra.model.QReport
 import com.faendir.acra.navigation.View
 import com.faendir.acra.service.DataService
-import com.faendir.acra.util.PARAM
-import com.faendir.acra.ui.component.ConfigurationLabel
+import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.ui.component.dialog.FluentDialog
+import com.faendir.acra.ui.component.dialog.closeButton
+import com.faendir.acra.ui.component.dialog.confirmButtons
+import com.faendir.acra.ui.component.dialog.showFluentDialog
 import com.faendir.acra.ui.ext.box
+import com.faendir.acra.ui.ext.comboBox
+import com.faendir.acra.ui.ext.configurationLabel
+import com.faendir.acra.ui.ext.content
+import com.faendir.acra.ui.ext.translatableNumberField
+import com.faendir.acra.ui.ext.translatableRangeField
+import com.faendir.acra.ui.ext.translatableText
 import com.faendir.acra.ui.view.Overview
+import com.faendir.acra.util.PARAM
 import com.vaadin.flow.component.UI
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.beans.factory.annotation.Value
 
 @View
 class DangerCard(dataService: DataService, @Qualifier(PARAM) app: App) : AdminCard(dataService) {
-
-    @Value("\${server.context-path}")
-    private val baseUrl: String? = null
-
     init {
-        setHeader(Translatable.createLabel(Messages.DANGER_ZONE))
-        dividerEnabled = true
-        setHeaderColor("var(--lumo-error-contrast-color)", "var(--lumo-error-color)")
-        box(Messages.NEW_ACRA_CONFIG, Messages.NEW_ACRA_CONFIG_DETAILS, Messages.CREATE) {
-            FluentDialog().addText(Messages.NEW_ACRA_CONFIG_CONFIRM)
-                .addConfirmButtons { FluentDialog().addComponent(ConfigurationLabel(baseUrl, dataService.recreateReporterUser(app))).addCloseButton().show() }
-                .show()
-        }
-        box(Messages.NEW_BUG_CONFIG, Messages.NEW_BUG_CONFIG_DETAILS, Messages.CONFIGURE) {
-            val score = Translatable.createRangeField(Messages.SCORE).with {
-                min = 0.0
-                max = 100.0
-                value = app.configuration.minScore.toDouble()
-            }
-            FluentDialog().addComponent(score)
-                .addText(Messages.NEW_BUG_CONFIG_CONFIRM)
-                .addConfirmButtons { dataService.changeConfiguration(app, App.Configuration(score.value.toInt())) }
-                .show()
-        }
-        box(Messages.PURGE_OLD, Messages.PURGE_OLD_DETAILS, Messages.PURGE) {
-            val age = Translatable.createNumberField(Messages.REPORTS_OLDER_THAN1).with {
-                value = 30.0
-                step = 1.0
-                min = 1.0
-                setHasControls(true)
-                setWidthFull()
-                suffixComponent = Translatable.createLabel(Messages.REPORTS_OLDER_THAN2)
-            }
-            FluentDialog().addComponent(age)
-                .setTitle(Messages.PURGE)
-                .addConfirmButtons { dataService.deleteReportsOlderThanDays(app, age.value.toInt()) }.show()
-        }
-        box(Messages.PURGE_VERSION, Messages.PURGE_VERSION_DETAILS, Messages.PURGE) {
-            val versionBox =
-                Translatable.createComboBox(dataService.getFromReports(app, null, QReport.report.stacktrace.version.code), Messages.REPORTS_BEFORE_VERSION)
-            FluentDialog().addComponent(versionBox)
-                .setTitle(Messages.PURGE)
-                .addConfirmButtons {
-                    if (versionBox.value != null) {
-                        dataService.deleteReportsBeforeVersion(app, versionBox.value!!)
+        content {
+            setHeader(Translatable.createLabel(Messages.DANGER_ZONE))
+            setHeaderColor("var(--lumo-error-contrast-color)", "var(--lumo-error-color)")
+            dividerEnabled = true
+            box(Messages.NEW_ACRA_CONFIG, Messages.NEW_ACRA_CONFIG_DETAILS, Messages.CREATE) {
+                showFluentDialog {
+                    translatableText(Messages.NEW_ACRA_CONFIG_CONFIRM)
+                    confirmButtons {
+                        showFluentDialog {
+                            configurationLabel(dataService.recreateReporterUser(app))
+                            closeButton()
+                        }
                     }
-                }.show()
-        }
-        box(Messages.DELETE_APP, Messages.DELETE_APP_DETAILS, Messages.DELETE) {
-            FluentDialog().addText(Messages.DELETE_APP_CONFIRM).addConfirmButtons {
-                dataService.deleteApp(app)
-                UI.getCurrent().navigate(Overview::class.java)
-            }.show()
+                }
+            }
+            box(Messages.NEW_BUG_CONFIG, Messages.NEW_BUG_CONFIG_DETAILS, Messages.CONFIGURE) {
+                showFluentDialog {
+                    val score = translatableRangeField(Messages.SCORE) {
+                        min = 0.0
+                        max = 100.0
+                        value = app.configuration.minScore.toDouble()
+                    }
+                    translatableText(Messages.NEW_BUG_CONFIG_CONFIRM)
+                    confirmButtons {
+                        dataService.changeConfiguration(app, App.Configuration(score.value.toInt()))
+                    }
+                }
+            }
+            box(Messages.PURGE_OLD, Messages.PURGE_OLD_DETAILS, Messages.PURGE) {
+                showFluentDialog {
+                    header(Messages.PURGE)
+                    val age = translatableNumberField(Messages.REPORTS_OLDER_THAN1) {
+                        value = 30.0
+                        step = 1.0
+                        min = 1.0
+                        setHasControls(true)
+                        setWidthFull()
+                        suffixComponent = Translatable.createLabel(Messages.REPORTS_OLDER_THAN2)
+                    }
+                    confirmButtons {
+                        dataService.deleteReportsOlderThanDays(app, age.value.toInt())
+                    }
+                }
+            }
+            box(Messages.PURGE_VERSION, Messages.PURGE_VERSION_DETAILS, Messages.PURGE) {
+                showFluentDialog {
+                    header(Messages.PURGE)
+                    val versionBox = comboBox(dataService.getFromReports(app, null, QReport.report.stacktrace.version.code), Messages.REPORTS_BEFORE_VERSION)
+                    confirmButtons {
+                        if (versionBox.value != null) {
+                            dataService.deleteReportsBeforeVersion(app, versionBox.value!!)
+                        }
+                    }
+                }
+            }
+            box(Messages.DELETE_APP, Messages.DELETE_APP_DETAILS, Messages.DELETE) {
+                showFluentDialog {
+                    translatableText(Messages.DELETE_APP_CONFIRM)
+                    confirmButtons {
+                        dataService.deleteApp(app)
+                        UI.getCurrent().navigate(Overview::class.java)
+                    }
+                }
+            }
         }
     }
 }

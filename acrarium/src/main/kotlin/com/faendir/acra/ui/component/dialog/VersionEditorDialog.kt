@@ -29,7 +29,7 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout
 class VersionEditorDialog(dataService: DataService, app: App, onUpdate: (() -> Unit) = {}, old: Version? = null) : AcrariumDialog() {
 
     init {
-        setHeader(if (old == null) Messages.NEW_VERSION else Messages.EDIT_VERSION)
+        header(if (old == null) Messages.NEW_VERSION else Messages.EDIT_VERSION)
         val code = Translatable.createNumberField(Messages.VERSION_CODE).with {
             value = old?.code?.toDouble() ?: dataService.getMaxVersion(app)?.plus(1.0) ?: 1.0
             step = 1.0
@@ -43,7 +43,7 @@ class VersionEditorDialog(dataService: DataService, app: App, onUpdate: (() -> U
             setWidthFull()
             if (old != null) { value = old.mappings }
         }
-        setPositive(if (old == null) Messages.CREATE else Messages.SAVE) {
+        positiveAction(if (old == null) Messages.CREATE else Messages.SAVE) {
             if (old == null) {
                 dataService.storeVersion(Version(app, code.value.toInt(), name.value, upload.value))
             } else {
@@ -54,7 +54,7 @@ class VersionEditorDialog(dataService: DataService, app: App, onUpdate: (() -> U
             close()
             onUpdate.invoke()
         }
-        setNegative(Messages.CANCEL)
+        negativeAction(Messages.CANCEL)
         val layout = FlexLayout(code, name, upload)
         layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN)
         add(layout)

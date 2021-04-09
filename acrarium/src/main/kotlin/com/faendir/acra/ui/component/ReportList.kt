@@ -16,7 +16,6 @@
 package com.faendir.acra.ui.component
 
 import com.faendir.acra.dataprovider.QueryDslDataProvider
-import com.faendir.acra.dataprovider.QueryDslFilterWithParameter
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.App
 import com.faendir.acra.model.Permission
@@ -27,12 +26,13 @@ import com.faendir.acra.model.view.VReport
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.AvatarService
 import com.faendir.acra.settings.LocalSettings
-import com.faendir.acra.ui.component.dialog.FluentDialog
+import com.faendir.acra.ui.component.dialog.confirmButtons
+import com.faendir.acra.ui.component.dialog.showFluentDialog
 import com.faendir.acra.ui.component.grid.AcrariumGridView
+import com.faendir.acra.ui.component.grid.TimeSpanRenderer
 import com.faendir.acra.ui.component.grid.column
+import com.faendir.acra.ui.ext.translatableText
 import com.faendir.acra.ui.view.report.ReportView
-import com.faendir.acra.util.TimeSpanRenderer
-import com.querydsl.jpa.impl.JPAQuery
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.grid.Grid
@@ -41,7 +41,8 @@ import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.icon.Icon
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.data.renderer.ComponentRenderer
-import com.vaadin.flow.data.value.ValueChangeMode
+import com.vaadin.flow.spring.annotation.SpringComponent
+import com.vaadin.flow.spring.annotation.UIScope
 
 /**
  * @author lukas
@@ -79,7 +80,7 @@ class ReportList(
                 .setFilterable(QReport.report.isSilent.eq(false), false, Messages.HIDE_SILENT)
                 .setCaption(Messages.SILENT)
             for ((index, column) in app.configuration.customReportColumns.withIndex()) {
-                column({it.customColumns[index]}) {
+                column({ it.customColumns[index] }) {
                     setCaption(Messages.ONE_ARG, column)
                     setSortableAndFilterable(Queries.customReportColumnExpression(column), Messages.ONE_ARG, column)
                 }
@@ -87,14 +88,24 @@ class ReportList(
             if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
                 addColumn(ComponentRenderer { report ->
                     Button(Icon(VaadinIcon.TRASH)) {
-                        FluentDialog().addText(Messages.DELETE_REPORT_CONFIRM).addConfirmButtons {
-                            deleteReport(report)
-                            dataProvider.refreshAll()
-                        }.show()
+                        showFluentDialog {
+                            translatableText(Messages.DELETE_REPORT_CONFIRM)
+                            confirmButtons {
+                                deleteReport(report)
+                                dataProvider.refreshAll()
+                            }
+                        }
                     }
                 }).setCaption(Messages.DELETE).setAutoWidth(false).setWidth("100px")
             }
             addOnClickNavigation(ReportView::class.java) { it.id }
         }
+    }
+
+    @UIScope
+    @SpringComponent
+    class Factory(private val avatarService: AvatarService, private val localSettings: LocalSettings) {
+        fun create(app: App, dataProvider: QueryDslDataProvider<VReport>, deleteReport: (VReport) -> Unit) =
+            ReportList(app, dataProvider, avatarService, localSettings, deleteReport)
     }
 }
