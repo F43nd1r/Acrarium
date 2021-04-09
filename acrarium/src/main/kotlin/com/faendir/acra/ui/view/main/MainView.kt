@@ -18,7 +18,7 @@ package com.faendir.acra.ui.view.main
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.User
 import com.faendir.acra.security.SecurityUtils
-import com.faendir.acra.ui.component.Path
+import com.faendir.acra.ui.component.tabs.Path
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.SizeUnit
 import com.faendir.acra.ui.ext.content
@@ -45,7 +45,6 @@ import com.vaadin.flow.component.tabs.Tabs
 import com.vaadin.flow.router.RouterLayout
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
-import org.springframework.context.ApplicationContext
 import org.springframework.context.support.GenericApplicationContext
 import org.springframework.security.core.context.SecurityContextHolder
 
@@ -62,14 +61,14 @@ class MainView(applicationContext: GenericApplicationContext) : Composite<AppLay
     private val tabs: Tabs
 
     init {
-        targets[com.faendir.acra.ui.component.Tab(Messages.HOME)] = Overview::class.java
+        targets[com.faendir.acra.ui.component.tabs.Tab(Messages.HOME)] = Overview::class.java
         targets[Path(applicationContext)] = Component::class.java
-        targets[com.faendir.acra.ui.component.Tab(Messages.ACCOUNT)] = AccountView::class.java
+        targets[com.faendir.acra.ui.component.tabs.Tab(Messages.ACCOUNT)] = AccountView::class.java
         if (SecurityUtils.hasRole(User.Role.ADMIN)) {
-            targets[com.faendir.acra.ui.component.Tab(Messages.USER_MANAGER)] = UserManager::class.java
+            targets[com.faendir.acra.ui.component.tabs.Tab(Messages.USER_MANAGER)] = UserManager::class.java
         }
-        targets[com.faendir.acra.ui.component.Tab(Messages.SETTINGS)] = SettingsView::class.java
-        targets[com.faendir.acra.ui.component.Tab(Messages.ABOUT)] = AboutView::class.java
+        targets[com.faendir.acra.ui.component.tabs.Tab(Messages.SETTINGS)] = SettingsView::class.java
+        targets[com.faendir.acra.ui.component.tabs.Tab(Messages.ABOUT)] = AboutView::class.java
         tabs = Tabs(*targets.keys.toTypedArray()).apply {
             orientation = Tabs.Orientation.VERTICAL
             addSelectedChangeListener { event ->

@@ -17,7 +17,7 @@ package com.faendir.acra.ui.view.app
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.util.PARAM
-import com.faendir.acra.ui.component.TabView
+import com.faendir.acra.ui.component.tabs.TabView
 import com.faendir.acra.ui.view.app.tabs.AdminTab
 import com.faendir.acra.ui.view.app.tabs.BugTab
 import com.faendir.acra.ui.view.app.tabs.ReportTab

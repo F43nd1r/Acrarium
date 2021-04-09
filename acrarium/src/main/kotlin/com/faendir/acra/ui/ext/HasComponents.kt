@@ -10,7 +10,7 @@ import com.faendir.acra.ui.component.ConfigurationLabel
 import com.faendir.acra.ui.component.DownloadButton
 import com.faendir.acra.ui.component.InstallationView
 import com.faendir.acra.ui.component.RangeField
-import com.faendir.acra.ui.component.Tab
+import com.faendir.acra.ui.component.tabs.Tab
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.UserEditor
 import com.faendir.acra.ui.component.grid.AcrariumGrid

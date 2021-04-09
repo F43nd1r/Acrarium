@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.component
+package com.faendir.acra.ui.component.tabs
 
 import com.faendir.acra.i18n.TranslatableText
+import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.util.PARAM
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.DetachEvent
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.tabs.Tab
-import com.vaadin.flow.i18n.LocaleChangeEvent
 import com.vaadin.flow.router.AfterNavigationEvent
 import com.vaadin.flow.router.AfterNavigationListener
 import com.vaadin.flow.router.RouteParameters

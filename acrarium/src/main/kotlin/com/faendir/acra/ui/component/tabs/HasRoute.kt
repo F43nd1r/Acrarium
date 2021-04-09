@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.component
+package com.faendir.acra.ui.component.tabs
 
 import com.faendir.acra.i18n.TranslatableText
+import com.faendir.acra.ui.component.HasAcrariumTitle
 import com.faendir.acra.util.PARAM
 import com.vaadin.flow.router.AfterNavigationEvent
 import org.springframework.context.support.GenericApplicationContext
@@ -42,7 +43,7 @@ interface HasRoute : HasAcrariumTitle {
 
     fun getTranslation(key: String, vararg params: Any): String
 
-    open class Parent<T : HasRoute>(protected val parentClass: Class<T>) {
+    open class Parent<T : HasRoute>(private val parentClass: Class<T>) {
         open operator fun get(applicationContext: GenericApplicationContext, afterNavigationEvent: AfterNavigationEvent?): T =
             applicationContext.getBean(parentClass)
     }

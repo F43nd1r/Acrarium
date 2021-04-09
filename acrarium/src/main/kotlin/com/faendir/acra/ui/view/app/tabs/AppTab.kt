@@ -18,7 +18,7 @@ package com.faendir.acra.ui.view.app.tabs
 import com.faendir.acra.model.App
 import com.faendir.acra.navigation.AppParser
 import com.faendir.acra.navigation.ParseParameter
-import com.faendir.acra.ui.component.TabView
+import com.faendir.acra.ui.component.tabs.TabView
 import com.vaadin.flow.component.Component
 
 /**

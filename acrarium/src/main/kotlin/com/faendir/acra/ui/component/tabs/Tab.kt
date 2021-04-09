@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.component
+package com.faendir.acra.ui.component.tabs
 
 import com.vaadin.flow.component.tabs.Tab
 import com.vaadin.flow.i18n.LocaleChangeEvent

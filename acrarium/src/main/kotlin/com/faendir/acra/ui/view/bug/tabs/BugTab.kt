@@ -18,8 +18,8 @@ package com.faendir.acra.ui.view.bug.tabs
 import com.faendir.acra.model.Bug
 import com.faendir.acra.navigation.BugParser
 import com.faendir.acra.navigation.ParseParameter
-import com.faendir.acra.ui.component.HasRoute
-import com.faendir.acra.ui.component.TabView
+import com.faendir.acra.ui.component.tabs.HasRoute
+import com.faendir.acra.ui.component.tabs.TabView
 import com.faendir.acra.ui.view.app.tabs.BugTab
 import com.vaadin.flow.component.Component
 

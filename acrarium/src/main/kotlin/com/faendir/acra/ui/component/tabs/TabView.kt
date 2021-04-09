@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.component
+package com.faendir.acra.ui.component.tabs
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.ui.component.Path.ParametrizedTextElement
+import com.faendir.acra.ui.component.SpringComposite
+import com.faendir.acra.ui.component.tabs.Path.ParametrizedTextElement
 import com.faendir.acra.ui.ext.forEach
 import com.faendir.acra.ui.ext.setFlexGrow
 import com.faendir.acra.ui.ext.tab
