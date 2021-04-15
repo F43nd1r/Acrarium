@@ -96,7 +96,7 @@ fun <T> HasComponents.queryDslAcrariumGrid(dataProvider: QueryDslDataProvider<T>
 }
 
 fun HasComponents.translatableButton(captionId: String, vararg params: Any, clickListener: ((ClickEvent<Button>) -> Unit) = {}): Translatable<Button> {
-    return Translatable.createButton(captionId, params, clickListener).also { add(it) }
+    return Translatable.createButton(captionId, *params, clickListener = clickListener).also { add(it) }
 }
 
 fun HasComponents.formLayout(initializer: FormLayout.() -> Unit = {}) {

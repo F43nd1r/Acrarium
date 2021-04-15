@@ -12,7 +12,7 @@ open class AcrariumColumn<T>(acrariumGrid: AbstractAcrariumGrid<T, out AcrariumC
     var caption: TranslatableText? = null
         set(value) {
             field = value
-            key = value?.id
+            key = value?.let { it.id + it.params.joinToString("") { param -> param.toString() } }
         }
     var captionId: String?
         get() = caption?.id

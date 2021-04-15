@@ -28,6 +28,7 @@ import com.faendir.acra.ui.component.HasAcrariumTitle
 import com.faendir.acra.ui.component.dialog.closeButton
 import com.faendir.acra.ui.component.dialog.createButton
 import com.faendir.acra.ui.component.dialog.showFluentDialog
+import com.faendir.acra.ui.component.grid.column
 import com.faendir.acra.ui.ext.SizeUnit
 import com.faendir.acra.ui.ext.configurationLabel
 import com.faendir.acra.ui.ext.content
@@ -58,9 +59,19 @@ class Overview(private val dataService: DataService) : Composite<VerticalLayout>
             setSizeFull()
             val grid = queryDslAcrariumGrid(dataService.getAppProvider()) {
                 setSelectionMode(Grid.SelectionMode.NONE)
-                addColumn { it.name }.setSortable(QApp.app.name).setCaption(Messages.NAME).setFlexGrow(1)
-                addColumn { it.bugCount }.setSortable(QBug.bug.countDistinct()).setCaption(Messages.BUGS)
-                addColumn { it.reportCount }.setSortable(QReport.report.count()).setCaption(Messages.REPORTS)
+                column({ it.name }) {
+                    setSortable(QApp.app.name)
+                    setCaption(Messages.NAME)
+                    flexGrow = 1
+                }
+                column({ it.bugCount }) {
+                    setSortable(QBug.bug.countDistinct())
+                    setCaption(Messages.BUGS)
+                }
+                column({ it.reportCount }) {
+                    setSortable(QReport.report.count())
+                    setCaption(Messages.REPORTS)
+                }
                 addOnClickNavigation(BugTab::class.java) { it.id }
             }
             if (SecurityUtils.hasRole(User.Role.ADMIN)) {
@@ -105,5 +116,5 @@ class Overview(private val dataService: DataService) : Composite<VerticalLayout>
         }
     }
 
-    override val title = TranslatableText(Messages.ACRARIUM)
+    override val title = TranslatableText(Messages.HOME)
 }

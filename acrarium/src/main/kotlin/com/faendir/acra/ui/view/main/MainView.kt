@@ -43,10 +43,13 @@ import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.tabs.Tab
 import com.vaadin.flow.component.tabs.Tabs
 import com.vaadin.flow.router.RouterLayout
+import com.vaadin.flow.router.RouterLink
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
 import org.springframework.context.support.GenericApplicationContext
 import org.springframework.security.core.context.SecurityContextHolder
+import kotlin.reflect.KClass
+import kotlin.streams.asSequence
 
 /**
  * @author lukas
@@ -57,26 +60,20 @@ import org.springframework.security.core.context.SecurityContextHolder
 @UIScope
 @SpringComponent
 class MainView(applicationContext: GenericApplicationContext) : Composite<AppLayout>(), RouterLayout {
-    private val targets: LinkedHashMap<Tab, Class<out Component>> = LinkedHashMap()
+    private val targets: MutableMap<Class<out HasElement>, Tab> = mutableMapOf()
     private val tabs: Tabs
 
     init {
-        targets[com.faendir.acra.ui.component.tabs.Tab(Messages.HOME)] = Overview::class.java
-        targets[Path(applicationContext)] = Component::class.java
-        targets[com.faendir.acra.ui.component.tabs.Tab(Messages.ACCOUNT)] = AccountView::class.java
-        if (SecurityUtils.hasRole(User.Role.ADMIN)) {
-            targets[com.faendir.acra.ui.component.tabs.Tab(Messages.USER_MANAGER)] = UserManager::class.java
-        }
-        targets[com.faendir.acra.ui.component.tabs.Tab(Messages.SETTINGS)] = SettingsView::class.java
-        targets[com.faendir.acra.ui.component.tabs.Tab(Messages.ABOUT)] = AboutView::class.java
-        tabs = Tabs(*targets.keys.toTypedArray()).apply {
+        tabs = Tabs().apply {
             orientation = Tabs.Orientation.VERTICAL
-            addSelectedChangeListener { event ->
-                val target = targets[event.selectedTab]
-                if (target != null && target != Component::class.java) {
-                    ui.ifPresent { it.navigate(target) }
-                }
+            add(createTab<Overview>(Messages.HOME))
+            add(Path(applicationContext))
+            add(createTab<AccountView>(Messages.ACCOUNT))
+            if (SecurityUtils.hasRole(User.Role.ADMIN)) {
+                add(createTab<UserManager>(Messages.USER_MANAGER))
             }
+            add(createTab<SettingsView>(Messages.SETTINGS))
+            add(createTab<AboutView>(Messages.ABOUT))
         }
         content {
             element.style["width"] = "100%"
@@ -99,6 +96,12 @@ class MainView(applicationContext: GenericApplicationContext) : Composite<AppLay
         }
     }
 
+    private inline fun <reified T : Component> createTab(captionId: String) : Tab {
+        val tab = Tab(Translatable.createRouterLink(T::class, captionId))
+        targets[T::class.java] = tab
+        return tab
+    }
+
     private fun logout() {
         SecurityContextHolder.clearContext()
         ui.ifPresent {
@@ -109,6 +112,6 @@ class MainView(applicationContext: GenericApplicationContext) : Composite<AppLay
 
     override fun showRouterLayoutContent(content: HasElement) {
         super.showRouterLayoutContent(content)
-        targets.entries.firstOrNull { content.javaClass == it.value }?.let { tabs.selectedTab = it.key }
+        targets[content.javaClass]?.let { tabs.selectedTab = it }
     }
 }

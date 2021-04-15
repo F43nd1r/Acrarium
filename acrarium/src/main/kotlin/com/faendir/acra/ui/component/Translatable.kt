@@ -42,7 +42,9 @@ import com.vaadin.flow.component.textfield.TextArea
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.i18n.LocaleChangeEvent
 import com.vaadin.flow.i18n.LocaleChangeObserver
+import com.vaadin.flow.router.RouterLink
 import com.vaadin.flow.shared.Registration
+import kotlin.reflect.KClass
 
 /**
  * @author lukas
@@ -136,6 +138,9 @@ open class Translatable<T : Component> protected constructor(protected val t: T,
 
         fun createRangeField(captionId: String, vararg params: Any) = ValidatedValue(RangeField(), RangeField::setLabel, captionId, *params)
 
-        fun createP(captionId: String, vararg params: Any) = Translatable(Paragraph(), Paragraph::setText, captionId, params)
+        fun createP(captionId: String, vararg params: Any) = Translatable(Paragraph(), Paragraph::setText, captionId, *params)
+
+        fun createRouterLink(target: KClass<out Component>, captionId: String, vararg params: Any) =
+            Translatable(RouterLink("", target.java), HasText::setText, captionId, *params)
     }
 }
