@@ -52,6 +52,8 @@ class Card() : LitTemplate(), HasSize, HasStyle, HasComponents, HasSlottedCompon
         children.filter { it.element.getAttribute("slot") == null }.forEach { this.remove(it) }
     }
 
+    fun hasContent() = children.anyMatch { it.element.getAttribute("slot") == null }
+
     enum class Slot : HasSlottedComponents.Slot {
         HEADER
     }

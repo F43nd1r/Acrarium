@@ -36,8 +36,15 @@ internal abstract class Chart<T>(captionId: String, vararg params: Any) : Compos
     }
 
     fun setContent(map: Map<T, Long>) {
-        content.removeContent()
-        content.add(createChart(map))
+        val reload = content.hasContent()
+        if (reload) {
+            content.removeContent()
+        }
+        val chart = createChart(map)
+        content.add(chart)
+        if (!reload) {
+            chart.element.executeJs("setTimeout(() => { this.updateConfig(); this.chartComponent.updateOptions(this.config); this.chartComponent.render() }, 0)")
+        }
     }
 
     protected abstract fun createChart(map: Map<T, Long>): ApexCharts
