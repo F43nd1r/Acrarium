@@ -139,6 +139,7 @@ class DataService(
         entityManager.remove(if (entityManager.contains(entity)) entity else entityManager.merge(entity))
     }
 
+    @Transactional
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#version.app, T(com.faendir.acra.model.Permission\$Level).EDIT)")
     fun storeVersion(version: Version): Version = store(version)
 
