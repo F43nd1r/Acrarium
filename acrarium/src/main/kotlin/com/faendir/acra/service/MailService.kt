@@ -16,14 +16,15 @@
 package com.faendir.acra.service
 
 import com.faendir.acra.i18n.Messages
+import com.faendir.acra.model.Bug
 import com.faendir.acra.model.MailSettings
 import com.faendir.acra.model.QBug
 import com.faendir.acra.model.QMailSettings
 import com.faendir.acra.model.QReport
 import com.faendir.acra.model.QStacktrace
 import com.faendir.acra.model.User
-import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
+import com.faendir.acra.util.PARAM
 import com.faendir.acra.util.ensureTrailing
 import com.querydsl.core.Tuple
 import com.querydsl.jpa.impl.JPAQuery
@@ -85,8 +86,8 @@ class MailService(private val entityManager: EntityManager, private val i18nProv
             bug.solvedVersion = null
             entityManager.merge(bug)
         } else if (spikeReceiver.isNotEmpty()) {
-            val reportCount = fetchReportCountOnDay(0)
-            val averageCount = LongStream.range(1, 3).map { subtractDays: Long -> fetchReportCountOnDay(subtractDays) }.average().orElse(Double.MAX_VALUE)
+            val reportCount = fetchReportCountOnDay(bug, 0)
+            val averageCount = LongStream.range(1, 3).map { subtractDays: Long -> fetchReportCountOnDay(bug, subtractDays) }.average().orElse(Double.MAX_VALUE)
             if (reportCount > 1.2 * averageCount && reportCount - 1 <= 1.2 * averageCount) {
                 sendMessage(regressionReceiver, getTranslation(Messages.SPIKE_MAIL_TEMPLATE, getFullUrl(ReportTab::class.java, bug.id), bug.title, stacktrace.version.name,
                         reportCount), getTranslation(Messages.SPIKE_MAIL_SUBJECT, app.name))
@@ -96,11 +97,12 @@ class MailService(private val entityManager: EntityManager, private val i18nProv
 
     private fun getUserBy(list: List<MailSettings>, predicate: (MailSettings) -> Boolean): List<User> = list.filter(predicate).map(MailSettings::user)
 
-    private fun fetchReportCountOnDay(subtractDays: Long): Long {
+    private fun fetchReportCountOnDay(bug: Bug, subtractDays: Long): Long {
         val today = ZonedDateTime.now().truncatedTo(ChronoUnit.DAYS)
-        return JPAQuery<Any>(entityManager).from(QReport.report).where(QReport.report.stacktrace.bug.eq(QBug.bug)
-                .and(QReport.report.date.between(today.minus(subtractDays, ChronoUnit.DAYS), today.minus(subtractDays - 1, ChronoUnit.DAYS))))
-                .select(QReport.report.count()).fetchCount()
+        return JPAQuery<Any>(entityManager)
+            .from(QReport.report)
+            .where(QReport.report.stacktrace.bug.eq(bug).and(QReport.report.date.between(today.minusDays(subtractDays), today.minusDays(subtractDays - 1))))
+            .select(QReport.report.count()).fetchCount()
     }
 
     @Scheduled(cron = "0 0 0 * * SUN")
