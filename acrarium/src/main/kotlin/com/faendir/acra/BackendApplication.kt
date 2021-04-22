@@ -23,6 +23,7 @@ import org.springframework.boot.autoconfigure.mustache.MustacheAutoConfiguration
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
 import org.springframework.boot.builder.SpringApplicationBuilder
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Import
@@ -35,6 +36,7 @@ import org.springframework.context.annotation.PropertySources
         PropertySource(value = ["file:\${user.home}/.acra/application.properties"], ignoreResourceNotFound = true))
 @Import(MailSenderAutoConfiguration::class)
 @EnableCaching
+@ConfigurationPropertiesScan
 class BackendApplication : SpringBootServletInitializer() {
     override fun configure(builder: SpringApplicationBuilder): SpringApplicationBuilder = builder.sources(BackendApplication::class.java)
 }

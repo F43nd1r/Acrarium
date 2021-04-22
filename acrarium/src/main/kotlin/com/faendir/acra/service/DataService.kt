@@ -24,6 +24,7 @@ import com.faendir.acra.model.MailSettings
 import com.faendir.acra.model.QApp
 import com.faendir.acra.model.QAttachment
 import com.faendir.acra.model.QBug
+import com.faendir.acra.model.QDevice
 import com.faendir.acra.model.QMailSettings
 import com.faendir.acra.model.QReport
 import com.faendir.acra.model.QStacktrace
@@ -44,6 +45,7 @@ import com.faendir.acra.util.tryOrNull
 import com.querydsl.core.types.Expression
 import com.querydsl.core.types.Predicate
 import com.querydsl.core.types.dsl.ComparableExpressionBase
+import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.jpa.JPAExpressions
 import com.querydsl.jpa.impl.JPADeleteClause
 import com.querydsl.jpa.impl.JPAQuery
@@ -426,6 +428,10 @@ class DataService(
     @Transactional
     fun updateDeviceTable(devices: List<Device>) {
         devices.forEach { store(it) }
+    }
+
+    fun hasDeviceTableEntries() : Boolean {
+        return JPAQuery<Any>(entityManager).from(QDevice.device1).select(Expressions.ONE).fetchFirst() != null
     }
 
 }
