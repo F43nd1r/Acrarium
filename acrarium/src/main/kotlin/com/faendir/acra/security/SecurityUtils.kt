@@ -50,6 +50,6 @@ object SecurityUtils {
     @JvmStatic
     fun isFrameworkInternalRequest(request: HttpServletRequest): Boolean {
         val parameterValue = request.getParameter(ApplicationConstants.REQUEST_TYPE_PARAMETER)
-        return (parameterValue != null && RequestType.values().any { it.getIdentifier() == parameterValue })
+        return (parameterValue != null && RequestType.values().any { it.identifier == parameterValue })
     }
 }
