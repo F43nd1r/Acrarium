@@ -1,6 +1,7 @@
 package com.faendir.acra.navigation
 
 import com.faendir.acra.service.DataService
+import com.faendir.acra.util.catching
 import com.vaadin.flow.server.UIInitEvent
 import com.vaadin.flow.server.UIInitListener
 import org.springframework.context.support.GenericApplicationContext
@@ -11,13 +12,15 @@ import kotlin.reflect.full.createInstance
 
 @Component
 class ParameterUIListener(private val applicationContext: GenericApplicationContext, private val dataService: DataService) : UIInitListener {
+    private val nameCache = mutableSetOf<String>()
     override fun uiInit(uiInitEvent: UIInitEvent) {
-        val nameCache = mutableListOf<String>()
         uiInitEvent.ui.addBeforeEnterListener { event ->
             event.routeParameters.parameterNames.forEach {
                 val annotation = AnnotationUtils.findAnnotation(event.navigationTarget, ParseParameter::class.java)
                 val parameter = event.routeParameters.get(it).orElseThrow()
-                nameCache.add(it)
+                synchronized(nameCache) {
+                    nameCache.add(it)
+                }
                 if (annotation != null) {
                     registerParsedParameter(annotation.value.createInstance(), it, parameter)
                 } else {
@@ -26,8 +29,10 @@ class ParameterUIListener(private val applicationContext: GenericApplicationCont
             }
         }
         uiInitEvent.ui.addAfterNavigationListener {
-            nameCache.forEach { applicationContext.removeBeanDefinition(it) }
-            nameCache.clear()
+            synchronized(nameCache) {
+                nameCache.forEach { catching { applicationContext.removeBeanDefinition(it) } }
+                nameCache.clear()
+            }
         }
     }
 
