@@ -25,17 +25,11 @@ class RestConfiguration {
 class SwitchingMultipartResolver : MultipartResolver {
     private val commonsResolver = CommonsMultipartResolver()
     private val standardResolver = StandardServletMultipartResolver()
-    override fun isMultipart(request: HttpServletRequest): Boolean {
-        return request.resolver().isMultipart(request)
-    }
+    override fun isMultipart(request: HttpServletRequest) = request.resolver().isMultipart(request)
 
-    override fun resolveMultipart(request: HttpServletRequest): MultipartHttpServletRequest {
-        return request.resolver().resolveMultipart(request)
-    }
+    override fun resolveMultipart(request: HttpServletRequest): MultipartHttpServletRequest = request.resolver().resolveMultipart(request)
 
-    override fun cleanupMultipart(request: MultipartHttpServletRequest) {
-        return request.resolver().cleanupMultipart(request)
-    }
+    override fun cleanupMultipart(request: MultipartHttpServletRequest) = request.resolver().cleanupMultipart(request)
 
-    private fun HttpServletRequest.resolver() = if (this.servletPath.startsWith("/VAADIN")) standardResolver else commonsResolver
+    private fun HttpServletRequest.resolver() = if (servletPath.startsWith("/VAADIN")) standardResolver else commonsResolver
 }

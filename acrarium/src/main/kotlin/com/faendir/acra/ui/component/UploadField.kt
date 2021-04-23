@@ -17,11 +17,9 @@ package com.faendir.acra.ui.component
 
 import com.faendir.acra.util.tryOrNull
 import com.vaadin.flow.component.customfield.CustomField
-import com.vaadin.flow.component.upload.SucceededEvent
 import com.vaadin.flow.component.upload.Upload
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer
 import org.springframework.util.StreamUtils
-import java.io.IOException
 import java.nio.charset.Charset
 
 /**
