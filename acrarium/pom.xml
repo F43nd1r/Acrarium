@@ -346,14 +346,6 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-            <id>github</id>
-            <name>github</name>
-            <url>https://maven.pkg.github.com/f43nd1r/*</url>
-        </repository>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
             <id>central</id>
             <url>https://repo1.maven.org/maven2/</url>
         </repository>
@@ -375,23 +367,9 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-            <id>jcenter</id>
-            <url>https://jcenter.bintray.com</url>
-        </repository>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
             <id>bintray-f43nd1r-maven</id>
             <name>bintray</name>
             <url>https://dl.bintray.com/f43nd1r/maven</url>
-        </repository>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>vaadin-prereleases</id>
-            <url>https://maven.vaadin.com/vaadin-prereleases/</url>
         </repository>
     </repositories>
     <pluginRepositories>

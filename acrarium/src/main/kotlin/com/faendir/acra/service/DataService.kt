@@ -300,8 +300,6 @@ class DataService(
         var app = a
         app.configuration = configuration
         app = store(app)
-        entityManager.flush()
-        applicationEventPublisher.publishEvent(ConfigurationUpdateEvent(this, app))
     }
 
     @Transactional

@@ -19,6 +19,7 @@ package com.faendir.acra.util
 import com.faendir.acra.model.Stacktrace
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.UserService
+import com.querydsl.core.types.dsl.BooleanExpression
 import org.json.JSONObject
 import proguard.retrace.ReTrace
 import java.io.IOException
@@ -108,3 +109,5 @@ inline fun <T : Any, R> T.equalsBy(other: Any?, id: T.() -> R): Boolean = when {
 }
 
 const val PARAM = "param"
+
+infix fun BooleanExpression.and(other: BooleanExpression): BooleanExpression = and(other)
