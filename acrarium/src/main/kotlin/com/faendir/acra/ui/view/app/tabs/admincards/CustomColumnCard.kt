@@ -8,6 +8,7 @@ import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.component.grid.ButtonRenderer
 import com.faendir.acra.ui.component.grid.column
 import com.faendir.acra.ui.ext.SizeUnit
 import com.faendir.acra.ui.ext.acrariumGrid
@@ -72,12 +73,10 @@ class CustomColumnCard(dataService: DataService, @Qualifier(PARAM) app: App) : A
                         app.configuration.customReportColumns.remove("")
                         dataProvider.refreshAll()
                     }
-                    column(ComponentRenderer { string ->
-                        Button(Icon(VaadinIcon.EDIT)) {
-                            editor.editItem(string)
+                    column(ButtonRenderer(VaadinIcon.EDIT, {editButtons.add(it)}) {
+                            editor.editItem(it)
                             field.focus()
                             recalculateColumnWidths()
-                        }.also { editButtons.add(it) }
                     }) {
                         editorComponent = Div(save, cancel)
                         setFlexGrow(1)

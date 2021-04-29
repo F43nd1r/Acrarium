@@ -29,12 +29,12 @@ import com.faendir.acra.settings.LocalSettings
 import com.faendir.acra.ui.component.dialog.confirmButtons
 import com.faendir.acra.ui.component.dialog.showFluentDialog
 import com.faendir.acra.ui.component.grid.AcrariumGridView
+import com.faendir.acra.ui.component.grid.ButtonRenderer
 import com.faendir.acra.ui.component.grid.TimeSpanRenderer
 import com.faendir.acra.ui.component.grid.column
 import com.faendir.acra.ui.ext.translatableText
 import com.faendir.acra.ui.view.report.ReportView
 import com.vaadin.flow.component.Composite
-import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.GridSortOrder
 import com.vaadin.flow.component.html.Span
@@ -86,17 +86,19 @@ class ReportList(
                 }
             }
             if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-                addColumn(ComponentRenderer { report ->
-                    Button(Icon(VaadinIcon.TRASH)) {
-                        showFluentDialog {
-                            translatableText(Messages.DELETE_REPORT_CONFIRM)
-                            confirmButtons {
-                                deleteReport(report)
-                                dataProvider.refreshAll()
-                            }
+                column(ButtonRenderer(VaadinIcon.TRASH) { report ->
+                    showFluentDialog {
+                        translatableText(Messages.DELETE_REPORT_CONFIRM)
+                        confirmButtons {
+                            deleteReport(report)
+                            dataProvider.refreshAll()
                         }
                     }
-                }).setCaption(Messages.DELETE).setAutoWidth(false).setWidth("100px")
+                }) {
+                    setCaption(Messages.DELETE)
+                    isAutoWidth = false
+                    width = "100px"
+                }
             }
             addOnClickNavigation(ReportView::class.java) { it.id }
         }

@@ -36,6 +36,7 @@ import com.faendir.acra.ui.ext.setHeight
 import com.faendir.acra.ui.ext.setMinHeight
 import com.faendir.acra.ui.ext.translatableText
 import com.faendir.acra.util.PARAM
+import com.vaadin.flow.component.Unit
 import com.vaadin.flow.component.icon.Icon
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.data.renderer.IconRenderer
@@ -64,7 +65,10 @@ class VersionCard(dataService: DataService, @Qualifier(PARAM) app: App) : AdminC
                     setCaption(Messages.PROGUARD_MAPPINGS)
                 }
                 if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-                    column(ButtonRenderer(VaadinIcon.EDIT) { VersionEditorDialog(dataService, app, { dataProvider.refreshAll() }, it).open() })
+                    column(ButtonRenderer(VaadinIcon.EDIT) { VersionEditorDialog(dataService, app, { dataProvider.refreshAll() }, it).open() }) {
+                        width = "50px"
+                        isAutoWidth = false
+                    }
                     column(ButtonRenderer(VaadinIcon.TRASH) {
                         showFluentDialog {
                             translatableText(Messages.DELETE_VERSION_CONFIRM, it.code)
@@ -73,7 +77,10 @@ class VersionCard(dataService: DataService, @Qualifier(PARAM) app: App) : AdminC
                                 dataProvider.refreshAll()
                             }
                         }
-                    })
+                    }) {
+                        width = "50px"
+                        isAutoWidth = false
+                    }
                     appendFooterRow().getCell(columns[0]).setComponent(
                         Translatable.createButton(Messages.NEW_VERSION) { VersionEditorDialog(dataService, app, { dataProvider.refreshAll() }).open() })
                 }
