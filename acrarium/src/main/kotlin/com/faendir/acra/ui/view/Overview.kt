@@ -40,6 +40,7 @@ import com.faendir.acra.ui.ext.translatableCheckbox
 import com.faendir.acra.ui.ext.translatableLabel
 import com.faendir.acra.ui.ext.translatableNumberField
 import com.faendir.acra.ui.ext.translatableTextField
+import com.faendir.acra.ui.view.app.tabs.AppTab
 import com.faendir.acra.ui.view.app.tabs.BugTab
 import com.faendir.acra.ui.view.main.MainView
 import com.vaadin.flow.component.Composite
@@ -72,7 +73,7 @@ class Overview(private val dataService: DataService) : Composite<VerticalLayout>
                     setSortable(QReport.report.count())
                     setCaption(Messages.REPORTS)
                 }
-                addOnClickNavigation(BugTab::class.java) { it.id }
+                addOnClickNavigation(BugTab::class.java) { AppTab.getNavigationParams(it.app) }
             }
             if (SecurityUtils.hasRole(User.Role.ADMIN)) {
                 flexLayout {

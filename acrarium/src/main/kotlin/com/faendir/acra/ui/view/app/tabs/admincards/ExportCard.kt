@@ -18,6 +18,7 @@ package com.faendir.acra.ui.view.app.tabs.admincards
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.App
 import com.faendir.acra.model.QReport
+import com.faendir.acra.navigation.ParseAppParameter
 import com.faendir.acra.navigation.View
 import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.AdminCard
@@ -25,17 +26,15 @@ import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.comboBox
 import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.downloadButton
-import com.faendir.acra.util.PARAM
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.StringPath
 import com.vaadin.flow.server.InputStreamFactory
 import com.vaadin.flow.server.StreamResource
-import org.springframework.beans.factory.annotation.Qualifier
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 
 @View
-class ExportCard(dataService: DataService, @Qualifier(PARAM) app: App) : AdminCard(dataService) {
+class ExportCard(dataService: DataService, @ParseAppParameter app: App) : AdminCard(dataService) {
     init {
         content {
             setHeader(Translatable.createLabel(Messages.EXPORT))

@@ -16,13 +16,12 @@
 package com.faendir.acra.ui.view.app.tabs
 
 import com.faendir.acra.model.App
+import com.faendir.acra.navigation.ParseAppParameter
 import com.faendir.acra.navigation.View
 import com.faendir.acra.service.DataService
-import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.statistics.Statistics
 import com.faendir.acra.ui.view.app.AppView
 import com.vaadin.flow.router.Route
-import org.springframework.beans.factory.annotation.Qualifier
 
 /**
  * @author lukas
@@ -30,7 +29,7 @@ import org.springframework.beans.factory.annotation.Qualifier
  */
 @View
 @Route(value = "statistics", layout = AppView::class)
-class StatisticsTab(private val dataService: DataService, @Qualifier(PARAM) private val app: App) : AppTab<Statistics>(app) {
+class StatisticsTab(private val dataService: DataService, @ParseAppParameter private val app: App) : AppTab<Statistics>(app) {
     override fun initContent(): Statistics {
         return Statistics(app, null, dataService)
     }

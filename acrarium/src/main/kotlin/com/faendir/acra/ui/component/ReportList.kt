@@ -100,7 +100,7 @@ class ReportList(
                     width = "100px"
                 }
             }
-            addOnClickNavigation(ReportView::class.java) { it.id }
+            addOnClickNavigation(ReportView::class.java) { ReportView.getNavigationParams(it) }
         }
     }
 

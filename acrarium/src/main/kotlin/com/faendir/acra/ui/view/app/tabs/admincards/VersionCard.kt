@@ -19,6 +19,7 @@ import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.App
 import com.faendir.acra.model.Permission
 import com.faendir.acra.model.QVersion
+import com.faendir.acra.navigation.ParseAppParameter
 import com.faendir.acra.navigation.View
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.DataService
@@ -35,15 +36,12 @@ import com.faendir.acra.ui.ext.queryDslAcrariumGrid
 import com.faendir.acra.ui.ext.setHeight
 import com.faendir.acra.ui.ext.setMinHeight
 import com.faendir.acra.ui.ext.translatableText
-import com.faendir.acra.util.PARAM
-import com.vaadin.flow.component.Unit
 import com.vaadin.flow.component.icon.Icon
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.data.renderer.IconRenderer
-import org.springframework.beans.factory.annotation.Qualifier
 
 @View
-class VersionCard(dataService: DataService, @Qualifier(PARAM) app: App) : AdminCard(dataService) {
+class VersionCard(dataService: DataService, @ParseAppParameter app: App) : AdminCard(dataService) {
     init {
         content {
             setHeader(Translatable.createLabel(Messages.VERSIONS))

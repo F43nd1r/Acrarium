@@ -16,10 +16,10 @@
 package com.faendir.acra.ui.view.app.tabs
 
 import com.faendir.acra.model.App
-import com.faendir.acra.ui.component.CardView
-import com.faendir.acra.util.PARAM
-import com.faendir.acra.ui.view.app.AppView
+import com.faendir.acra.navigation.ParseAppParameter
 import com.faendir.acra.ui.component.AdminCard
+import com.faendir.acra.ui.component.CardView
+import com.faendir.acra.ui.view.app.AppView
 import com.faendir.acra.ui.view.app.tabs.admincards.CustomColumnCard
 import com.faendir.acra.ui.view.app.tabs.admincards.DangerCard
 import com.faendir.acra.ui.view.app.tabs.admincards.ExportCard
@@ -28,7 +28,6 @@ import com.faendir.acra.ui.view.app.tabs.admincards.VersionCard
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
-import org.springframework.beans.factory.annotation.Qualifier
 
 /**
  * @author lukas
@@ -37,7 +36,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 @UIScope
 @SpringComponent
 @Route(value = "admin", layout = AppView::class)
-class AdminTab(@Qualifier(PARAM) app: App) : AppTab<CardView<AdminCard>>(app) {
+class AdminTab(@ParseAppParameter app: App) : AppTab<CardView<AdminCard>>(app) {
     init {
         content.add(VersionCard::class, NotificationCard::class, ExportCard::class, CustomColumnCard::class, DangerCard::class)
     }

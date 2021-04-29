@@ -21,6 +21,7 @@ import com.faendir.acra.util.PARAM
 import com.vaadin.flow.router.AfterNavigationEvent
 import org.springframework.context.support.GenericApplicationContext
 import java.util.function.Supplier
+import kotlin.reflect.KClass
 
 /**
  * @author lukas
@@ -29,12 +30,12 @@ import java.util.function.Supplier
 interface HasRoute : HasAcrariumTitle {
     val pathElement: Path.Element<*>
 
-    val logicalParent: Parent<*>?
+    val logicalParent: KClass<out HasRoute>?
         get() = null
 
     fun getPathElements(applicationContext: GenericApplicationContext, afterNavigationEvent: AfterNavigationEvent): List<Path.Element<*>> {
         val list: MutableList<Path.Element<*>> = mutableListOf(pathElement)
-        logicalParent?.let { list.addAll(it[applicationContext, afterNavigationEvent].getPathElements(applicationContext, afterNavigationEvent)) }
+        logicalParent?.let { list.addAll(applicationContext.getBean(it.java).getPathElements(applicationContext, afterNavigationEvent)) }
         return list
     }
 
@@ -42,18 +43,4 @@ interface HasRoute : HasAcrariumTitle {
         get() = pathElement
 
     fun getTranslation(key: String, vararg params: Any): String
-
-    open class Parent<T : HasRoute>(private val parentClass: Class<T>) {
-        open operator fun get(applicationContext: GenericApplicationContext, afterNavigationEvent: AfterNavigationEvent?): T =
-            applicationContext.getBean(parentClass)
-    }
-
-    class ParametrizedParent<T, P : Any>(parentClass: Class<T>, private val parameter: P) : Parent<T>(parentClass) where T : HasRoute {
-        override fun get(applicationContext: GenericApplicationContext, afterNavigationEvent: AfterNavigationEvent?): T {
-            applicationContext.registerBean(PARAM, parameter.javaClass, Supplier { parameter })
-            val parent = super.get(applicationContext, afterNavigationEvent)
-            applicationContext.removeBeanDefinition(PARAM)
-            return parent
-        }
-    }
 }

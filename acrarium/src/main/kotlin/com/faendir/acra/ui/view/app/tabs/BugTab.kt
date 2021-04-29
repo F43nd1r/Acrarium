@@ -22,6 +22,7 @@ import com.faendir.acra.model.QBug
 import com.faendir.acra.model.QReport
 import com.faendir.acra.model.Version
 import com.faendir.acra.model.view.VBug
+import com.faendir.acra.navigation.ParseAppParameter
 import com.faendir.acra.navigation.View
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.BugMerger
@@ -36,8 +37,8 @@ import com.faendir.acra.ui.component.grid.column
 import com.faendir.acra.ui.component.grid.grid
 import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.view.app.AppView
+import com.faendir.acra.ui.view.bug.tabs.BugTab
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
-import com.faendir.acra.util.PARAM
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.grid.Grid
@@ -47,7 +48,6 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup
 import com.vaadin.flow.component.select.Select
 import com.vaadin.flow.data.renderer.ComponentRenderer
 import com.vaadin.flow.router.Route
-import org.springframework.beans.factory.annotation.Qualifier
 
 /**
  * @author lukas
@@ -59,7 +59,7 @@ class BugTab(
     private val dataService: DataService,
     private val bugMerger: BugMerger,
     private val localSettings: LocalSettings,
-    @Qualifier(PARAM)
+    @ParseAppParameter
     private val app: App
 ) : AppTab<AcrariumGridView<VBug>>(app) {
     init {
@@ -129,7 +129,7 @@ class BugTab(
                     setFilterable(QBug.bug.solvedVersion.isNull, true, Messages.HIDE_SOLVED)
                     setCaption(Messages.SOLVED)
                 }
-                addOnClickNavigation(ReportTab::class.java) { it.bug.id }
+                addOnClickNavigation(ReportTab::class.java) { BugTab.getNavigationParams(it.bug) }
             }
         }
     }

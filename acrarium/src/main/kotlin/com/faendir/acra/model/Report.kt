@@ -45,9 +45,9 @@ class Report(@OnDelete(action = OnDeleteAction.CASCADE)
              @JsonIdentityReference(alwaysAsId = true)
              @JsonIdentityInfo(generator = PropertyGenerator::class, property = "id")
              @QueryInit("*.*")
-             var stacktrace: Stacktrace,
+             override var stacktrace: Stacktrace,
              @Type(type = "text")
-             val content: String) {
+             val content: String) : IReport {
 
     @JsonIgnore
     @Transient
@@ -63,7 +63,7 @@ class Report(@OnDelete(action = OnDeleteAction.CASCADE)
 
 
     @Id
-    val id: String = jsonObject.getString(ReportField.REPORT_ID.name)
+    override val id: String = jsonObject.getString(ReportField.REPORT_ID.name)
 
     val date: ZonedDateTime = jsonObject.optString(ReportField.USER_CRASH_DATE.name).toDate()
 

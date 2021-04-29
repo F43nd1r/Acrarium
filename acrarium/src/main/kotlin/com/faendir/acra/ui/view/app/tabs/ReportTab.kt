@@ -16,13 +16,12 @@
 package com.faendir.acra.ui.view.app.tabs
 
 import com.faendir.acra.model.App
+import com.faendir.acra.navigation.ParseAppParameter
 import com.faendir.acra.navigation.View
 import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.ReportList
 import com.faendir.acra.ui.view.app.AppView
-import com.faendir.acra.util.PARAM
 import com.vaadin.flow.router.Route
-import org.springframework.beans.factory.annotation.Qualifier
 
 /**
  * @author lukas
@@ -33,7 +32,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 class ReportTab(
     private val dataService: DataService,
     private val reportListFactory: ReportList.Factory,
-    @Qualifier(PARAM)
+    @ParseAppParameter
     private val app: App
 ) : AppTab<ReportList>(app) {
 

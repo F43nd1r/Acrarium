@@ -16,14 +16,14 @@
 package com.faendir.acra.ui.component
 
 import com.faendir.acra.navigation.View
+import com.faendir.acra.security.RequiresRole
+import com.faendir.acra.security.SecurityUtils.hasRole
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexLayout
-import com.vaadin.flow.spring.annotation.SpringComponent
-import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.ApplicationContext
-import org.springframework.context.annotation.Scope
+import org.springframework.core.annotation.AnnotationUtils
 import kotlin.reflect.KClass
 
 @View
@@ -37,6 +37,6 @@ class CardView<C : Composite<Card>>(private val context: ApplicationContext) : F
 
     @SafeVarargs
     fun add(vararg cards: KClass<out C>) {
-        add(*cards.map { context.getBean(it.java) }.map { it as Component }.toTypedArray())
+        add(*cards.map { context.getBean(it.java) }.filterIsInstance<Component>().toTypedArray())
     }
 }

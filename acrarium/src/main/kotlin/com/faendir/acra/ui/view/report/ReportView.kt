@@ -16,17 +16,15 @@
 package com.faendir.acra.ui.view.report
 
 import com.faendir.acra.i18n.Messages
+import com.faendir.acra.model.IReport
 import com.faendir.acra.model.Report
-import com.faendir.acra.navigation.ParseParameter
-import com.faendir.acra.navigation.ReportParser
+import com.faendir.acra.navigation.ParseReportParameter
 import com.faendir.acra.navigation.View
 import com.faendir.acra.service.AvatarService
 import com.faendir.acra.service.DataService
-import com.faendir.acra.ui.component.tabs.HasRoute
-import com.faendir.acra.util.PARAM
-import com.faendir.acra.ui.component.tabs.Path
-import com.faendir.acra.ui.component.tabs.Path.ParametrizedTextElement
 import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.component.tabs.HasRoute
+import com.faendir.acra.ui.component.tabs.Path
 import com.faendir.acra.ui.ext.Align
 import com.faendir.acra.ui.ext.JustifyItems
 import com.faendir.acra.ui.ext.SizeUnit
@@ -47,6 +45,9 @@ import com.faendir.acra.ui.ext.setJustifyItems
 import com.faendir.acra.ui.ext.translatableLabel
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
 import com.faendir.acra.ui.view.main.MainView
+import com.faendir.acra.util.PARAM_APP
+import com.faendir.acra.util.PARAM_BUG
+import com.faendir.acra.util.PARAM_REPORT
 import com.faendir.acra.util.retrace
 import com.github.appreciated.css.grid.sizes.MaxContent
 import com.vaadin.flow.component.Composite
@@ -55,7 +56,6 @@ import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.server.InputStreamFactory
 import com.vaadin.flow.server.StreamResource
-import org.springframework.beans.factory.annotation.Qualifier
 import org.xbib.time.pretty.PrettyTime
 import java.util.*
 import kotlin.math.log10
@@ -66,9 +66,8 @@ import kotlin.math.max
  * @since 17.09.18
  */
 @View
-@Route(value = "report/:$PARAM", layout = MainView::class)
-@ParseParameter(ReportParser::class)
-class ReportView(private val dataService: DataService, avatarService: AvatarService, @Qualifier(PARAM) private val report: Report) : Composite<Div>(),
+@Route(value = "app/:${PARAM_APP}/bug/:${PARAM_BUG}/report/:${PARAM_REPORT}", layout = MainView::class)
+class ReportView(private val dataService: DataService, avatarService: AvatarService, @ParseReportParameter private val report: Report) : Composite<Div>(),
     HasRoute {
     private val prettyTime: PrettyTime = PrettyTime(Locale.US)
 
@@ -142,7 +141,15 @@ class ReportView(private val dataService: DataService, avatarService: AvatarServ
     }
 
     override val pathElement: Path.Element<*> =
-        ParametrizedTextElement(javaClass, report.id, Messages.REPORT_FROM, prettyTime.formatUnrounded(report.date.toLocalDateTime()))
+        Path.Element(this::class, getNavigationParams(report), Messages.REPORT_FROM, prettyTime.formatUnrounded(report.date.toLocalDateTime()))
 
-    override val logicalParent: HasRoute.Parent<ReportTab> = HasRoute.ParametrizedParent(ReportTab::class.java, report.stacktrace.bug)
+    override val logicalParent = ReportTab::class
+
+    companion object {
+        fun getNavigationParams(report: IReport) = mapOf(
+            PARAM_APP to report.stacktrace.bug.app.id.toString(),
+            PARAM_BUG to report.stacktrace.bug.id.toString(),
+            PARAM_REPORT to report.id
+        )
+    }
 }

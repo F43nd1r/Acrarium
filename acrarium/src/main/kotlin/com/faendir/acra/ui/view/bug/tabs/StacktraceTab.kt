@@ -18,10 +18,10 @@ package com.faendir.acra.ui.view.bug.tabs
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.Bug
 import com.faendir.acra.model.Permission
+import com.faendir.acra.navigation.ParseBugParameter
 import com.faendir.acra.navigation.View
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.DataService
-import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.Card
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.Align
@@ -42,7 +42,6 @@ import com.vaadin.flow.component.icon.Icon
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.router.Route
-import org.springframework.beans.factory.annotation.Qualifier
 
 /**
  * @author lukas
@@ -50,7 +49,7 @@ import org.springframework.beans.factory.annotation.Qualifier
  */
 @View
 @Route(value = "stacktrace", layout = BugView::class)
-class StacktraceTab(private val dataService: DataService, @Qualifier(PARAM) private val bug: Bug) : BugTab<Div>(bug) {
+class StacktraceTab(private val dataService: DataService, @ParseBugParameter private val bug: Bug) : BugTab<Div>(bug) {
 
     init {
         content {

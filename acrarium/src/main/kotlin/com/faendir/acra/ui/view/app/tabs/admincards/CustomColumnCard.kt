@@ -3,7 +3,12 @@ package com.faendir.acra.ui.view.app.tabs.admincards
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.App
 import com.faendir.acra.model.Permission
+import com.faendir.acra.model.User
+import com.faendir.acra.navigation.ParseAppParameter
 import com.faendir.acra.navigation.View
+import com.faendir.acra.security.HasApp
+import com.faendir.acra.security.RequiresPermission
+import com.faendir.acra.security.RequiresRole
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.AdminCard
@@ -16,7 +21,6 @@ import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.setHeight
 import com.faendir.acra.ui.ext.setMarginRight
 import com.faendir.acra.ui.ext.setMinHeight
-import com.faendir.acra.util.PARAM
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.component.icon.Icon
@@ -24,11 +28,11 @@ import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.data.binder.Binder
 import com.vaadin.flow.data.renderer.ComponentRenderer
-import org.springframework.beans.factory.annotation.Qualifier
 import java.util.*
 
 @View
-class CustomColumnCard(dataService: DataService, @Qualifier(PARAM) app: App) : AdminCard(dataService) {
+@RequiresPermission(Permission.Level.EDIT)
+class CustomColumnCard(dataService: DataService, @ParseAppParameter override val app: App) : AdminCard(dataService), HasApp {
 
     init {
         content {

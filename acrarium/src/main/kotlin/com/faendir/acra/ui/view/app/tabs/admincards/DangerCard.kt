@@ -17,8 +17,14 @@ package com.faendir.acra.ui.view.app.tabs.admincards
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.App
+import com.faendir.acra.model.Permission
 import com.faendir.acra.model.QReport
+import com.faendir.acra.model.User
+import com.faendir.acra.navigation.ParseAppParameter
 import com.faendir.acra.navigation.View
+import com.faendir.acra.security.HasApp
+import com.faendir.acra.security.RequiresPermission
+import com.faendir.acra.security.RequiresRole
 import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.Translatable
@@ -33,12 +39,11 @@ import com.faendir.acra.ui.ext.translatableNumberField
 import com.faendir.acra.ui.ext.translatableRangeField
 import com.faendir.acra.ui.ext.translatableText
 import com.faendir.acra.ui.view.Overview
-import com.faendir.acra.util.PARAM
 import com.vaadin.flow.component.UI
-import org.springframework.beans.factory.annotation.Qualifier
 
 @View
-class DangerCard(dataService: DataService, @Qualifier(PARAM) app: App) : AdminCard(dataService) {
+@RequiresPermission(Permission.Level.ADMIN)
+class DangerCard(dataService: DataService, @ParseAppParameter override val app: App) : AdminCard(dataService), HasApp {
     init {
         content {
             setHeader(Translatable.createLabel(Messages.DANGER_ZONE))

@@ -24,11 +24,11 @@ import com.faendir.acra.model.QReport
 import com.faendir.acra.model.QStacktrace
 import com.faendir.acra.model.User
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
-import com.faendir.acra.util.PARAM
+import com.faendir.acra.util.PARAM_APP
+import com.faendir.acra.util.PARAM_BUG
 import com.faendir.acra.util.ensureTrailing
 import com.querydsl.core.Tuple
 import com.querydsl.jpa.impl.JPAQuery
-import com.vaadin.flow.component.Component
 import com.vaadin.flow.i18n.I18NProvider
 import com.vaadin.flow.router.RouteConfiguration
 import com.vaadin.flow.router.RouteParameters
@@ -58,7 +58,12 @@ import javax.persistence.EntityManager
 @EnableScheduling
 @EnableAsync
 @ConditionalOnProperty(prefix = "spring.mail", name = ["host"])
-class MailService(private val entityManager: EntityManager, private val i18nProvider: I18NProvider, private val mailSender: JavaMailSender, private val routeConfiguration: RouteConfiguration) {
+class MailService(
+    private val entityManager: EntityManager,
+    private val i18nProvider: I18NProvider,
+    private val mailSender: JavaMailSender,
+    private val routeConfiguration: RouteConfiguration
+) {
 
     @Value("\${server.context-path}")
     private val baseUrl: String? = null
@@ -71,26 +76,41 @@ class MailService(private val entityManager: EntityManager, private val i18nProv
         val stacktrace = r.stacktrace
         val bug = stacktrace.bug
         val app = bug.app
-        val settings = JPAQuery<Any>(entityManager).select(QMailSettings.mailSettings).from(QMailSettings.mailSettings).where(QMailSettings.mailSettings.app.eq(app)
-                .and(QMailSettings.mailSettings.user.mail.isNotNull)).fetch()
+        val settings = JPAQuery<Any>(entityManager).select(QMailSettings.mailSettings).from(QMailSettings.mailSettings).where(
+            QMailSettings.mailSettings.app.eq(app)
+                .and(QMailSettings.mailSettings.user.mail.isNotNull)
+        ).fetch()
         val newBugReceiver = getUserBy(settings, MailSettings::newBug)
         val regressionReceiver = getUserBy(settings, MailSettings::regression)
         val spikeReceiver = getUserBy(settings, MailSettings::spike)
         if (newBugReceiver.isNotEmpty() && JPAQuery<Any>(entityManager).from(QReport.report).where(QReport.report.stacktrace.bug.eq(bug)).limit(2)
-                        .select(QReport.report.count()).fetchCount() == 1L) {
-            sendMessage(newBugReceiver, getTranslation(Messages.NEW_BUG_MAIL_TEMPLATE, getFullUrl(ReportTab::class.java, bug.id), bug.title, r.brand, r.phoneModel, r.androidVersion,
-                    app.name, stacktrace.version.name), getTranslation(Messages.NEW_BUG_MAIL_SUBJECT, app.name))
+                .select(QReport.report.count()).fetchCount() == 1L
+        ) {
+            sendMessage(
+                newBugReceiver, getTranslation(
+                    Messages.NEW_BUG_MAIL_TEMPLATE, getBugUrl(bug), bug.title, r.brand, r.phoneModel, r.androidVersion,
+                    app.name, stacktrace.version.name
+                ), getTranslation(Messages.NEW_BUG_MAIL_SUBJECT, app.name)
+            )
         } else if (regressionReceiver.isNotEmpty() && bug.solvedVersion != null && bug.solvedVersion!!.code <= stacktrace.version.code) {
-            sendMessage(regressionReceiver, getTranslation(Messages.REGRESSION_MAIL_TEMPLATE, getFullUrl(ReportTab::class.java, bug.id), bug.title, r.brand, bug.solvedVersion!!.name,
-                    r.phoneModel, r.androidVersion, app.name, stacktrace.version.name), getTranslation(Messages.REGRESSION_MAIL_SUBJECT, app.name))
+            sendMessage(
+                regressionReceiver, getTranslation(
+                    Messages.REGRESSION_MAIL_TEMPLATE, getBugUrl(bug), bug.title, r.brand, bug.solvedVersion!!.name,
+                    r.phoneModel, r.androidVersion, app.name, stacktrace.version.name
+                ), getTranslation(Messages.REGRESSION_MAIL_SUBJECT, app.name)
+            )
             bug.solvedVersion = null
             entityManager.merge(bug)
         } else if (spikeReceiver.isNotEmpty()) {
             val reportCount = fetchReportCountOnDay(bug, 0)
             val averageCount = LongStream.range(1, 3).map { subtractDays: Long -> fetchReportCountOnDay(bug, subtractDays) }.average().orElse(Double.MAX_VALUE)
             if (reportCount > 1.2 * averageCount && reportCount - 1 <= 1.2 * averageCount) {
-                sendMessage(regressionReceiver, getTranslation(Messages.SPIKE_MAIL_TEMPLATE, getFullUrl(ReportTab::class.java, bug.id), bug.title, stacktrace.version.name,
-                        reportCount), getTranslation(Messages.SPIKE_MAIL_SUBJECT, app.name))
+                sendMessage(
+                    regressionReceiver, getTranslation(
+                        Messages.SPIKE_MAIL_TEMPLATE, getBugUrl(bug), bug.title, stacktrace.version.name,
+                        reportCount
+                    ), getTranslation(Messages.SPIKE_MAIL_SUBJECT, app.name)
+                )
             }
         }
     }
@@ -107,17 +127,24 @@ class MailService(private val entityManager: EntityManager, private val i18nProv
 
     @Scheduled(cron = "0 0 0 * * SUN")
     fun weeklyReport() {
-        val settings = JPAQuery<Any>(entityManager).select(QMailSettings.mailSettings).from(QMailSettings.mailSettings).where(QMailSettings.mailSettings.summary.isTrue).fetch()
+        val settings =
+            JPAQuery<Any>(entityManager).select(QMailSettings.mailSettings).from(QMailSettings.mailSettings).where(QMailSettings.mailSettings.summary.isTrue)
+                .fetch()
                 .groupBy { it.app }
         for ((key, value) in settings) {
-            val tuples = JPAQuery<Any>(entityManager).from(QBug.bug).join(QStacktrace.stacktrace1).on(QBug.bug.eq(QStacktrace.stacktrace1.bug)).join(QReport.report).on(QStacktrace.stacktrace1.eq(QReport.report.stacktrace)).where(QBug.bug.app.eq(key).and(QReport.report.date.after(ZonedDateTime.now().minus(1, ChronoUnit.WEEKS))))
+            val tuples =
+                JPAQuery<Any>(entityManager).from(QBug.bug).join(QStacktrace.stacktrace1).on(QBug.bug.eq(QStacktrace.stacktrace1.bug)).join(QReport.report)
+                    .on(QStacktrace.stacktrace1.eq(QReport.report.stacktrace))
+                    .where(QBug.bug.app.eq(key).and(QReport.report.date.after(ZonedDateTime.now().minus(1, ChronoUnit.WEEKS))))
                     .groupBy(QBug.bug)
                     .select(QBug.bug, QReport.report.count(), QReport.report.installationId.countDistinct())
                     .fetch()
             var body = tuples.joinToString("\n") { tuple: Tuple ->
                 val bug = tuple.get(QBug.bug)
-                getTranslation(Messages.WEEKLY_MAIL_BUG_TEMPLATE, getFullUrl(ReportTab::class.java, bug!!.id), bug.title, tuple.get(QReport.report.count())!!,
-                        tuple.get(QReport.report.installationId.countDistinct())!!)
+                getTranslation(
+                    Messages.WEEKLY_MAIL_BUG_TEMPLATE, getBugUrl(bug!!), bug.title, tuple.get(QReport.report.count())!!,
+                    tuple.get(QReport.report.installationId.countDistinct())!!
+                )
             }
             if (body.isEmpty()) {
                 body = getTranslation(Messages.WEEKLY_MAIL_NO_REPORTS)
@@ -149,8 +176,15 @@ class MailService(private val entityManager: EntityManager, private val i18nProv
         return i18nProvider.getTranslation(messageId, Locale.ENGLISH, *params)
     }
 
-    private fun <T, C : Component > getFullUrl(navigationTarget: Class<out C?>, parameter: T): String {
-        return baseUrl?.ensureTrailing("/") + routeConfiguration.getUrl(navigationTarget, RouteParameters(PARAM, parameter.toString()))
+    private fun getBugUrl(bug: Bug): String {
+        return baseUrl?.ensureTrailing("/") + routeConfiguration.getUrl(
+            ReportTab::class.java, RouteParameters(
+                mapOf(
+                    PARAM_APP to bug.app.id.toString(),
+                    PARAM_BUG to bug.id.toString()
+                )
+            )
+        )
     }
 
 }

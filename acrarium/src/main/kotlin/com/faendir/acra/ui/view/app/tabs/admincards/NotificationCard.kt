@@ -18,6 +18,7 @@ package com.faendir.acra.ui.view.app.tabs.admincards
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.App
 import com.faendir.acra.model.MailSettings
+import com.faendir.acra.navigation.ParseAppParameter
 import com.faendir.acra.navigation.View
 import com.faendir.acra.service.DataService
 import com.faendir.acra.service.UserService
@@ -28,14 +29,12 @@ import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.forEach
 import com.faendir.acra.ui.ext.gridLayout
 import com.faendir.acra.ui.ext.translatableLabel
-import com.faendir.acra.util.PARAM
 import com.faendir.acra.util.getCurrentUser
 import com.github.appreciated.css.grid.sizes.Auto
 import com.github.appreciated.css.grid.sizes.MaxContent
-import org.springframework.beans.factory.annotation.Qualifier
 
 @View
-class NotificationCard(userService: UserService, dataService: DataService, @Qualifier(PARAM) app: App) : AdminCard(dataService) {
+class NotificationCard(userService: UserService, dataService: DataService, @ParseAppParameter app: App) : AdminCard(dataService) {
     init {
         content {
             setHeader(Translatable.createLabel(Messages.NOTIFICATIONS))

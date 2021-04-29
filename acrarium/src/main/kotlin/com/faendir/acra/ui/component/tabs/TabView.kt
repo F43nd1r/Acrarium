@@ -17,7 +17,6 @@ package com.faendir.acra.ui.component.tabs
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.ui.component.SpringComposite
-import com.faendir.acra.ui.component.tabs.Path.ParametrizedTextElement
 import com.faendir.acra.ui.ext.forEach
 import com.faendir.acra.ui.ext.setFlexGrow
 import com.faendir.acra.ui.ext.tab
@@ -32,6 +31,7 @@ import com.vaadin.flow.component.tabs.Tabs
 import com.vaadin.flow.router.RouteParameters
 import com.vaadin.flow.router.RouterLayout
 import java.io.Serializable
+import kotlin.reflect.KClass
 
 /**
  * @author lukas
@@ -51,7 +51,7 @@ open class TabView(private vararg val tabs: TabInfo<out TabContent<*>>) : FlexLa
             }
             addSelectedChangeListener {
                 ui.ifPresent { ui ->
-                    ui.navigate(tabs[it.source.selectedIndex].tabClass, RouteParameters(PARAM, content.id.toString()))
+                    ui.navigate(tabs[it.source.selectedIndex].tabClass, RouteParameters(PARAM, content.params.toString()))
                 }
             }
         }
@@ -72,10 +72,10 @@ open class TabView(private vararg val tabs: TabInfo<out TabContent<*>>) : FlexLa
     class TabInfo<T>(val tabClass: Class<T>, val labelId: String) : Serializable
 
     abstract class TabContent<T : Component> : SpringComposite<T>(), HasRoute, HasStyle {
-        abstract val id: Int
+        abstract val params: Map<String, String>
         abstract val name: String
 
         override val pathElement: Path.Element<*>
-            get() = ParametrizedTextElement<TabContent<*>, Int>(javaClass, id, Messages.ONE_ARG, name)
+            get() = Path.Element(this::class, params, Messages.ONE_ARG, name)
     }
 }

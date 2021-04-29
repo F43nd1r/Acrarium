@@ -17,38 +17,29 @@ package com.faendir.acra.ui.component.tabs
 
 import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.util.PARAM
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.DetachEvent
-import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.tabs.Tab
 import com.vaadin.flow.router.AfterNavigationEvent
 import com.vaadin.flow.router.AfterNavigationListener
-import com.vaadin.flow.router.RouteParameters
 import com.vaadin.flow.shared.Registration
 import org.springframework.context.support.GenericApplicationContext
+import kotlin.reflect.KClass
 
 /**
  * @author lukas
  * @since 18.10.18
  */
 class Path(private val applicationContext: GenericApplicationContext) : SubTabs(), AfterNavigationListener {
-    private val actions: MutableMap<Tab, () -> Unit> = mutableMapOf()
     private var registration: Registration? = null
-
-    init {
-        addSelectedChangeListener { actions[it.selectedTab]?.invoke() }
-    }
 
     override fun afterNavigation(event: AfterNavigationEvent) {
         removeAll()
-        actions.clear()
         for (element in event.activeChain.filterIsInstance<HasRoute>().flatMap { it.getPathElements(applicationContext, event) }.reversed()) {
             val tab = element.toTab()
             add(tab)
             selectedTab = tab
-            actions[tab] = element.action
         }
     }
 
@@ -62,21 +53,15 @@ class Path(private val applicationContext: GenericApplicationContext) : SubTabs(
         super.onDetach(detachEvent)
     }
 
-    open class Element<T : Component>(val target: Class<T>, titleId: String, vararg params: Any) : TranslatableText(titleId, *params) {
+    open class Element<T : Component>(val target: KClass<T>, val targetParams: Map<String, String>, titleId: String, vararg params: Any) :
+        TranslatableText(titleId, *params) {
         fun toTab(): Tab {
-            val div = Translatable.createDiv(id, *params)
-            div.addTranslatedListener { div.content.text?.let { div.content.element.setProperty("innerHTML", it.replace(".", ".<wbr>")) } }
-            div.style["overflow-wrap"] = "break-word"
-            div.setWidthFull()
-            return Tab(div)
+            val link = Translatable.createRouterLink(target, targetParams, id, *params)
+            link.addTranslatedListener { link.content.text?.let { link.content.element.setProperty("innerHTML", it.replace(".", ".<wbr>")) } }
+            link.style["display"] = "block"
+            link.style["overflow-wrap"] = "break-word"
+            link.setWidthFull()
+            return Tab(link)
         }
-
-        open val action: () -> Unit = { UI.getCurrent().navigate(target) }
-
-    }
-
-    class ParametrizedTextElement<T, P>(target: Class<T>, private val parameter: P, titleId: String, vararg params: Any) : Element<T>(target, titleId, *params)
-            where T : Component {
-        override val action: () -> Unit = { UI.getCurrent().navigate(target, RouteParameters(PARAM, parameter.toString())) }
     }
 }

@@ -16,11 +16,15 @@
 package com.faendir.acra.ui.view.bug.tabs.admincards
 
 import com.faendir.acra.i18n.Messages
+import com.faendir.acra.model.App
 import com.faendir.acra.model.Bug
+import com.faendir.acra.model.Permission
+import com.faendir.acra.navigation.ParseBugParameter
 import com.faendir.acra.navigation.View
+import com.faendir.acra.security.HasApp
+import com.faendir.acra.security.RequiresPermission
 import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.AdminCard
-import com.faendir.acra.util.PARAM
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.flexLayout
@@ -28,12 +32,11 @@ import com.faendir.acra.ui.ext.translatableButton
 import com.faendir.acra.ui.ext.translatableTextArea
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexLayout
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
-import org.springframework.beans.factory.annotation.Qualifier
 
 @View
-class PropertiesCard(dataService: DataService, @Qualifier(PARAM) bug: Bug) : AdminCard(dataService) {
+@RequiresPermission(Permission.Level.EDIT)
+class PropertiesCard(dataService: DataService, @ParseBugParameter bug: Bug) : AdminCard(dataService), HasApp {
+    override val app: App = bug.app
 
     init {
         content {

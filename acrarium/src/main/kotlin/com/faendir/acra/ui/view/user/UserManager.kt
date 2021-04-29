@@ -21,6 +21,7 @@ import com.faendir.acra.model.Permission
 import com.faendir.acra.model.QUser
 import com.faendir.acra.model.User
 import com.faendir.acra.navigation.View
+import com.faendir.acra.security.RequiresRole
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.DataService
 import com.faendir.acra.service.UserService
@@ -48,6 +49,7 @@ import com.vaadin.flow.router.Route
  */
 @View
 @Route(value = "user-manager", layout = MainView::class)
+@RequiresRole(User.Role.ADMIN)
 class UserManager(private val userService: UserService, private val dataService: DataService) : Composite<FlexLayout>(), HasAcrariumTitle {
     init {
         content {

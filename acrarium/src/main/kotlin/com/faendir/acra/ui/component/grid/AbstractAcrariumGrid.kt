@@ -6,10 +6,8 @@ import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.ItemClickEvent
 import com.vaadin.flow.data.renderer.Renderer
 import com.vaadin.flow.function.ValueProvider
-import com.vaadin.flow.router.RouteConfiguration
 import com.vaadin.flow.router.RouteParameters
 import java.util.function.BiFunction
-import java.util.function.Consumer
 
 @Suppress("UNCHECKED_CAST")
 abstract class AbstractAcrariumGrid<T, C : Grid.Column<T>>() : Grid<T>() {
@@ -36,18 +34,12 @@ abstract class AbstractAcrariumGrid<T, C : Grid.Column<T>>() : Grid<T>() {
      * workaround https://github.com/vaadin/vaadin-grid/issues/1864
      */
     override fun recalculateColumnWidths() {
-        getElement().executeJs("setTimeout(() => { this.recalculateColumnWidths() }, 10)");
+        element.executeJs("setTimeout(() => { this.recalculateColumnWidths() }, 10)");
     }
 
-    fun <C, R> addOnClickNavigation(target: Class<C>, transform: (T) -> R) where C : Component {
+    fun addOnClickNavigation(target: Class<out Component>, getParameters: (T) -> Map<String, String>) {
         addItemClickListener { e: ItemClickEvent<T> ->
-            ui.ifPresent(if (e.button == 1 || e.isCtrlKey) Consumer {
-                it.page.executeJs(
-                    """window.open("${
-                        RouteConfiguration.forSessionScope().getUrl(target, RouteParameters(PARAM, transform(e.item).toString()))
-                    }", "blank", "");"""
-                )
-            } else Consumer { it.navigate(target, RouteParameters(PARAM, transform(e.item).toString())) })
+            ui.ifPresent { it.navigate(target, RouteParameters(getParameters(e.item))) }
         }
     }
 }

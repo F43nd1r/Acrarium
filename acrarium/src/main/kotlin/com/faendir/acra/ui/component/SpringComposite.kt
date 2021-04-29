@@ -26,7 +26,6 @@ import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.TypeVariable
 
-@SpringComponent
 abstract class SpringComposite<T : Component> : Composite<T>() {
 
     @Suppress("UNCHECKED_CAST")

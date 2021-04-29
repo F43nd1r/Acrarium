@@ -16,20 +16,23 @@
 package com.faendir.acra.ui.view.bug.tabs
 
 import com.faendir.acra.model.Bug
-import com.faendir.acra.navigation.BugParser
-import com.faendir.acra.navigation.ParseParameter
-import com.faendir.acra.ui.component.tabs.HasRoute
 import com.faendir.acra.ui.component.tabs.TabView
 import com.faendir.acra.ui.view.app.tabs.BugTab
+import com.faendir.acra.util.PARAM_APP
+import com.faendir.acra.util.PARAM_BUG
 import com.vaadin.flow.component.Component
 
 /**
  * @author lukas
  * @since 19.11.18
  */
-@ParseParameter(BugParser::class)
+
 abstract class BugTab<T : Component>(bug: Bug) : TabView.TabContent<T>() {
-    override val logicalParent: HasRoute.Parent<*>? = HasRoute.ParametrizedParent(BugTab::class.java, bug.app)
-    override val id: Int = bug.id
-    override val name: String = bug.title
+    override val logicalParent = BugTab::class
+    override val params = getNavigationParams(bug)
+    override val name = bug.title
+
+    companion object {
+        fun getNavigationParams(bug: Bug) = mapOf(PARAM_APP to bug.app.id.toString(), PARAM_BUG to bug.id.toString())
+    }
 }

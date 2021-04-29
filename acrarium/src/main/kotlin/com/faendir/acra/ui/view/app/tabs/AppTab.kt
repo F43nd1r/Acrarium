@@ -16,17 +16,19 @@
 package com.faendir.acra.ui.view.app.tabs
 
 import com.faendir.acra.model.App
-import com.faendir.acra.navigation.AppParser
-import com.faendir.acra.navigation.ParseParameter
 import com.faendir.acra.ui.component.tabs.TabView
+import com.faendir.acra.util.PARAM_APP
 import com.vaadin.flow.component.Component
 
 /**
  * @author lukas
  * @since 14.07.18
  */
-@ParseParameter(AppParser::class)
 abstract class AppTab<T : Component>(app: App) : TabView.TabContent<T>() {
-    override val id: Int = app.id
+    override val params: Map<String, String> = getNavigationParams(app)
     override val name: String = app.name
+
+    companion object {
+        fun getNavigationParams(app: App) = mapOf(PARAM_APP to app.id.toString())
+    }
 }

@@ -23,6 +23,7 @@ import com.faendir.acra.ui.view.app.tabs.BugTab
 import com.faendir.acra.ui.view.app.tabs.ReportTab
 import com.faendir.acra.ui.view.app.tabs.StatisticsTab
 import com.faendir.acra.ui.view.main.MainView
+import com.faendir.acra.util.PARAM_APP
 import com.vaadin.flow.router.ParentLayout
 import com.vaadin.flow.router.RoutePrefix
 import com.vaadin.flow.spring.annotation.SpringComponent
@@ -34,7 +35,7 @@ import com.vaadin.flow.spring.annotation.UIScope
  */
 @UIScope
 @SpringComponent
-@RoutePrefix("app/:$PARAM")
+@RoutePrefix("app/:$PARAM_APP")
 @ParentLayout(MainView::class)
 class AppView : TabView(
     TabInfo(BugTab::class.java, Messages.BUGS),

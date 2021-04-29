@@ -16,13 +16,12 @@
 package com.faendir.acra.ui.view.bug.tabs
 
 import com.faendir.acra.model.Bug
+import com.faendir.acra.navigation.ParseBugParameter
 import com.faendir.acra.navigation.View
 import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.ReportList
 import com.faendir.acra.ui.view.bug.BugView
-import com.faendir.acra.util.PARAM
 import com.vaadin.flow.router.Route
-import org.springframework.beans.factory.annotation.Qualifier
 
 /**
  * @author lukas
@@ -33,7 +32,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 class ReportTab(
     private val dataService: DataService,
     private val reportListFactory: ReportList.Factory,
-    @Qualifier(PARAM)
+    @ParseBugParameter
     private val bug: Bug
 ) : BugTab<ReportList>(bug) {
 

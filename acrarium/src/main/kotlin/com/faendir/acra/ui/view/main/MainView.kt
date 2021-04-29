@@ -97,7 +97,7 @@ class MainView(applicationContext: GenericApplicationContext) : Composite<AppLay
     }
 
     private inline fun <reified T : Component> createTab(captionId: String) : Tab {
-        val tab = Tab(Translatable.createRouterLink(T::class, captionId))
+        val tab = Tab(Translatable.createRouterLink(T::class, captionId = captionId))
         targets[T::class.java] = tab
         return tab
     }
