@@ -60,31 +60,7 @@ class RestReportInterface(private val dataService: DataService) {
         return ResponseEntity.ok().build<Any>()
     }
 
-    @PreAuthorize("hasRole(T(com.faendir.acra.model.User\$Role).USER)")
-    @RequestMapping(value = [EXPORT_PATH], produces = [MediaType.APPLICATION_JSON_VALUE], method = [RequestMethod.GET])
-    fun export(@RequestParam(name = PARAM_APP) appId: String, @RequestParam(name = PARAM_ID, required = false) id: String?,
-               @RequestParam(name = PARAM_MAIL, required = false) mail: String?): ResponseEntity<String> {
-        val app = dataService.findApp(appId) ?: return ResponseEntity.notFound().build()
-        var where: BooleanExpression? = null
-        var name = ""
-        if (mail != null && mail.isNotEmpty()) {
-            where = QReport.report.userEmail.eq(mail)
-            name += "_$mail"
-        }
-        if (id != null && id.isNotEmpty()) {
-            where = QReport.report.installationId.eq(id).and(where)
-            name += "_$id"
-        }
-        if (name.isEmpty()) {
-            return ResponseEntity.badRequest().build()
-        }
-        val headers = HttpHeaders()
-        headers.setContentDispositionFormData("attachment", "reports$name.json")
-        return ResponseEntity.ok().headers(headers).body(dataService.getFromReports(app, where, QReport.report.content).joinToString(", ", "[", "]"))
-    }
-
     companion object {
-        const val EXPORT_PATH = "export"
         const val PARAM_APP = "app_id"
         const val PARAM_ID = "id"
         const val PARAM_MAIL = "mail"
