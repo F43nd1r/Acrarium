@@ -142,6 +142,9 @@ open class Translatable<T : Component> protected constructor(protected val t: T,
         fun createP(captionId: String, vararg params: Any) = Translatable(Paragraph(), Paragraph::setText, captionId, *params)
 
         fun createRouterLink(target: KClass<out Component>, targetParams: Map<String, String> = emptyMap(), captionId: String, vararg params: Any) =
-            Translatable(RouterLink("", target.java, RouteParameters(targetParams)), HasText::setText, captionId, *params)
+            createRouterLink(target, RouteParameters(targetParams), captionId, *params)
+
+        fun createRouterLink(target: KClass<out Component>, targetParams: RouteParameters, captionId: String, vararg params: Any) =
+            Translatable(RouterLink("", target.java, targetParams), HasText::setText, captionId, *params)
     }
 }

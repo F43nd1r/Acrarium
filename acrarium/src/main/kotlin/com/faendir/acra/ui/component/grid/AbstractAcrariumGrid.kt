@@ -1,6 +1,5 @@
 package com.faendir.acra.ui.component.grid
 
-import com.faendir.acra.util.PARAM
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.ItemClickEvent

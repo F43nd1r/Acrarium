@@ -1,7 +1,6 @@
 package com.faendir.acra.navigation
 
 import com.faendir.acra.service.DataService
-import com.faendir.acra.util.PARAM
 import com.faendir.acra.util.PARAM_APP
 import com.faendir.acra.util.PARAM_BUG
 import com.faendir.acra.util.PARAM_REPORT

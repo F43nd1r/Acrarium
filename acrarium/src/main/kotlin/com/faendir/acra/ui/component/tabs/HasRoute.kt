@@ -17,10 +17,8 @@ package com.faendir.acra.ui.component.tabs
 
 import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.ui.component.HasAcrariumTitle
-import com.faendir.acra.util.PARAM
 import com.vaadin.flow.router.AfterNavigationEvent
 import org.springframework.context.support.GenericApplicationContext
-import java.util.function.Supplier
 import kotlin.reflect.KClass
 
 /**

@@ -17,17 +17,19 @@ package com.faendir.acra.ui.component.tabs
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.ui.component.SpringComposite
+import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.forEach
 import com.faendir.acra.ui.ext.setFlexGrow
-import com.faendir.acra.ui.ext.tab
 import com.faendir.acra.ui.ext.tabs
-import com.faendir.acra.util.PARAM
 import com.faendir.acra.util.indexOfFirstOrNull
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.HasElement
 import com.vaadin.flow.component.HasStyle
 import com.vaadin.flow.component.orderedlayout.FlexLayout
+import com.vaadin.flow.component.tabs.Tab
 import com.vaadin.flow.component.tabs.Tabs
+import com.vaadin.flow.router.BeforeEnterEvent
+import com.vaadin.flow.router.BeforeEnterObserver
 import com.vaadin.flow.router.RouteParameters
 import com.vaadin.flow.router.RouterLayout
 import java.io.Serializable
@@ -38,22 +40,22 @@ import kotlin.reflect.KClass
  * @since 03.12.18
  */
 @Suppress("LeakingThis")
-open class TabView(private vararg val tabs: TabInfo<out TabContent<*>>) : FlexLayout() , RouterLayout {
+open class TabView(private vararg val tabs: TabInfo<out TabContent<*>>) : FlexLayout() , RouterLayout, BeforeEnterObserver {
     private val header: Tabs
     lateinit var content: TabContent<*>
+    lateinit var parameters: RouteParameters
 
     init {
         setSizeFull()
         setFlexDirection(FlexDirection.COLUMN)
-        header = tabs {
-            forEach(tabs.toList()) {
-                tab(it.labelId)
-            }
-            addSelectedChangeListener {
-                ui.ifPresent { ui ->
-                    ui.navigate(tabs[it.source.selectedIndex].tabClass, RouteParameters(PARAM, content.params.toString()))
-                }
-            }
+        header = tabs()
+    }
+
+    override fun beforeEnter(event: BeforeEnterEvent) {
+        parameters = event.routeParameters
+        header.removeAll()
+        header.forEach(tabs.toList()) {
+            add(Tab(Translatable.createRouterLink(it.tabClass, parameters, it.labelId)))
         }
     }
 
@@ -64,12 +66,12 @@ open class TabView(private vararg val tabs: TabInfo<out TabContent<*>>) : FlexLa
             }
             this.content = content
             content.setFlexGrow(1)
-            tabs.indexOfFirstOrNull { it.tabClass == content.javaClass }?.let { header.selectedIndex = it }
+            tabs.indexOfFirstOrNull { it.tabClass.java == content.javaClass }?.let { header.selectedIndex = it }
             add(content)
         }
     }
 
-    class TabInfo<T>(val tabClass: Class<T>, val labelId: String) : Serializable
+    class TabInfo<T : Any>(val tabClass: KClass<T>, val labelId: String) : Serializable
 
     abstract class TabContent<T : Component> : SpringComposite<T>(), HasRoute, HasStyle {
         abstract val params: Map<String, String>

@@ -108,7 +108,6 @@ inline fun <T : Any, R> T.equalsBy(other: Any?, id: T.() -> R): Boolean = when {
     else -> id() == (other as T).id()
 }
 
-const val PARAM = "param"
 const val PARAM_APP = "app"
 const val PARAM_BUG = "bug"
 const val PARAM_REPORT = "report"
