@@ -51,7 +51,7 @@ class ExportCard(dataService: DataService, @ParseAppParameter app: App) : AdminC
                 try {
                     val where = null.eqIfNotBlank(QReport.report.userEmail, mailBox.value).eqIfNotBlank(QReport.report.installationId, idBox.value)
                     ByteArrayInputStream(
-                        if (where == null) ByteArray(0) else dataService.getFromReports(app, where, QReport.report.content, QReport.report.id)
+                        if (where == null) ByteArray(0) else dataService.getFromReports(app, where, QReport.report.content)
                             .joinToString(", ", "[", "]").toByteArray(StandardCharsets.UTF_8)
                     )
                 } finally {

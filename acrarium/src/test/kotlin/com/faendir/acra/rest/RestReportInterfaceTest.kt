@@ -34,15 +34,11 @@ import io.mockk.runs
 import io.mockk.verify
 import org.json.JSONArray
 import org.json.JSONObject
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.ComponentScan
-import org.springframework.context.annotation.FilterType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE
@@ -83,7 +79,7 @@ class RestReportInterfaceTest {
     fun setUp() {
         val app = mockk<App>()
         every { dataService.findApp(TEST_STRING) } returns app
-        every { dataService.getFromReports(any(), any(), any<Expression<Any>>(), any()) } returns listOf("{\"name\":\"a\"}", "{\"name\":\"b\"}")
+        every { dataService.getFromReports(any(), any(), any<Expression<Any>>()) } returns listOf("{\"name\":\"a\"}", "{\"name\":\"b\"}")
         every { dataService.createNewReport(any(), any(), any()) } just runs
     }
 

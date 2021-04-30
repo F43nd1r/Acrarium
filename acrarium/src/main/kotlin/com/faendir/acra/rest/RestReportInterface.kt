@@ -32,7 +32,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.security.Principal
-import java.util.stream.Collectors
 
 /**
  * @author Lukas
@@ -81,7 +80,7 @@ class RestReportInterface(private val dataService: DataService) {
         }
         val headers = HttpHeaders()
         headers.setContentDispositionFormData("attachment", "reports$name.json")
-        return ResponseEntity.ok().headers(headers).body(dataService.getFromReports(app, where, QReport.report.content, QReport.report.id).joinToString(", ", "[", "]"))
+        return ResponseEntity.ok().headers(headers).body(dataService.getFromReports(app, where, QReport.report.content).joinToString(", ", "[", "]"))
     }
 
     companion object {
