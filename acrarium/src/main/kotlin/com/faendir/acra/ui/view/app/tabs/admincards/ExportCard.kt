@@ -30,6 +30,7 @@ import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.StringPath
 import com.vaadin.flow.server.InputStreamFactory
 import com.vaadin.flow.server.StreamResource
+import org.springframework.security.core.context.SecurityContextHolder
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 
@@ -44,12 +45,18 @@ class ExportCard(dataService: DataService, @ParseAppParameter app: App) : AdminC
             val idBox = comboBox(dataService.getFromReports(app, null, QReport.report.installationId), Messages.BY_ID) {
                 setWidthFull()
             }
+            val authentication = SecurityContextHolder.getContext().authentication
             downloadButton(StreamResource("reports.json", InputStreamFactory {
-                val where = null.eqIfNotBlank(QReport.report.userEmail, mailBox.value).eqIfNotBlank(QReport.report.installationId, idBox.value)
-                ByteArrayInputStream(
-                    if (where == null) ByteArray(0) else dataService.getFromReports(app, where, QReport.report.content, QReport.report.id)
-                        .joinToString(", ", "[", "]").toByteArray(StandardCharsets.UTF_8)
-                )
+                SecurityContextHolder.getContext().authentication = authentication
+                try {
+                    val where = null.eqIfNotBlank(QReport.report.userEmail, mailBox.value).eqIfNotBlank(QReport.report.installationId, idBox.value)
+                    ByteArrayInputStream(
+                        if (where == null) ByteArray(0) else dataService.getFromReports(app, where, QReport.report.content, QReport.report.id)
+                            .joinToString(", ", "[", "]").toByteArray(StandardCharsets.UTF_8)
+                    )
+                } finally {
+                    SecurityContextHolder.getContext().authentication = null
+                }
             }), Messages.DOWNLOAD) {
                 setSizeFull()
             }
