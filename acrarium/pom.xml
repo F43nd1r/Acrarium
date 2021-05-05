@@ -364,12 +364,8 @@
             <url>https://maven.google.com</url>
         </repository>
         <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-f43nd1r-maven</id>
-            <name>bintray</name>
-            <url>https://dl.bintray.com/f43nd1r/maven</url>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
     <pluginRepositories>
@@ -470,9 +466,14 @@
                         <configuration>
                             <annotationProcessorPaths>
                                 <path>
-                                    <groupId>com.faendir.querydsl</groupId>
-                                    <artifactId>querydsl-kotlin</artifactId>
-                                    <version>4.3.5</version>
+                                    <groupId>com.github.F43nd1r.querydsl</groupId>
+                                    <artifactId>querydsl-kotlin-codegen</artifactId>
+                                    <version>kotlin-codegen-SNAPSHOT</version>
+                                </path>
+                                <path>
+                                    <groupId>com.github.F43nd1r.querydsl</groupId>
+                                    <artifactId>querydsl-apt</artifactId>
+                                    <version>kotlin-codegen-SNAPSHOT</version>
                                 </path>
                                 <path>
                                     <groupId>com.google.auto.service</groupId>
