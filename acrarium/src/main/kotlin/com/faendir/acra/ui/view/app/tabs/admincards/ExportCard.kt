@@ -39,10 +39,10 @@ class ExportCard(dataService: DataService, @ParseAppParameter app: App) : AdminC
     init {
         content {
             setHeader(Translatable.createLabel(Messages.EXPORT))
-            val mailBox = comboBox(dataService.getFromReports(app, null, QReport.report.userEmail), Messages.BY_MAIL) {
+            val mailBox = comboBox(dataService.getFromReports(app, QReport.report.userEmail), Messages.BY_MAIL) {
                 setWidthFull()
             }
-            val idBox = comboBox(dataService.getFromReports(app, null, QReport.report.installationId), Messages.BY_ID) {
+            val idBox = comboBox(dataService.getFromReports(app, QReport.report.installationId), Messages.BY_ID) {
                 setWidthFull()
             }
             val authentication = SecurityContextHolder.getContext().authentication
@@ -51,7 +51,7 @@ class ExportCard(dataService: DataService, @ParseAppParameter app: App) : AdminC
                 try {
                     val where = null.eqIfNotBlank(QReport.report.userEmail, mailBox.value).eqIfNotBlank(QReport.report.installationId, idBox.value)
                     ByteArrayInputStream(
-                        if (where == null) ByteArray(0) else dataService.getFromReports(app, where, QReport.report.content)
+                        if (where == null) ByteArray(0) else dataService.getFromReports(app, QReport.report.content, where, sorted = false)
                             .joinToString(", ", "[", "]").toByteArray(StandardCharsets.UTF_8)
                     )
                 } finally {

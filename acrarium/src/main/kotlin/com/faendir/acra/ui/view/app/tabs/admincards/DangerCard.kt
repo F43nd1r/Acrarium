@@ -92,7 +92,7 @@ class DangerCard(dataService: DataService, @ParseAppParameter override val app: 
             box(Messages.PURGE_VERSION, Messages.PURGE_VERSION_DETAILS, Messages.PURGE) {
                 showFluentDialog {
                     header(Messages.PURGE)
-                    val versionBox = comboBox(dataService.getFromReports(app, null, QReport.report.stacktrace.version.code), Messages.REPORTS_BEFORE_VERSION)
+                    val versionBox = comboBox(dataService.getFromReports(app, QReport.report.stacktrace.version.code), Messages.REPORTS_BEFORE_VERSION)
                     confirmButtons {
                         if (versionBox.value != null) {
                             dataService.deleteReportsBeforeVersion(app, versionBox.value!!)

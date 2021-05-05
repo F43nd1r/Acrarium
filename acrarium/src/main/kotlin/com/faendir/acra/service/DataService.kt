@@ -372,17 +372,13 @@ class DataService(
             .groupBy(select)
             .select(select, QReport.report.id.count())
             .fetch()
-        return result.map { it[select]!! to (it[QReport.report.id.count()] ?: 0L) }.toMap()
+        return result.associate { it[select]!! to (it[QReport.report.id.count()] ?: 0L) }
     }
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
-    fun <T : Comparable<*>> getFromReports(app: App, where: Predicate?, select: ComparableExpressionBase<T>): List<T> =
-        getFromReports(app, where, select)
-
-    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
-    fun <T> getFromReports(app: App, where: Predicate?, select: Expression<T>): List<T> =
+    fun <T> getFromReports(app: App, select: Expression<T>, where: Predicate? = null, sorted: Boolean = true): List<T> =
         (JPAQuery<Any>(entityManager) as JPAQuery<*>).from(QReport.report).where(QReport.report.stacktrace.bug.app.eq(app).and(where))
-            .select(select).distinct().fetch()
+            .select(select).apply { if(sorted && select is ComparableExpressionBase) orderBy(select.asc()) }.distinct().fetch()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun getStacktraces(bug: Bug): List<Stacktrace> =

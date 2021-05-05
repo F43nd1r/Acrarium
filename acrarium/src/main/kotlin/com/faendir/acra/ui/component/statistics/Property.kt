@@ -72,7 +72,7 @@ constructor(private val app: App, private val filterComponent: C, private val fi
 
     internal class Factory(private val dataService: DataService, private val expression: BooleanExpression?, private val app: App) {
         fun createStringProperty(stringExpression: ComparableExpressionBase<String>, filterTextId: String, chartTitleId: String): Property<*, *, *, *> {
-            val list = dataService.getFromReports(app, expression, stringExpression)
+            val list = dataService.getFromReports(app, stringExpression, where = expression)
             val select = Select(*list.toTypedArray())
             if (list.isNotEmpty()) {
                 select.value = list[0]
