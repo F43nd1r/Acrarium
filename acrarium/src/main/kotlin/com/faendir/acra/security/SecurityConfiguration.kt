@@ -140,7 +140,7 @@ class SecurityConfiguration(private val userService: UserService) : WebSecurityC
                 .headers().disable()
                 .requestCache().requestCache(requestCache)
                 .and().authorizeRequests()
-                .requestMatchers(SecurityUtils::isFrameworkInternalRequest).permitAll()
+                .requestMatchers({ SecurityUtils.isFrameworkInternalRequest(it) }).permitAll()
                 .regexMatchers("/${SetupView.ROUTE}").permitAll()
                 .anyRequest().authenticated()
                 .and().formLogin().loginPage("/${LoginView.ROUTE}").permitAll()
