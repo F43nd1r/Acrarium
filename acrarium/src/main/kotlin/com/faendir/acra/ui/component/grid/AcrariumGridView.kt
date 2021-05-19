@@ -22,19 +22,26 @@ class AcrariumGridView<T>(
         addOnLayoutChangedListener { gridSettings.set(it) }
     }
     val header: HasComponents
+
     init {
-        header = FlexLayout(
-            Div().apply { setFlexGrow(1) }, //spacer
-            GridFilterMenu(grid).apply { content.setMarginRight(5.0, com.faendir.acra.ui.ext.SizeUnit.PIXEL) },
-            GridColumnMenu(grid)
-        )
+        header = FlexLayout()
         header.setWidthFull()
         add(header, grid)
         setFlexGrow(1.0, grid)
         setSizeFull()
     }
+
+    internal fun updateHeader() {
+        header.removeAll()
+        header.add(
+            Div().apply { setFlexGrow(1) }, //spacer
+            GridFilterMenu(grid).apply { content.setMarginRight(5.0, com.faendir.acra.ui.ext.SizeUnit.PIXEL) },
+            GridColumnMenu(grid)
+        )
+    }
 }
 
 fun <T> AcrariumGridView<T>.grid(initializer: QueryDslAcrariumGrid<T>.() -> Unit) {
     grid.apply(initializer)
+    updateHeader()
 }

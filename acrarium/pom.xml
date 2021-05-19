@@ -466,12 +466,12 @@
                         <configuration>
                             <annotationProcessorPaths>
                                 <path>
-                                    <groupId>com.github.F43nd1r.querydsl</groupId>
+                                    <groupId>com.github.f43nd1r.querydsl</groupId>
                                     <artifactId>querydsl-kotlin-codegen</artifactId>
                                     <version>kotlin-codegen-SNAPSHOT</version>
                                 </path>
                                 <path>
-                                    <groupId>com.github.F43nd1r.querydsl</groupId>
+                                    <groupId>com.github.f43nd1r.querydsl</groupId>
                                     <artifactId>querydsl-apt</artifactId>
                                     <version>kotlin-codegen-SNAPSHOT</version>
                                 </path>
