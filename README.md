@@ -1,4 +1,8 @@
-[![Actions Status](https://github.com/F43nd1r/Acrarium/workflows/tests/badge.svg)](https://github.com/F43nd1r/Acrarium/actions)
+[![Actions Status](https://img.shields.io/github/workflow/status/F43nd1r/Acrarium/tests?label=Tests&style=for-the-badge)](https://github.com/F43nd1r/Acrarium/actions)
+[![License](https://img.shields.io/github/license/F43nd1r/Acrarium?style=for-the-badge)](https://github.com/F43nd1r/Acrarium/blob/master/LICENSE)
+[![Docker Pulls](https://img.shields.io/docker/pulls/f43nd1r/acrarium?style=for-the-badge)](https://hub.docker.com/repository/docker/f43nd1r/acrarium)
+[![Github Downloads](https://img.shields.io/github/downloads/F43nd1r/Acrarium/total?label=Github%20Downloads&style=for-the-badge)](https://github.com/F43nd1r/Acrarium/releases)
+[![Latest Version](https://img.shields.io/docker/v/f43nd1r/acrarium?label=Latest%20version&style=for-the-badge)](https://github.com/F43nd1r/Acrarium/releases)
 
 <h1 align=center>
 <img src="acrarium/src/main/resources/META-INF/resources/frontend/logo.png" width=50%>
