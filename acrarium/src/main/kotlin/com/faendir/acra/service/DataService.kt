@@ -287,7 +287,8 @@ class DataService(
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun findAllVersions(app: App): List<Version> =
-        JPAQuery<Any>(entityManager).from(QVersion.version).where(QVersion.version.app.eq(app)).select(QVersion.version).fetch()
+        JPAQuery<Any>(entityManager).from(QVersion.version).where(QVersion.version.app.eq(app)).select(QVersion.version).orderBy(QVersion.version.code.desc())
+            .fetch()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun findMailSettings(app: App, user: User): MailSettings? = JPAQuery<Any>(entityManager).from(QMailSettings.mailSettings)
@@ -299,7 +300,7 @@ class DataService(
     fun changeConfiguration(a: App, configuration: App.Configuration) {
         var app = a
         app.configuration = configuration
-        app = store(app)
+        store(app)
     }
 
     @Transactional
@@ -378,7 +379,7 @@ class DataService(
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun <T> getFromReports(app: App, select: Expression<T>, where: Predicate? = null, sorted: Boolean = true): List<T> =
         (JPAQuery<Any>(entityManager) as JPAQuery<*>).from(QReport.report).where(QReport.report.stacktrace.bug.app.eq(app).and(where))
-            .select(select).apply { if(sorted && select is ComparableExpressionBase) orderBy(select.asc()) }.distinct().fetch()
+            .select(select).apply { if (sorted && select is ComparableExpressionBase) orderBy(select.asc()) }.distinct().fetch()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun getStacktraces(bug: Bug): List<Stacktrace> =
@@ -425,7 +426,7 @@ class DataService(
         devices.forEach { store(it) }
     }
 
-    fun hasDeviceTableEntries() : Boolean {
+    fun hasDeviceTableEntries(): Boolean {
         return JPAQuery<Any>(entityManager).from(QDevice.device1).select(Expressions.ONE).fetchFirst() != null
     }
 
