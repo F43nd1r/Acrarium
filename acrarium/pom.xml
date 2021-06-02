@@ -16,7 +16,7 @@
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <vaadin.version>19.0.8</vaadin.version>
+        <vaadin.version>20.0.0</vaadin.version>
         <drivers.dir>${project.basedir}/drivers</drivers.dir>
         <drivers.downloader.phase>pre-integration-test</drivers.downloader.phase>
         <docker.image.prefix>f43nd1r</docker.image.prefix>
