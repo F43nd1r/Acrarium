@@ -16,15 +16,18 @@
 package com.faendir.acra.security
 
 import com.faendir.acra.model.User
-import com.faendir.acra.navigation.LoginRequestCache
 import com.faendir.acra.rest.RestApiInterface.Companion.API_PATH
 import com.faendir.acra.rest.RestReportInterface.Companion.REPORT_PATH
 import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.view.login.LoginView
 import com.faendir.acra.ui.view.login.SetupView
+import com.vaadin.flow.spring.security.RequestUtil
+import com.vaadin.flow.spring.security.VaadinDefaultRequestCache
+import com.vaadin.flow.spring.security.VaadinWebSecurityConfigurerAdapter
 import org.apache.commons.text.CharacterPredicate
 import org.apache.commons.text.RandomStringGenerator
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
@@ -36,6 +39,7 @@ import org.springframework.security.config.BeanIds
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.builders.WebSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.core.Authentication
@@ -46,8 +50,6 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint
 import java.security.SecureRandom
-import org.springframework.security.config.annotation.web.builders.WebSecurity
-import java.lang.Exception
 
 
 /**
@@ -56,7 +58,7 @@ import java.lang.Exception
  */
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 class SecurityConfiguration(private val userService: UserService) : WebSecurityConfigurerAdapter() {
 
     override fun configure(auth: AuthenticationManagerBuilder) {
@@ -73,22 +75,8 @@ class SecurityConfiguration(private val userService: UserService) : WebSecurityC
                 return null
             }
 
-            override fun supports(authentication: Class<*>): Boolean {
-                return UsernamePasswordAuthenticationToken::class.java.isAssignableFrom(authentication)
-            }
+            override fun supports(authentication: Class<*>): Boolean = UsernamePasswordAuthenticationToken::class.java.isAssignableFrom(authentication)
         })
-    }
-
-    override fun configure(web: WebSecurity) {
-        web.ignoring().antMatchers(
-            "/VAADIN/**",
-            "/favicon.ico",
-            "/robots.txt",
-            "/frontend/**",
-            "/webjars/**",
-            "/frontend-es5/**",
-            "/frontend-es6/**"
-        )
     }
 
     @Configuration
@@ -131,24 +119,23 @@ class SecurityConfiguration(private val userService: UserService) : WebSecurityC
     }
 
     @Configuration
+    @ConditionalOnBean(VaadinDefaultRequestCache::class, RequestUtil::class)
     @Order(4)
-    class VaadinConfigurer : WebSecurityConfigurerAdapter() {
-        private val requestCache = LoginRequestCache()
+    class VaadinConfigurer : VaadinWebSecurityConfigurerAdapter() {
+
+        override fun configure(web: WebSecurity) {
+            super.configure(web)
+            web.ignoring().antMatchers("/images/**")
+        }
 
         override fun configure(http: HttpSecurity) {
             http.csrf().disable()
                 .headers().disable()
-                .requestCache().requestCache(requestCache)
-                .and().authorizeRequests()
-                .requestMatchers({ SecurityUtils.isFrameworkInternalRequest(it) }).permitAll()
+                .authorizeRequests()
                 .regexMatchers("/${SetupView.ROUTE}").permitAll()
-                .anyRequest().authenticated()
                 .and().formLogin().loginPage("/${LoginView.ROUTE}").permitAll()
-                .and().sessionManagement()
+            super.configure(http)
         }
-
-        @Bean
-        fun requestCache(): LoginRequestCache = requestCache
     }
 
     @Bean(name = [BeanIds.AUTHENTICATION_MANAGER])
@@ -163,7 +150,7 @@ class SecurityConfiguration(private val userService: UserService) : WebSecurityC
 
         @Bean
         fun randomStringGenerator(secureRandom: SecureRandom): RandomStringGenerator =
-            RandomStringGenerator.Builder().usingRandom { secureRandom.nextInt(it) }.withinRange('0'.toInt(), 'z'.toInt())
+            RandomStringGenerator.Builder().usingRandom { secureRandom.nextInt(it) }.withinRange('0'.code, 'z'.code)
                 .filteredBy(CharacterPredicate { Character.isLetterOrDigit(it) }).build()
 
         @Bean
