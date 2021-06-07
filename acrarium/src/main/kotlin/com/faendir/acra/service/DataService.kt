@@ -384,9 +384,8 @@ class DataService(
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun getStacktraces(bug: Bug): List<Stacktrace> =
         JPAQuery<Any>(entityManager).from(QStacktrace.stacktrace1)
-            .join(QStacktrace.stacktrace1.version, QVersion.version)
-            .fetchAll()
-            .fetchJoin()
+            .join(QStacktrace.stacktrace1.version, QVersion.version).fetchAll().fetchJoin()
+            .join(QStacktrace.stacktrace1.bug).fetchJoin()
             .where(QStacktrace.stacktrace1.bug.eq(bug)).select(QStacktrace.stacktrace1).fetch()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")

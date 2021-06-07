@@ -21,6 +21,9 @@ import com.faendir.acra.rest.RestReportInterface.Companion.REPORT_PATH
 import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.view.login.LoginView
 import com.faendir.acra.ui.view.login.SetupView
+import com.vaadin.flow.spring.SpringLookupInitializer
+import com.vaadin.flow.spring.VaadinScopesConfig
+import com.vaadin.flow.spring.scopes.VaadinSessionScope
 import com.vaadin.flow.spring.security.RequestUtil
 import com.vaadin.flow.spring.security.VaadinDefaultRequestCache
 import com.vaadin.flow.spring.security.VaadinWebSecurityConfigurerAdapter
@@ -28,6 +31,7 @@ import org.apache.commons.text.CharacterPredicate
 import org.apache.commons.text.RandomStringGenerator
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
@@ -119,7 +123,6 @@ class SecurityConfiguration(private val userService: UserService) : WebSecurityC
     }
 
     @Configuration
-    @ConditionalOnBean(VaadinDefaultRequestCache::class, RequestUtil::class)
     @Order(4)
     class VaadinConfigurer : VaadinWebSecurityConfigurerAdapter() {
 

@@ -67,7 +67,7 @@ class SetupView(userService: UserService) : Composite<FlexLayout>(), HasAcrarium
                             style["font-size"] = "var(--lumo-font-size-xxl)"
                             setAlignSelf(Align.CENTER)
                         }
-                        translatableImage("frontend/logo.png", Messages.ACRARIUM) {
+                        translatableImage("images/logo.png", Messages.ACRARIUM) {
                             setWidthFull()
                             setPaddingTop(0.5, SizeUnit.REM)
                             setPaddingBottom(1.0, SizeUnit.REM)

@@ -3,32 +3,32 @@ package com.faendir.acra.ui
 import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.component.UserEditor
 import com.faendir.acra.ui.testbench.BaseVaadinTest
-import com.faendir.acra.ui.testbench.KBrowserWebDriverContainer
+import com.faendir.acra.ui.testbench.HasChrome
+import com.faendir.acra.ui.testbench.HasContainer
+import com.faendir.acra.ui.testbench.HasFirefox
 import com.faendir.acra.ui.testbench.PASSWORD
 import com.faendir.acra.ui.testbench.USERNAME
-import com.faendir.acra.annotation.VaadinTest
-import com.faendir.acra.ui.testbench.getPage
 import com.vaadin.flow.component.button.testbench.ButtonElement
 import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement
 import com.vaadin.testbench.TestBenchElement
 import com.vaadin.testbench.annotations.Attribute
 import com.vaadin.testbench.elementsbase.Element
-import org.junit.platform.commons.annotation.Testable
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import strikt.api.expectThat
 import strikt.assertions.isNotNull
 import strikt.assertions.isTrue
 
-class InitialSetupTest : BaseVaadinTest() {
+abstract class InitialSetupTest : BaseVaadinTest() {
 
     @Autowired
     private lateinit var userService: UserService
 
-    @Testable
-    @VaadinTest
-    fun `perform initial user creation`(container: KBrowserWebDriverContainer, browserName: String) {
-        driver.getPage(port)
+    @Test
+    fun `perform initial user creation`() {
+        getPage(port)
+        waitForVaadin()
         val editor = `$`(UserEditorElement::class.java).first()
         editor.username.value = USERNAME
         editor.password.value = PASSWORD
@@ -42,6 +42,9 @@ class InitialSetupTest : BaseVaadinTest() {
         }
     }
 }
+
+class FirefoxInitialSetupTest : InitialSetupTest(), HasContainer by HasFirefox()
+class ChromeInitialSetupTest : InitialSetupTest(), HasContainer by HasChrome()
 
 @Element("div")
 @Attribute(name = "id", value = UserEditor.EDITOR_ID)

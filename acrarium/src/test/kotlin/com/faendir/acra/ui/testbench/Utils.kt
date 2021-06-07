@@ -9,10 +9,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 const val USERNAME = "TestUser"
 const val PASSWORD = "TestPassword12#'\"?"
 
-fun WebDriver.getPage(port: Int, page: String = "") {
-    get("http://host.testcontainers.internal:$port/$page")
-}
-
 fun UserService.createTestUser() {
     store(User(USERNAME, "", mutableSetOf(User.Role.ADMIN, User.Role.USER), PASSWORD))
 }
