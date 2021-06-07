@@ -17,11 +17,10 @@
 package com.faendir.acra.ui.view.login
 
 import com.faendir.acra.i18n.Messages
+import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.model.User
-import com.faendir.acra.navigation.LoginRequestCache
 import com.faendir.acra.navigation.View
 import com.faendir.acra.ui.component.HasAcrariumTitle
-import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.ui.ext.SizeUnit
 import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.flexLayout
@@ -37,16 +36,20 @@ import com.vaadin.flow.component.login.LoginI18n
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.router.Route
+import com.vaadin.flow.server.VaadinServletRequest
+import com.vaadin.flow.server.VaadinServletResponse
+import com.vaadin.flow.spring.security.VaadinDefaultRequestCache
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.InsufficientAuthenticationException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.web.savedrequest.DefaultSavedRequest
 
 @JsModule("./styles/shared-styles.js")
 @View
 @Route(ROUTE)
-class LoginView(private val authenticationManager: AuthenticationManager, private val loginRequestCache: LoginRequestCache) : Composite<FlexLayout>(),
+class LoginView(private val authenticationManager: AuthenticationManager, private val requestCache: VaadinDefaultRequestCache) : Composite<FlexLayout>(),
     HasAcrariumTitle {
     companion object {
         const val ROUTE = "login"
@@ -61,7 +64,7 @@ class LoginView(private val authenticationManager: AuthenticationManager, privat
                 setFlexDirection(FlexLayout.FlexDirection.COLUMN)
                 setSizeUndefined()
                 flexLayout {
-                    translatableImage("frontend/logo.png", Messages.ACRARIUM) {
+                    translatableImage("images/logo.png", Messages.ACRARIUM) {
                         setWidth(0, SizeUnit.PIXEL)
                         setFlexGrow(1)
                     }
@@ -87,12 +90,17 @@ class LoginView(private val authenticationManager: AuthenticationManager, privat
             }
             SecurityContextHolder.getContext().authentication = token
             UI.getCurrent().apply {
-                navigate(loginRequestCache.resolveRedirectUrl())
+                navigate(resolveRedirectUrl())
             }
             true
         } catch (ex: AuthenticationException) {
             false
         }
+    }
+
+    private fun resolveRedirectUrl(): String {
+        val savedRequest = requestCache.getRequest(VaadinServletRequest.getCurrent().httpServletRequest, VaadinServletResponse.getCurrent().httpServletResponse)
+        return (savedRequest as? DefaultSavedRequest)?.requestURI?.takeIf { it.isNotBlank() && !it.contains(LoginView.ROUTE) }?.removePrefix("/") ?: ""
     }
 
     override val title: TranslatableText = TranslatableText(Messages.LOGIN)

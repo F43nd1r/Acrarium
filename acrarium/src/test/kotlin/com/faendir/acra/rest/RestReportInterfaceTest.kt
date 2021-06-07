@@ -22,6 +22,8 @@ import com.faendir.acra.rest.RestReportInterface.Companion.REPORT_PATH
 import com.faendir.acra.service.DataService
 import com.faendir.acra.service.UserService
 import com.ninjasquad.springmockk.MockkBean
+import com.vaadin.flow.spring.security.RequestUtil
+import com.vaadin.flow.spring.security.VaadinDefaultRequestCache
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -53,6 +55,12 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 class RestReportInterfaceTest {
 
     @MockkBean
+    lateinit var requestCache: VaadinDefaultRequestCache
+
+    @MockkBean
+    lateinit var requestUtil: RequestUtil
+
+    @MockkBean
     lateinit var userService: UserService
 
     @MockkBean
@@ -69,6 +77,7 @@ class RestReportInterfaceTest {
         val app = mockk<App>()
         every { dataService.findApp(TEST_STRING) } returns app
         every { dataService.createNewReport(any(), any(), any()) } just runs
+        every { requestCache.getMatchingRequest(any(), any()) } returns null
     }
 
     @Test

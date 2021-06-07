@@ -82,7 +82,7 @@ class MainView(applicationContext: GenericApplicationContext) : Composite<AppLay
             addToDrawer(tabs)
             addToNavbar(
                 DrawerToggle(),
-                Translatable.createImage("frontend/logo.png", Messages.ACRARIUM).with {
+                Translatable.createImage("images/logo.png", Messages.ACRARIUM).with {
                     setHeight(32, SizeUnit.PIXEL)
                 },
                 Div().apply { setFlexGrow(1) },

@@ -17,6 +17,9 @@ package com.faendir.acra.liquibase
 
 import com.faendir.acra.BackendApplication
 import com.faendir.acra.annotation.AcrariumTest
+import com.faendir.acra.security.SecurityConfiguration
+import com.ninjasquad.springmockk.MockkBean
+import com.vaadin.flow.spring.security.VaadinDefaultRequestCache
 import liquibase.integration.spring.SpringLiquibase
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -33,6 +36,8 @@ import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.FilterType
 import org.springframework.core.io.ResourceLoader
+import org.springframework.security.config.annotation.web.WebSecurityConfigurer
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import javax.sql.DataSource
@@ -46,7 +51,7 @@ import javax.validation.Validator
 @DataJpaTest
 @AcrariumTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ComponentScan(basePackageClasses = [BackendApplication::class],
+@ComponentScan(basePackageClasses = [ChangeAwareSpringLiquibase::class],
         excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = [SpringLiquibase::class])])
 @ImportAutoConfiguration(exclude = [LiquibaseAutoConfiguration::class, EmbeddedDataSourceConfiguration::class])
 @EnableConfigurationProperties(LiquibaseProperties::class)
