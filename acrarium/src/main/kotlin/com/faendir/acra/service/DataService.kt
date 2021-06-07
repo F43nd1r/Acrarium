@@ -111,9 +111,8 @@ class DataService(
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun getReportProvider(app: App) = QueryDslDataProvider(
         Queries.selectVReport(entityManager, app)
-            .join(QStacktrace.stacktrace1.bug, QBug.bug).fetchJoin()
             .join(QStacktrace.stacktrace1.version).fetchJoin()
-            .where(QBug.bug.app.eq(app))
+            .where(QApp.app.eq(app))
     )
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#stacktrace.bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")

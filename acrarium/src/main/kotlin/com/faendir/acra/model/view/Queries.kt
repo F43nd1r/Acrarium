@@ -60,6 +60,8 @@ object Queries {
         .groupBy(QApp.app)
     private val V_REPORT = JPAQuery<Any>().from(QReport.report)
         .leftJoin(QStacktrace.stacktrace1).on(QStacktrace.stacktrace1.eq(QReport.report.stacktrace))
+        .join(QStacktrace.stacktrace1.bug, QBug.bug).fetchJoin()
+        .join(QBug.bug.app, QApp.app).fetchJoin()
         .leftJoin(QDevice.device1).on(QReport.report.phoneModel.eq(QDevice.device1.model).and(QReport.report.device.eq(QDevice.device1.device)))
 
 
