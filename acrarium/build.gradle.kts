@@ -55,6 +55,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3")
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.8")
+    implementation(libs.autoService.annotations)
+    kapt(libs.autoService.processor)
     developmentOnly(boot("devtools"))
     testImplementation(boot("starter-test"))
     testImplementation("org.springframework.security:spring-security-test:5.5.0")

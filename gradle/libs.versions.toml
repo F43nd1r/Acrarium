@@ -7,6 +7,7 @@ spring-boot = "2.5.0"
 vaadin-flow = "20.0.1"
 kotlinPoet = "1.8.0"
 docker-gradle = "0.26.0"
+autoService = "1.0"
 
 [libraries]
 kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -22,3 +23,5 @@ vaadin-flow-gradle = { module = "com.vaadin:vaadin-gradle-plugin", version.ref =
 vaadin-flow-bom = { module = "com.vaadin:vaadin-bom", version.ref = "vaadin-flow" }
 kotlinPoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinPoet" }
 docker-gradle = { module = "com.palantir.gradle.docker:gradle-docker", version.ref = "docker-gradle" }
+autoService-processor = { module = "com.google.auto.service:auto-service", version.ref = "autoService" }
+autoService-annotations = { module = "com.google.auto.service:auto-service", version.ref = "autoService" }
