@@ -44,7 +44,7 @@ dependencies {
     implementation("me.xdrop:fuzzywuzzy:1.3.1")
     implementation("javax.servlet:javax.servlet-api:4.0.1")
     implementation("com.google.auto.service:auto-service-annotations:1.0")
-    implementation("org.hibernate.validator:hibernate-validator:6.2.0.Final")
+    implementation("org.hibernate.validator:hibernate-validator:7.0.1.Final")
     implementation("com.faendir.ziplet:ziplet:2.4.3")
     implementation("com.univocity:univocity-parsers:2.9.1")
     implementation("com.talanlabs:avatar-generator:1.1.0")
