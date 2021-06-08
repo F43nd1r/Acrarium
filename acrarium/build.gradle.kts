@@ -108,8 +108,8 @@ noArg {
 
 docker {
     name = "f43nd1r/acrarium"
-    tag("hubLatest", "hub.docker.com/$name:latest")
-    tag("hubVersion", "hub.docker.com/$name:$version")
+    tag("hubLatest", "$name:latest")
+    tag("hubVersion", "$name:$version")
     tag("ghLatest", "ghcr.io/$name:latest")
     tag("ghVersion", "ghcr.io/$name:$version")
     files(tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar").outputs)
