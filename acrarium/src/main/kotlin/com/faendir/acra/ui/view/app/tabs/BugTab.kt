@@ -20,6 +20,7 @@ import com.faendir.acra.model.App
 import com.faendir.acra.model.Permission
 import com.faendir.acra.model.QBug
 import com.faendir.acra.model.QReport
+import com.faendir.acra.model.QStacktrace
 import com.faendir.acra.model.Version
 import com.faendir.acra.model.view.VBug
 import com.faendir.acra.navigation.ParseAppParameter
@@ -39,6 +40,7 @@ import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.view.app.AppView
 import com.faendir.acra.ui.view.bug.tabs.BugTab
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
+import com.querydsl.jpa.impl.JPAQuery
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.grid.Grid
@@ -122,11 +124,28 @@ class BugTab(
                         emptySelectionCaption = getTranslation(Messages.NOT_SOLVED)
                         value = bug.bug.solvedVersion
                         isEnabled = SecurityUtils.hasPermission(app, Permission.Level.EDIT)
-                        addValueChangeListener { e: ComponentValueChangeEvent<Select<Version?>?, Version?> -> dataService.setBugSolved(bug.bug, e.value) }
+                        addValueChangeListener { e: ComponentValueChangeEvent<Select<Version?>?, Version?> ->
+                            dataService.setBugSolved(bug.bug, e.value)
+                            style["--select-background-color"] =
+                                if (bug.highestVersionCode > bug.bug.solvedVersion?.code ?: Int.MAX_VALUE) "var(--lumo-error-color-50pct)" else null
+                        }
+                        if (bug.highestVersionCode > bug.bug.solvedVersion?.code ?: Int.MAX_VALUE) {
+                            style["--select-background-color"] = "var(--lumo-error-color-50pct)"
+                        }
                     }
                 }) {
                     setSortable(QBug.bug.solvedVersion)
-                    setFilterable(QBug.bug.solvedVersion.isNull, true, Messages.HIDE_SOLVED)
+                    setFilterable(
+                        //not solved or regression
+                        QBug.bug.solvedVersion.isNull.or(
+                            QBug.bug.solvedVersion.code.lt(
+                                JPAQuery<Any>().select(QStacktrace.stacktrace1.version.code.max()).from(QStacktrace.stacktrace1)
+                                    .where(QStacktrace.stacktrace1.bug.eq(QBug.bug))
+                            )
+                        ),
+                        true,
+                        Messages.HIDE_SOLVED
+                    )
                     setCaption(Messages.SOLVED)
                 }
                 addOnClickNavigation(ReportTab::class.java) { BugTab.getNavigationParams(it.bug) }

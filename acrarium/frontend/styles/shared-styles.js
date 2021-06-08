@@ -31,3 +31,12 @@ registerStyles("vaadin-login-form-wrapper",
         }
     `);
 
+registerStyles("vaadin-select-text-field",
+    // language=css
+    css`
+        [part="input-field"] {
+            background-color: var(--select-background-color, var(--lumo-contrast-10pct));
+        }
+    `
+    )
+
