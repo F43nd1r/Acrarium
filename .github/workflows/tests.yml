@@ -15,7 +15,7 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: ${{ matrix.java }}
-      - name: tests on Java ${{ matrix.java }}
+      - name: Tests on Java ${{ matrix.java }}
         uses: burrunan/gradle-cache-action@v1
         with:
           job-id: jdk${{ matrix.java }}
