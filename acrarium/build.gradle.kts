@@ -29,7 +29,7 @@ dependencies {
     implementation("com.vaadin:vaadin")
     implementation("com.vaadin:vaadin-spring-boot-starter")
     implementation("mysql:mysql-connector-java:8.0.25")
-    implementation("org.liquibase:liquibase-core:4.3.1")
+    implementation("org.liquibase:liquibase-core:4.3.5")
     implementation("com.faendir.liquibase:liquibase-kotlin-dsl:3.1.0")
     implementation("com.querydsl:querydsl-jpa:4.4.0")
     implementation("com.querydsl:querydsl-sql:4.4.0")
