@@ -116,12 +116,6 @@ docker {
     copySpec.into("build/libs")
 }
 
-gradle.taskGraph.addTaskExecutionGraphListener { graph ->
-    if (graph.allTasks.any { it.name == "docker" }) {
-        vaadin.productionMode = true
-    }
-}
-
 tasks.withType<Test> {
     project.properties["vaadinProKey"]?.let { systemProperty("vaadin.proKey", it) }
     useJUnitPlatform()
