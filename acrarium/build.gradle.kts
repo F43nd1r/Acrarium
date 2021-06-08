@@ -52,7 +52,7 @@ dependencies {
     implementation("com.github.appreciated:vaadin-css-grid:2.0.0")
     implementation("com.github.appreciated:vaadin-paper-menu-button:2.0.2")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.10")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0-native-mt")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3")
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.8")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
