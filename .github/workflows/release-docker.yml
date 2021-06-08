@@ -31,7 +31,7 @@ jobs:
         uses: burrunan/gradle-cache-action@v1
         with:
           job-id: jdk11
-          arguments: dockerPush
+          arguments: dockerTagsPush
           properties: vaadin.productionMode=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
