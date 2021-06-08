@@ -121,5 +121,6 @@ gradle.taskGraph.addTaskExecutionGraphListener { graph ->
 }
 
 tasks.withType<Test> {
+    project.properties["vaadinProKey"]?.let { systemProperty("vaadin.proKey", it) }
     useJUnitPlatform()
 }

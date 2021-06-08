@@ -21,7 +21,7 @@ jobs:
         with:
           job-id: jdk${{ matrix.java }}
           arguments: test
-          properties: test.jvmArgs="-Dvaadin.proKey=${{ secrets.VAADIN_PROKEY }}"
+          properties: vaadinProKey=${{ secrets.VAADIN_PROKEY }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload Test Results
