@@ -1,1 +1,1 @@
-import '../../target/index';
+import '../../build/index';

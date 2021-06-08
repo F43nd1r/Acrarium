@@ -1,0 +1,24 @@
+[versions]
+kotlin = "1.5.10"
+dokka = "1.4.32"
+jgitver = "0.10.0-rc03"
+nexusPublish = "1.0.0"
+spring-boot = "2.5.0"
+vaadin-flow = "20.0.1"
+kotlinPoet = "1.8.0"
+docker-gradle = "0.26.0"
+
+[libraries]
+kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-allopen = { module = "org.jetbrains.kotlin:kotlin-allopen", version.ref = "kotlin" }
+kotlin-noarg = { module = "org.jetbrains.kotlin:kotlin-noarg", version.ref = "kotlin" }
+dokka-gradle = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
+dokka-core = { module = "org.jetbrains.dokka:dokka-core", version.ref = "dokka" }
+jgitver = { module = "gradle.plugin.fr.brouillard.oss.gradle:gradle-jgitver-plugin", version.ref = "jgitver" }
+nexusPublish = { module = "io.github.gradle-nexus:publish-plugin", version.ref = "nexusPublish" }
+spring-boot-gradle = { module = "org.springframework.boot:spring-boot-gradle-plugin", version.ref = "spring-boot" }
+spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
+vaadin-flow-gradle = { module = "com.vaadin:vaadin-gradle-plugin", version.ref = "vaadin-flow" }
+vaadin-flow-bom = { module = "com.vaadin:vaadin-bom", version.ref = "vaadin-flow" }
+kotlinPoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinPoet" }
+docker-gradle = { module = "com.palantir.gradle.docker:gradle-docker", version.ref = "docker-gradle" }
