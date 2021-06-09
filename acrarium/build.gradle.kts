@@ -50,7 +50,7 @@ dependencies {
     implementation("com.univocity:univocity-parsers:2.9.1")
     implementation("com.talanlabs:avatar-generator:1.1.0")
     implementation("com.github.appreciated:apexcharts:2.0.0.beta12")
-    implementation("com.github.appreciated:vaadin-css-grid:2.0.0")
+    implementation("com.github.f43nd1r:grid-layout:65aeaefda0")
     implementation("com.github.appreciated:vaadin-paper-menu-button:2.0.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3")
