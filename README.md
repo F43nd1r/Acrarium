@@ -5,7 +5,7 @@
 [![Latest Version](https://img.shields.io/docker/v/f43nd1r/acrarium?label=Latest%20version&style=for-the-badge)](https://github.com/F43nd1r/Acrarium/releases)
 
 <h1 align=center>
-<img src="acrarium/src/main/resources/META-INF/resources/frontend/logo.png" width=50%>
+<img src="acrarium/src/main/resources/META-INF/resources/images/logo.png" width=50%>
 </h1>
 A Backend for ACRA written in Java using Spring Boot, Vaadin and MySQL
 
