@@ -69,7 +69,7 @@ class ReportList(
             addColumn { it.androidVersion }.setSortableAndFilterable(QReport.report.androidVersion, Messages.ANDROID_VERSION)
                 .setCaption(Messages.ANDROID_VERSION)
             addColumn(ComponentRenderer { report -> Span(report.marketingName ?: report.phoneModel).apply { element.setProperty("title", report.phoneModel) } })
-                .setSortableAndFilterable(QDevice.device1.marketingName.coalesce(QReport.report.phoneModel).asString(), Messages.DEVICE)
+                .setSortableAndFilterable(QDevice.device1.marketingName.coalesce(QReport.report.phoneModel), Messages.DEVICE)
                 .setCaption(Messages.DEVICE)
             addColumn { it.stacktrace.stacktrace.split("\n".toRegex(), 2).toTypedArray()[0] }.setSortableAndFilterable(
                 QReport.report.stacktrace.stacktrace,

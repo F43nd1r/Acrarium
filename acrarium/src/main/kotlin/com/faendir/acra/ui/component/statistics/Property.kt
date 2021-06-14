@@ -23,20 +23,17 @@ import com.querydsl.core.types.Expression
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.ComparableExpressionBase
 import com.querydsl.core.types.dsl.DateTimePath
-import com.querydsl.sql.SQLExpressions
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.HasEnabled
 import com.vaadin.flow.component.HasSize
 import com.vaadin.flow.component.HasStyle
 import com.vaadin.flow.component.HasValue
-import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.formlayout.FormLayout
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.select.Select
 import com.vaadin.flow.component.textfield.NumberField
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
-import java.util.*
 
 /**
  * @author lukas
@@ -84,8 +81,7 @@ constructor(private val app: App, private val filterComponent: C, private val fi
             val stepper = NumberField()
             stepper.value = 30.0
             return Property(app, stepper, { dateTimeExpression.after(ZonedDateTime.now().minus(it.toInt().toLong(), ChronoUnit.DAYS)) }, TimeChart(chartTitleId),
-                    dataService, SQLExpressions.date(dateTimeExpression), filterTextId)
+                    dataService, dateTimeExpression, filterTextId)
         }
-
     }
 }

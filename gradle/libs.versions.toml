@@ -3,11 +3,13 @@ kotlin = "1.5.10"
 dokka = "1.4.32"
 jgitver = "0.10.0-rc03"
 nexusPublish = "1.0.0"
-spring-boot = "2.5.0"
+spring-boot = "2.5.1"
 vaadin-flow = "20.0.1"
 kotlinPoet = "1.8.0"
 docker-gradle = "0.26.0"
 autoService = "1.0"
+testContainers = "1.15.3"
+selenium = "3.141.59"
 
 [libraries]
 kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -25,3 +27,28 @@ kotlinPoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinPoet" }
 docker-gradle = { module = "com.palantir.gradle.docker:gradle-docker", version.ref = "docker-gradle" }
 autoService-processor = { module = "com.google.auto.service:auto-service", version.ref = "autoService" }
 autoService-annotations = { module = "com.google.auto.service:auto-service", version.ref = "autoService" }
+liquibaseKotlinDsl = "com.faendir.liquibase:liquibase-kotlin-dsl:3.1.0"
+ektorp = "org.ektorp:org.ektorp.spring:1.5.0"
+acraJava = "ch.acra:acra-javacore:5.8.3"
+orgJson = "org.codeartisans:org.json:20161124"
+commonsText = "org.apache.commons:commons-text:1.9"
+xbibTime = "org.xbib:time:2.1.0"
+retrace = "com.faendir.proguard:retrace:1.3"
+fuzzywuzzy = "me.xdrop:fuzzywuzzy:1.3.1"
+ziplet = "com.faendir.ziplet:ziplet:2.4.3"
+univocityParser = "com.univocity:univocity-parsers:2.9.1"
+avatarGenerator = "com.talanlabs:avatar-generator:1.1.0"
+apexCharts = "com.github.appreciated:apexcharts:2.0.0.beta12"
+gridLayout = "com.github.f43nd1r:grid-layout:65aeaefda0"
+vaadin-paperMenuButton = "com.github.appreciated:vaadin-paper-menu-button:2.0.2"
+kotlin-coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0"
+kotlin-logging = "io.github.microutils:kotlin-logging-jvm:2.0.8"
+spring-mockk = "com.ninja-squad:springmockk:3.0.1"
+strikt = "io.strikt:strikt-core:0.31.0"
+testContainers-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testContainers" }
+testContainers-selenium = { module = "org.testcontainers:selenium", version.ref = "testContainers" }
+selenium-remote = { module = "org.seleniumhq.selenium:selenium-remote-driver", version.ref = "selenium" }
+selenium-chrome = { module = "org.seleniumhq.selenium:selenium-chrome-driver", version.ref = "selenium" }
+selenium-firefox = { module = "org.seleniumhq.selenium:selenium-firefox-driver", version.ref = "selenium" }
+mariadb4j = "ch.vorburger.mariaDB4j:mariaDB4j-springboot:2.4.0"
+mariadbClient = "org.mariadb.jdbc:mariadb-java-client:2.7.3"
