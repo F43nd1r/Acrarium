@@ -3,12 +3,9 @@ package com.faendir.acra.ui.view.app.tabs.admincards
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.App
 import com.faendir.acra.model.Permission
-import com.faendir.acra.model.User
 import com.faendir.acra.navigation.ParseAppParameter
 import com.faendir.acra.navigation.View
-import com.faendir.acra.security.HasApp
 import com.faendir.acra.security.RequiresPermission
-import com.faendir.acra.security.RequiresRole
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.AdminCard
@@ -32,7 +29,7 @@ import java.util.*
 
 @View
 @RequiresPermission(Permission.Level.EDIT)
-class CustomColumnCard(dataService: DataService, @ParseAppParameter override val app: App) : AdminCard(dataService), HasApp {
+class CustomColumnCard(dataService: DataService, @ParseAppParameter val app: App) : AdminCard(dataService) {
 
     init {
         content {

@@ -20,6 +20,7 @@ import com.faendir.acra.model.Permission
 import com.faendir.acra.model.User
 import com.vaadin.flow.server.HandlerHelper.RequestType
 import com.vaadin.flow.shared.ApplicationConstants
+import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import javax.servlet.http.HttpServletRequest
@@ -39,6 +40,12 @@ object SecurityUtils {
     fun hasPermission(app: App, level: Permission.Level): Boolean = SecurityContextHolder.getContext().authentication?.let {
         getPermission(app, it.authorities.filterIsInstance<Permission>()) { hasRole(User.Role.ADMIN) }.ordinal >= level.ordinal
     } ?: false
+
+    @JvmStatic
+    fun hasAccess(getApp: () -> App, target: Class<*>): Boolean {
+        return AnnotationUtils.findAnnotation(target, RequiresRole::class.java)?.let { hasRole(it.value) } ?: true &&
+                AnnotationUtils.findAnnotation(target, RequiresPermission::class.java)?.let { hasPermission(getApp(), it.value) } ?: true
+    }
 
     @JvmStatic
     fun getPermission(app: App, user: User): Permission.Level = getPermission(app, user.permissions) { user.roles.contains(User.Role.ADMIN) }

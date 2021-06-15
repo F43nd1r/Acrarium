@@ -16,12 +16,10 @@
 package com.faendir.acra.ui.view.bug.tabs.admincards
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.model.App
 import com.faendir.acra.model.Bug
 import com.faendir.acra.model.Permission
 import com.faendir.acra.navigation.ParseBugParameter
 import com.faendir.acra.navigation.View
-import com.faendir.acra.security.HasApp
 import com.faendir.acra.security.RequiresPermission
 import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.AdminCard
@@ -36,9 +34,7 @@ import com.vaadin.flow.component.UI
 
 @View("bugDangerCard")
 @RequiresPermission(Permission.Level.ADMIN)
-class DangerCard(dataService: DataService, @ParseBugParameter bug: Bug) : AdminCard(dataService), HasApp {
-    override val app: App = bug.app
-
+class DangerCard(dataService: DataService, @ParseBugParameter bug: Bug) : AdminCard(dataService) {
     init {
         content {
             setHeader(Translatable.createLabel(Messages.DANGER_ZONE))

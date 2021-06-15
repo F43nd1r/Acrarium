@@ -6,6 +6,9 @@ import com.faendir.acra.util.PARAM_BUG
 import com.faendir.acra.util.PARAM_REPORT
 import com.faendir.acra.util.toNullable
 import com.vaadin.flow.component.UI
+import com.vaadin.flow.router.BeforeEnterEvent
+import com.vaadin.flow.router.BeforeEnterListener
+import com.vaadin.flow.router.ListenerPriority
 import com.vaadin.flow.router.RouteParameters
 import com.vaadin.flow.server.UIInitEvent
 import com.vaadin.flow.server.UIInitListener
@@ -33,10 +36,15 @@ annotation class ParseReportParameter
 
 
 @Component
-class ParameterParser(private val dataService: DataService) : UIInitListener {
+@ListenerPriority(1000)
+class ParameterParser(private val dataService: DataService) : UIInitListener, BeforeEnterListener {
     private val cache = mutableMapOf<Int, RouteParameters>()
     override fun uiInit(uiInitEvent: UIInitEvent) {
-        uiInitEvent.ui.addBeforeEnterListener { cache[it.ui.uiId] = it.routeParameters }
+        uiInitEvent.ui.addBeforeEnterListener(this)
+    }
+
+    override fun beforeEnter(event: BeforeEnterEvent) {
+        cache[event.ui.uiId] = event.routeParameters
     }
 
     fun parseApp() = parse(PARAM_APP, DataService::findApp)
@@ -45,7 +53,7 @@ class ParameterParser(private val dataService: DataService) : UIInitListener {
 
     fun parseReport() = parse(PARAM_REPORT, DataService::findReport)
 
-    fun parse(param: String, parse: DataService.(String) -> Any?): Any {
+    fun <T> parse(param: String, parse: DataService.(String) -> T?): T {
         return parse(dataService, cache[UI.getCurrent().uiId]?.get(param)?.toNullable() ?: throw IllegalArgumentException("Parameter $param not present"))
             ?: throw IllegalArgumentException("Parse failure for parameter $param")
     }
