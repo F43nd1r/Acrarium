@@ -14,3 +14,4 @@ services:
       SPRING_DATASOURCE_PASSWORD: 1qay2wsx
       SPRING_JPA_DATABASE-PLATFORM: org.hibernate.dialect.MariaDB10Dialect
       SPRING_APPLICATION_JSON: '{ "management": { "endpoints": { "enabled-by-default": true }, "endpoint": { "health": { "show-details": "always", "probes": { "enabled": true } } }, "health": { "livenessState": { "enabled": true }, "readinessState": { "enabled": true } } } }'
+    entrypoint: [ "java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "org.springframework.boot.loader.JarLauncher" ]
