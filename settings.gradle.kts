@@ -1,15 +1,15 @@
-import com.faendir.gradle.createFromBom
+import com.faendir.gradle.createWithBomSupport
 plugins {
-    id("com.faendir.gradle.bom-version-catalog") version "1.0.2"
+    id("com.faendir.gradle.bom-version-catalog") version "1.1.1"
 }
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
     }
     versionCatalogs {
-        createFromBom("libs", "org.springframework.boot:spring-boot-dependencies:2.5.1", "com.vaadin:vaadin-bom:20.0.1") {
-            version("querydsl", "5.0.0-SNAPSHOT")
-            alias("comQuerydsl-querydslKotlinCodegen").to("com.querydsl", "querydsl-kotlin-codegen").versionRef("querydsl")
+        createWithBomSupport("libs") {
+            fromBomAlias("spring-boot-bom")
+            fromBomAlias("vaadin-flow-bom")
         }
     }
 }

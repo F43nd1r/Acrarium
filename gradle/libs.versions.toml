@@ -10,6 +10,7 @@ docker-gradle = "0.26.0"
 autoService = "1.0"
 testContainers = "1.15.3"
 selenium = "3.141.59"
+querydsl = "5.0.0-SNAPSHOT"
 
 [libraries]
 kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -52,3 +53,4 @@ selenium-chrome = { module = "org.seleniumhq.selenium:selenium-chrome-driver", v
 selenium-firefox = { module = "org.seleniumhq.selenium:selenium-firefox-driver", version.ref = "selenium" }
 mariadb4j = "ch.vorburger.mariaDB4j:mariaDB4j-springboot:2.4.0"
 mariadbClient = "org.mariadb.jdbc:mariadb-java-client:2.7.3"
+comQuerydsl-querydslKotlinCodegen = { module = "com.querydsl:querydsl-kotlin-codegen", version.ref = "querydsl" }
