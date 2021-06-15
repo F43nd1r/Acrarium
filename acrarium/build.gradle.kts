@@ -91,6 +91,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 
 springBoot {
     mainClass.set("com.faendir.acra.BackendApplicationKt")
+    buildInfo()
 }
 
 allOpen {
