@@ -113,3 +113,7 @@ const val PARAM_BUG = "bug"
 const val PARAM_REPORT = "report"
 
 infix fun BooleanExpression.and(other: BooleanExpression): BooleanExpression = and(other)
+
+fun <T, U, V> Iterable<T>.zip(u: Iterable<U>, v: Iterable<V>): List<Triple<T, U, V>> {
+    return zip(u.zip(v)) { t, (u, v) -> Triple(t, u, v) }
+}

@@ -10,7 +10,7 @@ docker-gradle = "0.26.0"
 autoService = "1.0"
 testContainers = "1.15.3"
 selenium = "3.141.59"
-querydsl = "5.0.0-SNAPSHOT"
+querydsl = "5.0.0.M1"
 
 [libraries]
 kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
