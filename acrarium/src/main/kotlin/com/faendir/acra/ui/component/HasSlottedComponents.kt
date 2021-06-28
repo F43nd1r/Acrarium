@@ -6,7 +6,8 @@ import com.vaadin.flow.component.HasComponents
 import com.vaadin.flow.component.HasElement
 import com.vaadin.flow.component.Text
 import org.slf4j.LoggerFactory
-import kotlin.streams.toList
+import java.util.*
+import kotlin.streams.asSequence
 
 interface HasSlottedComponents<S : HasSlottedComponents.Slot> : HasElement {
     companion object {
@@ -15,7 +16,7 @@ interface HasSlottedComponents<S : HasSlottedComponents.Slot> : HasElement {
 
     fun add(slot: S, vararg components: Component) {
         for (component in components) {
-            component.element.setAttribute(SLOT, slot.name.toLowerCase())
+            component.element.setAttribute(SLOT, slot.name.lowercase(Locale.getDefault()))
             element.appendChild(component.element)
         }
     }
@@ -32,8 +33,8 @@ interface HasSlottedComponents<S : HasSlottedComponents.Slot> : HasElement {
                     LoggerFactory.getLogger(HasComponents::class.java).debug("Remove of a component with no parent does nothing.")
                     false
                 }
-                component.element.getAttribute(SLOT) == slot.name.toLowerCase() -> {
-                    require(this.getElement() == parent) { "The given component ($component) is not a child of this component" }
+                component.element.getAttribute(SLOT) == slot.name.lowercase(Locale.getDefault()) -> {
+                    require(this.element == parent) { "The given component ($component) is not a child of this component" }
                     true
                 }
                 else -> false
@@ -41,12 +42,13 @@ interface HasSlottedComponents<S : HasSlottedComponents.Slot> : HasElement {
         }.map { it.element }.toTypedArray())
     }
 
-    fun get(slot: S): List<Component> = element.children.toList()
-        .filter { it.getAttribute(SLOT) == slot.name.toLowerCase() }
+    fun get(slot: S): List<Component> = element.children.asSequence()
+        .filter { it.getAttribute(SLOT) == slot.name.lowercase(Locale.getDefault()) }
         .mapNotNull { it.component.toNullable() }
+        .toList()
 
     fun removeAll(slot: S) {
-        element.removeChild(*element.children.filter { it.getAttribute(SLOT) == slot.name.toLowerCase() }.toArray { arrayOfNulls(it) })
+        element.removeChild(*element.children.filter { it.getAttribute(SLOT) == slot.name.lowercase(Locale.getDefault()) }.toArray { arrayOfNulls(it) })
     }
 
     interface Slot {
