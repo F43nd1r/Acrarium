@@ -14,7 +14,7 @@ COPY --from=builder application/snapshot-dependencies/ ./
 RUN true
 COPY --from=builder application/application/ ./
 
-RUN uid=$((`date +%s` / 60)) \
+RUN uid=$(($(($((`date +%s` / 60)) % 165535)) + 100000)) \
     && useradd -m -d /application/ -u $uid acrarium \
     && chown -R acrarium:acrarium /application
 
