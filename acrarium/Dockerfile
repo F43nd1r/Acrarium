@@ -13,4 +13,11 @@ RUN true
 COPY --from=builder application/snapshot-dependencies/ ./
 RUN true
 COPY --from=builder application/application/ ./
+
+RUN uid=$((`date +%s` / 60)) \
+    && useradd -m -d /application/ -u $uid acrarium \
+    && chown -R acrarium:acrarium /application
+
+USER acrarium
+
 ENTRYPOINT ["java", "${JAVA_OPTS}", "org.springframework.boot.loader.JarLauncher"]
