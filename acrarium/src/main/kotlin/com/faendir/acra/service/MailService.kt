@@ -69,8 +69,8 @@ class MailService(
     @Value("\${server.context-path}")
     private val baseUrl: String? = null
 
-    @Value("\${spring.mail.senderAddress}")
-    private val senderAddress: String? = null;
+    @Value("\${spring.mail.sender}")
+    private val sender: String? = null;
 
     @Transactional
     @EventListener
@@ -164,9 +164,7 @@ class MailService(
                     try {
                         val message = MimeMessageHelper(mailSender.createMimeMessage(), true)
                         message.setTo(it)
-                        if(StringUtils.isNotBlank(senderAddress)) {
-                            message.setFrom(senderAddress!!)
-                        }
+                        sender?.takeIf{ it.isNotBlank() }?.let { message.setFrom(it) }
                         message.setSubject(subject)
                         message.setText(body, true)
                         mailSender.send(message.mimeMessage)
