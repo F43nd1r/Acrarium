@@ -7,7 +7,7 @@
 <h1 align=center>
 <img src="acrarium/src/main/resources/META-INF/resources/images/logo.png" width=50%>
 </h1>
-A Backend for ACRA written in Java using Spring Boot, Vaadin and MySQL
+A Backend for ACRA written in Kotlin using Spring Boot, Vaadin and MySQL
 
 # Setup
 
