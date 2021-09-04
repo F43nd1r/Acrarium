@@ -1,16 +1,16 @@
 [versions]
-kotlin = "1.5.10"
-dokka = "1.4.32"
+kotlin = "1.5.30"
+dokka = "1.5.0"
 jgitver = "0.10.0-rc03"
-nexusPublish = "1.0.0"
-spring-boot = "2.5.1"
-vaadin-flow = "20.0.1"
-kotlinPoet = "1.8.0"
-docker-gradle = "0.26.0"
+nexusPublish = "1.1.0"
+spring-boot = "2.5.4"
+vaadin-flow = "20.0.7"
+kotlinPoet = "1.9.0"
+docker-gradle = "0.28.0"
 autoService = "1.0"
-testContainers = "1.15.3"
+testContainers = "1.16.0"
 selenium = "3.141.59"
-querydsl = "5.0.0.M1"
+querydsl = "5.0.0"
 
 [libraries]
 kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -30,7 +30,7 @@ autoService-processor = { module = "com.google.auto.service:auto-service", versi
 autoService-annotations = { module = "com.google.auto.service:auto-service", version.ref = "autoService" }
 liquibaseKotlinDsl = "com.faendir.liquibase:liquibase-kotlin-dsl:3.1.0"
 ektorp = "org.ektorp:org.ektorp.spring:1.5.0"
-acraJava = "ch.acra:acra-javacore:5.8.3"
+acraJava = "ch.acra:acra-javacore:5.8.4"
 orgJson = "org.codeartisans:org.json:20161124"
 commonsText = "org.apache.commons:commons-text:1.9"
 xbibTime = "org.xbib:time:2.1.0"
@@ -42,15 +42,15 @@ avatarGenerator = "com.talanlabs:avatar-generator:1.1.0"
 apexCharts = "com.github.appreciated:apexcharts:2.0.0.beta12"
 gridLayout = "com.github.appreciated:vaadin-css-grid:2.0.0"
 vaadin-paperMenuButton = "com.github.appreciated:vaadin-paper-menu-button:2.0.2"
-kotlin-coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0"
-kotlin-logging = "io.github.microutils:kotlin-logging-jvm:2.0.8"
+kotlin-coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2"
+kotlin-logging = "io.github.microutils:kotlin-logging-jvm:2.0.11"
 spring-mockk = "com.ninja-squad:springmockk:3.0.1"
-strikt = "io.strikt:strikt-core:0.31.0"
+strikt = "io.strikt:strikt-core:0.32.0"
 testContainers-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testContainers" }
 testContainers-selenium = { module = "org.testcontainers:selenium", version.ref = "testContainers" }
 selenium-remote = { module = "org.seleniumhq.selenium:selenium-remote-driver", version.ref = "selenium" }
 selenium-chrome = { module = "org.seleniumhq.selenium:selenium-chrome-driver", version.ref = "selenium" }
 selenium-firefox = { module = "org.seleniumhq.selenium:selenium-firefox-driver", version.ref = "selenium" }
-mariadb4j = "ch.vorburger.mariaDB4j:mariaDB4j-springboot:2.4.0"
-mariadbClient = "org.mariadb.jdbc:mariadb-java-client:2.7.3"
+mariadb4j = "ch.vorburger.mariaDB4j:mariaDB4j-springboot:2.4.9"
+mariadbClient = "org.mariadb.jdbc:mariadb-java-client:2.7.4"
 comQuerydsl-querydslKotlinCodegen = { module = "com.querydsl:querydsl-kotlin-codegen", version.ref = "querydsl" }
