@@ -17,9 +17,14 @@ package com.faendir.acra.ui.component.grid
 
 import com.faendir.acra.dataprovider.QueryDslDataProvider
 import com.faendir.acra.dataprovider.QueryDslFilter
+import com.faendir.acra.i18n.Messages
 import com.faendir.acra.settings.GridSettings
 import com.querydsl.jpa.impl.JPAQuery
+import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.grid.ItemClickEvent
+import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.data.renderer.Renderer
+import com.vaadin.flow.router.RouteParameters
 
 /**
  * @author lukas
@@ -64,6 +69,17 @@ class QueryDslAcrariumGrid<T>(val dataProvider: QueryDslDataProvider<T>, var gri
                 gridSettings = settings
                 listener(settings)
             }
+        }
+    }
+
+    fun addOnClickNavigation(target: Class<out Component>, getParameters: (T) -> Map<String, String>) {
+        addItemClickListener { e: ItemClickEvent<T> ->
+            ui.ifPresent { it.navigate(target, RouteParameters(getParameters(e.item))) }
+        }
+        column(RouteButtonRenderer(VaadinIcon.EXTERNAL_LINK, target, getParameters)) {
+            setCaption(Messages.OPEN)
+            isAutoWidth = false
+            width = "100px"
         }
     }
 }
