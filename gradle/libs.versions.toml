@@ -51,6 +51,6 @@ testContainers-selenium = { module = "org.testcontainers:selenium", version.ref 
 selenium-remote = { module = "org.seleniumhq.selenium:selenium-remote-driver", version.ref = "selenium" }
 selenium-chrome = { module = "org.seleniumhq.selenium:selenium-chrome-driver", version.ref = "selenium" }
 selenium-firefox = { module = "org.seleniumhq.selenium:selenium-firefox-driver", version.ref = "selenium" }
-mariadb4j = "ch.vorburger.mariaDB4j:mariaDB4j-springboot:2.4.9"
+mariadb4j = "org.craftercms.mariaDB4j:mariaDB4j-springboot:2.4.9"
 mariadbClient = "org.mariadb.jdbc:mariadb-java-client:2.7.4"
 comQuerydsl-querydslKotlinCodegen = { module = "com.querydsl:querydsl-kotlin-codegen", version.ref = "querydsl" }
