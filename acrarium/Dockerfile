@@ -13,4 +13,4 @@ RUN true
 COPY --from=builder application/snapshot-dependencies/ ./
 RUN true
 COPY --from=builder application/application/ ./
-ENTRYPOINT ["java", "${JAVA_OPTS}", "org.springframework.boot.loader.JarLauncher"]
+ENTRYPOINT java ${JAVA_OPTS} org.springframework.boot.loader.JarLauncher
