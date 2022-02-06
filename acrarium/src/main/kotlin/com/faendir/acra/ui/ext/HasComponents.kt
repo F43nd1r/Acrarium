@@ -10,11 +10,11 @@ import com.faendir.acra.ui.component.ConfigurationLabel
 import com.faendir.acra.ui.component.DownloadButton
 import com.faendir.acra.ui.component.InstallationView
 import com.faendir.acra.ui.component.RangeField
-import com.faendir.acra.ui.component.tabs.Tab
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.UserEditor
 import com.faendir.acra.ui.component.grid.AcrariumGrid
 import com.faendir.acra.ui.component.grid.QueryDslAcrariumGrid
+import com.faendir.acra.ui.component.tabs.Tab
 import com.github.appreciated.layout.GridLayout
 import com.vaadin.flow.component.AbstractField
 import com.vaadin.flow.component.ClickEvent
@@ -85,7 +85,7 @@ fun HasComponents.loginForm(loginI18n: LoginI18n, initializer: LoginForm.() -> U
 }
 
 fun HasComponents.userEditor(userService: UserService, user: User, isExistingUser: Boolean, onSuccess: () -> Unit) {
-    add(UserEditor(userService, user, isExistingUser, onSuccess))
+    add(UserEditor(userService, null, user, isExistingUser, onSuccess))
 }
 
 fun <T> HasComponents.queryDslAcrariumGrid(dataProvider: QueryDslDataProvider<T>, initializer: QueryDslAcrariumGrid<T>.() -> Unit): QueryDslAcrariumGrid<T> {

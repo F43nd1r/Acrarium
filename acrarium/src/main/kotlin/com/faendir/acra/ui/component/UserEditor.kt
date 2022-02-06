@@ -17,6 +17,7 @@ package com.faendir.acra.ui.component
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.User
+import com.faendir.acra.service.MailService
 import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.component.Translatable.ValidatedValue
 import com.faendir.acra.ui.ext.setMaxWidthFull
@@ -32,12 +33,14 @@ import com.vaadin.flow.data.binder.ValidationResult
 import com.vaadin.flow.data.binder.ValueContext
 import com.vaadin.flow.data.validator.EmailValidator
 import com.vaadin.flow.dom.ElementFactory
+import java.util.*
 
 /**
  * @author lukas
  * @since 28.02.19
  */
-class UserEditor(userService: UserService, private var user: User, isExistingUser: Boolean, onSuccess: () -> Unit) : Composite<FlexLayout>() {
+class UserEditor(userService: UserService, mailService: MailService?, private var user: User, isExistingUser: Boolean, onSuccess: () -> Unit) :
+    Composite<FlexLayout>() {
 
     init {
         setId(EDITOR_ID)
@@ -51,7 +54,7 @@ class UserEditor(userService: UserService, private var user: User, isExistingUse
             usernameBindingBuilder.asRequired(getTranslation(Messages.USERNAME_REQUIRED))
         }
         usernameBindingBuilder.withValidator({ it == user.username || userService.getUser(it) == null }, getTranslation(Messages.USERNAME_TAKEN))
-            .bind({ it.username }, if (!isExistingUser) Setter { u: User, value: String -> u.username = value.toLowerCase() } else null)
+            .bind({ it.username }, if (!isExistingUser) Setter { u: User, value: String -> u.username = value.lowercase(Locale.getDefault()) } else null)
         content.add(username)
         val mail = Translatable.createTextField(Messages.EMAIL)
         mail.setWidthFull()
@@ -110,10 +113,21 @@ class UserEditor(userService: UserService, private var user: User, isExistingUse
         button.content.isEnabled = false
         binder.addStatusChangeListener { button.content.isEnabled = it.binder.hasChanges() }
         content.add(button)
+        val testMailButton = Translatable.createButton(Messages.SEND_TEST_MAIL) {
+            if (canSendTestMail(mailService)) {
+                mailService!!.testMessage(user)
+            }
+        }
+        testMailButton.setWidthFull()
+        testMailButton.content.isEnabled = canSendTestMail(mailService)
+        binder.addStatusChangeListener { testMailButton.content.isEnabled = canSendTestMail(mailService) }
+        content.add(testMailButton)
         content.setFlexDirection(FlexLayout.FlexDirection.COLUMN)
         content.setMaxWidthFull()
         content.width = "calc(var(--lumo-size-m) * 10)"
     }
+
+    private fun canSendTestMail(mailService: MailService?) = user.mail?.isNotBlank() == true && mailService != null
 
     /**
      * password managers need an input outside the shadow dom, which we add here.

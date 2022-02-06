@@ -18,6 +18,7 @@ package com.faendir.acra.ui.view.user
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.navigation.View
+import com.faendir.acra.service.MailService
 import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.component.HasAcrariumTitle
 import com.faendir.acra.ui.component.UserEditor
@@ -29,7 +30,7 @@ import com.vaadin.flow.component.notification.Notification
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.router.Route
-import org.springframework.lang.NonNull
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author lukas
@@ -37,14 +38,16 @@ import org.springframework.lang.NonNull
  */
 @View
 @Route(value = "account", layout = MainView::class)
-class AccountView constructor(@field:NonNull @param:NonNull private val userService: UserService) : Composite<FlexLayout>(), HasAcrariumTitle {
+class AccountView constructor(private val userService: UserService, @Autowired(required = false) private val mailService: MailService?) :
+    Composite<FlexLayout>(),
+    HasAcrariumTitle {
     init {
         content {
             setSizeFull()
             justifyContentMode = FlexComponent.JustifyContentMode.CENTER
             alignItems = FlexComponent.Alignment.CENTER
             val user = userService.getCurrentUser()
-            add(UserEditor(userService, user, true) { Notification.show(getTranslation(Messages.SUCCESS)) })
+            add(UserEditor(userService, mailService, user, true) { Notification.show(getTranslation(Messages.SUCCESS)) })
         }
     }
 

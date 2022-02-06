@@ -32,7 +32,6 @@ import com.querydsl.jpa.impl.JPAQuery
 import com.vaadin.flow.i18n.I18NProvider
 import com.vaadin.flow.router.RouteConfiguration
 import com.vaadin.flow.router.RouteParameters
-import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.event.EventListener
@@ -70,7 +69,7 @@ class MailService(
     private val baseUrl: String? = null
 
     @Value("\${spring.mail.sender}")
-    private val sender: String? = null;
+    private val sender: String? = null
 
     @Transactional
     @EventListener
@@ -157,14 +156,18 @@ class MailService(
         }
     }
 
+    fun testMessage(user: User) {
+        sendMessage(listOf(user), getTranslation(Messages.TEST_MAIL_TEMPLATE), getTranslation(Messages.TEST_MAIL_SUBJECT))
+    }
+
     private fun sendMessage(users: List<User>, body: String, subject: String) {
         for (user in users) {
-            user.mail?.let {
-                if (it.isNotBlank()) {
+            user.mail?.let { mailAddress ->
+                if (mailAddress.isNotBlank()) {
                     try {
                         val message = MimeMessageHelper(mailSender.createMimeMessage(), true)
-                        message.setTo(it)
-                        sender?.takeIf{ it.isNotBlank() }?.let { message.setFrom(it) }
+                        message.setTo(mailAddress)
+                        sender?.takeIf { it.isNotBlank() }?.let { message.setFrom(it) }
                         message.setSubject(subject)
                         message.setText(body, true)
                         mailSender.send(message.mimeMessage)
