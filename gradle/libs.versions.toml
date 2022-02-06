@@ -3,14 +3,13 @@ kotlin = "1.5.30"
 dokka = "1.5.0"
 jgitver = "0.10.0-rc03"
 nexusPublish = "1.1.0"
-spring-boot = "2.5.4"
+spring-boot = "2.6.3"
 vaadin-flow = "20.0.7"
 kotlinPoet = "1.9.0"
 docker-gradle = "0.28.0"
 autoService = "1.0"
 testContainers = "1.16.0"
 selenium = "3.141.59"
-querydsl = "5.0.0"
 
 [libraries]
 kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -53,4 +52,3 @@ selenium-chrome = { module = "org.seleniumhq.selenium:selenium-chrome-driver", v
 selenium-firefox = { module = "org.seleniumhq.selenium:selenium-firefox-driver", version.ref = "selenium" }
 mariadb4j = "org.craftercms.mariaDB4j:mariaDB4j-springboot:2.4.9"
 mariadbClient = "org.mariadb.jdbc:mariadb-java-client:2.7.4"
-comQuerydsl-querydslKotlinCodegen = { module = "com.querydsl:querydsl-kotlin-codegen", version.ref = "querydsl" }
