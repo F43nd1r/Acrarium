@@ -43,23 +43,26 @@ class BugMerger(private val entityManager: EntityManager) {
     @Transactional
     fun checkAutoMerge(event: NewReportEvent) {
         val stacktrace = event.report.stacktrace
-        JPAQuery<Any>(entityManager).from(stacktrace1).where(stacktrace1.eq(stacktrace)).join(stacktrace1.bug, QBug.bug)
-            .join(QBug.bug.app).fetchJoin().select(QBug.bug).fetchOne()?.let { b ->
-                var bug = b
-                JPAQuery<Any>(entityManager).from(stacktrace1).where(
-                    stacktrace1.ne(stacktrace)
-                        .and(stacktrace1.bug.app.eq(b.app))
-                        .and(stacktrace1.className.eq(stacktrace.className))
-                )
-                    .join(stacktrace1.bug).fetchJoin().select(stacktrace1).iterate().use {
-                        it.asSequence().forEach { s ->
-                            if (s.bug != bug && FuzzySearch.ratio(s.stacktrace, stacktrace.stacktrace) >= bug.app.configuration.minScore) {
-                                entityManager.flush()
-                                bug = mergeBugs(listOf(s.bug, bug), s.bug.title)
+        val configuration = stacktrace.bug.app.configuration
+        if (configuration.minScore < 100) {
+            JPAQuery<Any>(entityManager).from(stacktrace1).where(stacktrace1.eq(stacktrace)).join(stacktrace1.bug, QBug.bug)
+                .join(QBug.bug.app).fetchJoin().select(QBug.bug).fetchOne()?.let { b ->
+                    var bug = b
+                    JPAQuery<Any>(entityManager).from(stacktrace1).where(
+                        stacktrace1.ne(stacktrace)
+                            .and(stacktrace1.bug.app.eq(b.app))
+                            .and(stacktrace1.className.eq(stacktrace.className))
+                    )
+                        .join(stacktrace1.bug).fetchJoin().select(stacktrace1).iterate().use {
+                            it.asSequence().forEach { s ->
+                                if (s.bug != bug && FuzzySearch.ratio(s.stacktrace, stacktrace.stacktrace) >= configuration.minScore) {
+                                    entityManager.flush()
+                                    bug = mergeBugs(listOf(s.bug, bug), s.bug.title)
+                                }
                             }
                         }
-                    }
-            }
+                }
+        }
     }
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bugs[0].app, T(com.faendir.acra.model.Permission\$Level).EDIT)")
