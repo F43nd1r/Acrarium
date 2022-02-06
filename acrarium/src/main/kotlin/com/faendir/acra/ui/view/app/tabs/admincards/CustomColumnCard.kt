@@ -74,10 +74,10 @@ class CustomColumnCard(dataService: DataService, @ParseAppParameter val app: App
                         app.configuration.customReportColumns.remove("")
                         dataProvider.refreshAll()
                     }
-                    column(ButtonRenderer(VaadinIcon.EDIT, {editButtons.add(it)}) {
-                            editor.editItem(it)
-                            field.focus()
-                            recalculateColumnWidths()
+                    column(ButtonRenderer(VaadinIcon.EDIT, { editButtons.add(this) }) {
+                        editor.editItem(it)
+                        field.focus()
+                        recalculateColumnWidths()
                     }) {
                         editorComponent = Div(save, cancel)
                         setFlexGrow(1)

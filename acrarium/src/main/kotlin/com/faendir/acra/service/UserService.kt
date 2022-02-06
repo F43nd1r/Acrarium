@@ -21,6 +21,7 @@ import com.faendir.acra.model.Permission
 import com.faendir.acra.model.QUser
 import com.faendir.acra.model.User
 import com.querydsl.core.types.dsl.Expressions
+import com.querydsl.jpa.impl.JPADeleteClause
 import com.querydsl.jpa.impl.JPAQuery
 import org.apache.commons.text.RandomStringGenerator
 import org.springframework.cache.annotation.CacheEvict
@@ -38,13 +39,15 @@ import javax.validation.Validator
  * @since 20.05.2017
  */
 @Service
-class UserService(private val passwordEncoder: PasswordEncoder, private val randomStringGenerator: RandomStringGenerator, private val entityManager: EntityManager,
-                  private val validator: Validator) : Serializable {
+class UserService(
+    private val passwordEncoder: PasswordEncoder, private val randomStringGenerator: RandomStringGenerator, private val entityManager: EntityManager,
+    private val validator: Validator
+) : Serializable {
 
     fun getUser(username: String): User? = JPAQuery<Any>(entityManager).from(USER)
-            .leftJoin(USER.roles).fetchJoin()
-            .leftJoin(USER.permissions).fetchJoin()
-            .where(USER.username.equalsIgnoreCase(username)).select(USER).fetchOne()
+        .leftJoin(USER.roles).fetchJoin()
+        .leftJoin(USER.permissions).fetchJoin()
+        .where(USER.username.equalsIgnoreCase(username)).select(USER).fetchOne()
 
     @CacheEvict(hasAdminCache)
     @Transactional
@@ -69,6 +72,12 @@ class UserService(private val passwordEncoder: PasswordEncoder, private val rand
     @CacheEvict(cacheNames = [hasAdminCache], allEntries = true)
     @Transactional
     fun store(user: User): User = entityManager.merge(user.apply { if (hasPlainTextPassword()) password = passwordEncoder.encode(user.getPlainTextPassword()) })
+
+    @CacheEvict(cacheNames = [hasAdminCache], allEntries = true)
+    @Transactional
+    fun delete(user: User) {
+        JPADeleteClause(entityManager, USER).where(USER.username.eq(user.username)).execute()
+    }
 
     @Cacheable(hasAdminCache)
     fun hasAdmin(): Boolean = JPAQuery<Any>(entityManager).from(USER).where(USER.roles.contains(User.Role.ADMIN)).select(Expressions.ONE).fetchFirst() != null

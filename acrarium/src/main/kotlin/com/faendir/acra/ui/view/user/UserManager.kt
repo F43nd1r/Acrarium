@@ -28,20 +28,25 @@ import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.component.HasAcrariumTitle
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.ValidatedField
+import com.faendir.acra.ui.component.dialog.confirmButtons
 import com.faendir.acra.ui.component.dialog.createButton
 import com.faendir.acra.ui.component.dialog.showFluentDialog
+import com.faendir.acra.ui.component.grid.ButtonRenderer
 import com.faendir.acra.ui.component.grid.column
 import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.forEach
 import com.faendir.acra.ui.ext.queryDslAcrariumGrid
+import com.faendir.acra.ui.ext.translatableText
 import com.faendir.acra.ui.view.main.MainView
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.combobox.ComboBox
 import com.vaadin.flow.component.grid.Grid
+import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.data.renderer.ComponentRenderer
 import com.vaadin.flow.router.Route
+import java.util.*
 
 /**
  * @author lukas
@@ -97,6 +102,20 @@ class UserManager(private val userService: UserService, private val dataService:
                         setCaption(Messages.ACCESS_PERMISSION, app.name)
                     }
                 }
+                column(ButtonRenderer(VaadinIcon.TRASH, { user ->
+                    isEnabled = user.username != SecurityUtils.getUsername()
+                }, {
+                    showFluentDialog {
+                        translatableText(Messages.DELETE_USER_CONFIRM, it.username)
+                        confirmButtons {
+                            userService.delete(it)
+                            dataProvider.refreshAll()
+                        }
+                    }
+                })) {
+                    width = "50px"
+                    isAutoWidth = false
+                }
                 appendFooterRow().getCell(columns[0]).setComponent(Translatable.createButton(Messages.NEW_USER) {
                     showFluentDialog {
                         val name = Translatable.createTextField(Messages.USERNAME)
@@ -109,7 +128,7 @@ class UserManager(private val userService: UserService, private val dataService:
                                 .addValidator({ it == password.content.value }, Messages.PASSWORDS_NOT_MATCHING)
                         )
                         createButton {
-                            userService.createUser(name.content.value.toLowerCase(), password.content.value)
+                            userService.createUser(name.content.value.lowercase(Locale.getDefault()), password.content.value)
                             dataProvider.refreshAll()
                         }
                     }
