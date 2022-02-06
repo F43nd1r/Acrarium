@@ -23,6 +23,7 @@ import com.vaadin.flow.component.html.Image
 import com.vaadin.flow.server.InputStreamFactory
 import com.vaadin.flow.server.StreamResource
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import java.io.ByteArrayInputStream
 import javax.annotation.Resource
@@ -35,6 +36,7 @@ import javax.annotation.Resource
 class AvatarService {
     private val avatar: Avatar = IdenticonAvatar.newAvatarBuilder().size(32, 32).build()
 
+    @Lazy
     @Resource
     private lateinit var self: AvatarService
 
