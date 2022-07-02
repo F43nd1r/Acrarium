@@ -29,17 +29,7 @@ import com.faendir.acra.ui.component.dialog.closeButton
 import com.faendir.acra.ui.component.dialog.createButton
 import com.faendir.acra.ui.component.dialog.showFluentDialog
 import com.faendir.acra.ui.component.grid.column
-import com.faendir.acra.ui.ext.SizeUnit
-import com.faendir.acra.ui.ext.configurationLabel
-import com.faendir.acra.ui.ext.content
-import com.faendir.acra.ui.ext.flexLayout
-import com.faendir.acra.ui.ext.queryDslAcrariumGrid
-import com.faendir.acra.ui.ext.setMarginRight
-import com.faendir.acra.ui.ext.translatableButton
-import com.faendir.acra.ui.ext.translatableCheckbox
-import com.faendir.acra.ui.ext.translatableLabel
-import com.faendir.acra.ui.ext.translatableNumberField
-import com.faendir.acra.ui.ext.translatableTextField
+import com.faendir.acra.ui.ext.*
 import com.faendir.acra.ui.view.app.tabs.AppTab
 import com.faendir.acra.ui.view.app.tabs.BugTab
 import com.faendir.acra.ui.view.main.MainView
@@ -83,7 +73,7 @@ class Overview(private val dataService: DataService) : Composite<VerticalLayout>
                             val name = translatableTextField(Messages.NAME)
                             createButton {
                                 showFluentDialog {
-                                    configurationLabel(dataService.createNewApp(name.content.value))
+                                    configurationLabel(dataService.createNewApp(name.getContent().value))
                                     closeButton()
                                 }
                                 grid.dataProvider.refreshAll()
@@ -102,7 +92,7 @@ class Overview(private val dataService: DataService) : Composite<VerticalLayout>
                             val ssl = translatableCheckbox(Messages.SSL)
                             val databaseName = translatableTextField(Messages.DATABASE_NAME) { value = "acra-myapp" }
                             createButton {
-                                val importResult = dataService.importFromAcraStorage(host.value, port.value.toInt(), ssl.value, databaseName.value)
+                                val importResult = dataService.importFromAcraStorage(host.getValue(), port.getValue().toInt(), ssl.getValue(), databaseName.getValue())
                                 showFluentDialog {
                                     translatableLabel(Messages.IMPORT_SUCCESS, importResult.successCount, importResult.totalCount)
                                     configurationLabel(importResult.user)

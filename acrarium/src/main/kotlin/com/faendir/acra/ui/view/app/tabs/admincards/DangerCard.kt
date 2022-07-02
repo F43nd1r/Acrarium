@@ -28,13 +28,7 @@ import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.closeButton
 import com.faendir.acra.ui.component.dialog.confirmButtons
 import com.faendir.acra.ui.component.dialog.showFluentDialog
-import com.faendir.acra.ui.ext.box
-import com.faendir.acra.ui.ext.comboBox
-import com.faendir.acra.ui.ext.configurationLabel
-import com.faendir.acra.ui.ext.content
-import com.faendir.acra.ui.ext.translatableNumberField
-import com.faendir.acra.ui.ext.translatableRangeField
-import com.faendir.acra.ui.ext.translatableText
+import com.faendir.acra.ui.ext.*
 import com.faendir.acra.ui.view.Overview
 import com.vaadin.flow.component.UI
 
@@ -66,7 +60,7 @@ class DangerCard(dataService: DataService, @ParseAppParameter val app: App) : Ad
                     }
                     translatableText(Messages.NEW_BUG_CONFIG_CONFIRM)
                     confirmButtons {
-                        dataService.changeConfiguration(app, App.Configuration(score.value.toInt()))
+                        dataService.changeConfiguration(app, App.Configuration(score.getValue().toInt()))
                     }
                 }
             }
@@ -82,7 +76,7 @@ class DangerCard(dataService: DataService, @ParseAppParameter val app: App) : Ad
                         suffixComponent = Translatable.createLabel(Messages.REPORTS_OLDER_THAN2)
                     }
                     confirmButtons {
-                        dataService.deleteReportsOlderThanDays(app, age.value.toInt())
+                        dataService.deleteReportsOlderThanDays(app, age.getValue().toInt())
                     }
                 }
             }

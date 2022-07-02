@@ -137,7 +137,7 @@ class UserEditor(userService: UserService, mailService: MailService?, private va
     private fun <T, V> exposeInput(field: ValidatedValue<T, *, V>) where T : Component, T : HasValue<ComponentValueChangeEvent<T, V>, V>, T : HasValidation {
         val input = ElementFactory.createInput()
         input.setAttribute("slot", "input")
-        field.element.appendChild(input)
+        field.getElement().appendChild(input)
     }
 
     companion object {
