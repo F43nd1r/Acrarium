@@ -1,6 +1,6 @@
 import com.faendir.gradle.createWithBomSupport
 plugins {
-    id("com.faendir.gradle.bom-version-catalog") version "1.2.0"
+    id("com.faendir.gradle.bom-version-catalog") version "1.2.1"
 }
 dependencyResolutionManagement {
     repositories {
