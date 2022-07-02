@@ -31,8 +31,8 @@ class QueryDslDataProvider<T>(private val fetchProvider: () -> JPAQuery<T>, priv
     constructor(fetchBase: JPAQuery<T>, countBase: JPAQuery<*>) : this(fetchBase::clone, countBase::clone)
 
     override fun fetchFromBackEnd(query: Query<T, QueryDslFilter>): Stream<T> {
-        return fetchProvider.invoke().also { query.filter.toNullable()?.apply(it) }.offset(query.offset.toLong()).limit(query.limit.toLong())
-                .also { q -> query.sortOrders?.filterIsInstance<QueryDslSortOrder>()?.fold(q) { orderBy(it.toSpecifier()) } }.fetch().stream()
+        return fetchProvider.invoke().also { query.filter.toNullable()?.apply(it) }.offset(query.offset.toLong()).limit(query.offset.toLong() + query.limit.toLong())
+            .also { q -> query.sortOrders?.filterIsInstance<QueryDslSortOrder>()?.fold(q) { orderBy(it.toSpecifier()) } }.fetch().stream()
     }
 
     override fun sizeInBackEnd(query: Query<T, QueryDslFilter>): Int {
