@@ -1,6 +1,27 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:base",
+    "group:monorepos",
+    "group:recommended",
+    "workarounds:all"
+  ],
+  "onboarding": false,
+  "dependencyDashboard": false,
+  "rangeStrategy": "pin",
+  "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": true,
+      "automergeType": "branch"
+    },
+    {
+      "matchPackagePatterns": ["^org\\.jetbrains\\.kotlin", "^com\\.google\\.devtools\\.ksp"],
+      "groupName": "kotlin"
+    }
   ]
 }
