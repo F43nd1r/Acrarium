@@ -17,24 +17,18 @@ package com.faendir.acra.ui.view.app.tabs
 
 import com.faendir.acra.model.App
 import com.faendir.acra.navigation.ParseAppParameter
+import com.faendir.acra.navigation.View
 import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.CardView
 import com.faendir.acra.ui.view.app.AppView
-import com.faendir.acra.ui.view.app.tabs.admincards.CustomColumnCard
-import com.faendir.acra.ui.view.app.tabs.admincards.DangerCard
-import com.faendir.acra.ui.view.app.tabs.admincards.ExportCard
-import com.faendir.acra.ui.view.app.tabs.admincards.NotificationCard
-import com.faendir.acra.ui.view.app.tabs.admincards.VersionCard
+import com.faendir.acra.ui.view.app.tabs.admincards.*
 import com.vaadin.flow.router.Route
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
 
 /**
  * @author lukas
  * @since 18.10.18
  */
-@UIScope
-@SpringComponent
+@View
 @Route(value = "admin", layout = AppView::class)
 class AdminTab(@ParseAppParameter app: App) : AppTab<CardView<AdminCard>>(app) {
     init {
