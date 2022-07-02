@@ -42,7 +42,7 @@ apexCharts = "com.github.appreciated:apexcharts:2.0.0.beta12"
 gridLayout = "com.github.appreciated:vaadin-css-grid:2.0.0"
 vaadin-paperMenuButton = "com.github.appreciated:vaadin-paper-menu-button:2.0.2"
 kotlin-coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2"
-kotlin-logging = "io.github.microutils:kotlin-logging-jvm:2.0.11"
+kotlin-logging = "io.github.microutils:kotlin-logging-jvm:2.1.23"
 spring-mockk = "com.ninja-squad:springmockk:3.1.1"
 strikt = "io.strikt:strikt-core:0.32.0"
 testContainers-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testContainers" }
