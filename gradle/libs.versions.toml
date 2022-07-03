@@ -8,7 +8,7 @@ vaadin-flow = "20.0.8"
 kotlinPoet = "1.12.0"
 docker-gradle = "0.34.0"
 autoService = "1.0.1"
-testContainers = "1.16.0"
+testContainers = "1.17.3"
 selenium = "3.141.59"
 
 [libraries]
