@@ -2,34 +2,17 @@ package com.faendir.acra.ui.view.error
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.navigation.View
-import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.ui.ext.SizeUnit
-import com.faendir.acra.ui.ext.flexLayout
-import com.faendir.acra.ui.ext.paragraph
-import com.faendir.acra.ui.ext.setMargin
-import com.faendir.acra.ui.ext.translatableButton
-import com.faendir.acra.ui.ext.translatableParagraph
+import com.faendir.acra.ui.ext.*
 import com.faendir.acra.ui.view.Overview
 import com.vaadin.flow.component.HasComponents
 import com.vaadin.flow.component.HasSize
-import com.vaadin.flow.component.html.Paragraph
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexLayout
-import com.vaadin.flow.router.BeforeEnterEvent
-import com.vaadin.flow.router.ErrorParameter
-import com.vaadin.flow.router.HasErrorParameter
-import com.vaadin.flow.router.NotFoundException
-import com.vaadin.flow.router.RouterLink
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
-import com.vaadin.flow.spring.router.SpringRouteNotFoundError
+import com.vaadin.flow.router.*
 
 @Suppress("LeakingThis")
 @View
-class ErrorView :
-		SpringRouteNotFoundError() /*need to extend RouteNotFoundError due to vaadin-spring bug:
-        TODO: Remove when https://github.com/vaadin/spring/issues/661 is fixed*/,
-        HasErrorParameter<NotFoundException>, HasComponents, HasSize {
+class ErrorView : RouteNotFoundError(), HasComponents, HasSize {
     init {
         setSizeFull()
         flexLayout {
