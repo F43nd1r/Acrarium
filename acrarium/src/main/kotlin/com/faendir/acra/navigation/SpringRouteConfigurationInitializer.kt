@@ -18,25 +18,30 @@ package com.faendir.acra.navigation
 
 import com.googlecode.gentyref.GenericTypeReflector
 import com.vaadin.flow.component.Component
+import com.vaadin.flow.di.Lookup
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.router.RouteAlias
 import com.vaadin.flow.router.RouteConfiguration
 import com.vaadin.flow.server.AmbiguousRouteConfigurationException
 import com.vaadin.flow.server.startup.AbstractRouteRegistryInitializer
-import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.web.context.WebApplicationContext
 import java.util.*
 import java.util.stream.Stream
 
 @Configuration
 class SpringRouteConfigurationInitializer : AbstractRouteRegistryInitializer() {
     @Bean
-    fun routeConfiguration(context: ApplicationContext): RouteConfiguration {
-        val vaadinContext = NonVaadinContext()
+    fun routeConfiguration(context: WebApplicationContext): RouteConfiguration {
+        val vaadinContext = NonVaadinContext(context)
+        val lookupInitializer = NonVaadinLookupInitializer()
+        lookupInitializer.initialize(vaadinContext, mutableMapOf()) { vaadinContext.setAttribute(Lookup::class.java, it) }
         val registry = SpringRouteRegistry(vaadinContext)
-        val routes = validateRouteClasses(vaadinContext, Stream.concat(Arrays.stream(context.getBeanNamesForAnnotation(Route::class.java)),
-                Arrays.stream(context.getBeanNamesForAnnotation(RouteAlias::class.java))).map { context.getType(it) })
+        val routes = validateRouteClasses(vaadinContext, Stream.concat(
+            Arrays.stream(context.getBeanNamesForAnnotation(Route::class.java)),
+            Arrays.stream(context.getBeanNamesForAnnotation(RouteAlias::class.java))
+        ).map { context.getType(it) })
         return RouteConfiguration.forRegistry(registry).also { it.update { setAnnotatedRoutes(it, routes) } }
     }
 
@@ -53,9 +58,11 @@ class SpringRouteConfigurationInitializer : AbstractRouteRegistryInitializer() {
         }
     }
 
-    private fun handleAmbiguousRoute(routeConfiguration: RouteConfiguration,
-                                     configuredNavigationTarget: Class<out Component?>,
-                                     navigationTarget: Class<out Component?>): Boolean {
+    private fun handleAmbiguousRoute(
+        routeConfiguration: RouteConfiguration,
+        configuredNavigationTarget: Class<out Component?>,
+        navigationTarget: Class<out Component?>
+    ): Boolean {
         return when {
             GenericTypeReflector.isSuperType(navigationTarget, configuredNavigationTarget) -> true
             GenericTypeReflector.isSuperType(configuredNavigationTarget, navigationTarget) -> {
@@ -63,6 +70,7 @@ class SpringRouteConfigurationInitializer : AbstractRouteRegistryInitializer() {
                 routeConfiguration.setAnnotatedRoute(navigationTarget)
                 true
             }
+
             else -> false
         }
     }
