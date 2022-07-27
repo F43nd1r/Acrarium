@@ -30,12 +30,7 @@ import com.faendir.acra.ui.component.dialog.confirmButtons
 import com.faendir.acra.ui.component.dialog.showFluentDialog
 import com.faendir.acra.ui.component.grid.ButtonRenderer
 import com.faendir.acra.ui.component.grid.column
-import com.faendir.acra.ui.ext.SizeUnit
-import com.faendir.acra.ui.ext.content
-import com.faendir.acra.ui.ext.queryDslAcrariumGrid
-import com.faendir.acra.ui.ext.setHeight
-import com.faendir.acra.ui.ext.setMinHeight
-import com.faendir.acra.ui.ext.translatableText
+import com.faendir.acra.ui.ext.*
 import com.vaadin.flow.component.icon.Icon
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.data.renderer.IconRenderer
@@ -59,7 +54,7 @@ class VersionCard(dataService: DataService, @ParseAppParameter app: App) : Admin
                     flexGrow = 1
                 }
                 column(IconRenderer({ Icon(if (it.mappings != null) VaadinIcon.CHECK else VaadinIcon.CLOSE) }, { "" })) {
-                    setSortable(QVersion.version.mappings.isNotNull)
+                    setSortable(QVersion.version.mappings)
                     setCaption(Messages.PROGUARD_MAPPINGS)
                 }
                 if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
