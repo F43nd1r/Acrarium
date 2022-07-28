@@ -3,10 +3,8 @@ package com.faendir.acra.security
 import com.faendir.acra.navigation.ParameterParser
 import org.springframework.beans.factory.BeanCreationNotAllowedException
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
-@Profile("!test")
 @Component
 class BeanSecurityEnforcer(private val parameterParser: ParameterParser) : InstantiationAwareBeanPostProcessor {
     override fun postProcessBeforeInstantiation(targetClass: Class<*>, beanName: String): Any? {

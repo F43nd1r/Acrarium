@@ -1,5 +1,6 @@
 package com.faendir.acra.navigation
 
+import com.faendir.acra.annotation.AcrariumTest
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
 import com.faendir.acra.util.PARAM_APP
 import com.faendir.acra.util.PARAM_BUG
@@ -11,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
+@AcrariumTest
 @SpringBootTest
 class SpringRouteConfigurationInitializerTest {
 
