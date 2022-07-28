@@ -1,1 +1,3 @@
-import '../../build/index';
+import './vaadin-featureflags.ts';
+
+import './index';

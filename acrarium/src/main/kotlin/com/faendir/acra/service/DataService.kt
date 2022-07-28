@@ -16,32 +16,12 @@
 package com.faendir.acra.service
 
 import com.faendir.acra.dataprovider.QueryDslDataProvider
-import com.faendir.acra.model.App
-import com.faendir.acra.model.Attachment
-import com.faendir.acra.model.Bug
-import com.faendir.acra.model.Device
-import com.faendir.acra.model.MailSettings
-import com.faendir.acra.model.QApp
-import com.faendir.acra.model.QAttachment
-import com.faendir.acra.model.QBug
-import com.faendir.acra.model.QDevice
-import com.faendir.acra.model.QMailSettings
-import com.faendir.acra.model.QReport
-import com.faendir.acra.model.QStacktrace
-import com.faendir.acra.model.QVersion
-import com.faendir.acra.model.Report
-import com.faendir.acra.model.Stacktrace
-import com.faendir.acra.model.User
-import com.faendir.acra.model.Version
+import com.faendir.acra.model.*
 import com.faendir.acra.model.view.Queries
 import com.faendir.acra.model.view.VApp
 import com.faendir.acra.model.view.VReport
 import com.faendir.acra.model.view.WhereExpressions.whereHasAppPermission
-import com.faendir.acra.util.ImportResult
-import com.faendir.acra.util.catching
-import com.faendir.acra.util.findInt
-import com.faendir.acra.util.findString
-import com.faendir.acra.util.tryOrNull
+import com.faendir.acra.util.*
 import com.querydsl.core.types.Expression
 import com.querydsl.core.types.Predicate
 import com.querydsl.core.types.dsl.ComparableExpressionBase
@@ -58,6 +38,7 @@ import org.ektorp.impl.StdCouchDbConnector
 import org.ektorp.impl.StdCouchDbInstance
 import org.hibernate.Hibernate
 import org.hibernate.engine.spi.SessionImplementor
+import org.intellij.lang.annotations.Language
 import org.json.JSONObject
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.access.prepost.PostAuthorize
@@ -332,7 +313,7 @@ class DataService(
 
     @Transactional
     @PreAuthorize("hasRole(T(com.faendir.acra.model.User\$Role).REPORTER)")
-    fun createNewReport(reporterUserName: String, content: String, attachments: List<MultipartFile>) {
+    fun createNewReport(reporterUserName: String, @Language("JSON") content: String, attachments: List<MultipartFile>) {
         JPAQuery<Any>(entityManager).from(QApp.app).where(QApp.app.reporter.username.eq(reporterUserName)).select(QApp.app).fetchOne()?.let { app ->
             val jsonObject = JSONObject(content)
             val trace = jsonObject.optString(ReportField.STACK_TRACE.name)

@@ -22,22 +22,16 @@ import com.faendir.acra.rest.RestReportInterface.Companion.REPORT_PATH
 import com.faendir.acra.service.DataService
 import com.faendir.acra.service.UserService
 import com.ninjasquad.springmockk.MockkBean
+import com.vaadin.flow.server.auth.ViewAccessChecker
 import com.vaadin.flow.spring.security.RequestUtil
 import com.vaadin.flow.spring.security.VaadinDefaultRequestCache
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.runs
-import io.mockk.verify
+import io.mockk.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.ComponentScan
-import org.springframework.http.MediaType.APPLICATION_JSON
-import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
-import org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE
-import org.springframework.http.MediaType.MULTIPART_FORM_DATA
+import org.springframework.http.MediaType.*
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.test.context.support.WithMockUser
@@ -57,8 +51,11 @@ class RestReportInterfaceTest {
     @MockkBean
     lateinit var requestCache: VaadinDefaultRequestCache
 
-    @MockkBean
+    @MockkBean(relaxed = true)
     lateinit var requestUtil: RequestUtil
+
+    @MockkBean(relaxed = true)
+    lateinit var viewAccessChecker: ViewAccessChecker
 
     @MockkBean
     lateinit var userService: UserService
