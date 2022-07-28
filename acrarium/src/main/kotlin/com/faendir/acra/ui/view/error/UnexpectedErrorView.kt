@@ -2,11 +2,7 @@ package com.faendir.acra.ui.view.error
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.navigation.View
-import com.faendir.acra.ui.ext.SizeUnit
-import com.faendir.acra.ui.ext.paragraph
-import com.faendir.acra.ui.ext.setMargin
-import com.faendir.acra.ui.ext.translatableButton
-import com.faendir.acra.ui.ext.translatableParagraph
+import com.faendir.acra.ui.ext.*
 import com.faendir.acra.ui.view.Overview
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexLayout
@@ -14,12 +10,14 @@ import com.vaadin.flow.router.BeforeEnterEvent
 import com.vaadin.flow.router.ErrorParameter
 import com.vaadin.flow.router.HasErrorParameter
 import com.vaadin.flow.router.RouterLink
+import com.vaadin.flow.server.auth.AnonymousAllowed
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
 @Suppress("LeakingThis")
 @View
+@AnonymousAllowed
 class UnexpectedErrorView : FlexLayout(), HasErrorParameter<Exception> {
     init {
         setSizeFull()

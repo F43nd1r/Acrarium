@@ -17,33 +17,24 @@
 package com.faendir.acra.ui.view.login
 
 import com.faendir.acra.i18n.Messages
+import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.model.User
 import com.faendir.acra.navigation.View
 import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.component.HasAcrariumTitle
-import com.faendir.acra.i18n.TranslatableText
-import com.faendir.acra.ui.ext.Align
-import com.faendir.acra.ui.ext.SizeUnit
-import com.faendir.acra.ui.ext.content
-import com.faendir.acra.ui.ext.flexLayout
-import com.faendir.acra.ui.ext.setAlignSelf
-import com.faendir.acra.ui.ext.setFlexGrow
-import com.faendir.acra.ui.ext.setPaddingBottom
-import com.faendir.acra.ui.ext.setPaddingTop
-import com.faendir.acra.ui.ext.setWidth
-import com.faendir.acra.ui.ext.translatableImage
-import com.faendir.acra.ui.ext.translatableLabel
-import com.faendir.acra.ui.ext.userEditor
+import com.faendir.acra.ui.ext.*
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.dependency.JsModule
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.router.Route
+import com.vaadin.flow.server.auth.AnonymousAllowed
 
 @JsModule("./styles/shared-styles.js")
 @View
 @Route(SetupView.ROUTE)
+@AnonymousAllowed
 class SetupView(userService: UserService) : Composite<FlexLayout>(), HasAcrariumTitle {
     companion object {
         const val ROUTE = "setup"

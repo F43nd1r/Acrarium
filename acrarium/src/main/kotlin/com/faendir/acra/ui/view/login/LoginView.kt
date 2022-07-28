@@ -21,13 +21,7 @@ import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.model.User
 import com.faendir.acra.navigation.View
 import com.faendir.acra.ui.component.HasAcrariumTitle
-import com.faendir.acra.ui.ext.SizeUnit
-import com.faendir.acra.ui.ext.content
-import com.faendir.acra.ui.ext.flexLayout
-import com.faendir.acra.ui.ext.loginForm
-import com.faendir.acra.ui.ext.setFlexGrow
-import com.faendir.acra.ui.ext.setWidth
-import com.faendir.acra.ui.ext.translatableImage
+import com.faendir.acra.ui.ext.*
 import com.faendir.acra.ui.view.login.LoginView.Companion.ROUTE
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.UI
@@ -38,6 +32,7 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.server.VaadinServletRequest
 import com.vaadin.flow.server.VaadinServletResponse
+import com.vaadin.flow.server.auth.AnonymousAllowed
 import com.vaadin.flow.spring.security.VaadinDefaultRequestCache
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.InsufficientAuthenticationException
@@ -45,10 +40,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.savedrequest.DefaultSavedRequest
+import java.util.*
 
 @JsModule("./styles/shared-styles.js")
 @View
 @Route(ROUTE)
+@AnonymousAllowed
 class LoginView(private val authenticationManager: AuthenticationManager, private val requestCache: VaadinDefaultRequestCache) : Composite<FlexLayout>(),
     HasAcrariumTitle {
     companion object {
@@ -84,7 +81,7 @@ class LoginView(private val authenticationManager: AuthenticationManager, privat
 
     private fun login(username: String, password: String): Boolean {
         return try {
-            val token = authenticationManager.authenticate(UsernamePasswordAuthenticationToken(username.toLowerCase(), password))
+            val token = authenticationManager.authenticate(UsernamePasswordAuthenticationToken(username.lowercase(Locale.getDefault()), password))
             if (!token.authorities.contains(User.Role.USER)) {
                 throw InsufficientAuthenticationException("Missing required role")
             }
@@ -100,7 +97,7 @@ class LoginView(private val authenticationManager: AuthenticationManager, privat
 
     private fun resolveRedirectUrl(): String {
         val savedRequest = requestCache.getRequest(VaadinServletRequest.getCurrent().httpServletRequest, VaadinServletResponse.getCurrent().httpServletResponse)
-        return (savedRequest as? DefaultSavedRequest)?.requestURI?.takeIf { it.isNotBlank() && !it.contains(LoginView.ROUTE) }?.removePrefix("/") ?: ""
+        return (savedRequest as? DefaultSavedRequest)?.requestURI?.takeIf { it.isNotBlank() && !it.contains(ROUTE) }?.removePrefix("/") ?: ""
     }
 
     override val title: TranslatableText = TranslatableText(Messages.LOGIN)

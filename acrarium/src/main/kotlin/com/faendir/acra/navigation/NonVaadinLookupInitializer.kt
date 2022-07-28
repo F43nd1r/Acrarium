@@ -24,12 +24,9 @@ import java.util.stream.Collectors
 import java.util.stream.Stream
 
 /**
- * Spring aware [LookupInitializer] implementation.
- *
- * @author Vaadin Ltd
- * @since
+ * this class needs to be abstract to not be picked up by vaadin
  */
-class NonVaadinLookupInitializer : LookupInitializer() {
+abstract class NonVaadinLookupInitializer : LookupInitializer() {
 
     private class SpringLookup(
         private val context: WebApplicationContext,

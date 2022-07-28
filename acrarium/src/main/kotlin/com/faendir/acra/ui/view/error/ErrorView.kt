@@ -9,9 +9,13 @@ import com.vaadin.flow.component.HasSize
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.router.*
+import com.vaadin.flow.router.internal.DefaultErrorHandler
+import com.vaadin.flow.server.auth.AnonymousAllowed
 
 @Suppress("LeakingThis")
 @View
+@DefaultErrorHandler
+@AnonymousAllowed
 class ErrorView : RouteNotFoundError(), HasComponents, HasSize {
     init {
         setSizeFull()

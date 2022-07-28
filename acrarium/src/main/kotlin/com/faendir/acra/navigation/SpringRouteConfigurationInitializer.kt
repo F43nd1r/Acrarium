@@ -35,7 +35,7 @@ class SpringRouteConfigurationInitializer : AbstractRouteRegistryInitializer() {
     @Bean
     fun routeConfiguration(context: WebApplicationContext): RouteConfiguration {
         val vaadinContext = NonVaadinContext(context)
-        val lookupInitializer = NonVaadinLookupInitializer()
+        val lookupInitializer = object : NonVaadinLookupInitializer() {}
         lookupInitializer.initialize(vaadinContext, mutableMapOf()) { vaadinContext.setAttribute(Lookup::class.java, it) }
         val registry = SpringRouteRegistry(vaadinContext)
         val routes = validateRouteClasses(vaadinContext, Stream.concat(

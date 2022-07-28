@@ -21,13 +21,21 @@ import com.vaadin.flow.server.UIInitListener
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.VaadinSessionScope
 import com.vaadin.flow.theme.lumo.Lumo
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.context.annotation.Lazy
+
+@SpringComponent
+class ThemeUIListener(private val uiThemeSetter: ObjectProvider<UIThemeSetter>) : UIInitListener {
+    override fun uiInit(event: UIInitEvent) {
+        uiThemeSetter.ifAvailable { it.uiInit(event) }
+    }
+}
 
 @VaadinSessionScope
 @SpringComponent
 @Lazy
-class ThemeUIListener(private val localSettings: LocalSettings) : UIInitListener {
-    override fun uiInit(event: UIInitEvent) {
+class UIThemeSetter(private val localSettings: LocalSettings) {
+    fun uiInit(event: UIInitEvent) {
         event.ui.element.setAttribute("theme", if (localSettings.darkTheme) Lumo.DARK else Lumo.LIGHT)
         event.ui.locale = localSettings.locale
     }
