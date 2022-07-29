@@ -8,7 +8,7 @@ databaseChangeLog {
     changeSet("1.0.0-create-version", Author.F43ND1R) {
         val codeColumn = "code"
         val appColumn = "app_id"
-        createTable("version") {
+        createTable(Table.VERSION) {
             column(name = "id", type = ColumnType.INT, autoIncrement = true) {
                 constraints(nullable = false, primaryKey = true, primaryKeyName = "PK_version")
             }
@@ -25,6 +25,6 @@ databaseChangeLog {
                 constraints(nullable = true)
             }
         }
-        addUniqueConstraint("version", "$codeColumn, $appColumn", constraintName = "UK_version")
+        addUniqueConstraint(Table.VERSION, "$codeColumn, $appColumn", constraintName = "UK_version")
     }
 }

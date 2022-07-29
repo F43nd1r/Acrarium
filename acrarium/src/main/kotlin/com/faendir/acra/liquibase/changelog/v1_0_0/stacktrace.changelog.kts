@@ -11,13 +11,13 @@ databaseChangeLog {
                 constraints(nullable = false, primaryKey = true, primaryKeyName = "PK_stacktrace")
             }
             column(name = "bug_id", type = ColumnType.INT) {
-                constraints(nullable = false, referencedTableName = "bug", referencedColumnNames = "id", deleteCascade = true, foreignKeyName = "FK_stacktrace_bug")
+                constraints(nullable = false, referencedTableName = Table.BUG, referencedColumnNames = "id", deleteCascade = true, foreignKeyName = "FK_stacktrace_bug")
             }
             column(name = "stacktrace", type = ColumnType.TEXT) {
                 constraints(nullable = false)
             }
             column(name = "version_id", type = ColumnType.INT) {
-                constraints(nullable = false, referencedTableName = "version", referencedColumnNames = "id", deleteCascade = true, foreignKeyName = "FK_stacktrace_version")
+                constraints(nullable = false, referencedTableName = Table.VERSION, referencedColumnNames = "id", deleteCascade = true, foreignKeyName = "FK_stacktrace_version")
             }
         }
     }

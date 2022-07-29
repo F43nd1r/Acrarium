@@ -6,7 +6,7 @@ import com.faendir.acra.liquibase.changelog.Table
 
 databaseChangeLog {
     changeSet("1.0.0-create-bug", Author.F43ND1R) {
-        createTable("bug") {
+        createTable(Table.BUG) {
             column(name = "id", type = ColumnType.INT, autoIncrement = true) {
                 constraints(nullable = false, primaryKey = true, primaryKeyName = "PK_bug")
             }
@@ -17,7 +17,7 @@ databaseChangeLog {
                 constraints(nullable = false, referencedTableName = Table.APP, referencedColumnNames = "id", deleteCascade = true, foreignKeyName = "FK_bug_app")
             }
             column(name = "solved_version", type = ColumnType.INT) {
-                constraints(nullable = true, referencedTableName = "version", referencedColumnNames = "id", foreignKeyName = "FK_bug_solved_version")
+                constraints(nullable = true, referencedTableName = Table.VERSION, referencedColumnNames = "id", foreignKeyName = "FK_bug_solved_version")
             }
         }
     }

@@ -29,7 +29,6 @@ import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.jpa.JPAExpressions
 import com.querydsl.jpa.impl.JPADeleteClause
 import com.querydsl.jpa.impl.JPAQuery
-import com.querydsl.jpa.impl.JPAUpdateClause
 import mu.KotlinLogging
 import org.acra.ReportField
 import org.ektorp.CouchDbConnector
@@ -125,7 +124,6 @@ class DataService(
 
     @Transactional
     fun deleteVersion(version: Version) {
-        JPAUpdateClause(entityManager, QBug.bug).set(QBug.bug.solvedVersion, null as Version?).where(QBug.bug.solvedVersion.eq(version))
         delete(version)
         applicationEventPublisher.publishEvent(ReportsDeleteEvent(this))
     }
