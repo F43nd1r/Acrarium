@@ -16,12 +16,7 @@
 package com.faendir.acra.ui.view.app.tabs
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.model.App
-import com.faendir.acra.model.Permission
-import com.faendir.acra.model.QBug
-import com.faendir.acra.model.QReport
-import com.faendir.acra.model.QStacktrace
-import com.faendir.acra.model.Version
+import com.faendir.acra.model.*
 import com.faendir.acra.model.view.VBug
 import com.faendir.acra.navigation.ParseAppParameter
 import com.faendir.acra.navigation.View
@@ -109,7 +104,7 @@ class BugTab(
                 }
                 column({ it.userCount }) {
                     setSortable(QReport.report.installationId.countDistinct())
-                    setCaption(Messages.AFFECTED_USERS)
+                    setCaption(Messages.AFFECTED_INSTALLATIONS)
                 }
                 column({ it.bug.title }) {
                     setSortableAndFilterable(QBug.bug.title, Messages.TITLE)
@@ -127,9 +122,9 @@ class BugTab(
                         addValueChangeListener { e: ComponentValueChangeEvent<Select<Version?>?, Version?> ->
                             dataService.setBugSolved(bug.bug, e.value)
                             style["--select-background-color"] =
-                                if (bug.highestVersionCode > bug.bug.solvedVersion?.code ?: Int.MAX_VALUE) "var(--lumo-error-color-50pct)" else null
+                                if (bug.highestVersionCode > (bug.bug.solvedVersion?.code ?: Int.MAX_VALUE)) "var(--lumo-error-color-50pct)" else null
                         }
-                        if (bug.highestVersionCode > bug.bug.solvedVersion?.code ?: Int.MAX_VALUE) {
+                        if (bug.highestVersionCode > (bug.bug.solvedVersion?.code ?: Int.MAX_VALUE)) {
                             style["--select-background-color"] = "var(--lumo-error-color-50pct)"
                         }
                     }

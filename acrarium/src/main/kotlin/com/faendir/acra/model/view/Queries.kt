@@ -15,12 +15,7 @@
  */
 package com.faendir.acra.model.view
 
-import com.faendir.acra.model.App
-import com.faendir.acra.model.QApp
-import com.faendir.acra.model.QBug
-import com.faendir.acra.model.QDevice
-import com.faendir.acra.model.QReport
-import com.faendir.acra.model.QStacktrace
+import com.faendir.acra.model.*
 import com.querydsl.core.types.Expression
 import com.querydsl.core.types.Projections
 import com.querydsl.core.types.dsl.Expressions
@@ -63,6 +58,9 @@ object Queries {
         .join(QStacktrace.stacktrace1.bug, QBug.bug).fetchJoin()
         .join(QBug.bug.app, QApp.app).fetchJoin()
         .leftJoin(QDevice.device1).on(QReport.report.phoneModel.eq(QDevice.device1.model).and(QReport.report.device.eq(QDevice.device1.device)))
+    private val V_INSTALLATION = JPAQuery<Any>().from(QReport.report)
+        .select(QVInstallation(QReport.report.installationId, QReport.report.count(), QReport.report.date.max()))
+        .groupBy(QReport.report.installationId)
 
 
     fun selectVBug(entityManager: EntityManager): JPAQuery<VBug> {
@@ -89,6 +87,8 @@ object Queries {
             )
         )
     }
+
+    fun selectVInstallation(entityManager: EntityManager) = V_INSTALLATION.clone(entityManager)
 
     fun customReportColumnExpression(customColumn: String): StringTemplate = Expressions.stringTemplate(
         "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(content, {0})), '')",

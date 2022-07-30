@@ -1,4 +1,4 @@
-package com.faendir.acra.ui.component.grid;
+package com.faendir.acra.ui.component.grid
 
 import com.faendir.acra.dataprovider.QueryDslDataProvider
 import com.faendir.acra.settings.GridSettings
@@ -22,22 +22,25 @@ class AcrariumGridView<T>(
         addOnLayoutChangedListener { gridSettings.set(it) }
     }
     val header: HasComponents
+    private val filterMenu = GridFilterMenu(grid).apply { content.setMarginRight(5.0, com.faendir.acra.ui.ext.SizeUnit.PIXEL) }
+    private val columnMenu = GridColumnMenu(grid)
 
     init {
-        header = FlexLayout()
+        header = FlexLayout(
+            Div().apply { setFlexGrow(1) }, //spacer
+            filterMenu,
+            columnMenu
+        )
         header.setWidthFull()
         add(header, grid)
         setFlexGrow(1.0, grid)
         setSizeFull()
+        updateHeader()
     }
 
     internal fun updateHeader() {
-        header.removeAll()
-        header.add(
-            Div().apply { setFlexGrow(1) }, //spacer
-            GridFilterMenu(grid).apply { content.setMarginRight(5.0, com.faendir.acra.ui.ext.SizeUnit.PIXEL) },
-            GridColumnMenu(grid)
-        )
+        filterMenu.update()
+        columnMenu.update()
     }
 }
 

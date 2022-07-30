@@ -8,21 +8,28 @@ import com.vaadin.flow.component.listbox.MultiSelectListBox
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.data.renderer.TextRenderer
 
-class GridColumnMenu(grid: QueryDslAcrariumGrid<*>) : PopupButton(VaadinIcon.WRENCH) {
+class GridColumnMenu(private val grid: QueryDslAcrariumGrid<*>) : PopupButton(VaadinIcon.WRENCH) {
+    private val content = MultiSelectListBox<QueryDslAcrariumColumn<*>>().apply {
+        setRenderer(TextRenderer { it.caption?.translate() })
+        addSelectionListener { event ->
+            if (event.isFromClient) {
+                event.removedSelection.forEach { it.isVisible = false }
+                event.addedSelection.forEach { it.isVisible = true }
+                grid.recalculateColumnWidths()
+            }
+        }
+    }
 
     init {
-        val content = MultiSelectListBox<QueryDslAcrariumColumn<*>>()
-        content.setRenderer(TextRenderer{ it.caption?.translate() })
-        content.addSelectionListener { event ->
-            event.addedSelection.forEach { it.isVisible = true }
-            event.removedSelection.forEach { it.isVisible = false }
-            grid.recalculateColumnWidths()
-        }
+        update()
+        add(VerticalLayout(Translatable.createLabel(Messages.EDIT_COLUMNS).with {
+            style.set("font-weight", "bold")
+        }, content))
+    }
+
+    fun update() {
         val items = grid.acrariumColumns.filter { it.caption != null }
         content.setItems(items)
         content.select(items.filter { it.isVisible })
-        add(VerticalLayout(Translatable.createLabel(Messages.EDIT_COLUMNS).with {
-            style.set("font-weight","bold")
-        }, content))
     }
 }

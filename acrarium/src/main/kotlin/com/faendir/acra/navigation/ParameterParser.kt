@@ -1,10 +1,7 @@
 package com.faendir.acra.navigation
 
 import com.faendir.acra.service.DataService
-import com.faendir.acra.util.PARAM_APP
-import com.faendir.acra.util.PARAM_BUG
-import com.faendir.acra.util.PARAM_REPORT
-import com.faendir.acra.util.toNullable
+import com.faendir.acra.util.*
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.router.BeforeEnterEvent
 import com.vaadin.flow.router.BeforeEnterListener
@@ -34,6 +31,12 @@ annotation class ParseBugParameter
 @Value("#{@parameterParser.parseReport()}")
 annotation class ParseReportParameter
 
+@Inherited
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Value("#{@parameterParser.parseInstallation()}")
+annotation class ParseInstallationParameter
+
 
 @Component
 @ListenerPriority(1000)
@@ -52,6 +55,8 @@ class ParameterParser(private val dataService: DataService) : UIInitListener, Be
     fun parseBug() = parse(PARAM_BUG) { findBug(it.toInt()) }
 
     fun parseReport() = parse(PARAM_REPORT, DataService::findReport)
+
+    fun parseInstallation() = parse(PARAM_INSTALLATION) { it }
 
     fun <T> parse(param: String, parse: DataService.(String) -> T?): T {
         return parse(dataService, cache[UI.getCurrent().uiId]?.get(param)?.toNullable() ?: throw IllegalArgumentException("Parameter $param not present"))

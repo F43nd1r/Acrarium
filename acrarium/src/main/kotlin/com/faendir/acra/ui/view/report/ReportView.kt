@@ -25,24 +25,7 @@ import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.tabs.HasRoute
 import com.faendir.acra.ui.component.tabs.Path
-import com.faendir.acra.ui.ext.Align
-import com.faendir.acra.ui.ext.JustifyItems
-import com.faendir.acra.ui.ext.SizeUnit
-import com.faendir.acra.ui.ext.anchor
-import com.faendir.acra.ui.ext.card
-import com.faendir.acra.ui.ext.content
-import com.faendir.acra.ui.ext.div
-import com.faendir.acra.ui.ext.forEach
-import com.faendir.acra.ui.ext.gridLayout
-import com.faendir.acra.ui.ext.honorWhitespaces
-import com.faendir.acra.ui.ext.installationView
-import com.faendir.acra.ui.ext.label
-import com.faendir.acra.ui.ext.secondary
-import com.faendir.acra.ui.ext.setAlignItems
-import com.faendir.acra.ui.ext.setAlignSelf
-import com.faendir.acra.ui.ext.setColumnGap
-import com.faendir.acra.ui.ext.setJustifyItems
-import com.faendir.acra.ui.ext.translatableLabel
+import com.faendir.acra.ui.ext.*
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
 import com.faendir.acra.ui.view.main.MainView
 import com.faendir.acra.util.PARAM_APP
@@ -85,7 +68,7 @@ class ReportView(private val dataService: DataService, avatarService: AvatarServ
                     label(report.stacktrace.version.name)
                     translatableLabel(Messages.DATE) { secondary() }
                     label(prettyTime.formatUnrounded(report.date.toLocalDateTime()))
-                    translatableLabel(Messages.USER) {
+                    translatableLabel(Messages.INSTALLATION) {
                         secondary()
                         setAlignSelf(Align.CENTER)
                     }

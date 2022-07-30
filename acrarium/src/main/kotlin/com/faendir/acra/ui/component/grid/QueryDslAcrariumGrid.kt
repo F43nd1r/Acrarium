@@ -51,7 +51,7 @@ class QueryDslAcrariumGrid<T>(val dataProvider: QueryDslDataProvider<T>, var gri
     fun loadLayout() {
         gridSettings?.apply {
             val orderedColumns = columnOrder.mapNotNull { key -> acrariumColumns.find { it.key == key } }
-            val unorderedColumns = acrariumColumns - orderedColumns
+            val unorderedColumns = acrariumColumns - orderedColumns.toSet()
             setColumnOrder(orderedColumns + unorderedColumns)
             hiddenColumns.forEach { key -> acrariumColumns.find { it.key == key }?.isVisible = false }
         }

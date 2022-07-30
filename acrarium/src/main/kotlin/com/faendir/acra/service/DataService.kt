@@ -95,6 +95,13 @@ class DataService(
             .where(QApp.app.eq(app))
     )
 
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun getReportProvider(app: App, installationId: String) = QueryDslDataProvider(
+        Queries.selectVReport(entityManager, app)
+            .join(QStacktrace.stacktrace1.version).fetchJoin()
+            .where(QApp.app.eq(app).and(QReport.report.installationId.eq(installationId)))
+    )
+
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#stacktrace.bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun getReportIds(stacktrace: Stacktrace): List<String> =
         JPAQuery<Any>(entityManager).from(QReport.report).where(QReport.report.stacktrace.eq(stacktrace)).select(QReport.report.id).fetch()
@@ -110,6 +117,9 @@ class DataService(
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun getVersionProvider(app: App) =
         QueryDslDataProvider(JPAQuery<Any>(entityManager).from(QVersion.version).fetchAll().where(QVersion.version.app.eq(app)).select(QVersion.version))
+
+    @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
+    fun getInstallationProvider(app: App) = QueryDslDataProvider(Queries.selectVInstallation(entityManager).where(QReport.report.stacktrace.bug.app.eq(app)))
 
     @Transactional
     fun <T> store(entity: T): T = entityManager.merge(entity)

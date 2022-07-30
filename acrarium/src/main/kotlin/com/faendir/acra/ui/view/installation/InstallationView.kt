@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.view.app
+package com.faendir.acra.ui.view.installation
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.ui.component.tabs.TabView
-import com.faendir.acra.ui.view.app.tabs.*
+import com.faendir.acra.ui.view.installation.tabs.ReportTab
+import com.faendir.acra.ui.view.installation.tabs.StatisticsTab
 import com.faendir.acra.ui.view.main.MainView
 import com.faendir.acra.util.PARAM_APP
+import com.faendir.acra.util.PARAM_INSTALLATION
 import com.vaadin.flow.router.ParentLayout
 import com.vaadin.flow.router.RoutePrefix
 import com.vaadin.flow.spring.annotation.SpringComponent
@@ -27,16 +29,13 @@ import com.vaadin.flow.spring.annotation.UIScope
 
 /**
  * @author lukas
- * @since 13.07.18
+ * @since 08.09.18
  */
 @UIScope
 @SpringComponent
-@RoutePrefix("app/:$PARAM_APP")
+@RoutePrefix("app/:${PARAM_APP}/installation/:$PARAM_INSTALLATION")
 @ParentLayout(MainView::class)
-class AppView : TabView(
-    TabInfo(BugTab::class, Messages.BUGS),
+class InstallationView : TabView(
     TabInfo(ReportTab::class, Messages.REPORTS),
-    TabInfo(InstallationTab::class, Messages.INSTALLATIONS),
     TabInfo(StatisticsTab::class, Messages.STATISTICS),
-    TabInfo(AdminTab::class, Messages.ADMIN)
 )

@@ -22,11 +22,7 @@ import com.faendir.acra.service.UserService
 import com.querydsl.core.types.dsl.BooleanExpression
 import org.json.JSONObject
 import proguard.retrace.ReTrace
-import java.io.IOException
-import java.io.LineNumberReader
-import java.io.PrintWriter
-import java.io.StringReader
-import java.io.StringWriter
+import java.io.*
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -110,6 +106,7 @@ inline fun <T : Any, R> T.equalsBy(other: Any?, id: T.() -> R): Boolean = when {
 
 const val PARAM_APP = "app"
 const val PARAM_BUG = "bug"
+const val PARAM_INSTALLATION = "installation"
 const val PARAM_REPORT = "report"
 
 infix fun BooleanExpression.and(other: BooleanExpression): BooleanExpression = and(other)

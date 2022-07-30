@@ -6,14 +6,18 @@ import com.faendir.acra.ui.component.Translatable
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 
-class GridFilterMenu(grid: QueryDslAcrariumGrid<*>) : PopupButton(VaadinIcon.FILTER) {
+class GridFilterMenu(private val grid: QueryDslAcrariumGrid<*>) : PopupButton(VaadinIcon.FILTER) {
+    private val content = VerticalLayout().also { add(it) }
 
     init {
-        val content = VerticalLayout()
+        update()
+    }
+
+    fun update() {
+        content.removeAll()
         content.add(Translatable.createLabel(Messages.FILTER).with {
             style.set("font-weight", "bold")
         })
         content.add(*grid.acrariumColumns.mapNotNull { it.filterComponent }.toTypedArray())
-        add(content)
     }
 }

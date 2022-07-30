@@ -15,6 +15,7 @@
  */
 package com.faendir.acra.service
 
+import com.faendir.acra.model.view.VInstallation
 import com.faendir.acra.model.view.VReport
 import com.talanlabs.avatargenerator.Avatar
 import com.talanlabs.avatargenerator.IdenticonAvatar
@@ -41,6 +42,8 @@ class AvatarService {
     private lateinit var self: AvatarService
 
     fun getAvatar(report: VReport): Component = Image(self.getAvatar(report.installationId), report.installationId)
+
+    fun getAvatar(installation: VInstallation): Component = Image(self.getAvatar(installation.id), installation.id)
 
     @Cacheable("avatars")
     fun getAvatar(installationId: String): StreamResource {

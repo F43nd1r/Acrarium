@@ -52,6 +52,8 @@ class LocalSettings(private val objectMapper: ObjectMapper) : Serializable {
 
     var reportGridSettings: GridSettings? by jsonCookie()
 
+    var installationGridSettings: GridSettings? by jsonCookie()
+
     private class Cookie<T>(
         private val fromString: LocalSettings.(String?) -> T,
         private val toString: LocalSettings.(T) -> String

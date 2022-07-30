@@ -13,30 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.view.app
+package com.faendir.acra.ui.view.installation.tabs
 
-import com.faendir.acra.i18n.Messages
+import com.faendir.acra.model.App
 import com.faendir.acra.ui.component.tabs.TabView
-import com.faendir.acra.ui.view.app.tabs.*
-import com.faendir.acra.ui.view.main.MainView
+import com.faendir.acra.ui.view.app.tabs.InstallationTab
 import com.faendir.acra.util.PARAM_APP
-import com.vaadin.flow.router.ParentLayout
-import com.vaadin.flow.router.RoutePrefix
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
+import com.faendir.acra.util.PARAM_INSTALLATION
+import com.vaadin.flow.component.Component
 
 /**
  * @author lukas
- * @since 13.07.18
+ * @since 19.11.18
  */
-@UIScope
-@SpringComponent
-@RoutePrefix("app/:$PARAM_APP")
-@ParentLayout(MainView::class)
-class AppView : TabView(
-    TabInfo(BugTab::class, Messages.BUGS),
-    TabInfo(ReportTab::class, Messages.REPORTS),
-    TabInfo(InstallationTab::class, Messages.INSTALLATIONS),
-    TabInfo(StatisticsTab::class, Messages.STATISTICS),
-    TabInfo(AdminTab::class, Messages.ADMIN)
-)
+
+abstract class InstallationTab<T : Component>(app: App, installationId: String) : TabView.TabContent<T>() {
+    override val logicalParent = InstallationTab::class
+    override val params = getNavigationParams(app, installationId)
+    override val name = installationId
+
+    companion object {
+        fun getNavigationParams(app: App, installationId: String) = mapOf(PARAM_APP to app.id.toString(), PARAM_INSTALLATION to installationId)
+    }
+}

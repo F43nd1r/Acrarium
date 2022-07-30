@@ -58,9 +58,13 @@ class ReportList(
     override fun initContent(): AcrariumGridView<VReport> {
         return AcrariumGridView(dataProvider, localSettings::reportGridSettings) {
             setSelectionMode(Grid.SelectionMode.NONE)
-            addColumn(ComponentRenderer { report -> avatarService.getAvatar(report) }).setSortable(QReport.report.installationId)
-                .setCaption(Messages.USER)
-                .setWidth("50px").setAutoWidth(false)
+            column(ComponentRenderer { report -> avatarService.getAvatar(report) }) {
+                setSortable(QReport.report.installationId)
+                setFilterable(QReport.report.installationId, Messages.INSTALLATION)
+                setCaption(Messages.INSTALLATION)
+                width = "50px"
+                isAutoWidth = false
+            }
             val dateColumn = addColumn(TimeSpanRenderer { it.date }).setSortable(QReport.report.date).setCaption(Messages.DATE)
             sort(GridSortOrder.desc(dateColumn).build())
             addColumn { it.stacktrace.version.name }.setSortable(QReport.report.stacktrace.version.code)
@@ -74,7 +78,7 @@ class ReportList(
             addColumn { it.stacktrace.stacktrace.split("\n".toRegex(), 2).toTypedArray()[0] }.setSortableAndFilterable(
                 QReport.report.stacktrace.stacktrace,
                 Messages.STACKTRACE
-            ).setCaption(Messages.STACKTRACE).setAutoWidth(false).setFlexGrow(1)
+            ).setCaption(Messages.STACKTRACE).setAutoWidth(false).flexGrow = 1
             addColumn(ComponentRenderer { report -> Icon(if (report.isSilent) VaadinIcon.CHECK else VaadinIcon.CLOSE) })
                 .setSortable(QReport.report.isSilent)
                 .setFilterable(QReport.report.isSilent.eq(false), false, Messages.HIDE_SILENT)
