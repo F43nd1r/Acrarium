@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.kotlin.logging)
     implementation(libs.autoService.annotations)
     kapt(libs.autoService.processor)
+    implementation(libs.springdoc)
     developmentOnly(libs.orgSpringframeworkBoot.springBootDevtools)
     testImplementation(libs.orgSpringframeworkBoot.springBootStarterTest)
     testImplementation(libs.orgSpringframeworkSecurity.springSecurityTest)
