@@ -29,7 +29,7 @@ import javax.persistence.EntityManager
  */
 object Queries {
     private val V_BUG = JPAQuery<Any>().from(QBug.bug)
-        .leftJoin(QStacktrace.stacktrace1)
+        .innerJoin(QStacktrace.stacktrace1)
         .on(QStacktrace.stacktrace1.bug.eq(QBug.bug))
         .leftJoin(QReport.report)
         .on(QReport.report.stacktrace.eq(QStacktrace.stacktrace1))
