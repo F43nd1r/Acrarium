@@ -110,8 +110,8 @@ class SecurityConfiguration(private val userService: UserService) : WebSecurityC
                 .headers().disable()
                 .anonymous().disable()
                 .exceptionHandling().authenticationEntryPoint(BasicAuthenticationEntryPoint()).and()
-                .requestMatcher(EndpointRequest.toAnyEndpoint()).authorizeRequests { it.anyRequest().hasRole(User.Role.API.name) }
-                .httpBasic()
+                .requestMatchers().requestMatchers(EndpointRequest.toAnyEndpoint()).regexMatchers(".*/swagger-ui/.*").and()
+                .authorizeRequests { it.anyRequest().hasRole(User.Role.API.name) }.httpBasic()
         }
     }
 
