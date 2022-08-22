@@ -52,4 +52,4 @@ selenium-chrome = { module = "org.seleniumhq.selenium:selenium-chrome-driver", v
 selenium-firefox = { module = "org.seleniumhq.selenium:selenium-firefox-driver", version.ref = "selenium" }
 mariadb4j = "org.craftercms.mariaDB4j:mariaDB4j-springboot:2.5.3"
 mariadbClient = "org.mariadb.jdbc:mariadb-java-client:3.0.7"
-springdoc = "org.springdoc:springdoc-openapi-ui:1.6.10"
+springdoc = "org.springdoc:springdoc-openapi-ui:1.6.11"
