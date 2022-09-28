@@ -9,7 +9,7 @@ kotlinPoet = "1.12.0"
 docker-gradle = "0.34.0"
 autoService = "1.0.1"
 testContainers = "1.17.3"
-selenium = "4.4.0"
+selenium = "4.5.0"
 
 [libraries]
 kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
