@@ -36,22 +36,27 @@ import javax.persistence.ManyToOne
  * @since 08.12.2017
  */
 @Entity
-class Bug(@OnDelete(action = OnDeleteAction.CASCADE)
-          @ManyToOne(cascade = [CascadeType.REFRESH], optional = false, fetch = FetchType.LAZY)
-          @JsonIdentityReference(alwaysAsId = true)
-          @JsonIdentityInfo(generator = PropertyGenerator::class, property = "id")
-          val app: App,
-          stacktrace: String) {
-    @Type(type = "text")
-    var title: String = stacktrace.split("\n".toRegex(), 2).toTypedArray()[0]
-
-    @ManyToOne(cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY)
-    @JoinColumn(name = "solved_version")
-    var solvedVersion: Version? = null
-
+class Bug(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id = 0
+    val id: Int,
+    @Type(type = "text")
+    var title: String,
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @ManyToOne(
+        cascade = [CascadeType.REFRESH],
+        optional = false,
+        fetch = FetchType.LAZY
+    )
+    @JsonIdentityReference(alwaysAsId = true)
+    @JsonIdentityInfo(generator = PropertyGenerator::class, property = "id")
+    val app: App,
+    @ManyToOne(cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY)
+    @JoinColumn(name = "solved_version")
+    var solvedVersion: Version?
+) {
+
+    constructor(app: App, stacktrace: String) : this(0, stacktrace.split("\n".toRegex(), 2).toTypedArray()[0], app, null)
 
     override fun equals(other: Any?) = equalsBy(other, Bug::id)
 

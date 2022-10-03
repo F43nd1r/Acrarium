@@ -38,6 +38,6 @@ class ReportTab(
 ) : InstallationTab<ReportList>(app, installationId) {
 
     override fun initContent(): ReportList {
-        return reportListFactory.create(app, dataService.getReportProvider(app, installationId)) { dataService.deleteReport(it) }
+        return reportListFactory.create(app, dataService.getReportProvider(app, installationId))
     }
 }

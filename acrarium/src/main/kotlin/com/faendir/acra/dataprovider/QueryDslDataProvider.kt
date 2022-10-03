@@ -17,26 +17,37 @@ package com.faendir.acra.dataprovider
 
 import com.faendir.acra.util.fold
 import com.faendir.acra.util.toNullable
+import com.querydsl.core.types.Expression
+import com.querydsl.core.types.Order
+import com.querydsl.core.types.OrderSpecifier
+import com.querydsl.core.types.dsl.BooleanExpression
+import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.jpa.impl.JPAQuery
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider
 import com.vaadin.flow.data.provider.Query
+import com.vaadin.flow.data.provider.SortDirection
 import java.util.stream.Stream
 
 /**
  * @author lukas
  * @since 30.05.18
  */
-class QueryDslDataProvider<T>(private val fetchProvider: () -> JPAQuery<T>, private val countProvider: () -> JPAQuery<*>) : AbstractBackEndDataProvider<T, QueryDslFilter>() {
+class QueryDslDataProvider<T : Any>(private val fetchProvider: () -> JPAQuery<T>, private val countProvider: () -> JPAQuery<*>) :
+    AcrariumDataProvider<T, BooleanExpression, Expression<out Comparable<*>>>() {
     constructor(base: JPAQuery<T>) : this(base, base)
     constructor(fetchBase: JPAQuery<T>, countBase: JPAQuery<*>) : this(fetchBase::clone, countBase::clone)
 
-    override fun fetchFromBackEnd(query: Query<T, QueryDslFilter>): Stream<T> {
-        return fetchProvider.invoke().also { query.filter.toNullable()?.apply(it) }.offset(query.offset.toLong()).limit(query.limit.toLong())
-                .also { q -> query.sortOrders?.filterIsInstance<QueryDslSortOrder>()?.fold(q) { orderBy(it.toSpecifier()) } }.fetch().stream()
-    }
+    override fun fetch(filters: Set<BooleanExpression>, sort: List<AcrariumSort<Expression<out Comparable<*>>>>, offset: Int, limit: Int): Stream<T> =
+        fetchProvider.invoke()
+            .where(*filters.toTypedArray())
+            .offset(offset.toLong())
+            .limit(limit.toLong())
+            .orderBy(*sort.map { it.toSpecifier() }.toTypedArray())
+            .fetch()
+            .stream()
 
-    override fun sizeInBackEnd(query: Query<T, QueryDslFilter>): Int {
-        return Math.toIntExact(countProvider.invoke().also { query.filter.toNullable()?.apply(it) }.fetchCount())
-    }
+    override fun size(filters: Set<BooleanExpression>): Int = Math.toIntExact(countProvider.invoke().where(*filters.toTypedArray()).fetchCount())
+
+    private fun AcrariumSort<Expression<out Comparable<*>>>.toSpecifier() = OrderSpecifier(if (direction == SortDirection.ASCENDING) Order.ASC else Order.DESC, sort)
 }
 

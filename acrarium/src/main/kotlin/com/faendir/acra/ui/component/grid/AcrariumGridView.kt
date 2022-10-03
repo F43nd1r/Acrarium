@@ -1,36 +1,34 @@
 package com.faendir.acra.ui.component.grid
 
-import com.faendir.acra.dataprovider.QueryDslDataProvider
 import com.faendir.acra.settings.GridSettings
 import com.faendir.acra.ui.ext.setFlexGrow
 import com.faendir.acra.ui.ext.setMarginRight
-import com.vaadin.flow.component.HasComponents
 import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import kotlin.reflect.KMutableProperty0
 
-class AcrariumGridView<T>(
-    dataProvider: QueryDslDataProvider<T>,
+open class AcrariumGridView<T : Any, F : Any, S : Any, C : FilterableSortableLocalizedColumn<T, F, S>, G : LayoutPersistingFilterableGrid<T, F, S, C>>(
+    layoutPersistingFilterableGrid: G,
     gridSettings: KMutableProperty0<GridSettings?>,
-    initializer: QueryDslAcrariumGrid<T>.() -> Unit = {}
+    initializer: G.() -> Unit = {}
 ) :
     VerticalLayout() {
-    val grid: QueryDslAcrariumGrid<T> = QueryDslAcrariumGrid(dataProvider, gridSettings.get()).apply {
+
+    val grid: G = layoutPersistingFilterableGrid.apply {
         initializer()
         loadLayout()
         addOnLayoutChangedListener { gridSettings.set(it) }
     }
-    val header: HasComponents
     private val filterMenu = GridFilterMenu(grid).apply { content.setMarginRight(5.0, com.faendir.acra.ui.ext.SizeUnit.PIXEL) }
     private val columnMenu = GridColumnMenu(grid)
+    val header = FlexLayout(
+        Div().apply { setFlexGrow(1) }, //spacer
+        filterMenu,
+        columnMenu
+    )
 
     init {
-        header = FlexLayout(
-            Div().apply { setFlexGrow(1) }, //spacer
-            filterMenu,
-            columnMenu
-        )
         header.setWidthFull()
         add(header, grid)
         setFlexGrow(1.0, grid)
@@ -44,7 +42,7 @@ class AcrariumGridView<T>(
     }
 }
 
-fun <T> AcrariumGridView<T>.grid(initializer: QueryDslAcrariumGrid<T>.() -> Unit) {
+fun <T : Any, F : Any, S : Any, C : FilterableSortableLocalizedColumn<T, F, S>, G : LayoutPersistingFilterableGrid<T, F, S, C>> AcrariumGridView<T, F, S, C, G>.grid(initializer: G.() -> Unit) {
     grid.apply(initializer)
     updateHeader()
 }

@@ -16,6 +16,7 @@
 
 package com.faendir.acra.dataprovider
 
+import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.EntityPathBase
 import com.querydsl.core.types.dsl.StringPath
 import com.querydsl.jpa.impl.JPAQuery
@@ -33,7 +34,7 @@ import strikt.assertions.isEqualTo
 internal class QueryDslDataProviderTest {
 
     lateinit var jpaQuery: JPAQuery<TestDTO>
-    lateinit var dataProvider: QueryDslDataProvider<TestDTO>
+    private lateinit var dataProvider: QueryDslDataProvider<TestDTO>
 
     @BeforeEach
     fun setUp() {
@@ -48,16 +49,16 @@ internal class QueryDslDataProviderTest {
 
     @Test
     internal fun sort() {
-        dataProvider.fetch(Query(0, 10, mutableListOf(QueryDslSortOrder(QTestDTO.test.testValue, SortDirection.DESCENDING)) as List<QuerySortOrder>, null, null))
+        dataProvider.fetch(Query(0, 10, mutableListOf(AcrariumSort(QTestDTO.test.testValue, SortDirection.DESCENDING)) as List<QuerySortOrder>, null, null))
         verify { jpaQuery.orderBy(match { it.target == QTestDTO.test.testValue && !it.isAscending }) }
     }
 
     @Test
     internal fun filter() {
-        val filter = mockk<QueryDslFilter>(relaxed = true)
-        every { filter.apply(jpaQuery) } returns jpaQuery
+        val filter = mockk<() -> List<BooleanExpression>>(relaxed = true)
+        every { filter.invoke() } returns emptyList()
         dataProvider.fetch(Query(0, 10, null, null, filter))
-        verify { filter.apply(any<JPAQuery<*>>()) }
+        verify { filter.invoke() }
     }
 
     @Test

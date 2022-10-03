@@ -83,7 +83,7 @@ class RestApiInterface(private val dataService: DataService) {
         dataService.storeVersion(dataService.findVersion(app, code)?.also { version ->
             name?.let { it -> version.name = it }
             version.mappings = content
-        } ?: Version(app, code, name ?: "N/A", content))
+        } ?: Version(code = code, name = name ?: "N/A", app = app, mappings = content))
         return ResponseEntity.ok().build<Any>()
     }
 

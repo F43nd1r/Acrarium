@@ -15,28 +15,35 @@
  */
 package com.faendir.acra.ui.view.app.tabs
 
+import com.faendir.acra.dataprovider.BugDataProvider
+import com.faendir.acra.dataprovider.BugFilter
+import com.faendir.acra.dataprovider.BugSort
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.model.*
+import com.faendir.acra.model.App
+import com.faendir.acra.model.Permission
+import com.faendir.acra.model.Version
 import com.faendir.acra.model.view.VBug
 import com.faendir.acra.navigation.ParseAppParameter
 import com.faendir.acra.navigation.View
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.BugMerger
 import com.faendir.acra.service.DataService
+import com.faendir.acra.settings.GridSettings
 import com.faendir.acra.settings.LocalSettings
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.createButton
 import com.faendir.acra.ui.component.dialog.showFluentDialog
 import com.faendir.acra.ui.component.grid.AcrariumGridView
+import com.faendir.acra.ui.component.grid.BasicLayoutPersistingFilterableGrid
+import com.faendir.acra.ui.component.grid.FilterableSortableLocalizedColumn
 import com.faendir.acra.ui.component.grid.TimeSpanRenderer
 import com.faendir.acra.ui.component.grid.column
-import com.faendir.acra.ui.component.grid.grid
 import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.view.app.AppView
 import com.faendir.acra.ui.view.bug.tabs.BugTab
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
-import com.querydsl.jpa.impl.JPAQuery
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent
+import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.GridSortOrder
@@ -45,6 +52,7 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup
 import com.vaadin.flow.component.select.Select
 import com.vaadin.flow.data.renderer.ComponentRenderer
 import com.vaadin.flow.router.Route
+import kotlin.reflect.KMutableProperty0
 
 /**
  * @author lukas
@@ -58,10 +66,13 @@ class BugTab(
     private val localSettings: LocalSettings,
     @ParseAppParameter
     private val app: App
-) : AppTab<AcrariumGridView<VBug>>(app) {
+) : AppTab<BugGridView>(app) {
+
+    private val mergeButton: Translatable<Button>
+
     init {
         content {
-            val mergeButton = Translatable.createButton(Messages.MERGE_BUGS) {
+            mergeButton = Translatable.createButton(Messages.MERGE_BUGS) {
                 val selectedItems: List<VBug> = ArrayList(grid.selectedItems)
                 if (selectedItems.size > 1) {
                     val titles = RadioButtonGroup<String>()
@@ -84,69 +95,75 @@ class BugTab(
                 removeThemeVariants(ButtonVariant.LUMO_PRIMARY)
             }
             header.addComponentAsFirst(mergeButton)
-            grid {
-                setSelectionMode(Grid.SelectionMode.MULTI)
-                asMultiSelect().addSelectionListener { mergeButton.content.isEnabled = it.allSelectedItems.size >= 2 }
-                column({ it.reportCount }) {
-                    setSortable(QReport.report.count())
-                    setCaption(Messages.REPORTS)
-                }
-                column(TimeSpanRenderer { it.lastReport }) {
-                    setSortable(QReport.report.date.max())
-                    setCaption(Messages.LATEST_REPORT)
-                    sort(GridSortOrder.desc(this).build())
-                }
-                val versions = dataService.findAllVersions(app)
-                val versionCodeNameMap = versions.associate { it.code to it.name }
-                column({ versionCodeNameMap[it.highestVersionCode] }) {
-                    setSortable(QReport.report.stacktrace.version.code.max())
-                    setCaption(Messages.LATEST_VERSION)
-                }
-                column({ it.userCount }) {
-                    setSortable(QReport.report.installationId.countDistinct())
-                    setCaption(Messages.AFFECTED_INSTALLATIONS)
-                }
-                column({ it.bug.title }) {
-                    setSortableAndFilterable(QBug.bug.title, Messages.TITLE)
-                    setCaption(Messages.TITLE)
-                    isAutoWidth = false
-                    flexGrow = 1
-                }
-                column(ComponentRenderer { bug: VBug ->
-                    Select(*versions.toTypedArray()).apply {
-                        setTextRenderer { it.name }
-                        isEmptySelectionAllowed = true
-                        emptySelectionCaption = getTranslation(Messages.NOT_SOLVED)
-                        value = bug.bug.solvedVersion
-                        isEnabled = SecurityUtils.hasPermission(app, Permission.Level.EDIT)
-                        addValueChangeListener { e: ComponentValueChangeEvent<Select<Version?>?, Version?> ->
-                            dataService.setBugSolved(bug.bug, e.value)
-                            style["--select-background-color"] =
-                                if (bug.highestVersionCode > (bug.bug.solvedVersion?.code ?: Int.MAX_VALUE)) "var(--lumo-error-color-50pct)" else null
-                        }
-                        if (bug.highestVersionCode > (bug.bug.solvedVersion?.code ?: Int.MAX_VALUE)) {
-                            style["--select-background-color"] = "var(--lumo-error-color-50pct)"
-                        }
-                    }
-                }) {
-                    setSortable(QBug.bug.solvedVersion)
-                    setFilterable(
-                        //not solved or regression
-                        QBug.bug.solvedVersion.isNull.or(
-                            QBug.bug.solvedVersion.code.lt(
-                                JPAQuery<Any>().select(QStacktrace.stacktrace1.version.code.max()).from(QStacktrace.stacktrace1)
-                                    .where(QStacktrace.stacktrace1.bug.eq(QBug.bug))
-                            )
-                        ),
-                        true,
-                        Messages.HIDE_SOLVED
-                    )
-                    setCaption(Messages.SOLVED)
-                }
-                addOnClickNavigation(ReportTab::class.java) { BugTab.getNavigationParams(it.bug) }
-            }
         }
     }
 
-    override fun initContent() = AcrariumGridView(dataService.getBugProvider(app), localSettings::bugGridSettings)
+    override fun initContent() = BugGridView(dataService.getBugProvider(app), localSettings::bugGridSettings) {
+        setSelectionMode(Grid.SelectionMode.MULTI)
+        asMultiSelect().addSelectionListener { mergeButton.content.isEnabled = it.allSelectedItems.size >= 2 }
+        column({ it.reportCount }) {
+            setSortable(BugSort.REPORT_COUNT)
+            setCaption(Messages.REPORTS)
+        }
+        column(TimeSpanRenderer { it.lastReport }) {
+            setSortable(BugSort.MAX_REPORT_DATE)
+            setCaption(Messages.LATEST_REPORT)
+            sort(GridSortOrder.desc(this).build())
+        }
+        val versions = dataService.findAllVersions(app)
+        val versionCodeNameMap = versions.associate { it.code to it.name }
+        column({ versionCodeNameMap[it.highestVersionCode] }) {
+            setSortable(BugSort.MAX_VERSION_CODE)
+            setCaption(Messages.LATEST_VERSION)
+        }
+        column({ it.userCount }) {
+            setSortable(BugSort.USER_COUNT)
+            setCaption(Messages.AFFECTED_INSTALLATIONS)
+        }
+        column({ it.bug.title }) {
+            setSortable(BugSort.TITLE)
+            setFilterable({ BugFilter.TitleFilter(it) }, Messages.TITLE)
+            setCaption(Messages.TITLE)
+            isAutoWidth = false
+            flexGrow = 1
+        }
+        column(ComponentRenderer { bug: VBug ->
+            Select(*versions.toTypedArray()).apply {
+                setTextRenderer { it.name }
+                isEmptySelectionAllowed = true
+                emptySelectionCaption = getTranslation(Messages.NOT_SOLVED)
+                value = bug.bug.solvedVersion
+                isEnabled = SecurityUtils.hasPermission(app, Permission.Level.EDIT)
+                addValueChangeListener { e: ComponentValueChangeEvent<Select<Version?>?, Version?> ->
+                    dataService.setBugSolved(bug.bug, e.value)
+                    style["--select-background-color"] =
+                        if (bug.highestVersionCode > (bug.bug.solvedVersion?.code ?: Int.MAX_VALUE)) "var(--lumo-error-color-50pct)" else null
+                }
+                if (bug.highestVersionCode > (bug.bug.solvedVersion?.code ?: Int.MAX_VALUE)) {
+                    style["--select-background-color"] = "var(--lumo-error-color-50pct)"
+                }
+            }
+        }) {
+            setSortable(BugSort.SOLVED_VERSION)
+            setFilterable(BugFilter.NotSolvedOrRegressionFilter, true, Messages.HIDE_SOLVED)
+            setCaption(Messages.SOLVED)
+        }
+        addOnClickNavigation(ReportTab::class.java) { BugTab.getNavigationParams(it.bug) }
+    }
 }
+
+class BugGridView(
+    dataProvider: BugDataProvider,
+    gridSettings: KMutableProperty0<GridSettings?>,
+    initializer: BasicLayoutPersistingFilterableGrid<VBug, BugFilter, BugSort>.() -> Unit
+) :
+    AcrariumGridView<
+            VBug,
+            BugFilter,
+            BugSort,
+            FilterableSortableLocalizedColumn<VBug, BugFilter, BugSort>,
+            BasicLayoutPersistingFilterableGrid<VBug, BugFilter, BugSort>>(
+        BasicLayoutPersistingFilterableGrid(dataProvider, gridSettings.get()),
+        gridSettings,
+        initializer
+    )

@@ -31,7 +31,7 @@ registerStyles("vaadin-login-form-wrapper",
         }
     `);
 
-registerStyles("vaadin-select-text-field",
+registerStyles("vaadin-select",
     // language=css
     css`
         [part="input-field"] {

@@ -18,6 +18,9 @@ package com.faendir.acra.ui.component.grid
 import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.data.renderer.ComponentRenderer
 import org.xbib.time.pretty.PrettyTime
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -26,9 +29,9 @@ import java.util.*
  * @author Lukas
  * @since 26.05.2017
  */
-class TimeSpanRenderer<T>(valueProvider: (T) -> ZonedDateTime?) : ComponentRenderer<Span, T>({ t: T ->
+class TimeSpanRenderer<T>(valueProvider: (T) -> LocalDateTime?) : ComponentRenderer<Span, T>({ t: T ->
     valueProvider(t)?.let {
-        Span(PrettyTime(Locale.US).formatUnrounded(it.toLocalDateTime())).apply {
+        Span(PrettyTime(Locale.US).formatUnrounded(it)).apply {
             element.setProperty("title", DateTimeFormatter.ISO_DATE_TIME.format(it))
         }
     } ?: Span()

@@ -129,10 +129,12 @@ class ReportView(private val dataService: DataService, avatarService: AvatarServ
     override val logicalParent = ReportTab::class
 
     companion object {
-        fun getNavigationParams(report: IReport) = mapOf(
-            PARAM_APP to report.stacktrace.bug.app.id.toString(),
-            PARAM_BUG to report.stacktrace.bug.id.toString(),
-            PARAM_REPORT to report.id
+        fun getNavigationParams(report: IReport) = getNavigationParams(report.stacktrace.bug.app.id, report.stacktrace.bug.id, report.id)
+
+        fun getNavigationParams(appId: Int, bugId: Int, reportId: String) = mapOf(
+            PARAM_APP to appId.toString(),
+            PARAM_BUG to bugId.toString(),
+            PARAM_REPORT to reportId,
         )
     }
 }

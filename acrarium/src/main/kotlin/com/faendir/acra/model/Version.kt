@@ -34,17 +34,19 @@ import javax.persistence.ManyToOne
  * @since 26.07.18
  */
 @Entity
-class Version(@OnDelete(action = OnDeleteAction.CASCADE)
-              @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.REFRESH], optional = false, fetch = FetchType.LAZY)
-              val app: App,
-              val code: Int,
-              var name: String,
-              @Basic(fetch = FetchType.LAZY)
-              @Type(type = "text")
-              var mappings: String? = null) : Comparable<Version> {
+class Version(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id = 0
+    private val id: Int = 0,
+    val code: Int,
+    var name: String,
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @ManyToOne(cascade = [CascadeType.MERGE, CascadeType.REFRESH], optional = false, fetch = FetchType.LAZY)
+    val app: App,
+    @Basic(fetch = FetchType.LAZY)
+    @Type(type = "text")
+    var mappings: String? = null
+) : Comparable<Version> {
 
     override fun compareTo(other: Version): Int = code.compareTo(other.code)
 

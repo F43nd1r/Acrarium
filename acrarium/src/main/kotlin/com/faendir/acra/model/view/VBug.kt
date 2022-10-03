@@ -17,10 +17,12 @@ package com.faendir.acra.model.view
 
 import com.faendir.acra.model.Bug
 import com.querydsl.core.annotations.QueryProjection
+import java.time.Instant
+import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
 /**
  * @author lukas
  * @since 30.05.18
  */
-class VBug @QueryProjection constructor(val bug: Bug, val lastReport: ZonedDateTime, val reportCount: Long, val highestVersionCode: Int, val userCount: Long) 
+class VBug @QueryProjection constructor(val bug: Bug, val lastReport: LocalDateTime, val reportCount: Long, val highestVersionCode: Int, val userCount: Long)

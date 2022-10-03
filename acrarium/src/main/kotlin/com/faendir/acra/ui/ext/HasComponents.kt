@@ -12,7 +12,7 @@ import com.faendir.acra.ui.component.InstallationView
 import com.faendir.acra.ui.component.RangeField
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.UserEditor
-import com.faendir.acra.ui.component.grid.AcrariumGrid
+import com.faendir.acra.ui.component.grid.BasicCustomColumnGrid
 import com.faendir.acra.ui.component.grid.QueryDslAcrariumGrid
 import com.faendir.acra.ui.component.tabs.Tab
 import com.github.appreciated.layout.GridLayout
@@ -88,7 +88,7 @@ fun HasComponents.userEditor(userService: UserService, user: User, isExistingUse
     add(UserEditor(userService, null, user, isExistingUser, onSuccess))
 }
 
-fun <T> HasComponents.queryDslAcrariumGrid(dataProvider: QueryDslDataProvider<T>, initializer: QueryDslAcrariumGrid<T>.() -> Unit): QueryDslAcrariumGrid<T> {
+fun <T : Any> HasComponents.queryDslAcrariumGrid(dataProvider: QueryDslDataProvider<T>, initializer: QueryDslAcrariumGrid<T>.() -> Unit): QueryDslAcrariumGrid<T> {
     val grid = QueryDslAcrariumGrid(dataProvider)
     grid.initializer()
     add(grid)
@@ -145,8 +145,8 @@ fun HasComponents.translatableTextArea(captionId: String, vararg params: Any, in
     return Translatable.createTextArea(captionId, *params).with(initializer).also { add(it) }
 }
 
-fun <T> HasComponents.acrariumGrid(content: Collection<T>, initializer: AcrariumGrid<T>.() -> Unit): Grid<T> {
-    return AcrariumGrid<T>().apply { setItems(content) }.apply(initializer).also { add(it) }
+fun <T> HasComponents.acrariumGrid(content: Collection<T>, initializer: BasicCustomColumnGrid<T>.() -> Unit): Grid<T> {
+    return BasicCustomColumnGrid<T>().apply { setItems(content) }.apply(initializer).also { add(it) }
 }
 
 fun HasComponents.translatableText(captionId: String, vararg params: Any, initializer: Text.() -> Unit = {}) {

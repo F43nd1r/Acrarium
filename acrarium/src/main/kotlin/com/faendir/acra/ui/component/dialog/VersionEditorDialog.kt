@@ -45,7 +45,7 @@ class VersionEditorDialog(dataService: DataService, app: App, onUpdate: (() -> U
         }
         positiveAction(if (old == null) Messages.CREATE else Messages.SAVE) {
             if (old == null) {
-                dataService.storeVersion(Version(app, code.value.toInt(), name.value, upload.value))
+                dataService.storeVersion(Version(code = code.value.toInt(), name = name.value, app = app, mappings = upload.value))
             } else {
                 old.name = name.value
                 old.mappings = upload.value

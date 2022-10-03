@@ -9,7 +9,11 @@ class NonVaadinContext(val applicationContext: WebApplicationContext) : VaadinCo
     private val attributes = mutableMapOf<Class<*>, Any>()
 
     override fun <T : Any> getAttribute(type: Class<T>, defaultValueSupplier: Supplier<T>?): T {
-        return attributes[type] as? T ?: defaultValueSupplier?.get() ?: throw NoSuchElementException()
+        return try {
+            type.cast(attributes[type])
+        } catch (e: ClassCastException) {
+            null
+        } ?: defaultValueSupplier?.get() ?: throw NoSuchElementException()
     }
 
     override fun <T : Any> setAttribute(clazz: Class<T>, value: T) {

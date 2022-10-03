@@ -19,8 +19,6 @@ import com.faendir.acra.util.equalsBy
 import com.fasterxml.jackson.annotation.JsonIgnore
 import org.hibernate.annotations.OnDelete
 import org.hibernate.annotations.OnDeleteAction
-import javax.persistence.Access
-import javax.persistence.AccessType
 import javax.persistence.CascadeType
 import javax.persistence.CollectionTable
 import javax.persistence.Column
@@ -43,14 +41,12 @@ class App(
     @JsonIgnore
     @OneToOne(cascade = [CascadeType.ALL], optional = false, orphanRemoval = true, fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    var reporter: User
-) {
-
-    var configuration: Configuration = Configuration()
-
+    var reporter: User,
+    var configuration: Configuration = Configuration(),
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id = 0
+    val id: Int = 0
+) {
 
     override fun equals(other: Any?) = equalsBy(other, App::id)
 

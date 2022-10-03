@@ -8,8 +8,8 @@ import com.vaadin.flow.component.listbox.MultiSelectListBox
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.data.renderer.TextRenderer
 
-class GridColumnMenu(private val grid: QueryDslAcrariumGrid<*>) : PopupButton(VaadinIcon.WRENCH) {
-    private val content = MultiSelectListBox<QueryDslAcrariumColumn<*>>().apply {
+class GridColumnMenu(private val grid: LayoutPersistingFilterableGrid<*, *, *, *>) : PopupButton(VaadinIcon.WRENCH) {
+    private val content = MultiSelectListBox<LocalizedColumn<*>>().apply {
         setRenderer(TextRenderer { it.caption?.translate() })
         addSelectionListener { event ->
             if (event.isFromClient) {
@@ -28,7 +28,7 @@ class GridColumnMenu(private val grid: QueryDslAcrariumGrid<*>) : PopupButton(Va
     }
 
     fun update() {
-        val items = grid.acrariumColumns.filter { it.caption != null }
+        val items = grid.filterableColumns.filter { it.caption != null }
         content.setItems(items)
         content.select(items.filter { it.isVisible })
     }

@@ -16,69 +16,21 @@
 
 package com.faendir.acra.ui.component.grid
 
-import com.faendir.acra.dataprovider.QueryDslFilter
-import com.faendir.acra.dataprovider.QueryDslFilterWithParameter
-import com.faendir.acra.dataprovider.QueryDslSortOrder
-import com.faendir.acra.ui.component.Translatable
 import com.querydsl.core.types.Expression
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.StringExpression
-import com.querydsl.jpa.impl.JPAQuery
-import com.vaadin.flow.component.Component
-import com.vaadin.flow.component.HasSize
-import com.vaadin.flow.component.HasValue
-import com.vaadin.flow.data.provider.SortDirection
 import com.vaadin.flow.data.renderer.Renderer
-import com.vaadin.flow.data.value.ValueChangeMode
-import java.util.stream.Stream
 
-class QueryDslAcrariumColumn<T>(private val acrariumGrid: QueryDslAcrariumGrid<T>, renderer: Renderer<T>, columnId: String) :
-    AcrariumColumn<T>(acrariumGrid, renderer, columnId) {
-    var filter: QueryDslFilter? = null
-        private set
-    var filterComponent: Component? = null
-        private set
+class QueryDslAcrariumColumn<T : Any>(acrariumGrid: QueryDslAcrariumGrid<T>, renderer: Renderer<T>, columnId: String) :
+    FilterableSortableLocalizedColumn<T, BooleanExpression, Expression<out Comparable<*>>>(acrariumGrid, renderer, columnId) {
 
-    fun setSortable(sort: Expression<out Comparable<*>>): QueryDslAcrariumColumn<T> {
-        setSortOrderProvider { direction: SortDirection -> Stream.of(QueryDslSortOrder(sort, direction)) }
-        isSortable = true
-        return this
+    fun setFilterable(expr: StringExpression, captionId: String, vararg params: Any) {
+        setFilterable({ expr.contains(it) }, captionId, params)
     }
 
-    fun setFilterable(expr: StringExpression, captionId: String, vararg params: Any): QueryDslAcrariumColumn<T> {
-        return setFilterable(Translatable.createTextFieldWithHint(captionId, *params).with {
-            valueChangeMode = ValueChangeMode.EAGER
-        }, object : QueryDslFilterWithParameter<String?> {
-            override var parameter: String? = null
-
-            override fun <T> apply(query: JPAQuery<T>): JPAQuery<T> = parameter?.let { query.where(expr.contains(it)) } ?: query
-
-        })
-    }
-
-    fun setFilterable(expr: BooleanExpression, default: Boolean, captionId: String, vararg params: Any): QueryDslAcrariumColumn<T> {
-        return setFilterable(Translatable.createCheckbox(captionId, *params).with { value = default }, object : QueryDslFilterWithParameter<Boolean> {
-            override var parameter: Boolean = default
-            override fun <T> apply(query: JPAQuery<T>): JPAQuery<T> = if (parameter) query.where(expr) else query
-        })
-    }
-
-    fun setSortableAndFilterable(expr: StringExpression, captionId: String, vararg params: Any): QueryDslAcrariumColumn<T> {
-        return setSortable(expr).setFilterable(expr, captionId, params)
-    }
-
-    fun <C, U> setFilterable(
-        filterField: C,
-        filter: QueryDslFilterWithParameter<U>
-    ): QueryDslAcrariumColumn<T> where C : Component, C : HasValue<out HasValue.ValueChangeEvent<U>, U>, C : HasSize {
-        filterField.setWidthFull()
-        this.filter = filter
-        this.filterComponent = filterField
-        filterField.addValueChangeListener { event ->
-            filter.parameter = event.value
-            acrariumGrid.dataProvider.refreshAll()
-        }
-        return this
+    fun setSortableAndFilterable(expr: StringExpression, captionId: String, vararg params: Any) {
+        setSortable(expr)
+        setFilterable(expr, captionId, params)
     }
 
 }

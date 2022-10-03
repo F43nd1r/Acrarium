@@ -20,6 +20,7 @@ import com.faendir.acra.model.Stacktrace
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.UserService
 import com.querydsl.core.types.dsl.BooleanExpression
+import org.intellij.lang.annotations.Language
 import org.json.JSONObject
 import proguard.retrace.ReTrace
 import java.io.*
@@ -114,3 +115,6 @@ infix fun BooleanExpression.and(other: BooleanExpression): BooleanExpression = a
 fun <T, U, V> Iterable<T>.zip(u: Iterable<U>, v: Iterable<V>): List<Triple<T, U, V>> {
     return zip(u.zip(v)) { t, (u, v) -> Triple(t, u, v) }
 }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun sql(@Language("SQL") sql: String) = sql

@@ -16,11 +16,8 @@
 package com.faendir.acra.model
 
 import com.faendir.acra.util.NoArgConstructor
-import org.springframework.data.annotation.PersistenceConstructor
-import org.springframework.lang.NonNull
 import java.io.Serializable
 import java.sql.Blob
-import java.util.*
 import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.Id

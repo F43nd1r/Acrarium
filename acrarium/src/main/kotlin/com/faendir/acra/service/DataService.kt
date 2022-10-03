@@ -15,7 +15,10 @@
  */
 package com.faendir.acra.service
 
+import com.faendir.acra.dataprovider.BugDataProvider
 import com.faendir.acra.dataprovider.QueryDslDataProvider
+import com.faendir.acra.dataprovider.ReportDataProvider
+import com.faendir.acra.dataprovider.ReportFilter
 import com.faendir.acra.model.*
 import com.faendir.acra.model.view.Queries
 import com.faendir.acra.model.view.VApp
@@ -73,7 +76,7 @@ class DataService(
     fun getAppIds(): List<Int> = JPAQuery<Any>(entityManager).from(QApp.app).where(whereHasAppPermission()).select(QApp.app.id).fetch()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
-    fun getBugProvider(app: App) = QueryDslDataProvider(Queries.selectVBug(entityManager).where(QBug.bug.app.eq(app)))
+    fun getBugProvider(app: App) = BugDataProvider(entityManager, app)
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun getBugIds(app: App): List<Int> = JPAQuery<Any>(entityManager).from(QBug.bug).where(QBug.bug.app.eq(app)).select(QBug.bug.id).fetch()
@@ -83,24 +86,13 @@ class DataService(
         JPAQuery<Any>(entityManager).from(QStacktrace.stacktrace1).where(QStacktrace.stacktrace1.bug.eq(bug)).select(QStacktrace.stacktrace1.id).fetch()
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
-    fun getReportProvider(bug: Bug) = QueryDslDataProvider(
-        Queries.selectVReport(entityManager, bug.app)
-            .where(QStacktrace.stacktrace1.bug.eq(bug))
-    )
+    fun getReportProvider(bug: Bug) = ReportDataProvider(entityManager, bug.app, ReportFilter.Bug(bug.id))
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
-    fun getReportProvider(app: App) = QueryDslDataProvider(
-        Queries.selectVReport(entityManager, app)
-            .join(QStacktrace.stacktrace1.version).fetchJoin()
-            .where(QApp.app.eq(app))
-    )
+    fun getReportProvider(app: App) = ReportDataProvider(entityManager, app, null)
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
-    fun getReportProvider(app: App, installationId: String) = QueryDslDataProvider(
-        Queries.selectVReport(entityManager, app)
-            .join(QStacktrace.stacktrace1.version).fetchJoin()
-            .where(QApp.app.eq(app).and(QReport.report.installationId.eq(installationId)))
-    )
+    fun getReportProvider(app: App, installationId: String) = ReportDataProvider(entityManager, app, ReportFilter.InstallationId(installationId))
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#stacktrace.bug.app, T(com.faendir.acra.model.Permission\$Level).VIEW)")
     fun getReportIds(stacktrace: Stacktrace): List<String> =
@@ -321,7 +313,10 @@ class DataService(
 
     @Transactional
     @PreAuthorize("hasRole(T(com.faendir.acra.model.User\$Role).REPORTER)")
-    fun createNewReport(reporterUserName: String, @Language("JSON") content: String, attachments: List<MultipartFile>) {
+    fun createNewReport(reporterUserName: String,
+                        @Language("JSON")
+                        content: String, attachments: List<MultipartFile>
+    ) {
         JPAQuery<Any>(entityManager).from(QApp.app).where(QApp.app.reporter.username.eq(reporterUserName)).select(QApp.app).fetchOne()?.let { app ->
             val jsonObject = JSONObject(content)
             val trace = jsonObject.optString(ReportField.STACK_TRACE.name)
@@ -351,7 +346,7 @@ class DataService(
         val buildConfig: JSONObject? = jsonObject.optJSONObject(ReportField.BUILD_CONFIG.name)
         val versionCode: Int = buildConfig?.findInt("VERSION_CODE") ?: jsonObject.findInt(ReportField.APP_VERSION_CODE.name) ?: 0
         val versionName: String = buildConfig?.findString("VERSION_NAME") ?: jsonObject.findString(ReportField.APP_VERSION_NAME.name) ?: "N/A"
-        return findVersion(app, versionCode) ?: (Version(app, versionCode, versionName))
+        return findVersion(app, versionCode) ?: (Version(code = versionCode, name = versionName, app = app))
     }
 
     @PreAuthorize("T(com.faendir.acra.security.SecurityUtils).hasPermission(#app, T(com.faendir.acra.model.Permission\$Level).VIEW)")

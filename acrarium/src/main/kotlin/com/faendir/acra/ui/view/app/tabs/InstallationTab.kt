@@ -10,7 +10,7 @@ import com.faendir.acra.service.AvatarService
 import com.faendir.acra.service.DataService
 import com.faendir.acra.settings.LocalSettings
 import com.faendir.acra.ui.component.InstallationView
-import com.faendir.acra.ui.component.grid.AcrariumGridView
+import com.faendir.acra.ui.component.grid.QueryDSLGridView
 import com.faendir.acra.ui.component.grid.TimeSpanRenderer
 import com.faendir.acra.ui.component.grid.column
 import com.faendir.acra.ui.component.grid.grid
@@ -31,7 +31,7 @@ class InstallationTab(
     private val localSettings: LocalSettings,
     @ParseAppParameter
     private val app: App
-) : AppTab<AcrariumGridView<VInstallation>>(app) {
+) : AppTab<QueryDSLGridView<VInstallation>>(app) {
     init {
         content {
             grid {
@@ -48,7 +48,7 @@ class InstallationTab(
                     setSortable(QReport.report.count())
                     setCaption(Messages.REPORTS)
                 }
-                column(TimeSpanRenderer { it.lastReport }) {
+                column(TimeSpanRenderer { it.lastReport.toLocalDateTime() }) {
                     setSortable(QReport.report.date.max())
                     setCaption(Messages.LATEST_REPORT)
                     sort(GridSortOrder.desc(this).build())
@@ -58,5 +58,5 @@ class InstallationTab(
         }
     }
 
-    override fun initContent() = AcrariumGridView(dataService.getInstallationProvider(app), localSettings::installationGridSettings)
+    override fun initContent() = QueryDSLGridView(dataService.getInstallationProvider(app), localSettings::installationGridSettings)
 }

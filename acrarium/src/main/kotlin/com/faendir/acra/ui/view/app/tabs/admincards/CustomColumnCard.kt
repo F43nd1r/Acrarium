@@ -47,7 +47,7 @@ class CustomColumnCard(dataService: DataService, @ParseAppParameter val app: App
                     editor.isBuffered = true
                     val regex = Regex("[\\w_-]+(\\.[\\w_-]+)*")
                     val field = TextField().apply {
-                        isPreventInvalidInput = true
+                        allowedCharPattern = "[\\w_.-]"
                         pattern = regex.pattern
                     }
                     editor.binder.forField(field)
@@ -90,14 +90,13 @@ class CustomColumnCard(dataService: DataService, @ParseAppParameter val app: App
                             dataProvider.refreshAll()
                         }
                     })
-                    appendFooterRow().getCell(columns[0]).setComponent(
-                        Translatable.createButton(Messages.ADD_COLUMN) {
-                            if (!app.configuration.customReportColumns.contains("")) {
-                                app.configuration.customReportColumns.add("")
-                            }
-                            dataProvider.refreshAll()
-                            editor.editItem("")
-                        })
+                    appendFooterRow().getCell(columns[0]).component = Translatable.createButton(Messages.ADD_COLUMN) {
+                        if (!app.configuration.customReportColumns.contains("")) {
+                            app.configuration.customReportColumns.add("")
+                        }
+                        dataProvider.refreshAll()
+                        editor.editItem("")
+                    }
                 }
             }
         }

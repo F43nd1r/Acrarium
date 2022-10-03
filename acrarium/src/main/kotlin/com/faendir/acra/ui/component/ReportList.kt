@@ -15,21 +15,24 @@
  */
 package com.faendir.acra.ui.component
 
-import com.faendir.acra.dataprovider.QueryDslDataProvider
+import com.faendir.acra.dataprovider.ReportDataProvider
+import com.faendir.acra.dataprovider.ReportFilter
+import com.faendir.acra.dataprovider.ReportSort
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.model.App
 import com.faendir.acra.model.Permission
-import com.faendir.acra.model.QDevice
-import com.faendir.acra.model.QReport
-import com.faendir.acra.model.view.Queries
 import com.faendir.acra.model.view.VReport
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.service.AvatarService
+import com.faendir.acra.service.DataService
+import com.faendir.acra.settings.GridSettings
 import com.faendir.acra.settings.LocalSettings
 import com.faendir.acra.ui.component.dialog.confirmButtons
 import com.faendir.acra.ui.component.dialog.showFluentDialog
 import com.faendir.acra.ui.component.grid.AcrariumGridView
+import com.faendir.acra.ui.component.grid.BasicLayoutPersistingFilterableGrid
 import com.faendir.acra.ui.component.grid.ButtonRenderer
+import com.faendir.acra.ui.component.grid.FilterableSortableLocalizedColumn
 import com.faendir.acra.ui.component.grid.TimeSpanRenderer
 import com.faendir.acra.ui.component.grid.column
 import com.faendir.acra.ui.ext.translatableText
@@ -43,6 +46,7 @@ import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.data.renderer.ComponentRenderer
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
+import kotlin.reflect.KMutableProperty0
 
 /**
  * @author lukas
@@ -50,43 +54,53 @@ import com.vaadin.flow.spring.annotation.UIScope
  */
 class ReportList(
     private val app: App,
-    private val dataProvider: QueryDslDataProvider<VReport>,
+    private val dataProvider: ReportDataProvider,
     private val avatarService: AvatarService,
     private val localSettings: LocalSettings,
-    private val deleteReport: (VReport) -> Unit
-) : Composite<AcrariumGridView<VReport>>() {
-    override fun initContent(): AcrariumGridView<VReport> {
-        return AcrariumGridView(dataProvider, localSettings::reportGridSettings) {
+    private val dataService: DataService,
+) : Composite<ReportGridView>() {
+    override fun initContent(): ReportGridView {
+        return ReportGridView(dataProvider, localSettings::reportGridSettings) {
             setSelectionMode(Grid.SelectionMode.NONE)
             column(ComponentRenderer { report -> avatarService.getAvatar(report) }) {
-                setSortable(QReport.report.installationId)
-                setFilterable(QReport.report.installationId, Messages.INSTALLATION)
+                setSortable(ReportSort.InstallationId)
+                setFilterable({ ReportFilter.InstallationId(it) }, Messages.INSTALLATION)
                 setCaption(Messages.INSTALLATION)
                 width = "50px"
                 isAutoWidth = false
             }
-            val dateColumn = addColumn(TimeSpanRenderer { it.date }).setSortable(QReport.report.date).setCaption(Messages.DATE)
+            val dateColumn = column(TimeSpanRenderer { it.date }) {
+                setSortable(ReportSort.Date)
+                setCaption(Messages.DATE)
+            }
             sort(GridSortOrder.desc(dateColumn).build())
-            addColumn { it.stacktrace.version.name }.setSortable(QReport.report.stacktrace.version.code)
-                .setFilterable(QReport.report.stacktrace.version.name, Messages.APP_VERSION)
-                .setCaption(Messages.APP_VERSION)
-            addColumn { it.androidVersion }.setSortableAndFilterable(QReport.report.androidVersion, Messages.ANDROID_VERSION)
-                .setCaption(Messages.ANDROID_VERSION)
-            addColumn(ComponentRenderer { report -> Span(report.marketingName ?: report.phoneModel).apply { element.setProperty("title", report.phoneModel) } })
-                .setSortableAndFilterable(QDevice.device1.marketingName.coalesce(QReport.report.phoneModel), Messages.DEVICE)
-                .setCaption(Messages.DEVICE)
-            addColumn { it.stacktrace.stacktrace.split("\n".toRegex(), 2).toTypedArray()[0] }.setSortableAndFilterable(
-                QReport.report.stacktrace.stacktrace,
-                Messages.STACKTRACE
-            ).setCaption(Messages.STACKTRACE).setAutoWidth(false).flexGrow = 1
-            addColumn(ComponentRenderer { report -> Icon(if (report.isSilent) VaadinIcon.CHECK else VaadinIcon.CLOSE) })
-                .setSortable(QReport.report.isSilent)
-                .setFilterable(QReport.report.isSilent.eq(false), false, Messages.HIDE_SILENT)
-                .setCaption(Messages.SILENT)
+            column({ it.versionName }) {
+                setFilterable({ ReportFilter.VersionName(it) }, Messages.APP_VERSION)
+                setCaption(Messages.APP_VERSION)
+            }
+            column({ it.androidVersion }) {
+                setSortable(ReportSort.AndroidVersion)
+                setFilterable({ ReportFilter.AndroidVersion(it) }, Messages.ANDROID_VERSION)
+                setCaption(Messages.ANDROID_VERSION)
+            }
+            column(ComponentRenderer { report -> Span(report.marketingName ?: report.phoneModel).apply { element.setProperty("title", report.phoneModel) } }) {
+                setFilterable({ ReportFilter.PhoneMarketingNameOrModel(it) }, Messages.DEVICE)
+                setCaption(Messages.DEVICE)
+            }
+            column({ it.stacktrace.split("\n".toRegex(), 2).toTypedArray()[0] }) {
+                setFilterable({ ReportFilter.Stacktrace(it) }, Messages.STACKTRACE)
+                setCaption(Messages.STACKTRACE)
+                isAutoWidth = false
+                flexGrow = 1
+            }
+            column(ComponentRenderer { report -> Icon(if (report.isSilent) VaadinIcon.CHECK else VaadinIcon.CLOSE) }) {
+                setSortable(ReportSort.IsSilent)
+                setFilterable(ReportFilter.IsNotSilent, false, Messages.HIDE_SILENT)
+                setCaption(Messages.SILENT)
+            }
             for ((index, column) in app.configuration.customReportColumns.withIndex()) {
                 column({ it.customColumns[index] }) {
                     setCaption(Messages.ONE_ARG, column)
-                    setSortableAndFilterable(Queries.customReportColumnExpression(column), Messages.ONE_ARG, column)
                 }
             }
             if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
@@ -94,7 +108,7 @@ class ReportList(
                     showFluentDialog {
                         translatableText(Messages.DELETE_REPORT_CONFIRM)
                         confirmButtons {
-                            deleteReport(report)
+                            dataService.deleteReport(report)
                             dataProvider.refreshAll()
                         }
                     }
@@ -104,14 +118,30 @@ class ReportList(
                     width = "100px"
                 }
             }
-            addOnClickNavigation(ReportView::class.java) { ReportView.getNavigationParams(it) }
+            addOnClickNavigation(ReportView::class.java) { ReportView.getNavigationParams(it.appId, it.bugId, it.id) }
         }
     }
 
     @UIScope
     @SpringComponent
-    class Factory(private val avatarService: AvatarService, private val localSettings: LocalSettings) {
-        fun create(app: App, dataProvider: QueryDslDataProvider<VReport>, deleteReport: (VReport) -> Unit) =
-            ReportList(app, dataProvider, avatarService, localSettings, deleteReport)
+    class Factory(private val avatarService: AvatarService, private val localSettings: LocalSettings, private val dataService: DataService) {
+        fun create(app: App, dataProvider: ReportDataProvider) =
+            ReportList(app, dataProvider, avatarService, localSettings, dataService)
     }
 }
+
+class ReportGridView(
+    dataProvider: ReportDataProvider,
+    gridSettings: KMutableProperty0<GridSettings?>,
+    initializer: BasicLayoutPersistingFilterableGrid<VReport, ReportFilter, ReportSort>.() -> Unit
+) :
+    AcrariumGridView<
+            VReport,
+            ReportFilter,
+            ReportSort,
+            FilterableSortableLocalizedColumn<VReport, ReportFilter, ReportSort>,
+            BasicLayoutPersistingFilterableGrid<VReport, ReportFilter, ReportSort>>(
+        BasicLayoutPersistingFilterableGrid(dataProvider, gridSettings.get()),
+        gridSettings,
+        initializer
+    )
