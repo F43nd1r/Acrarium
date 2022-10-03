@@ -40,9 +40,11 @@ internal class QueryDslDataProviderTest {
     fun setUp() {
         jpaQuery = mockk(relaxed = true)
         dataProvider = QueryDslDataProvider({ jpaQuery }, { jpaQuery })
+        every { jpaQuery.where(*anyVararg()) } returns jpaQuery
         every { jpaQuery.offset(any()) } returns jpaQuery
         every { jpaQuery.limit(any()) } returns jpaQuery
         every { jpaQuery.orderBy(any()) } returns jpaQuery
+        every { jpaQuery.orderBy(*anyVararg()) } returns jpaQuery
         every { jpaQuery.fetch() } returns listOf(TestDTO(TEST_STRING))
         every { jpaQuery.fetchCount() } returns 1
     }
@@ -50,13 +52,13 @@ internal class QueryDslDataProviderTest {
     @Test
     internal fun sort() {
         dataProvider.fetch(Query(0, 10, mutableListOf(AcrariumSort(QTestDTO.test.testValue, SortDirection.DESCENDING)) as List<QuerySortOrder>, null, null))
-        verify { jpaQuery.orderBy(match { it.target == QTestDTO.test.testValue && !it.isAscending }) }
+        verify { jpaQuery.orderBy(*varargAll { it.target == QTestDTO.test.testValue && !it.isAscending }) }
     }
 
     @Test
     internal fun filter() {
-        val filter = mockk<() -> List<BooleanExpression>>(relaxed = true)
-        every { filter.invoke() } returns emptyList()
+        val filter = mockk<() -> Set<BooleanExpression>>(relaxed = true)
+        every { filter.invoke() } returns emptySet()
         dataProvider.fetch(Query(0, 10, null, null, filter))
         verify { filter.invoke() }
     }

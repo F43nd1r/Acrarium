@@ -8,7 +8,7 @@ import java.util.stream.Stream
 
 abstract class AcrariumDataProvider<T : Any, F : Any, S : Any> : AbstractBackEndDataProvider<T, () -> Set<F>>() {
     override fun fetchFromBackEnd(query: Query<T, () -> Set<F>>): Stream<T> =
-        fetch(query.filters(), query.sortOrders.filterIsInstance<AcrariumSort<S>>(), query.offset, query.limit)
+        fetch(query.filters(), query.sortOrders?.filterIsInstance<AcrariumSort<S>>().orEmpty(), query.offset, query.limit)
 
     abstract fun fetch(filters: Set<F>, sort: List<AcrariumSort<S>>, offset: Int, limit: Int): Stream<T>
 
