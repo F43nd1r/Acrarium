@@ -20,11 +20,6 @@ import com.github.appreciated.apexcharts.ApexCharts
 import com.github.appreciated.apexcharts.ApexChartsBuilder
 import com.github.appreciated.apexcharts.config.builder.ChartBuilder
 import com.github.appreciated.apexcharts.config.chart.Type
-import org.springframework.data.util.Pair
-import org.springframework.lang.NonNull
-import java.util.*
-import java.util.function.Function
-import java.util.stream.Collectors
 
 /**
  * @author lukas
@@ -41,7 +36,7 @@ internal class PieChart(captionId: String, vararg params: Any) : Chart<String>(c
             list.add(other)
         }
         return ApexChartsBuilder.get()
-                .withChart(ChartBuilder.get().withType(Type.pie).withBackground("transparent").build())
+            .withChart(ChartBuilder.get().withType(Type.PIE).withBackground("transparent").build())
                 .withLabels(*list.map { it.first }.toTypedArray())
                 .withSeries(*list.map {it.second.toDouble() }.toTypedArray())
                 .build()
