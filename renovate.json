@@ -6,8 +6,6 @@
     "group:recommended",
     "workarounds:all"
   ],
-  "onboarding": false,
-  "dependencyDashboard": false,
   "rangeStrategy": "pin",
   "packageRules": [
     {
