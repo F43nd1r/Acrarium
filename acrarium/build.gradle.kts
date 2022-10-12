@@ -1,5 +1,5 @@
 plugins {
-    kotlin
+    org.jetbrains.kotlin.jvm
     org.jetbrains.kotlin.kapt
     org.jetbrains.kotlin.plugin.allopen
     org.jetbrains.kotlin.plugin.spring
@@ -16,6 +16,14 @@ configurations {
     implementation { extendsFrom(base) }
     getByName("kapt") { extendsFrom(base) }
     developmentOnly { extendsFrom(base) }
+}
+
+repositories {
+    mavenCentral()
+    google()
+    maven { setUrl("https://maven.vaadin.com/vaadin-addons") }
+    maven { setUrl("https://oss.sonatype.org/content/repositories/snapshots") }
+    mavenLocal()
 }
 
 dependencies {
@@ -81,6 +89,9 @@ val generateMessageClasses by tasks.creating(com.faendir.acra.gradle.I18nClassGe
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = "11"
+    }
     dependsOn(generateMessageClasses)
 }
 
