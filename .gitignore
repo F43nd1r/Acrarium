@@ -43,3 +43,6 @@ pnpmfile.js
 /target
 .flattened-pom.xml
 /acrarium/vite.generated.ts
+
+### Frontend ###
+/acrarium/frontend/generated/*

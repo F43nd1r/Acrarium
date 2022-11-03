@@ -7,6 +7,7 @@ import com.faendir.acra.model.view.VBug
 import com.faendir.acra.util.sql
 import com.vaadin.flow.data.provider.SortDirection
 import java.sql.Timestamp
+import java.time.Instant
 import java.util.stream.Stream
 import javax.persistence.EntityManager
 
@@ -48,9 +49,17 @@ class BugDataProvider(private val entityManager: EntityManager, private val app:
             val solvedVersionCode = it[3]
             val solvedVersionName = it[4]
             val reportCount = it[5]
-            val maxReportDate = it[6]
-            val maxVersionCode = it[7]
+            var maxReportDate = it[6]
+            var maxVersionCode = it[7]
             val userCount = it[8]
+
+            if(maxReportDate == null) {
+                maxReportDate = Timestamp.from(Instant.MIN);
+            }
+            if(maxVersionCode == null) {
+                maxVersionCode = -1;
+            }
+
             VBug(
                 bug = Bug(
                     id = (bugId as Number).toInt(),
