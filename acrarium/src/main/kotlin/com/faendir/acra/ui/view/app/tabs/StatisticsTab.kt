@@ -15,10 +15,10 @@
  */
 package com.faendir.acra.ui.view.app.tabs
 
-import com.faendir.acra.model.App
-import com.faendir.acra.navigation.ParseAppParameter
+import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
-import com.faendir.acra.service.DataService
+import com.faendir.acra.persistence.report.ReportRepository
+import com.faendir.acra.persistence.version.VersionRepository
 import com.faendir.acra.ui.component.statistics.Statistics
 import com.faendir.acra.ui.view.app.AppView
 import com.vaadin.flow.router.Route
@@ -29,8 +29,8 @@ import com.vaadin.flow.router.Route
  */
 @View
 @Route(value = "statistics", layout = AppView::class)
-class StatisticsTab(private val dataService: DataService, @ParseAppParameter private val app: App) : AppTab<Statistics>(app) {
-    override fun initContent(): Statistics {
-        return Statistics(app, null, dataService)
-    }
-}
+class StatisticsTab(
+    reportRepository: ReportRepository,
+    versionRepository: VersionRepository,
+    routeParams: RouteParams,
+) : Statistics(routeParams.appId(), null, reportRepository, versionRepository)

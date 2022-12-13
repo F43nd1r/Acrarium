@@ -15,14 +15,6 @@
  */
 package com.faendir.acra.ui.component.dialog
 
-import com.faendir.acra.i18n.Messages
-import com.faendir.acra.util.catching
-import com.vaadin.flow.component.Component
-import com.vaadin.flow.component.HasSize
-import com.vaadin.flow.component.orderedlayout.FlexLayout
-import org.springframework.data.util.Pair
-import kotlin.streams.asSequence
-
 /**
  * @author Lukas
  * @since 19.12.2017
@@ -33,12 +25,12 @@ class FluentDialog : AcrariumDialog() {
     fun validatedField(validatedField: ValidatedField<*, *>, isInitialValid: Boolean = false) {
         val listener: (Boolean) -> Unit = { updateField(validatedField, it) }
         validatedField.addListener(listener)
-        fields[validatedField] = Pair.of(isInitialValid, listener)
+        fields[validatedField] = Pair(isInitialValid, listener)
         add(validatedField.field)
     }
 
     private fun updateField(field: ValidatedField<*, *>, value: Boolean) {
-        fields[field] = Pair.of(value, fields[field]!!.second)
+        fields[field] = Pair(value, fields[field]!!.second)
         checkValid()
     }
 

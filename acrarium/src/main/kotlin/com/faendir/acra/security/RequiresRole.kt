@@ -1,5 +1,5 @@
 package com.faendir.acra.security
 
-import com.faendir.acra.model.User
+import com.faendir.acra.persistence.user.Role
 
-annotation class RequiresRole(val value: User.Role)
+annotation class RequiresRole(val value: Role)

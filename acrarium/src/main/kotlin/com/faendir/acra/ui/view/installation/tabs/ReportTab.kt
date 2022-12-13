@@ -15,13 +15,11 @@
  */
 package com.faendir.acra.ui.view.installation.tabs
 
-import com.faendir.acra.model.App
-import com.faendir.acra.navigation.ParseAppParameter
-import com.faendir.acra.navigation.ParseInstallationParameter
+import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
-import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.ReportList
 import com.faendir.acra.ui.view.installation.InstallationView
+import com.vaadin.flow.component.Composite
 import com.vaadin.flow.router.Route
 
 /**
@@ -31,13 +29,13 @@ import com.vaadin.flow.router.Route
 @View("installationReportTab")
 @Route(value = "report", layout = InstallationView::class)
 class ReportTab(
-    private val dataService: DataService,
     private val reportListFactory: ReportList.Factory,
-    @ParseAppParameter private val app: App,
-    @ParseInstallationParameter private val installationId: String
-) : InstallationTab<ReportList>(app, installationId) {
+    routeParams: RouteParams,
+) : Composite<ReportList>() {
+    private val appId = routeParams.appId()
+    private val installationId = routeParams.installationId()
 
     override fun initContent(): ReportList {
-        return reportListFactory.create(app, dataService.getReportProvider(app, installationId))
+        return reportListFactory.create(appId) { reportService, appId, customColumns -> reportService.getProvider(appId, installationId, customColumns) }
     }
 }

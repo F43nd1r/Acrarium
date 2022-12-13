@@ -15,28 +15,45 @@
  */
 package com.faendir.acra.ui.view
 
+import com.faendir.acra.domain.ReportService
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.i18n.TranslatableText
-import com.faendir.acra.model.QApp
-import com.faendir.acra.model.QBug
-import com.faendir.acra.model.QReport
-import com.faendir.acra.model.User
 import com.faendir.acra.navigation.View
+import com.faendir.acra.persistence.app.AppRepository
+import com.faendir.acra.persistence.app.AppStats
+import com.faendir.acra.persistence.app.Reporter
+import com.faendir.acra.persistence.user.Role
 import com.faendir.acra.security.SecurityUtils
-import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.HasAcrariumTitle
 import com.faendir.acra.ui.component.dialog.closeButton
 import com.faendir.acra.ui.component.dialog.createButton
 import com.faendir.acra.ui.component.dialog.showFluentDialog
 import com.faendir.acra.ui.component.grid.column
-import com.faendir.acra.ui.ext.*
-import com.faendir.acra.ui.view.app.tabs.AppTab
+import com.faendir.acra.ui.ext.SizeUnit
+import com.faendir.acra.ui.ext.basicLayoutPersistingFilterableGrid
+import com.faendir.acra.ui.ext.configurationLabel
+import com.faendir.acra.ui.ext.content
+import com.faendir.acra.ui.ext.flexLayout
+import com.faendir.acra.ui.ext.setMarginRight
+import com.faendir.acra.ui.ext.translatableButton
+import com.faendir.acra.ui.ext.translatableCheckbox
+import com.faendir.acra.ui.ext.translatableLabel
+import com.faendir.acra.ui.ext.translatableNumberField
+import com.faendir.acra.ui.ext.translatableTextField
+import com.faendir.acra.ui.view.app.AppView
 import com.faendir.acra.ui.view.app.tabs.BugTab
 import com.faendir.acra.ui.view.main.MainView
+import com.faendir.acra.util.catching
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.router.Route
+import org.acra.ReportField
+import org.ektorp.CouchDbConnector
+import org.ektorp.http.StdHttpClient
+import org.ektorp.impl.StdCouchDbConnector
+import org.ektorp.impl.StdCouchDbInstance
+import org.json.JSONObject
 
 /**
  * @author lukas
@@ -44,28 +61,28 @@ import com.vaadin.flow.router.Route
  */
 @View
 @Route(value = "", layout = MainView::class)
-class Overview(private val dataService: DataService) : Composite<VerticalLayout>(), HasAcrariumTitle {
+class Overview(private val appRepository: AppRepository, private val reportService: ReportService) : Composite<VerticalLayout>(), HasAcrariumTitle {
     init {
         content {
             setSizeFull()
-            val grid = queryDslAcrariumGrid(dataService.getAppProvider()) {
+            val grid = basicLayoutPersistingFilterableGrid(appRepository.getProvider()) {
                 setSelectionMode(Grid.SelectionMode.NONE)
                 column({ it.name }) {
-                    setSortable(QApp.app.name)
+                    setSortable(AppStats.Sort.NAME)
                     setCaption(Messages.NAME)
                     flexGrow = 1
                 }
                 column({ it.bugCount }) {
-                    setSortable(QBug.bug.countDistinct())
+                    setSortable(AppStats.Sort.BUG_COUNT)
                     setCaption(Messages.BUGS)
                 }
                 column({ it.reportCount }) {
-                    setSortable(QReport.report.count())
+                    setSortable(AppStats.Sort.REPORT_COUNT)
                     setCaption(Messages.REPORTS)
                 }
-                addOnClickNavigation(BugTab::class.java) { AppTab.getNavigationParams(it.app) }
+                addOnClickNavigation(BugTab::class.java) { AppView.getNavigationParams(it.id) }
             }
-            if (SecurityUtils.hasRole(User.Role.ADMIN)) {
+            if (SecurityUtils.hasRole(Role.ADMIN)) {
                 flexLayout {
                     translatableButton(Messages.NEW_APP) {
                         showFluentDialog {
@@ -73,7 +90,7 @@ class Overview(private val dataService: DataService) : Composite<VerticalLayout>
                             val name = translatableTextField(Messages.NAME)
                             createButton {
                                 showFluentDialog {
-                                    configurationLabel(dataService.createNewApp(name.getContent().value))
+                                    configurationLabel(appRepository.create(name.getContent().value))
                                     closeButton()
                                 }
                                 grid.dataProvider.refreshAll()
@@ -92,10 +109,10 @@ class Overview(private val dataService: DataService) : Composite<VerticalLayout>
                             val ssl = translatableCheckbox(Messages.SSL)
                             val databaseName = translatableTextField(Messages.DATABASE_NAME) { value = "acra-myapp" }
                             createButton {
-                                val importResult = dataService.importFromAcraStorage(host.getValue(), port.getValue().toInt(), ssl.getValue(), databaseName.getValue())
+                                val importResult = importFromAcraStorage(host.getValue(), port.getValue().toInt(), ssl.getValue(), databaseName.getValue())
                                 showFluentDialog {
                                     translatableLabel(Messages.IMPORT_SUCCESS, importResult.successCount, importResult.totalCount)
-                                    configurationLabel(importResult.user)
+                                    configurationLabel(importResult.reporter)
                                     closeButton()
                                 }
                                 grid.dataProvider.refreshAll()
@@ -108,4 +125,32 @@ class Overview(private val dataService: DataService) : Composite<VerticalLayout>
     }
 
     override val title = TranslatableText(Messages.HOME)
+
+    private fun importFromAcraStorage(host: String, port: Int, ssl: Boolean, database: String): ImportResult {
+        val httpClient = StdHttpClient.Builder().host(host).port(port).enableSSL(ssl).build()
+        val db: CouchDbConnector = StdCouchDbConnector(database, StdCouchDbInstance(httpClient))
+        val reporter = appRepository.create(database.replaceFirst("acra-".toRegex(), ""))
+        var total = 0
+        var success = 0
+        for (id in db.allDocIds) {
+            if (!id.startsWith("_design")) {
+                total++
+                catching {
+                    val report = JSONObject(db.getAsStream(id).reader(Charsets.UTF_8).use { it.readText() })
+                    fixStringIsArray(report, ReportField.STACK_TRACE)
+                    fixStringIsArray(report, ReportField.LOGCAT)
+                    reportService.create(reporter.username, report.toString(), emptyList())
+                    success++
+                }
+            }
+        }
+        httpClient.shutdown()
+        return ImportResult(reporter, total, success)
+    }
+
+    data class ImportResult(val reporter: Reporter, val totalCount: Int, val successCount: Int)
+
+    private fun fixStringIsArray(report: JSONObject, reportField: ReportField) {
+        report.optJSONArray(reportField.name)?.let { report.put(reportField.name, it.filterIsInstance<String>().joinToString("\n")) }
+    }
 }

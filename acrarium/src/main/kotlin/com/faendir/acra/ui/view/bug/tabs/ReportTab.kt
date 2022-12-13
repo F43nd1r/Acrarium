@@ -15,12 +15,11 @@
  */
 package com.faendir.acra.ui.view.bug.tabs
 
-import com.faendir.acra.model.Bug
-import com.faendir.acra.navigation.ParseBugParameter
+import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
-import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.ReportList
 import com.faendir.acra.ui.view.bug.BugView
+import com.vaadin.flow.component.Composite
 import com.vaadin.flow.router.Route
 
 /**
@@ -30,13 +29,11 @@ import com.vaadin.flow.router.Route
 @View("bugReportTab")
 @Route(value = "report", layout = BugView::class)
 class ReportTab(
-    private val dataService: DataService,
     private val reportListFactory: ReportList.Factory,
-    @ParseBugParameter
-    private val bug: Bug
-) : BugTab<ReportList>(bug) {
+    private val routeParams: RouteParams,
+) : Composite<ReportList>() {
 
     override fun initContent(): ReportList {
-        return reportListFactory.create(bug.app, dataService.getReportProvider(bug))
+        return reportListFactory.create(routeParams.appId()) { reportService, appId, customColumns -> reportService.getProvider(appId, routeParams.bugId(), customColumns) }
     }
 }

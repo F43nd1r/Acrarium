@@ -15,15 +15,12 @@
  */
 package com.faendir.acra.security
 
-import com.faendir.acra.model.App
-import com.faendir.acra.model.Permission
-import com.faendir.acra.model.User
-import com.vaadin.flow.server.HandlerHelper.RequestType
-import com.vaadin.flow.shared.ApplicationConstants
+import com.faendir.acra.persistence.app.AppId
+import com.faendir.acra.persistence.user.Role
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.security.authentication.AnonymousAuthenticationToken
+import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
-import javax.servlet.http.HttpServletRequest
 
 
 object SecurityUtils {
@@ -31,32 +28,30 @@ object SecurityUtils {
     fun isLoggedIn(): Boolean = SecurityContextHolder.getContext().authentication?.takeIf { it !is AnonymousAuthenticationToken }?.isAuthenticated ?: false
 
     @JvmStatic
-    fun hasRole(role: User.Role): Boolean = SecurityContextHolder.getContext().authentication?.authorities?.any { it.authority == role.authority } ?: false
+    fun hasRole(role: Role): Boolean = SecurityContextHolder.getContext().authentication?.authorities?.any { it.authority == role.authority } ?: false
+
+    @JvmStatic
+    fun getAuthorities(): Collection<GrantedAuthority> = SecurityContextHolder.getContext().authentication?.authorities ?: emptySet()
 
     @JvmStatic
     fun getUsername(): String = SecurityContextHolder.getContext().authentication?.name ?: ""
 
     @JvmStatic
-    fun hasPermission(app: App, level: Permission.Level): Boolean = SecurityContextHolder.getContext().authentication?.let {
-        getPermission(app, it.authorities.filterIsInstance<Permission>()) { hasRole(User.Role.ADMIN) }.ordinal >= level.ordinal
+    fun hasPermission(appId: AppId, level: com.faendir.acra.persistence.user.Permission.Level): Boolean = SecurityContextHolder.getContext().authentication?.let {
+        getPermission(appId, it.authorities.filterIsInstance<com.faendir.acra.persistence.user.Permission>()) { hasRole(Role.ADMIN) } >= level
     } ?: false
 
     @JvmStatic
-    fun hasAccess(getApp: () -> App, target: Class<*>): Boolean {
+    fun hasAccess(getApp: () -> AppId, target: Class<*>): Boolean {
         return AnnotationUtils.findAnnotation(target, RequiresRole::class.java)?.let { hasRole(it.value) } ?: true &&
                 AnnotationUtils.findAnnotation(target, RequiresPermission::class.java)?.let { hasPermission(getApp(), it.value) } ?: true
     }
 
-    @JvmStatic
-    fun getPermission(app: App, user: User): Permission.Level = getPermission(app, user.permissions) { user.roles.contains(User.Role.ADMIN) }
-
-    private fun getPermission(app: App, permissionStream: Collection<Permission>, isAdmin: () -> Boolean): Permission.Level =
-        permissionStream.firstOrNull { it.app == app }?.level ?: if (isAdmin()) Permission.Level.ADMIN else Permission.Level.NONE
-
-
-    @JvmStatic
-    fun isFrameworkInternalRequest(request: HttpServletRequest): Boolean {
-        val parameterValue = request.getParameter(ApplicationConstants.REQUEST_TYPE_PARAMETER)
-        return (parameterValue != null && RequestType.values().any { it.identifier == parameterValue })
-    }
+    private fun getPermission(
+        appId: AppId,
+        permissionStream: Collection<com.faendir.acra.persistence.user.Permission>,
+        isAdmin: () -> Boolean
+    ): com.faendir.acra.persistence.user.Permission.Level =
+        permissionStream.firstOrNull { it.appId == appId }?.level
+            ?: if (isAdmin()) com.faendir.acra.persistence.user.Permission.Level.ADMIN else com.faendir.acra.persistence.user.Permission.Level.NONE
 }

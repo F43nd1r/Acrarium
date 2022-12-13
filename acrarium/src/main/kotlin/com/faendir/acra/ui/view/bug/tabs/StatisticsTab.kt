@@ -15,11 +15,11 @@
  */
 package com.faendir.acra.ui.view.bug.tabs
 
-import com.faendir.acra.model.Bug
-import com.faendir.acra.model.QReport
-import com.faendir.acra.navigation.ParseBugParameter
+import com.faendir.acra.jooq.generated.Tables.REPORT
+import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
-import com.faendir.acra.service.DataService
+import com.faendir.acra.persistence.report.ReportRepository
+import com.faendir.acra.persistence.version.VersionRepository
 import com.faendir.acra.ui.component.statistics.Statistics
 import com.faendir.acra.ui.view.bug.BugView
 import com.vaadin.flow.router.Route
@@ -30,9 +30,8 @@ import com.vaadin.flow.router.Route
  */
 @View("bugStatisticsTab")
 @Route(value = "statistics", layout = BugView::class)
-class StatisticsTab(private val dataService: DataService, @ParseBugParameter private val bug: Bug) : BugTab<Statistics>(bug) {
-
-    override fun initContent(): Statistics {
-        return Statistics(bug.app, QReport.report.stacktrace.bug.eq(bug), dataService)
-    }
-}
+class StatisticsTab(
+    reportRepository: ReportRepository,
+    versionRepository: VersionRepository,
+    routeParams: RouteParams,
+) : Statistics(routeParams.appId(), REPORT.BUG_ID.eq(routeParams.bugId()), reportRepository, versionRepository)

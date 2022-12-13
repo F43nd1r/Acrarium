@@ -16,12 +16,11 @@
 package com.faendir.acra.ui.view.bug.tabs.admincards
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.model.Bug
-import com.faendir.acra.model.Permission
-import com.faendir.acra.navigation.ParseBugParameter
+import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
+import com.faendir.acra.persistence.bug.BugRepository
+import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.security.RequiresPermission
-import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.content
@@ -30,24 +29,28 @@ import com.faendir.acra.ui.ext.translatableButton
 import com.faendir.acra.ui.ext.translatableTextArea
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexLayout
+import com.vaadin.flow.router.NotFoundException
 
 @View
 @RequiresPermission(Permission.Level.EDIT)
-class PropertiesCard(dataService: DataService, @ParseBugParameter bug: Bug) : AdminCard(dataService) {
+class PropertiesCard(
+    bugRepository: BugRepository,
+    routeParams: RouteParams,
+) : AdminCard() {
+    private val appId = routeParams.appId()
+    private val bugId = routeParams.bugId()
+
     init {
         content {
             setHeader(Translatable.createLabel(Messages.PROPERTIES))
             flexLayout {
-                setFlexDirection(FlexLayout.FlexDirection.COLUMN)
+                flexDirection = FlexLayout.FlexDirection.COLUMN
                 alignItems = FlexComponent.Alignment.END
                 val title = translatableTextArea(Messages.TITLE) {
-                    value = bug.title
+                    value = (bugRepository.find(bugId) ?: throw NotFoundException()).title
                     setWidthFull()
                 }
-                translatableButton(Messages.SAVE) {
-                    bug.title = title.content.value
-                    dataService.store(bug)
-                }
+                translatableButton(Messages.SAVE) { bugRepository.setTitle(appId, bugId, title.content.value) }
             }
         }
     }

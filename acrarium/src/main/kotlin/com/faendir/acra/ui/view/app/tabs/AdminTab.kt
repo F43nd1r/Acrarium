@@ -15,13 +15,16 @@
  */
 package com.faendir.acra.ui.view.app.tabs
 
-import com.faendir.acra.model.App
-import com.faendir.acra.navigation.ParseAppParameter
 import com.faendir.acra.navigation.View
 import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.CardView
+import com.faendir.acra.ui.component.SpringComposite
 import com.faendir.acra.ui.view.app.AppView
-import com.faendir.acra.ui.view.app.tabs.admincards.*
+import com.faendir.acra.ui.view.app.tabs.admincards.CustomColumnCard
+import com.faendir.acra.ui.view.app.tabs.admincards.DangerCard
+import com.faendir.acra.ui.view.app.tabs.admincards.ExportCard
+import com.faendir.acra.ui.view.app.tabs.admincards.NotificationCard
+import com.faendir.acra.ui.view.app.tabs.admincards.VersionCard
 import com.vaadin.flow.router.Route
 
 /**
@@ -30,7 +33,7 @@ import com.vaadin.flow.router.Route
  */
 @View
 @Route(value = "admin", layout = AppView::class)
-class AdminTab(@ParseAppParameter app: App) : AppTab<CardView<AdminCard>>(app) {
+class AdminTab : SpringComposite<CardView<AdminCard>>() {
     init {
         content.add(VersionCard::class, NotificationCard::class, ExportCard::class, CustomColumnCard::class, DangerCard::class)
     }

@@ -9,6 +9,9 @@ plugins {
 repositories {
     mavenCentral()
     gradlePluginPortal()
+    maven { setUrl("https://repo.spring.io/milestone") }
+    maven { setUrl("https://maven.vaadin.com/vaadin-prereleases/") }
+    maven { setUrl("https://repository.apache.org/content/repositories/snapshots") }
 }
 
 dependencies {

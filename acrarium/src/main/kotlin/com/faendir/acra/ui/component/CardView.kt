@@ -15,7 +15,7 @@
  */
 package com.faendir.acra.ui.component
 
-import com.faendir.acra.navigation.ParameterParser
+import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
 import com.faendir.acra.security.SecurityUtils
 import com.vaadin.flow.component.Component
@@ -26,7 +26,7 @@ import org.springframework.context.ApplicationContext
 import kotlin.reflect.KClass
 
 @View
-class CardView<C : Composite<Card>>(private val context: ApplicationContext, private val parameterParser: ParameterParser) : FlexLayout() {
+class CardView<C : Composite<Card>>(private val context: ApplicationContext, private val routeParams: RouteParams) : FlexLayout() {
 
     init {
         setWidthFull()
@@ -36,6 +36,6 @@ class CardView<C : Composite<Card>>(private val context: ApplicationContext, pri
 
     @SafeVarargs
     fun add(vararg cards: KClass<out C>) {
-        add(*cards.map { it.java }.filter { SecurityUtils.hasAccess(parameterParser::parseApp, it) }.map { context.getBean(it) }.toTypedArray<Component>())
+        add(*cards.map { it.java }.filter { SecurityUtils.hasAccess(routeParams::appId, it) }.map { context.getBean(it) }.toTypedArray<Component>())
     }
 }

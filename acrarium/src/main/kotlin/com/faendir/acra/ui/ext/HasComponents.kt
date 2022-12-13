@@ -1,21 +1,21 @@
 package com.faendir.acra.ui.ext
 
-import com.faendir.acra.dataprovider.QueryDslDataProvider
-import com.faendir.acra.model.User
-import com.faendir.acra.service.AvatarService
-import com.faendir.acra.service.UserService
+import com.faendir.acra.dataprovider.AcrariumDataProvider
+import com.faendir.acra.domain.AvatarService
+import com.faendir.acra.persistence.app.Reporter
+import com.faendir.acra.persistence.user.Role
 import com.faendir.acra.ui.component.Box
 import com.faendir.acra.ui.component.Card
 import com.faendir.acra.ui.component.ConfigurationLabel
+import com.faendir.acra.ui.component.CssGridLayout
 import com.faendir.acra.ui.component.DownloadButton
 import com.faendir.acra.ui.component.InstallationView
 import com.faendir.acra.ui.component.RangeField
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.UserEditor
 import com.faendir.acra.ui.component.grid.BasicCustomColumnGrid
-import com.faendir.acra.ui.component.grid.QueryDslAcrariumGrid
+import com.faendir.acra.ui.component.grid.BasicLayoutPersistingFilterableGrid
 import com.faendir.acra.ui.component.tabs.Tab
-import com.github.appreciated.layout.GridLayout
 import com.vaadin.flow.component.AbstractField
 import com.vaadin.flow.component.ClickEvent
 import com.vaadin.flow.component.HasComponents
@@ -40,8 +40,8 @@ import com.vaadin.flow.component.textfield.TextArea
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.server.AbstractStreamResource
 
-fun HasComponents.gridLayout(initializer: GridLayout.() -> Unit = {}) {
-    add(GridLayout().apply(initializer))
+fun HasComponents.gridLayout(initializer: CssGridLayout.() -> Unit = {}) {
+    add(CssGridLayout().apply(initializer))
 }
 
 fun HasComponents.translatableLabel(captionId: String, vararg params: Any, initializer: Label.() -> Unit = {}) {
@@ -84,12 +84,15 @@ fun HasComponents.loginForm(loginI18n: LoginI18n, initializer: LoginForm.() -> U
     add(LoginForm(loginI18n).apply(initializer))
 }
 
-fun HasComponents.userEditor(userService: UserService, user: User, isExistingUser: Boolean, onSuccess: () -> Unit) {
-    add(UserEditor(userService, null, user, isExistingUser, onSuccess))
+fun HasComponents.userEditor(userRepository: com.faendir.acra.persistence.user.UserRepository, grantRoles: Set<Role>, onSuccess: () -> Unit) {
+    add(UserEditor(userRepository, null, null, grantRoles, onSuccess))
 }
 
-fun <T : Any> HasComponents.queryDslAcrariumGrid(dataProvider: QueryDslDataProvider<T>, initializer: QueryDslAcrariumGrid<T>.() -> Unit): QueryDslAcrariumGrid<T> {
-    val grid = QueryDslAcrariumGrid(dataProvider)
+fun <T : Any, F : Any, S : Any> HasComponents.basicLayoutPersistingFilterableGrid(
+    dataProvider: AcrariumDataProvider<T, F, S>,
+    initializer: BasicLayoutPersistingFilterableGrid<T, F, S>.() -> Unit
+): BasicLayoutPersistingFilterableGrid<T, F, S> {
+    val grid = BasicLayoutPersistingFilterableGrid(dataProvider)
     grid.initializer()
     add(grid)
     return grid
@@ -111,8 +114,8 @@ fun HasComponents.checkbox(initializer: Checkbox.() -> Unit = {}) {
     add(Checkbox().apply(initializer))
 }
 
-fun <T> HasComponents.translatableSelect(items: Collection<T>, captionId: String, vararg params: Any, initializer: Select<T>.() -> Unit = {}) {
-    add(Translatable.createSelect(items, captionId, *params).with(initializer))
+fun <T> HasComponents.translatableSelect(items: Collection<T>, getLabel: (T) -> String, captionId: String, vararg params: Any, initializer: Select<T>.() -> Unit = {}) {
+    add(Translatable.createSelect(items, getLabel, captionId, *params).with(initializer))
 }
 
 fun HasComponents.tabs(initializer: Tabs.() -> Unit = {}): Tabs {
@@ -153,8 +156,8 @@ fun HasComponents.translatableText(captionId: String, vararg params: Any, initia
     add(Translatable.createText(captionId, *params).with(initializer))
 }
 
-fun HasComponents.configurationLabel(user: User) {
-    add(ConfigurationLabel.forUser(user))
+fun HasComponents.configurationLabel(user: Reporter) {
+    add(ConfigurationLabel.forReporter(user))
 }
 
 fun HasComponents.translatableRangeField(

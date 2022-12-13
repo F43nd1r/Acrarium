@@ -16,49 +16,58 @@
 package com.faendir.acra.ui.view.app.tabs.admincards
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.model.App
-import com.faendir.acra.model.Permission
-import com.faendir.acra.model.QVersion
-import com.faendir.acra.navigation.ParseAppParameter
+import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
+import com.faendir.acra.persistence.user.Permission
+import com.faendir.acra.persistence.version.Version
+import com.faendir.acra.persistence.version.VersionRepository
 import com.faendir.acra.security.SecurityUtils
-import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.VersionEditorDialog
 import com.faendir.acra.ui.component.dialog.confirmButtons
 import com.faendir.acra.ui.component.dialog.showFluentDialog
-import com.faendir.acra.ui.component.grid.ButtonRenderer
 import com.faendir.acra.ui.component.grid.column
-import com.faendir.acra.ui.ext.*
+import com.faendir.acra.ui.component.grid.renderer.ButtonRenderer
+import com.faendir.acra.ui.ext.SizeUnit
+import com.faendir.acra.ui.ext.basicLayoutPersistingFilterableGrid
+import com.faendir.acra.ui.ext.content
+import com.faendir.acra.ui.ext.setHeight
+import com.faendir.acra.ui.ext.setMinHeight
+import com.faendir.acra.ui.ext.translatableText
 import com.vaadin.flow.component.icon.Icon
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.data.renderer.IconRenderer
 
 @View
-class VersionCard(dataService: DataService, @ParseAppParameter app: App) : AdminCard(dataService) {
+class VersionCard(
+    private val versionRepository: VersionRepository,
+    routeParams: RouteParams,
+) : AdminCard() {
+    private val appId = routeParams.appId()
+
     init {
         content {
             setHeader(Translatable.createLabel(Messages.VERSIONS))
-            queryDslAcrariumGrid(dataService.getVersionProvider(app)) {
+            basicLayoutPersistingFilterableGrid(versionRepository.getProvider(appId)) {
                 setMinHeight(280, SizeUnit.PIXEL)
                 setHeight(100, SizeUnit.PERCENTAGE)
                 column({ it.code }) {
-                    setSortable(QVersion.version.code)
+                    setSortable(Version.Sort.CODE)
                     setCaption(Messages.VERSION_CODE)
                     flexGrow = 1
                 }
                 column({ it.name }) {
-                    setSortable(QVersion.version.name)
+                    setSortable(Version.Sort.NAME)
                     setCaption(Messages.VERSION)
                     flexGrow = 1
                 }
                 column(IconRenderer({ Icon(if (it.mappings != null) VaadinIcon.CHECK else VaadinIcon.CLOSE) }, { "" })) {
-                    setSortable(QVersion.version.mappings)
+                    setSortable(Version.Sort.MAPPINGS)
                     setCaption(Messages.PROGUARD_MAPPINGS)
                 }
-                if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
-                    column(ButtonRenderer(VaadinIcon.EDIT) { VersionEditorDialog(dataService, app, { dataProvider.refreshAll() }, it).open() }) {
+                if (SecurityUtils.hasPermission(appId, Permission.Level.EDIT)) {
+                    column(ButtonRenderer(VaadinIcon.EDIT) { VersionEditorDialog(versionRepository, appId, { dataProvider.refreshAll() }, it).open() }) {
                         width = "50px"
                         isAutoWidth = false
                     }
@@ -66,7 +75,7 @@ class VersionCard(dataService: DataService, @ParseAppParameter app: App) : Admin
                         showFluentDialog {
                             translatableText(Messages.DELETE_VERSION_CONFIRM, it.code)
                             confirmButtons {
-                                dataService.deleteVersion(it)
+                                versionRepository.delete(it)
                                 dataProvider.refreshAll()
                             }
                         }
@@ -74,8 +83,8 @@ class VersionCard(dataService: DataService, @ParseAppParameter app: App) : Admin
                         width = "50px"
                         isAutoWidth = false
                     }
-                    appendFooterRow().getCell(columns[0]).setComponent(
-                        Translatable.createButton(Messages.NEW_VERSION) { VersionEditorDialog(dataService, app, { dataProvider.refreshAll() }).open() })
+                    appendFooterRow().getCell(columns[0]).component =
+                        Translatable.createButton(Messages.NEW_VERSION) { VersionEditorDialog(versionRepository, appId, { dataProvider.refreshAll() }).open() }
                 }
             }
         }

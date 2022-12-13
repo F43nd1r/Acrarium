@@ -1,5 +1,6 @@
 package com.faendir.acra.ui.component.grid
 
+import com.faendir.acra.dataprovider.AcrariumDataProvider
 import com.faendir.acra.settings.GridSettings
 import com.faendir.acra.ui.ext.setFlexGrow
 import com.faendir.acra.ui.ext.setMarginRight
@@ -12,8 +13,7 @@ open class AcrariumGridView<T : Any, F : Any, S : Any, C : FilterableSortableLoc
     layoutPersistingFilterableGrid: G,
     gridSettings: KMutableProperty0<GridSettings?>,
     initializer: G.() -> Unit = {}
-) :
-    VerticalLayout() {
+) : VerticalLayout() {
 
     val grid: G = layoutPersistingFilterableGrid.apply {
         initializer()
@@ -41,6 +41,16 @@ open class AcrariumGridView<T : Any, F : Any, S : Any, C : FilterableSortableLoc
         columnMenu.update()
     }
 }
+
+class BasicLayoutPersistingFilterableGridView<T : Any, F : Any, S : Any>(
+    dataProvider: AcrariumDataProvider<T, F, S>,
+    gridSettings: KMutableProperty0<GridSettings?>,
+    initializer: BasicLayoutPersistingFilterableGrid<T, F, S>.() -> Unit
+) : AcrariumGridView<T, F, S, FilterableSortableLocalizedColumn<T, F, S>, BasicLayoutPersistingFilterableGrid<T, F, S>>(
+    BasicLayoutPersistingFilterableGrid(dataProvider, gridSettings.get()),
+    gridSettings,
+    initializer
+)
 
 fun <T : Any, F : Any, S : Any, C : FilterableSortableLocalizedColumn<T, F, S>, G : LayoutPersistingFilterableGrid<T, F, S, C>> AcrariumGridView<T, F, S, C, G>.grid(initializer: G.() -> Unit) {
     grid.apply(initializer)

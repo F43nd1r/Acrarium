@@ -22,14 +22,18 @@ open class FilterableSortableLocalizedColumn<T : Any, F: Any, S: Any>(grid: Grid
         isSortable = true
     }
 
-    fun setFilterable(createFilter: (String) -> F, captionId: String, vararg params: Any) {
+    fun setFilterableContains(createFilter: (String) -> F, captionId: String, vararg params: Any) {
         setFilterable(Translatable.createTextFieldWithHint(captionId, *params).with {
             valueChangeMode = ValueChangeMode.EAGER
         }, null) { parameter -> parameter?.let { createFilter(it) } }
     }
 
-    fun setFilterable(filter: F, default: Boolean, captionId: String, vararg params: Any) {
-        return setFilterable(Translatable.createCheckbox(captionId, *params).with { value = default }, default) { if (it) filter else null }
+    fun setFilterableToggle(filter: F, default: Boolean, captionId: String, vararg params: Any) {
+        setFilterable(Translatable.createCheckbox(captionId, *params).with { value = default }, default) { if (it) filter else null }
+    }
+
+    fun <U> setFilterableIs(options: List<U>, getLabel: (U) -> String, createFilter: (U & Any) -> F, captionId: String, vararg params: Any) {
+        setFilterable(Translatable.createSelect(options, getLabel, captionId, params), null) { parameter -> parameter?.let { createFilter(it) } }
     }
 
     private fun <C, U> setFilterable(

@@ -17,25 +17,25 @@ package com.faendir.acra.ui.view.user
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.i18n.TranslatableText
-import com.faendir.acra.model.Permission
-import com.faendir.acra.model.QUser
-import com.faendir.acra.model.User
 import com.faendir.acra.navigation.View
+import com.faendir.acra.persistence.app.AppRepository
+import com.faendir.acra.persistence.user.Permission
+import com.faendir.acra.persistence.user.Role
+import com.faendir.acra.persistence.user.UserAuthorities
+import com.faendir.acra.persistence.user.UserRepository
 import com.faendir.acra.security.RequiresRole
 import com.faendir.acra.security.SecurityUtils
-import com.faendir.acra.service.DataService
-import com.faendir.acra.service.UserService
 import com.faendir.acra.ui.component.HasAcrariumTitle
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.ValidatedField
 import com.faendir.acra.ui.component.dialog.confirmButtons
 import com.faendir.acra.ui.component.dialog.createButton
 import com.faendir.acra.ui.component.dialog.showFluentDialog
-import com.faendir.acra.ui.component.grid.ButtonRenderer
 import com.faendir.acra.ui.component.grid.column
+import com.faendir.acra.ui.component.grid.renderer.ButtonRenderer
+import com.faendir.acra.ui.ext.basicLayoutPersistingFilterableGrid
 import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.forEach
-import com.faendir.acra.ui.ext.queryDslAcrariumGrid
 import com.faendir.acra.ui.ext.translatableText
 import com.faendir.acra.ui.view.main.MainView
 import com.vaadin.flow.component.Composite
@@ -46,7 +46,6 @@ import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.data.renderer.ComponentRenderer
 import com.vaadin.flow.router.Route
-import java.util.*
 
 /**
  * @author lukas
@@ -54,24 +53,24 @@ import java.util.*
  */
 @View
 @Route(value = "user-manager", layout = MainView::class)
-@RequiresRole(User.Role.ADMIN)
-class UserManager(private val userService: UserService, private val dataService: DataService) : Composite<FlexLayout>(), HasAcrariumTitle {
+@RequiresRole(Role.ADMIN)
+class UserManager(private val userRepository: UserRepository, private val appRepository: AppRepository) : Composite<FlexLayout>(), HasAcrariumTitle {
     init {
         content {
-            setFlexDirection(FlexLayout.FlexDirection.COLUMN)
+            flexDirection = FlexLayout.FlexDirection.COLUMN
             setSizeFull()
-            queryDslAcrariumGrid(userService.getUserProvider()) {
+            basicLayoutPersistingFilterableGrid(userRepository.getProvider()) {
                 setWidthFull()
                 setSelectionMode(Grid.SelectionMode.NONE)
                 column({ it.username }) {
-                    setSortable(QUser.user.username)
+                    setSortable(UserAuthorities.Sort.USERNAME)
                     setCaption(Messages.USERNAME)
                     flexGrow = 1
                 }
-                column(ComponentRenderer { user: User ->
-                    Checkbox(user.roles.contains(User.Role.ADMIN)).apply {
+                column(ComponentRenderer { user: UserAuthorities ->
+                    Checkbox(user.roles.contains(Role.ADMIN)).apply {
                         addValueChangeListener {
-                            userService.setAdmin(user, it.value)
+                            userRepository.setRole(user.username, Role.ADMIN, it.value)
                             dataProvider.refreshAll()
                         }
                         isEnabled = user.username != SecurityUtils.getUsername()
@@ -79,22 +78,22 @@ class UserManager(private val userService: UserService, private val dataService:
                 }) {
                     setCaption(Messages.ADMIN)
                 }
-                column(ComponentRenderer { user: User ->
-                    Checkbox(user.roles.contains(User.Role.API)).apply {
+                column(ComponentRenderer { user: UserAuthorities ->
+                    Checkbox(user.roles.contains(Role.API)).apply {
                         addValueChangeListener {
-                            userService.setApiAccess(user, it.value)
+                            userRepository.setRole(user.username, Role.API, it.value)
                             dataProvider.refreshAll()
                         }
                     }
                 }) {
                     setCaption(Messages.API)
                 }
-                forEach(dataService.findAllApps()) { app ->
-                    column(ComponentRenderer { user: User ->
+                forEach(appRepository.getAllNames()) { app ->
+                    column(ComponentRenderer { user: UserAuthorities ->
                         ComboBox(null, *Permission.Level.values()).apply {
-                            value = SecurityUtils.getPermission(app, user)
+                            value = user.getPermissionLevel(app.id)
                             addValueChangeListener {
-                                userService.setPermission(user, app, it.value)
+                                userRepository.setPermission(user.username, app.id, it.value)
                                 dataProvider.refreshAll()
                             }
                         }
@@ -108,7 +107,7 @@ class UserManager(private val userService: UserService, private val dataService:
                     showFluentDialog {
                         translatableText(Messages.DELETE_USER_CONFIRM, it.username)
                         confirmButtons {
-                            userService.delete(it)
+                            userRepository.delete(it.username)
                             dataProvider.refreshAll()
                         }
                     }
@@ -116,7 +115,7 @@ class UserManager(private val userService: UserService, private val dataService:
                     width = "50px"
                     isAutoWidth = false
                 }
-                appendFooterRow().getCell(columns[0]).setComponent(Translatable.createButton(Messages.NEW_USER) {
+                appendFooterRow().getCell(columns[0]).component = Translatable.createButton(Messages.NEW_USER) {
                     showFluentDialog {
                         val name = Translatable.createTextField(Messages.USERNAME)
                         val password = Translatable.createPasswordField(Messages.PASSWORD)
@@ -128,11 +127,11 @@ class UserManager(private val userService: UserService, private val dataService:
                                 .addValidator({ it == password.content.value }, Messages.PASSWORDS_NOT_MATCHING)
                         )
                         createButton {
-                            userService.createUser(name.content.value.lowercase(Locale.getDefault()), password.content.value)
+                            userRepository.create(name.content.value, password.content.value, null)
                             dataProvider.refreshAll()
                         }
                     }
-                })
+                }
             }
         }
     }

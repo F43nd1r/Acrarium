@@ -16,25 +16,38 @@
 package com.faendir.acra.ui.view.app.tabs.admincards
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.model.App
-import com.faendir.acra.model.Permission
-import com.faendir.acra.model.QReport
-import com.faendir.acra.navigation.ParseAppParameter
+import com.faendir.acra.jooq.generated.Tables.REPORT
+import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
+import com.faendir.acra.persistence.app.AppRepository
+import com.faendir.acra.persistence.report.ReportRepository
+import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.security.RequiresPermission
-import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.closeButton
 import com.faendir.acra.ui.component.dialog.confirmButtons
 import com.faendir.acra.ui.component.dialog.showFluentDialog
-import com.faendir.acra.ui.ext.*
+import com.faendir.acra.ui.ext.box
+import com.faendir.acra.ui.ext.comboBox
+import com.faendir.acra.ui.ext.configurationLabel
+import com.faendir.acra.ui.ext.content
+import com.faendir.acra.ui.ext.translatableNumberField
+import com.faendir.acra.ui.ext.translatableText
 import com.faendir.acra.ui.view.Overview
 import com.vaadin.flow.component.UI
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @View
 @RequiresPermission(Permission.Level.ADMIN)
-class DangerCard(dataService: DataService, @ParseAppParameter val app: App) : AdminCard(dataService) {
+class DangerCard(
+    appRepository: AppRepository,
+    reportRepository: ReportRepository,
+    routeParams: RouteParams,
+) : AdminCard() {
+    private val appId = routeParams.appId()
+
     init {
         content {
             setHeader(Translatable.createLabel(Messages.DANGER_ZONE))
@@ -45,22 +58,9 @@ class DangerCard(dataService: DataService, @ParseAppParameter val app: App) : Ad
                     translatableText(Messages.NEW_ACRA_CONFIG_CONFIRM)
                     confirmButtons {
                         showFluentDialog {
-                            configurationLabel(dataService.recreateReporterUser(app))
+                            configurationLabel(appRepository.recreateReporter(appId))
                             closeButton()
                         }
-                    }
-                }
-            }
-            box(Messages.NEW_BUG_CONFIG, Messages.NEW_BUG_CONFIG_DETAILS, Messages.CONFIGURE) {
-                showFluentDialog {
-                    val score = translatableRangeField(Messages.SCORE) {
-                        min = 0.0
-                        max = 100.0
-                        value = app.configuration.minScore.toDouble()
-                    }
-                    translatableText(Messages.NEW_BUG_CONFIG_CONFIRM)
-                    confirmButtons {
-                        dataService.changeConfiguration(app, App.Configuration(score.getValue().toInt()))
                     }
                 }
             }
@@ -71,22 +71,22 @@ class DangerCard(dataService: DataService, @ParseAppParameter val app: App) : Ad
                         value = 30.0
                         step = 1.0
                         min = 1.0
-                        setHasControls(true)
+                        isStepButtonsVisible = true
                         setWidthFull()
                         suffixComponent = Translatable.createLabel(Messages.REPORTS_OLDER_THAN2)
                     }
                     confirmButtons {
-                        dataService.deleteReportsOlderThanDays(app, age.getValue().toInt())
+                        reportRepository.deleteBefore(appId, Instant.now().minus(age.getValue().toLong(), ChronoUnit.DAYS))
                     }
                 }
             }
             box(Messages.PURGE_VERSION, Messages.PURGE_VERSION_DETAILS, Messages.PURGE) {
                 showFluentDialog {
                     header(Messages.PURGE)
-                    val versionBox = comboBox(dataService.getFromReports(app, QReport.report.stacktrace.version.code), Messages.REPORTS_BEFORE_VERSION)
+                    val versionBox = comboBox(reportRepository.get(appId, REPORT.VERSION_CODE), Messages.REPORTS_BEFORE_VERSION)
                     confirmButtons {
                         if (versionBox.value != null) {
-                            dataService.deleteReportsBeforeVersion(app, versionBox.value!!)
+                            reportRepository.deleteBefore(appId, versionBox.value!!)
                         }
                     }
                 }
@@ -95,7 +95,7 @@ class DangerCard(dataService: DataService, @ParseAppParameter val app: App) : Ad
                 showFluentDialog {
                     translatableText(Messages.DELETE_APP_CONFIRM)
                     confirmButtons {
-                        dataService.deleteApp(app)
+                        appRepository.delete(appId)
                         UI.getCurrent().navigate(Overview::class.java)
                     }
                 }

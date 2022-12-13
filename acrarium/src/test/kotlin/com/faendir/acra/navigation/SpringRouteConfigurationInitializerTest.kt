@@ -2,8 +2,6 @@ package com.faendir.acra.navigation
 
 import com.faendir.acra.annotation.AcrariumTest
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
-import com.faendir.acra.util.PARAM_APP
-import com.faendir.acra.util.PARAM_BUG
 import com.vaadin.flow.router.RouteConfiguration
 import com.vaadin.flow.router.RouteParameters
 import org.junit.jupiter.api.Test

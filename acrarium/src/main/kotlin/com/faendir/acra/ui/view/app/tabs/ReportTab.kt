@@ -15,12 +15,12 @@
  */
 package com.faendir.acra.ui.view.app.tabs
 
-import com.faendir.acra.model.App
-import com.faendir.acra.navigation.ParseAppParameter
+import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
-import com.faendir.acra.service.DataService
+import com.faendir.acra.persistence.report.ReportRepository
 import com.faendir.acra.ui.component.ReportList
 import com.faendir.acra.ui.view.app.AppView
+import com.vaadin.flow.component.Composite
 import com.vaadin.flow.router.Route
 
 /**
@@ -30,13 +30,8 @@ import com.vaadin.flow.router.Route
 @View
 @Route(value = "report", layout = AppView::class)
 class ReportTab(
-    private val dataService: DataService,
     private val reportListFactory: ReportList.Factory,
-    @ParseAppParameter
-    private val app: App
-) : AppTab<ReportList>(app) {
-
-    override fun initContent(): ReportList {
-        return reportListFactory.create(app, dataService.getReportProvider(app))
-    }
+    private val routeParams: RouteParams,
+) : Composite<ReportList>() {
+    override fun initContent() = reportListFactory.create(routeParams.appId(), ReportRepository::getProvider)
 }

@@ -16,12 +16,16 @@
 package com.faendir.acra.ui.view.installation
 
 import com.faendir.acra.i18n.Messages
+import com.faendir.acra.navigation.LogicalParent
+import com.faendir.acra.navigation.PARAM_APP
+import com.faendir.acra.navigation.PARAM_INSTALLATION
+import com.faendir.acra.navigation.RouteParams
+import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.ui.component.tabs.TabView
+import com.faendir.acra.ui.view.app.tabs.InstallationTab
 import com.faendir.acra.ui.view.installation.tabs.ReportTab
 import com.faendir.acra.ui.view.installation.tabs.StatisticsTab
 import com.faendir.acra.ui.view.main.MainView
-import com.faendir.acra.util.PARAM_APP
-import com.faendir.acra.util.PARAM_INSTALLATION
 import com.vaadin.flow.router.ParentLayout
 import com.vaadin.flow.router.RoutePrefix
 import com.vaadin.flow.spring.annotation.SpringComponent
@@ -33,9 +37,18 @@ import com.vaadin.flow.spring.annotation.UIScope
  */
 @UIScope
 @SpringComponent
-@RoutePrefix("app/:${PARAM_APP}/installation/:$PARAM_INSTALLATION")
+@RoutePrefix("app/:$PARAM_APP/installation/:$PARAM_INSTALLATION")
 @ParentLayout(MainView::class)
-class InstallationView : TabView(
+@LogicalParent(InstallationTab::class)
+class InstallationView(
+    routeParams: RouteParams,
+) : TabView(
+    routeParams.installationId(),
     TabInfo(ReportTab::class, Messages.REPORTS),
     TabInfo(StatisticsTab::class, Messages.STATISTICS),
-)
+) {
+
+    companion object {
+        fun getNavigationParams(app: AppId, installationId: String) = mapOf(PARAM_APP to app.toString(), PARAM_INSTALLATION to installationId)
+    }
+}

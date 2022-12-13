@@ -42,4 +42,7 @@ pnpmfile.js
 **/target
 /target
 .flattened-pom.xml
+
 /acrarium/vite.generated.ts
+/acrarium/.pnpm-debug.log
+/acrarium/frontend/generated

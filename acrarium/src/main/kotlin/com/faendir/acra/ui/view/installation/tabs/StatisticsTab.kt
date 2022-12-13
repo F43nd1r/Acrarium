@@ -15,14 +15,14 @@
  */
 package com.faendir.acra.ui.view.installation.tabs
 
-import com.faendir.acra.model.App
-import com.faendir.acra.model.QReport
-import com.faendir.acra.navigation.ParseAppParameter
-import com.faendir.acra.navigation.ParseInstallationParameter
+import com.faendir.acra.jooq.generated.Tables.REPORT
+import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
-import com.faendir.acra.service.DataService
+import com.faendir.acra.persistence.report.ReportRepository
+import com.faendir.acra.persistence.version.VersionRepository
 import com.faendir.acra.ui.component.statistics.Statistics
 import com.faendir.acra.ui.view.installation.InstallationView
+import com.vaadin.flow.component.Composite
 import com.vaadin.flow.router.Route
 
 /**
@@ -31,10 +31,14 @@ import com.vaadin.flow.router.Route
  */
 @View("installationStatisticsTab")
 @Route(value = "statistics", layout = InstallationView::class)
-class StatisticsTab(private val dataService: DataService, @ParseAppParameter private val app: App, @ParseInstallationParameter private val installationId: String) :
-    InstallationTab<Statistics>(app, installationId) {
-
+class StatisticsTab(
+    private val reportRepository: ReportRepository,
+    private val versionRepository: VersionRepository,
+    routeParams: RouteParams,
+) : Composite<Statistics>() {
+    private val appId = routeParams.appId()
+    private val installationId = routeParams.installationId()
     override fun initContent(): Statistics {
-        return Statistics(app, QReport.report.stacktrace.bug.app.eq(app).and(QReport.report.installationId.eq(installationId)), dataService)
+        return Statistics(appId, REPORT.APP_ID.eq(appId).and(REPORT.INSTALLATION_ID.eq(installationId)), reportRepository, versionRepository)
     }
 }

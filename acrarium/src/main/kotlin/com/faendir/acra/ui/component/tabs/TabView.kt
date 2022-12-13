@@ -16,7 +16,8 @@
 package com.faendir.acra.ui.component.tabs
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.ui.component.SpringComposite
+import com.faendir.acra.i18n.TranslatableText
+import com.faendir.acra.ui.component.HasAcrariumTitle
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.forEach
 import com.faendir.acra.ui.ext.setFlexGrow
@@ -24,7 +25,6 @@ import com.faendir.acra.ui.ext.tabs
 import com.faendir.acra.util.indexOfFirstOrNull
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.HasElement
-import com.vaadin.flow.component.HasStyle
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.component.tabs.Tab
 import com.vaadin.flow.component.tabs.Tabs
@@ -40,14 +40,17 @@ import kotlin.reflect.KClass
  * @since 03.12.18
  */
 @Suppress("LeakingThis")
-open class TabView(private vararg val tabs: TabInfo<out TabContent<*>>) : FlexLayout() , RouterLayout, BeforeEnterObserver {
+open class TabView(
+    private val name: String,
+    private vararg val tabs: TabInfo<out Component>
+) : FlexLayout(), RouterLayout, BeforeEnterObserver, HasAcrariumTitle {
     private val header: Tabs
-    lateinit var content: TabContent<*>
+    lateinit var content: Component
     lateinit var parameters: RouteParameters
 
     init {
         setSizeFull()
-        setFlexDirection(FlexDirection.COLUMN)
+        flexDirection = FlexDirection.COLUMN
         header = tabs()
     }
 
@@ -60,24 +63,20 @@ open class TabView(private vararg val tabs: TabInfo<out TabContent<*>>) : FlexLa
     }
 
     override fun showRouterLayoutContent(content: HasElement) {
-        if(content is TabContent<*>) {
+        if (content is Component) {
             if (this::content.isInitialized) {
                 remove(this.content)
             }
-            this.content = content
-            content.setFlexGrow(1)
-            tabs.indexOfFirstOrNull { it.tabClass.java == content.javaClass }?.let { header.selectedIndex = it }
+            @Suppress("UNCHECKED_CAST")
+            val kClass = content::class as KClass<out Component>
+            this.content = content.apply { setFlexGrow(1) }
+            tabs.indexOfFirstOrNull { it.tabClass == kClass }?.let { header.selectedIndex = it }
             add(content)
         }
     }
 
     class TabInfo<T : Any>(val tabClass: KClass<T>, val labelId: String) : Serializable
 
-    abstract class TabContent<T : Component> : SpringComposite<T>(), HasRoute, HasStyle {
-        abstract val params: Map<String, String>
-        abstract val name: String
-
-        override val pathElement: Path.Element<*>
-            get() = Path.Element(this::class, params, Messages.ONE_ARG, name)
-    }
+    override val title: TranslatableText
+        get() = TranslatableText(Messages.ONE_ARG, name)
 }

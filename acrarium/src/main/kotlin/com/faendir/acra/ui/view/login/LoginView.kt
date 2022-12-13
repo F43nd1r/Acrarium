@@ -18,8 +18,8 @@ package com.faendir.acra.ui.view.login
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.i18n.TranslatableText
-import com.faendir.acra.model.User
 import com.faendir.acra.navigation.View
+import com.faendir.acra.persistence.user.Role
 import com.faendir.acra.ui.component.HasAcrariumTitle
 import com.faendir.acra.ui.ext.*
 import com.faendir.acra.ui.view.login.LoginView.Companion.ROUTE
@@ -32,6 +32,7 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.server.VaadinServletRequest
 import com.vaadin.flow.server.VaadinServletResponse
+import com.vaadin.flow.server.VaadinSession
 import com.vaadin.flow.server.auth.AnonymousAllowed
 import com.vaadin.flow.spring.security.VaadinDefaultRequestCache
 import org.springframework.security.authentication.AuthenticationManager
@@ -39,6 +40,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.security.web.savedrequest.DefaultSavedRequest
 import java.util.*
 
@@ -58,7 +60,7 @@ class LoginView(private val authenticationManager: AuthenticationManager, privat
             alignItems = FlexComponent.Alignment.CENTER
             justifyContentMode = FlexComponent.JustifyContentMode.CENTER
             flexLayout {
-                setFlexDirection(FlexLayout.FlexDirection.COLUMN)
+                flexDirection = FlexLayout.FlexDirection.COLUMN
                 setSizeUndefined()
                 flexLayout {
                     translatableImage("images/logo.png", Messages.ACRARIUM) {
@@ -82,10 +84,11 @@ class LoginView(private val authenticationManager: AuthenticationManager, privat
     private fun login(username: String, password: String): Boolean {
         return try {
             val token = authenticationManager.authenticate(UsernamePasswordAuthenticationToken(username.lowercase(Locale.getDefault()), password))
-            if (!token.authorities.contains(User.Role.USER)) {
+            if (!token.authorities.contains(Role.USER)) {
                 throw InsufficientAuthenticationException("Missing required role")
             }
             SecurityContextHolder.getContext().authentication = token
+            VaadinSession.getCurrent().session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext())
             UI.getCurrent().apply {
                 navigate(resolveRedirectUrl())
             }

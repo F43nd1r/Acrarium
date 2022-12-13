@@ -16,7 +16,7 @@
 package com.faendir.acra.ui.component
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.model.User
+import com.faendir.acra.persistence.app.Reporter
 import com.faendir.acra.rest.RestReportInterface
 import com.faendir.acra.ui.view.Overview
 import com.faendir.acra.util.ensureTrailing
@@ -32,8 +32,12 @@ import org.springframework.beans.factory.annotation.Value
  * @author lukas
  * @since 09.11.18
  */
-class ConfigurationLabel private constructor(@Value("\${server.context-path}") private val baseUrl: String?) : Label(""), LocaleChangeObserver {
-    private lateinit var user: User
+class ConfigurationLabel private constructor(
+    @Value("\${server.context-path}")
+    private val baseUrl: String?
+) : Label(""), LocaleChangeObserver {
+    private lateinit var username: String
+    private lateinit var rawPassword: String
 
     override fun localeChange(event: LocaleChangeEvent) {
         val baseUrl = this.baseUrl ?: VaadinRequest.getCurrent().getHeader("host")
@@ -41,14 +45,14 @@ class ConfigurationLabel private constructor(@Value("\${server.context-path}") p
             "innerHTML", getTranslation(
                 Messages.CONFIGURATION_LABEL,
                 baseUrl.ensureTrailing("/") + RouteConfiguration.forSessionScope().getUrl(Overview::class.java),
-                RestReportInterface.REPORT_PATH, user.username, user.getPlainTextPassword()
+                RestReportInterface.REPORT_PATH, username, rawPassword
             )
         )
     }
 
     companion object {
-        fun forUser(user: User): ConfigurationLabel =
-            VaadinService.getCurrent().instantiator.createComponent(ConfigurationLabel::class.java).also { it.user = user }
+        fun forReporter(reporter: Reporter): ConfigurationLabel =
+            VaadinService.getCurrent().instantiator.createComponent(ConfigurationLabel::class.java).also { it.username = reporter.username; it.rawPassword = reporter.rawPassword }
     }
 
 }

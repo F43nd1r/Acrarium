@@ -27,17 +27,17 @@ import com.github.appreciated.apexcharts.config.chart.Type
  */
 internal class PieChart(captionId: String, vararg params: Any) : Chart<String>(captionId, *params) {
 
-    override fun createChart(map: Map<String, Long>): ApexCharts {
+    override fun createChart(map: Map<String, Int>): ApexCharts {
         val list = map.entries.map { it.key to it.value }.sortedByDescending { it.second }.toMutableList()
         if (list.size > MAX_PARTS) {
             val replace = list.subList(MAX_PARTS, list.size)
-            val other = getTranslation(Messages.OTHER) to  replace.map { it.second }.sum()
+            val other = getTranslation(Messages.OTHER) to replace.map { it.second }.sum()
             replace.clear()
             list.add(other)
         }
         return ApexChartsBuilder.get()
             .withChart(ChartBuilder.get().withType(Type.PIE).withBackground("transparent").build())
-                .withLabels(*list.map { it.first }.toTypedArray())
+            .withLabels(*list.map { it.first }.toTypedArray())
                 .withSeries(*list.map {it.second.toDouble() }.toTypedArray())
                 .build()
     }

@@ -27,16 +27,16 @@ import com.github.appreciated.apexcharts.config.chart.builder.ToolbarBuilder
 import com.github.appreciated.apexcharts.config.chart.builder.ZoomBuilder
 import com.github.appreciated.apexcharts.config.xaxis.XAxisType
 import com.github.appreciated.apexcharts.helper.Series
-import java.time.ZonedDateTime
+import java.time.Instant
 import java.util.*
 
 /**
  * @author lukas
  * @since 01.06.18
  */
-internal class TimeChart(captionId: String, vararg params: Any) : Chart<ZonedDateTime>(captionId, *params) {
-    override fun createChart(map: Map<ZonedDateTime, Long>): ApexCharts {
-        val list = map.asSequence().sortedBy { it.key }.map { arrayOf<Any>(Date.from(it.key.toInstant()), it.value) }.toList()
+internal class TimeChart(captionId: String, vararg params: Any) : Chart<Instant>(captionId, *params) {
+    override fun createChart(map: Map<Instant, Int>): ApexCharts {
+        val list = map.asSequence().sortedBy { it.key }.map { arrayOf<Any>(Date.from(it.key), it.value) }.toList()
         return ApexChartsBuilder.get()
             .withChart(
                 ChartBuilder.get()

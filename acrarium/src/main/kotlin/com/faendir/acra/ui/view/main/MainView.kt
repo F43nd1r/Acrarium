@@ -16,9 +16,9 @@
 package com.faendir.acra.ui.view.main
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.model.User
+import com.faendir.acra.persistence.user.Role
 import com.faendir.acra.security.SecurityUtils
-import com.faendir.acra.ui.component.tabs.Path
+import com.faendir.acra.ui.component.Path
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.SizeUnit
 import com.faendir.acra.ui.ext.content
@@ -43,13 +43,10 @@ import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.tabs.Tab
 import com.vaadin.flow.component.tabs.Tabs
 import com.vaadin.flow.router.RouterLayout
-import com.vaadin.flow.router.RouterLink
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
 import org.springframework.context.support.GenericApplicationContext
 import org.springframework.security.core.context.SecurityContextHolder
-import kotlin.reflect.KClass
-import kotlin.streams.asSequence
 
 /**
  * @author lukas
@@ -69,7 +66,7 @@ class MainView(applicationContext: GenericApplicationContext) : Composite<AppLay
             add(createTab<Overview>(Messages.HOME))
             add(Path(applicationContext))
             add(createTab<AccountView>(Messages.ACCOUNT))
-            if (SecurityUtils.hasRole(User.Role.ADMIN)) {
+            if (SecurityUtils.hasRole(Role.ADMIN)) {
                 add(createTab<UserManager>(Messages.USER_MANAGER))
             }
             add(createTab<SettingsView>(Messages.SETTINGS))

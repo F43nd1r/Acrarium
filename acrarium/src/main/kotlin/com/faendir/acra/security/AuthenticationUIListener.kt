@@ -1,7 +1,7 @@
 package com.faendir.acra.security
 
-import com.faendir.acra.navigation.ParameterParser
-import com.faendir.acra.service.UserService
+import com.faendir.acra.navigation.RouteParams
+import com.faendir.acra.persistence.user.UserRepository
 import com.faendir.acra.ui.view.Overview
 import com.faendir.acra.ui.view.login.LoginView
 import com.faendir.acra.ui.view.login.SetupView
@@ -12,27 +12,27 @@ import org.springframework.stereotype.Component
 
 
 @Component
-class AuthenticationUIListener(private val userService: UserService, private val parameterParser: ParameterParser) : UIInitListener {
+class AuthenticationUIListener(private val userRepository: UserRepository, private val routeParams: RouteParams) : UIInitListener {
     override fun uiInit(init: UIInitEvent) {
         init.ui.addBeforeEnterListener { event ->
             when (event.navigationTarget) {
                 LoginView::class.java -> {
                     if (SecurityUtils.isLoggedIn()) {
                         event.rerouteTo(Overview::class.java)
-                    } else if (!userService.hasAdmin()) {
+                    } else if (!userRepository.hasAnyAdmin()) {
                         event.rerouteTo(SetupView::class.java)
                     }
                 }
                 SetupView::class.java -> {
                     if (SecurityUtils.isLoggedIn()) {
                         event.rerouteTo(Overview::class.java)
-                    } else if (userService.hasAdmin()) {
+                    } else if (userRepository.hasAnyAdmin()) {
                         event.rerouteTo(LoginView::class.java)
                     }
                 }
                 else -> if (!SecurityUtils.isLoggedIn()) {
-                    event.rerouteTo(if (userService.hasAdmin()) LoginView::class.java else SetupView::class.java)
-                } else if (!SecurityUtils.hasAccess(parameterParser::parseApp, event.navigationTarget)) {
+                    event.rerouteTo(if (userRepository.hasAnyAdmin()) LoginView::class.java else SetupView::class.java)
+                } else if (!SecurityUtils.hasAccess(routeParams::appId, event.navigationTarget)) {
                     event.rerouteToError(NotFoundException::class.java)
                 }
             }

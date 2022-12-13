@@ -16,12 +16,11 @@
 package com.faendir.acra.ui.view.app.tabs.admincards
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.model.App
-import com.faendir.acra.model.MailSettings
-import com.faendir.acra.navigation.ParseAppParameter
+import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
-import com.faendir.acra.service.DataService
-import com.faendir.acra.service.UserService
+import com.faendir.acra.persistence.mailsettings.MailSettings
+import com.faendir.acra.persistence.mailsettings.MailSettingsRepository
+import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.checkbox
@@ -29,20 +28,22 @@ import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.forEach
 import com.faendir.acra.ui.ext.gridLayout
 import com.faendir.acra.ui.ext.translatableLabel
-import com.faendir.acra.util.getCurrentUser
-import com.github.appreciated.css.grid.sizes.Auto
-import com.github.appreciated.css.grid.sizes.MaxContent
 
 @View
-class NotificationCard(userService: UserService, dataService: DataService, @ParseAppParameter app: App) : AdminCard(dataService) {
+class NotificationCard(
+    mailSettingsRepository: MailSettingsRepository,
+    routeParams: RouteParams,
+) : AdminCard() {
+    private val appId = routeParams.appId()
+
     init {
         content {
             setHeader(Translatable.createLabel(Messages.NOTIFICATIONS))
             gridLayout {
-                setTemplateColumns(Auto(), MaxContent())
+                setTemplateColumns("auto max-content")
                 setWidthFull()
-                val user = userService.getCurrentUser()
-                val settings = dataService.findMailSettings(app, user) ?: MailSettings(app, user)
+                val username = SecurityUtils.getUsername()
+                val settings = mailSettingsRepository.find(appId, username) ?: MailSettings(appId, username)
                 forEach(
                     listOf(
                         Messages.NEW_BUG_MAIL_LABEL to MailSettings::newBug,
@@ -57,7 +58,7 @@ class NotificationCard(userService: UserService, dataService: DataService, @Pars
                         addValueChangeListener { event ->
                             if (event.isFromClient) {
                                 property.set(settings, event.value)
-                                dataService.store(settings)
+                                mailSettingsRepository.store(settings)
                             }
                         }
                     }

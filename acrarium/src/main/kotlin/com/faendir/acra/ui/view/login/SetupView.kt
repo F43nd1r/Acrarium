@@ -18,9 +18,9 @@ package com.faendir.acra.ui.view.login
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.i18n.TranslatableText
-import com.faendir.acra.model.User
 import com.faendir.acra.navigation.View
-import com.faendir.acra.service.UserService
+import com.faendir.acra.persistence.user.Role
+import com.faendir.acra.persistence.user.UserRepository
 import com.faendir.acra.ui.component.HasAcrariumTitle
 import com.faendir.acra.ui.ext.*
 import com.vaadin.flow.component.Composite
@@ -35,23 +35,23 @@ import com.vaadin.flow.server.auth.AnonymousAllowed
 @View
 @Route(SetupView.ROUTE)
 @AnonymousAllowed
-class SetupView(userService: UserService) : Composite<FlexLayout>(), HasAcrariumTitle {
+class SetupView(userRepository: UserRepository) : Composite<FlexLayout>(), HasAcrariumTitle {
     companion object {
         const val ROUTE = "setup"
     }
 
     init {
-        if (userService.hasAdmin()) throw IllegalStateException()
+        if (userRepository.hasAnyAdmin()) throw IllegalStateException()
         content {
             setSizeFull()
             alignItems = FlexComponent.Alignment.CENTER
             justifyContentMode = FlexComponent.JustifyContentMode.CENTER
             flexLayout {
-                setFlexDirection(FlexLayout.FlexDirection.COLUMN)
+                flexDirection = FlexLayout.FlexDirection.COLUMN
                 setSizeUndefined()
                 flexLayout {
                     flexLayout {
-                        setFlexDirection(FlexLayout.FlexDirection.COLUMN)
+                        flexDirection = FlexLayout.FlexDirection.COLUMN
                         setWidth(0, SizeUnit.PIXEL)
                         setFlexGrow(1)
                         translatableLabel(Messages.WELCOME) {
@@ -66,7 +66,7 @@ class SetupView(userService: UserService) : Composite<FlexLayout>(), HasAcrarium
                         translatableLabel(Messages.CREATE_ADMIN)
                     }
                 }
-                userEditor(userService, User("", "", mutableSetOf(User.Role.ADMIN, User.Role.USER)), false) { UI.getCurrent().page.reload() }
+                userEditor(userRepository, mutableSetOf(Role.ADMIN, Role.USER)) { UI.getCurrent().page.reload() }
             }
         }
     }

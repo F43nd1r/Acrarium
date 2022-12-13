@@ -15,9 +15,9 @@
  */
 package com.faendir.acra
 
+import com.faendir.acra.util.YamlPropertySourceFactory
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
 import org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration
 import org.springframework.boot.autoconfigure.mustache.MustacheAutoConfiguration
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
@@ -31,9 +31,13 @@ import org.springframework.context.annotation.PropertySource
 import org.springframework.context.annotation.PropertySources
 
 @SpringBootApplication(exclude = [SecurityAutoConfiguration::class, MustacheAutoConfiguration::class, ErrorMvcAutoConfiguration::class])
-@PropertySources(PropertySource("classpath:default.properties"),
-        PropertySource(value = ["file:\${user.home}/.config/acrarium/application.properties"], ignoreResourceNotFound = true),
-        PropertySource(value = ["file:\${user.home}/.acra/application.properties"], ignoreResourceNotFound = true))
+@PropertySources(
+    PropertySource("classpath:default.yml", factory = YamlPropertySourceFactory::class),
+    PropertySource(value = ["file:\${user.home}/.config/acrarium/application.properties"], ignoreResourceNotFound = true),
+    PropertySource(value = ["file:\${user.home}/.config/acrarium/application.yml"], ignoreResourceNotFound = true, factory = YamlPropertySourceFactory::class),
+    PropertySource(value = ["file:\${user.home}/.acra/application.properties"], ignoreResourceNotFound = true),
+    PropertySource(value = ["file:\${user.home}/.acra/application.yml"], ignoreResourceNotFound = true, factory = YamlPropertySourceFactory::class)
+)
 @Import(MailSenderAutoConfiguration::class)
 @EnableCaching
 @ConfigurationPropertiesScan

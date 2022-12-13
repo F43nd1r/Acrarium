@@ -27,7 +27,7 @@ class RangeField : CustomField<Double>() {
     private val _field: NumberField = NumberField()
 
     init {
-        _field.setHasControls(true)
+        _field.isStepButtonsVisible = true
         input.addValueChangeListener { e: ComponentValueChangeEvent<RangeInput?, Double> ->
             if (e.isFromClient) {
                 _field.value = e.value

@@ -35,7 +35,7 @@ internal abstract class Chart<T>(captionId: String, vararg params: Any) : Compos
         content.setHeader(Translatable.createLabel(captionId, *params))
     }
 
-    fun setContent(map: Map<T, Long>) {
+    fun setContent(map: Map<T, Int>) {
         val reload = content.hasContent()
         if (reload) {
             content.removeContent()
@@ -47,5 +47,5 @@ internal abstract class Chart<T>(captionId: String, vararg params: Any) : Compos
         }
     }
 
-    protected abstract fun createChart(map: Map<T, Long>): ApexCharts
+    protected abstract fun createChart(map: Map<T, Int>): ApexCharts
 }

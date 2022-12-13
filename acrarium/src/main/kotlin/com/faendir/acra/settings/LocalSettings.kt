@@ -23,11 +23,11 @@ import com.vaadin.flow.server.VaadinResponse
 import com.vaadin.flow.server.VaadinService
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.VaadinSessionScope
+import jakarta.servlet.http.Cookie
 import java.io.Serializable
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.util.*
-import javax.servlet.http.Cookie
 import kotlin.reflect.KProperty
 
 /**

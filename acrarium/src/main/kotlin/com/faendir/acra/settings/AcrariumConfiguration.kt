@@ -1,9 +1,11 @@
 package com.faendir.acra.settings
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
-import org.springframework.context.annotation.Configuration
+import org.springframework.boot.context.properties.bind.ConstructorBinding
+import java.util.regex.Pattern
 
-@ConstructorBinding
+
 @ConfigurationProperties("acrarium")
-class AcrariumConfiguration(val updateDeviceList: Boolean)
+class AcrariumConfiguration @ConstructorBinding constructor(val updateDeviceList: Boolean, private val messageIgnorePattern: Pattern) {
+    val messageIgnoreRegex get() = messageIgnorePattern.toRegex()
+}

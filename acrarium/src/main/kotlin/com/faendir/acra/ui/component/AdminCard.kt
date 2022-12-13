@@ -15,8 +15,6 @@
  */
 package com.faendir.acra.ui.component
 
-import com.faendir.acra.service.DataService
-import com.faendir.acra.ui.component.Card
 import com.faendir.acra.ui.ext.SizeUnit
 import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.setFlexGrow
@@ -25,7 +23,7 @@ import com.faendir.acra.ui.ext.setMaxWidth
 import com.faendir.acra.ui.ext.setWidth
 import com.vaadin.flow.component.Composite
 
-abstract class AdminCard(protected val dataService: DataService) : Composite<Card>() {
+abstract class AdminCard : Composite<Card>() {
     init {
         content {
             setWidth(500, SizeUnit.PIXEL)

@@ -16,10 +16,10 @@
 package com.faendir.acra.ui.view
 
 import com.faendir.acra.i18n.Messages
+import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.navigation.View
 import com.faendir.acra.settings.LocalSettings
 import com.faendir.acra.ui.component.HasAcrariumTitle
-import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.ui.ext.Align
 import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.formLayout
@@ -60,8 +60,7 @@ class SettingsView(localSettings: LocalSettings) : Composite<FlexLayout>(), HasA
                         VaadinSession.getCurrent().uIs.forEach { ui -> ui.element.setAttribute("theme", if (it.value) Lumo.DARK else Lumo.LIGHT) }
                     }
                 }
-                translatableSelect(VaadinService.getCurrent().instantiator.i18NProvider.providedLocales, Messages.LOCALE) {
-                    setItemLabelGenerator { it.getDisplayName(localSettings.locale) }
+                translatableSelect(VaadinService.getCurrent().instantiator.i18NProvider.providedLocales, { it.getDisplayName(localSettings.locale) }, Messages.LOCALE) {
                     value = localSettings.locale
                     addValueChangeListener {
                         localSettings.locale = it.value

@@ -16,8 +16,8 @@ jobs:
           ref: ${{ github.ref }}
       - uses: actions/setup-java@v3
         with:
-          distribution: 'adopt'
-          java-version: '11'
+          distribution: 'temurin'
+          java-version: '17'
       - name: Build release
         uses: burrunan/gradle-cache-action@v1
         with:

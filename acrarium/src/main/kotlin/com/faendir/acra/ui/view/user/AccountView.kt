@@ -15,16 +15,16 @@
  */
 package com.faendir.acra.ui.view.user
 
+import com.faendir.acra.domain.MailService
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.navigation.View
-import com.faendir.acra.service.MailService
-import com.faendir.acra.service.UserService
+import com.faendir.acra.persistence.user.UserRepository
+import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.ui.component.HasAcrariumTitle
 import com.faendir.acra.ui.component.UserEditor
 import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.view.main.MainView
-import com.faendir.acra.util.getCurrentUser
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.notification.Notification
 import com.vaadin.flow.component.orderedlayout.FlexComponent
@@ -38,7 +38,11 @@ import org.springframework.beans.factory.annotation.Autowired
  */
 @View
 @Route(value = "account", layout = MainView::class)
-class AccountView constructor(private val userService: UserService, @Autowired(required = false) private val mailService: MailService?) :
+class AccountView constructor(
+    private val userRepository: UserRepository,
+    @Autowired(required = false)
+    private val mailService: MailService?
+) :
     Composite<FlexLayout>(),
     HasAcrariumTitle {
     init {
@@ -46,8 +50,7 @@ class AccountView constructor(private val userService: UserService, @Autowired(r
             setSizeFull()
             justifyContentMode = FlexComponent.JustifyContentMode.CENTER
             alignItems = FlexComponent.Alignment.CENTER
-            val user = userService.getCurrentUser()
-            add(UserEditor(userService, mailService, user, true) { Notification.show(getTranslation(Messages.SUCCESS)) })
+            add(UserEditor(userRepository, mailService, SecurityUtils.getUsername()) { Notification.show(getTranslation(Messages.SUCCESS)) })
         }
     }
 

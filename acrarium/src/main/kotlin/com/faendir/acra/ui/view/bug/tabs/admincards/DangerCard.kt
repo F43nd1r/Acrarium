@@ -16,12 +16,11 @@
 package com.faendir.acra.ui.view.bug.tabs.admincards
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.model.Bug
-import com.faendir.acra.model.Permission
-import com.faendir.acra.navigation.ParseBugParameter
+import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
+import com.faendir.acra.persistence.bug.BugRepository
+import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.security.RequiresPermission
-import com.faendir.acra.service.DataService
 import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.confirmButtons
@@ -34,7 +33,13 @@ import com.vaadin.flow.component.UI
 
 @View("bugDangerCard")
 @RequiresPermission(Permission.Level.ADMIN)
-class DangerCard(dataService: DataService, @ParseBugParameter bug: Bug) : AdminCard(dataService) {
+class DangerCard(
+    private val bugRepository: BugRepository,
+    routeParams: RouteParams,
+) : AdminCard() {
+    private val appId = routeParams.appId()
+    private val bugId = routeParams.bugId()
+
     init {
         content {
             setHeader(Translatable.createLabel(Messages.DANGER_ZONE))
@@ -44,7 +49,7 @@ class DangerCard(dataService: DataService, @ParseBugParameter bug: Bug) : AdminC
                 showFluentDialog {
                     translatableText(Messages.DELETE_BUG_CONFIRM)
                     confirmButtons {
-                        dataService.deleteBug(bug)
+                        bugRepository.delete(appId, bugId)
                         UI.getCurrent().navigate(Overview::class.java)
                     }
                 }

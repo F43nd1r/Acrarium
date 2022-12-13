@@ -1,0 +1,50 @@
+management:
+  endpoints:
+    enabled-by-default: false
+    web:
+      exposure:
+        include: '*'
+server:
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+  context-path: ''
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+        jdbc:
+          batch_size: 64
+        metadata_builder_contributor: com.faendir.acra.hibernate.FunctionDefinitions
+    show-sql: false
+  liquibase:
+    changelog: "classpath:db/db.changelog-master.yml"
+  mail:
+    sender: ''
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+springdoc:
+  show-actuator: true
+  swagger-ui:
+    enabled: false
+  use-management-port: true
+vaadin:
+  pnpm:
+    enable: true
+  servlet:
+    productionMode: true
+
+acrarium:
+  message-ignore-pattern: "[0-9]{4,}"
+  update-device-list: false
+

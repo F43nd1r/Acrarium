@@ -16,43 +16,47 @@
 package com.faendir.acra.ui.view.app.tabs.admincards
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.model.App
-import com.faendir.acra.model.QReport
-import com.faendir.acra.navigation.ParseAppParameter
+import com.faendir.acra.jooq.generated.Tables.REPORT
+import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
-import com.faendir.acra.service.DataService
+import com.faendir.acra.persistence.report.ReportRepository
 import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.comboBox
 import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.downloadButton
-import com.querydsl.core.types.dsl.BooleanExpression
-import com.querydsl.core.types.dsl.StringPath
 import com.vaadin.flow.server.InputStreamFactory
 import com.vaadin.flow.server.StreamResource
+import org.jooq.Condition
+import org.jooq.Field
 import org.springframework.security.core.context.SecurityContextHolder
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 
 @View
-class ExportCard(dataService: DataService, @ParseAppParameter app: App) : AdminCard(dataService) {
+class ExportCard(
+    reportRepository: ReportRepository,
+    routeParams: RouteParams,
+) : AdminCard() {
+    private val appId = routeParams.appId()
+
     init {
         content {
             setHeader(Translatable.createLabel(Messages.EXPORT))
-            val mailBox = comboBox(dataService.getFromReports(app, QReport.report.userEmail), Messages.BY_MAIL) {
+            val mailBox = comboBox(reportRepository.get(appId, REPORT.USER_EMAIL), Messages.BY_MAIL) {
                 setWidthFull()
             }
-            val idBox = comboBox(dataService.getFromReports(app, QReport.report.installationId), Messages.BY_ID) {
+            val idBox = comboBox(reportRepository.get(appId, REPORT.INSTALLATION_ID), Messages.BY_ID) {
                 setWidthFull()
             }
             val authentication = SecurityContextHolder.getContext().authentication
             downloadButton(StreamResource("reports.json", InputStreamFactory {
                 SecurityContextHolder.getContext().authentication = authentication
                 try {
-                    val where = null.eqIfNotBlank(QReport.report.userEmail, mailBox.value).eqIfNotBlank(QReport.report.installationId, idBox.value)
+                    val where = null.eqIfNotBlank(REPORT.USER_EMAIL, mailBox.value).eqIfNotBlank(REPORT.INSTALLATION_ID, idBox.value)
                     ByteArrayInputStream(
-                        if (where == null) ByteArray(0) else dataService.getFromReports(app, QReport.report.content, where, sorted = false)
-                            .joinToString(", ", "[", "]").toByteArray(StandardCharsets.UTF_8)
+                        if (where == null) ByteArray(0) else reportRepository.get(appId, REPORT.CONTENT, where, sorted = false)
+                            .joinToString(", ", "[", "]") { it.data() }.toByteArray(StandardCharsets.UTF_8)
                     )
                 } finally {
                     SecurityContextHolder.getContext().authentication = null
@@ -63,7 +67,5 @@ class ExportCard(dataService: DataService, @ParseAppParameter app: App) : AdminC
         }
     }
 
-    private fun BooleanExpression?.eqIfNotBlank(path: StringPath, value: String?): BooleanExpression? {
-        return value?.takeIf { it.isNotBlank() }?.let { path.eq(it).and(this) } ?: this
-    }
+    private fun Condition?.eqIfNotBlank(path: Field<String>, value: String?): Condition? = if (!value.isNullOrBlank()) this?.and(path.eq(value)) ?: path.eq(value) else null
 }

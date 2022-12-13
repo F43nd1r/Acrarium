@@ -15,30 +15,34 @@
  */
 package com.faendir.acra.ui.view.report
 
+import com.faendir.acra.domain.AvatarService
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.model.IReport
-import com.faendir.acra.model.Report
-import com.faendir.acra.navigation.ParseReportParameter
+import com.faendir.acra.i18n.TranslatableText
+import com.faendir.acra.navigation.LogicalParent
+import com.faendir.acra.navigation.PARAM_APP
+import com.faendir.acra.navigation.PARAM_BUG
+import com.faendir.acra.navigation.PARAM_REPORT
+import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
-import com.faendir.acra.service.AvatarService
-import com.faendir.acra.service.DataService
+import com.faendir.acra.persistence.app.AppId
+import com.faendir.acra.persistence.bug.BugId
+import com.faendir.acra.persistence.report.ReportRepository
+import com.faendir.acra.persistence.version.VersionRepository
+import com.faendir.acra.ui.component.HasAcrariumTitle
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.ui.component.tabs.HasRoute
-import com.faendir.acra.ui.component.tabs.Path
 import com.faendir.acra.ui.ext.*
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
 import com.faendir.acra.ui.view.main.MainView
-import com.faendir.acra.util.PARAM_APP
-import com.faendir.acra.util.PARAM_BUG
-import com.faendir.acra.util.PARAM_REPORT
 import com.faendir.acra.util.retrace
-import com.github.appreciated.css.grid.sizes.MaxContent
+import com.faendir.acra.util.toUtcLocal
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.HasComponents
 import com.vaadin.flow.component.html.Div
+import com.vaadin.flow.router.NotFoundException
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.server.InputStreamFactory
 import com.vaadin.flow.server.StreamResource
+import org.json.JSONObject
 import org.xbib.time.pretty.PrettyTime
 import java.util.*
 import kotlin.math.log10
@@ -49,41 +53,49 @@ import kotlin.math.max
  * @since 17.09.18
  */
 @View
-@Route(value = "app/:${PARAM_APP}/bug/:${PARAM_BUG}/report/:${PARAM_REPORT}", layout = MainView::class)
-class ReportView(private val dataService: DataService, avatarService: AvatarService, @ParseReportParameter private val report: Report) : Composite<Div>(),
-    HasRoute {
+@Route(value = "app/:$PARAM_APP/bug/:$PARAM_BUG/report/:$PARAM_REPORT", layout = MainView::class)
+@LogicalParent(ReportTab::class)
+class ReportView(
+    private val reportRepository: ReportRepository,
+    versionRepository: VersionRepository,
+    avatarService: AvatarService,
+    routeParams: RouteParams,
+) : Composite<Div>(),
+    HasAcrariumTitle {
+    private val report = reportRepository.find(routeParams.reportId()) ?: throw NotFoundException()
     private val prettyTime: PrettyTime = PrettyTime(Locale.US)
 
     init {
+        val version = versionRepository.find(report.appId, report.versionCode, report.versionFlavor) ?: throw NotFoundException()
         content {
             card {
                 setHeader(Translatable.createLabel(Messages.SUMMARY))
                 gridLayout {
-                    setTemplateColumns(MaxContent(), MaxContent())
+                    setTemplateColumns("max-content max-content")
                     setColumnGap(1, SizeUnit.EM)
                     setJustifyItems(JustifyItems.START)
                     setAlignItems(Align.FIRST_BASELINE)
 
                     translatableLabel(Messages.VERSION) { secondary() }
-                    label(report.stacktrace.version.name)
+                    label(version.name)
                     translatableLabel(Messages.DATE) { secondary() }
-                    label(prettyTime.formatUnrounded(report.date.toLocalDateTime()))
+                    label(prettyTime.formatUnrounded(report.date.toUtcLocal()))
                     translatableLabel(Messages.INSTALLATION) {
                         secondary()
                         setAlignSelf(Align.CENTER)
                     }
                     installationView(avatarService, report.installationId)
                     translatableLabel(Messages.EMAIL) { secondary() }
-                    label(report.userEmail)
+                    label(report.userEmail ?: "")
                     translatableLabel(Messages.COMMENT) { secondary() }
-                    label(report.userComment)
-                    val mapping = report.stacktrace.version.mappings
+                    label(report.userComment ?: "")
+                    val mapping = version.mappings
                     translatableLabel(if (mapping != null) Messages.DE_OBFUSCATED_STACKTRACE else Messages.NO_MAPPING_STACKTRACE) { secondary() }
-                    label(mapping?.let { report.stacktrace.retrace(it) } ?: report.stacktrace.stacktrace) { honorWhitespaces() }
+                    label(mapping?.let { report.stacktrace.retrace(it) } ?: report.stacktrace) { honorWhitespaces() }
                     translatableLabel(Messages.ATTACHMENTS) { secondary() }
                     div {
-                        forEach(dataService.findAttachments(report)) {
-                            anchor(StreamResource(it.filename, InputStreamFactory { it.content.binaryStream }), it.filename) {
+                        forEach(reportRepository.findAttachmentNames(report.id)) {
+                            anchor(StreamResource(it, InputStreamFactory { reportRepository.loadAttachment(report.id, it)!!.inputStream() }), it) {
                                 element.setAttribute("download", true)
                             }
                         }
@@ -92,14 +104,14 @@ class ReportView(private val dataService: DataService, avatarService: AvatarServ
             }
             card {
                 setHeader(Translatable.createLabel(Messages.DETAILS))
-                layoutForMap(report.jsonObject.toMap())
+                layoutForMap(JSONObject(report.content.data()).toMap())
             }
         }
     }
 
     private fun HasComponents.layoutForMap(map: Map<String, *>) {
         gridLayout {
-            setTemplateColumns(MaxContent(), MaxContent())
+            setTemplateColumns("max-content max-content")
             setColumnGap(1, SizeUnit.EM)
             setJustifyItems(JustifyItems.START)
 
@@ -119,19 +131,15 @@ class ReportView(private val dataService: DataService, avatarService: AvatarServ
                 val format = "%0${max(log10(values.size - 1.0), 0.0).toInt() + 1}d"
                 layoutForMap(values.mapIndexed { i, v -> String.format(format, i) to v }.toMap())
             }
+
             else -> label(value.toString()) { honorWhitespaces() }
         }
     }
 
-    override val pathElement: Path.Element<*> =
-        Path.Element(this::class, getNavigationParams(report), Messages.REPORT_FROM, prettyTime.formatUnrounded(report.date.toLocalDateTime()))
-
-    override val logicalParent = ReportTab::class
+    override val title = TranslatableText(Messages.REPORT_FROM, prettyTime.formatUnrounded(report.date.toUtcLocal()))
 
     companion object {
-        fun getNavigationParams(report: IReport) = getNavigationParams(report.stacktrace.bug.app.id, report.stacktrace.bug.id, report.id)
-
-        fun getNavigationParams(appId: Int, bugId: Int, reportId: String) = mapOf(
+        fun getNavigationParams(appId: AppId, bugId: BugId, reportId: String) = mapOf(
             PARAM_APP to appId.toString(),
             PARAM_BUG to bugId.toString(),
             PARAM_REPORT to reportId,

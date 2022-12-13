@@ -15,26 +15,24 @@
  */
 package com.faendir.acra.ui.component
 
-import com.faendir.acra.dataprovider.ReportDataProvider
-import com.faendir.acra.dataprovider.ReportFilter
-import com.faendir.acra.dataprovider.ReportSort
+import com.faendir.acra.dataprovider.AcrariumDataProvider
+import com.faendir.acra.domain.AvatarService
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.model.App
-import com.faendir.acra.model.Permission
-import com.faendir.acra.model.view.VReport
+import com.faendir.acra.persistence.app.AppId
+import com.faendir.acra.persistence.app.AppRepository
+import com.faendir.acra.persistence.app.CustomColumn
+import com.faendir.acra.persistence.report.ReportRepository
+import com.faendir.acra.persistence.report.ReportRow
+import com.faendir.acra.persistence.version.VersionRepository
 import com.faendir.acra.security.SecurityUtils
-import com.faendir.acra.service.AvatarService
-import com.faendir.acra.service.DataService
-import com.faendir.acra.settings.GridSettings
 import com.faendir.acra.settings.LocalSettings
 import com.faendir.acra.ui.component.dialog.confirmButtons
 import com.faendir.acra.ui.component.dialog.showFluentDialog
-import com.faendir.acra.ui.component.grid.AcrariumGridView
-import com.faendir.acra.ui.component.grid.BasicLayoutPersistingFilterableGrid
-import com.faendir.acra.ui.component.grid.ButtonRenderer
-import com.faendir.acra.ui.component.grid.FilterableSortableLocalizedColumn
-import com.faendir.acra.ui.component.grid.TimeSpanRenderer
+import com.faendir.acra.ui.component.grid.BasicLayoutPersistingFilterableGridView
 import com.faendir.acra.ui.component.grid.column
+import com.faendir.acra.ui.component.grid.renderer.ButtonRenderer
+import com.faendir.acra.ui.component.grid.renderer.InstantRenderer
+import com.faendir.acra.ui.component.grid.renderer.VersionRenderer
 import com.faendir.acra.ui.ext.translatableText
 import com.faendir.acra.ui.view.report.ReportView
 import com.vaadin.flow.component.Composite
@@ -46,69 +44,78 @@ import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.data.renderer.ComponentRenderer
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
-import kotlin.reflect.KMutableProperty0
 
 /**
  * @author lukas
  * @since 17.09.18
  */
 class ReportList(
-    private val app: App,
-    private val dataProvider: ReportDataProvider,
+    private val app: AppId,
+    private val dataProvider: AcrariumDataProvider<ReportRow, ReportRow.Filter, ReportRow.Sort>,
     private val avatarService: AvatarService,
     private val localSettings: LocalSettings,
-    private val dataService: DataService,
-) : Composite<ReportGridView>() {
-    override fun initContent(): ReportGridView {
-        return ReportGridView(dataProvider, localSettings::reportGridSettings) {
+    private val versionRepository: VersionRepository,
+    private val reportRepository: ReportRepository,
+    private val customColumns: List<CustomColumn>,
+) : Composite<BasicLayoutPersistingFilterableGridView<ReportRow, ReportRow.Filter, ReportRow.Sort>>() {
+    override fun initContent(): BasicLayoutPersistingFilterableGridView<ReportRow, ReportRow.Filter, ReportRow.Sort> {
+        return BasicLayoutPersistingFilterableGridView(dataProvider, localSettings::reportGridSettings) {
             setSelectionMode(Grid.SelectionMode.NONE)
-            column(ComponentRenderer { report -> avatarService.getAvatar(report) }) {
-                setSortable(ReportSort.InstallationId)
-                setFilterable({ ReportFilter.InstallationId(it) }, Messages.INSTALLATION)
+            column(ComponentRenderer { report -> avatarService.getAvatar(report.installationId) }) {
+                setSortable(ReportRow.Sort.INSTALLATION_ID)
+                setFilterableContains({ ReportRow.Filter.INSTALLATION_ID(it) }, Messages.INSTALLATION)
                 setCaption(Messages.INSTALLATION)
                 width = "50px"
                 isAutoWidth = false
             }
-            val dateColumn = column(TimeSpanRenderer { it.date }) {
-                setSortable(ReportSort.Date)
+            val dateColumn = column(InstantRenderer { it.date }) {
+                setSortable(ReportRow.Sort.DATE)
                 setCaption(Messages.DATE)
             }
             sort(GridSortOrder.desc(dateColumn).build())
-            column({ it.versionName }) {
-                setFilterable({ ReportFilter.VersionName(it) }, Messages.APP_VERSION)
+            val versions = versionRepository.getVersionNames(app)
+            column(VersionRenderer(versions) { it.versionCode to it.versionFlavor }) {
+                setFilterableIs(versions, { it.name }, { ReportRow.Filter.VERSION(it.code, it.flavor) }, Messages.APP_VERSION)
                 setCaption(Messages.APP_VERSION)
             }
             column({ it.androidVersion }) {
-                setSortable(ReportSort.AndroidVersion)
-                setFilterable({ ReportFilter.AndroidVersion(it) }, Messages.ANDROID_VERSION)
+                setSortable(ReportRow.Sort.ANDROID_VERSION)
+                setFilterableContains({ ReportRow.Filter.ANDROID_VERSION(it) }, Messages.ANDROID_VERSION)
                 setCaption(Messages.ANDROID_VERSION)
             }
-            column(ComponentRenderer { report -> Span(report.marketingName ?: report.phoneModel).apply { element.setProperty("title", report.phoneModel) } }) {
-                setFilterable({ ReportFilter.PhoneMarketingNameOrModel(it) }, Messages.DEVICE)
+            column(ComponentRenderer { report -> Span(report.marketingDevice).apply { element.setProperty("title", report.phoneModel) } }) {
+                setSortable(ReportRow.Sort.MARKETING_DEVICE)
+                setFilterableContains({ ReportRow.Filter.MARKETING_DEVICE(it) }, Messages.DEVICE)
                 setCaption(Messages.DEVICE)
             }
-            column({ it.stacktrace.split("\n".toRegex(), 2).toTypedArray()[0] }) {
-                setFilterable({ ReportFilter.Stacktrace(it) }, Messages.STACKTRACE)
-                setCaption(Messages.STACKTRACE)
+            column({ it.exceptionClass }) {
+                setFilterableContains({ ReportRow.Filter.EXCEPTION_CLASS(it) }, Messages.EXCEPTION)
+                setCaption(Messages.EXCEPTION)
+            }
+            column({ it.message }) {
+                setFilterableContains({ ReportRow.Filter.MESSAGE(it) }, Messages.MESSAGE)
+                setCaption(Messages.MESSAGE)
                 isAutoWidth = false
                 flexGrow = 1
             }
             column(ComponentRenderer { report -> Icon(if (report.isSilent) VaadinIcon.CHECK else VaadinIcon.CLOSE) }) {
-                setSortable(ReportSort.IsSilent)
-                setFilterable(ReportFilter.IsNotSilent, false, Messages.HIDE_SILENT)
+                setSortable(ReportRow.Sort.IS_SILENT)
+                setFilterableToggle(ReportRow.Filter.IS_NOT_SILENT, false, Messages.HIDE_SILENT)
                 setCaption(Messages.SILENT)
             }
-            for ((index, column) in app.configuration.customReportColumns.withIndex()) {
+            for ((index, column) in customColumns.withIndex()) {
                 column({ it.customColumns[index] }) {
-                    setCaption(Messages.ONE_ARG, column)
+                    setSortable(ReportRow.Sort.CUSTOM_COLUMN(column.path))
+                    setFilterableContains({ ReportRow.Filter.CUSTOM_COLUMN(column.path, it) }, Messages.ONE_ARG, column.name)
+                    setCaption(Messages.ONE_ARG, column.name)
                 }
             }
-            if (SecurityUtils.hasPermission(app, Permission.Level.EDIT)) {
+            if (SecurityUtils.hasPermission(app, com.faendir.acra.persistence.user.Permission.Level.EDIT)) {
                 column(ButtonRenderer(VaadinIcon.TRASH) { report ->
                     showFluentDialog {
                         translatableText(Messages.DELETE_REPORT_CONFIRM)
                         confirmButtons {
-                            dataService.deleteReport(report)
+                            reportRepository.delete(app, report.id)
                             dataProvider.refreshAll()
                         }
                     }
@@ -118,30 +125,33 @@ class ReportList(
                     width = "100px"
                 }
             }
-            addOnClickNavigation(ReportView::class.java) { ReportView.getNavigationParams(it.appId, it.bugId, it.id) }
+            addOnClickNavigation(ReportView::class.java) { ReportView.getNavigationParams(app, it.bugId, it.id) }
         }
     }
 
     @UIScope
     @SpringComponent
-    class Factory(private val avatarService: AvatarService, private val localSettings: LocalSettings, private val dataService: DataService) {
-        fun create(app: App, dataProvider: ReportDataProvider) =
-            ReportList(app, dataProvider, avatarService, localSettings, dataService)
+    class Factory(
+        private val appRepository: AppRepository,
+        private val avatarService: AvatarService,
+        private val localSettings: LocalSettings,
+        private val versionRepository: VersionRepository,
+        private val reportRepository: ReportRepository,
+    ) {
+        fun create(
+            app: AppId,
+            getDataProvider: (ReportRepository, appId: AppId, customColumns: List<String>) -> AcrariumDataProvider<ReportRow, ReportRow.Filter, ReportRow.Sort>
+        ): ReportList {
+            val customColumns = appRepository.getCustomColumns(app)
+            return ReportList(
+                app,
+                getDataProvider(reportRepository, app, customColumns.map { it.path }),
+                avatarService,
+                localSettings,
+                versionRepository,
+                reportRepository,
+                customColumns
+            )
+        }
     }
 }
-
-class ReportGridView(
-    dataProvider: ReportDataProvider,
-    gridSettings: KMutableProperty0<GridSettings?>,
-    initializer: BasicLayoutPersistingFilterableGrid<VReport, ReportFilter, ReportSort>.() -> Unit
-) :
-    AcrariumGridView<
-            VReport,
-            ReportFilter,
-            ReportSort,
-            FilterableSortableLocalizedColumn<VReport, ReportFilter, ReportSort>,
-            BasicLayoutPersistingFilterableGrid<VReport, ReportFilter, ReportSort>>(
-        BasicLayoutPersistingFilterableGrid(dataProvider, gridSettings.get()),
-        gridSettings,
-        initializer
-    )

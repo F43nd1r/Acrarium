@@ -16,26 +16,27 @@
 package com.faendir.acra.ui.component.statistics
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.model.App
-import com.faendir.acra.model.QReport
-import com.faendir.acra.service.DataService
+import com.faendir.acra.jooq.generated.Tables.REPORT
+import com.faendir.acra.persistence.app.AppId
+import com.faendir.acra.persistence.report.ReportRepository
+import com.faendir.acra.persistence.version.VersionRepository
 import com.faendir.acra.ui.component.Card
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.SizeUnit
 import com.faendir.acra.ui.ext.setWidth
-import com.querydsl.core.types.dsl.BooleanExpression
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.formlayout.FormLayout
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.component.textfield.NumberField
+import org.jooq.Condition
 
 /**
  * @author lukas
  * @since 21.05.18
  */
-class Statistics(app: App, private val baseExpression: BooleanExpression?, dataService: DataService) : Composite<FlexLayout>() {
-    private val properties: MutableList<Property<*, *, *, *>> = mutableListOf()
+open class Statistics(appId: AppId, private val baseExpression: Condition?, reportRepository: ReportRepository, versionRepository: VersionRepository) : Composite<FlexLayout>() {
+    private val properties: MutableList<Property<*, *, *, *, *>> = mutableListOf()
 
     init {
         val filterLayout = FormLayout()
@@ -46,12 +47,12 @@ class Statistics(app: App, private val baseExpression: BooleanExpression?, dataS
         card.setWidth(500, SizeUnit.PIXEL)
         val dayStepper = NumberField()
         dayStepper.value = 30.0
-        val factory = Property.Factory(dataService, baseExpression, app)
-        properties.add(factory.createAgeProperty(QReport.report.date, Messages.LAST_X_DAYS, Messages.REPORTS_OVER_TIME))
-        properties.add(factory.createStringProperty(QReport.report.androidVersion, Messages.ANDROID_VERSION, Messages.REPORTS_PER_ANDROID_VERSION))
-        properties.add(factory.createStringProperty(QReport.report.stacktrace.version.name, Messages.APP_VERSION, Messages.REPORTS_PER_APP_VERSION))
-        properties.add(factory.createStringProperty(QReport.report.phoneModel, Messages.PHONE_MODEL, Messages.REPORTS_PER_PHONE_MODEL))
-        properties.add(factory.createStringProperty(QReport.report.brand, Messages.PHONE_BRAND, Messages.REPORTS_PER_BRAND))
+        val factory = Property.Factory(reportRepository, versionRepository, baseExpression, appId)
+        properties.add(factory.createAgeProperty(REPORT.DATE, Messages.LAST_X_DAYS, Messages.REPORTS_OVER_TIME))
+        properties.add(factory.createStringProperty(REPORT.ANDROID_VERSION, Messages.ANDROID_VERSION, Messages.REPORTS_PER_ANDROID_VERSION))
+        properties.add(factory.createVersionProperty(REPORT.VERSION_CODE, REPORT.VERSION_FLAVOR, Messages.APP_VERSION, Messages.REPORTS_PER_APP_VERSION))
+        properties.add(factory.createStringProperty(REPORT.PHONE_MODEL, Messages.PHONE_MODEL, Messages.REPORTS_PER_PHONE_MODEL))
+        properties.add(factory.createStringProperty(REPORT.BRAND, Messages.PHONE_BRAND, Messages.REPORTS_PER_BRAND))
         content.flexWrap = FlexLayout.FlexWrap.WRAP
         content.setWidthFull()
         content.removeAll()

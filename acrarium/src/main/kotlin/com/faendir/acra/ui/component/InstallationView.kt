@@ -15,7 +15,7 @@
  */
 package com.faendir.acra.ui.component
 
-import com.faendir.acra.service.AvatarService
+import com.faendir.acra.domain.AvatarService
 import com.faendir.acra.ui.ext.stringProperty
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.DetachEvent
@@ -41,7 +41,7 @@ class InstallationView(private val avatarService: AvatarService) : LitTemplate()
     private var label by stringProperty("label")
 
     fun setInstallationId(installationId: String) {
-        resource = avatarService.getAvatar(installationId)
+        resource = avatarService.getAvatarResource(installationId)
         image = StreamResourceRegistry.getURI(resource).toASCIIString()
         label = installationId
         if (parent.isPresent) {

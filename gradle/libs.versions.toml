@@ -3,11 +3,13 @@ kotlin = "1.7.22"
 dokka = "1.7.20"
 jgitver = "0.10.0-rc03"
 nexusPublish = "1.1.0"
-spring-boot = "2.7.7"
-vaadin-flow = "23.2.11"
+springBoot = "3.0.0"
+vaadin-flow = "24.0.0.alpha9"
+vaadin-base = "24.0.0.alpha5"
 kotlinPoet = "1.12.0"
 docker-gradle = "0.34.0"
-autoService = "1.0.1"
+jooq = "3.17.6"
+mprV7 = "fail"
 
 [libraries]
 kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -17,15 +19,13 @@ dokka-gradle = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref
 dokka-core = { module = "org.jetbrains.dokka:dokka-core", version.ref = "dokka" }
 jgitver = { module = "gradle.plugin.fr.brouillard.oss.gradle:gradle-jgitver-plugin", version.ref = "jgitver" }
 nexusPublish = { module = "io.github.gradle-nexus:publish-plugin", version.ref = "nexusPublish" }
-spring-boot-gradle = { module = "org.springframework.boot:spring-boot-gradle-plugin", version.ref = "spring-boot" }
-spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
-vaadin-flow-gradle = { module = "com.vaadin:vaadin-gradle-plugin", version.ref = "vaadin-flow" }
-vaadin-flow-bom = { module = "com.vaadin:vaadin-bom", version.ref = "vaadin-flow" }
+spring-boot-gradle = { module = "org.springframework.boot:spring-boot-gradle-plugin", version.ref = "springBoot" }
+vaadin-flow-gradle = { module = "com.vaadin:vaadin-gradle-plugin", version.ref = "vaadin-base" }
+spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
+vaadin-base-bom = { module = "com.vaadin:vaadin-bom", version.ref = "vaadin-base" }
+vaadin-flow-bom = { module = "com.vaadin:flow-bom", version.ref = "vaadin-flow" }
 kotlinPoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinPoet" }
 docker-gradle = { module = "com.palantir.gradle.docker:gradle-docker", version.ref = "docker-gradle" }
-autoService-processor = { module = "com.google.auto.service:auto-service", version.ref = "autoService" }
-autoService-annotations = { module = "com.google.auto.service:auto-service", version.ref = "autoService" }
-liquibaseKotlinDsl = "com.faendir.liquibase:liquibase-kotlin-dsl:3.1.0"
 ektorp = "org.ektorp:org.ektorp.spring:1.5.0"
 acraJava = "ch.acra:acra-javacore:5.8.4"
 orgJson = "org.codeartisans:org.json:20161124"
@@ -36,8 +36,7 @@ fuzzywuzzy = "me.xdrop:fuzzywuzzy:1.4.0"
 ziplet = "com.faendir.ziplet:ziplet:2.4.3"
 univocityParser = "com.univocity:univocity-parsers:2.9.1"
 avatarGenerator = "com.talanlabs:avatar-generator:1.1.0"
-apexCharts = "com.github.appreciated:apexcharts:23.0.1"
-gridLayout = "com.github.appreciated:vaadin-css-grid:2.0.0"
+apexCharts = "com.github.appreciated:apexcharts:24.0.0-SNAPSHOT"
 vaadin-paperMenuButton = "com.github.appreciated:vaadin-paper-menu-button:2.0.2"
 kotlin-coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
 kotlin-logging = "io.github.microutils:kotlin-logging-jvm:3.0.5"

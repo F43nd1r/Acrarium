@@ -15,11 +15,10 @@
  */
 package com.faendir.acra.ui.view.bug.tabs
 
-import com.faendir.acra.model.Bug
-import com.faendir.acra.navigation.ParseBugParameter
 import com.faendir.acra.navigation.View
 import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.CardView
+import com.faendir.acra.ui.component.SpringComposite
 import com.faendir.acra.ui.view.bug.BugView
 import com.faendir.acra.ui.view.bug.tabs.admincards.DangerCard
 import com.faendir.acra.ui.view.bug.tabs.admincards.PropertiesCard
@@ -31,7 +30,7 @@ import com.vaadin.flow.router.Route
  */
 @View("bugAdminTab")
 @Route(value = "admin", layout = BugView::class)
-class AdminTab(@ParseBugParameter bug: Bug) : BugTab<CardView<AdminCard>>(bug) {
+class AdminTab : SpringComposite<CardView<AdminCard>>() {
     init {
         content.add(PropertiesCard::class, DangerCard::class)
     }

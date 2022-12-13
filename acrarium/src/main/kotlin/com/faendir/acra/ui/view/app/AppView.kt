@@ -16,27 +16,37 @@
 package com.faendir.acra.ui.view.app
 
 import com.faendir.acra.i18n.Messages
+import com.faendir.acra.navigation.PARAM_APP
+import com.faendir.acra.navigation.RouteParams
+import com.faendir.acra.navigation.View
+import com.faendir.acra.persistence.app.AppId
+import com.faendir.acra.persistence.app.AppRepository
 import com.faendir.acra.ui.component.tabs.TabView
 import com.faendir.acra.ui.view.app.tabs.*
 import com.faendir.acra.ui.view.main.MainView
-import com.faendir.acra.util.PARAM_APP
+import com.vaadin.flow.router.NotFoundException
 import com.vaadin.flow.router.ParentLayout
 import com.vaadin.flow.router.RoutePrefix
-import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
 
 /**
  * @author lukas
  * @since 13.07.18
  */
-@UIScope
-@SpringComponent
+@View
 @RoutePrefix("app/:$PARAM_APP")
 @ParentLayout(MainView::class)
-class AppView : TabView(
+class AppView(
+    appRepository: AppRepository,
+    routeParams: RouteParams,
+) : TabView(
+    (appRepository.find(routeParams.appId()) ?: throw NotFoundException()).name,
     TabInfo(BugTab::class, Messages.BUGS),
     TabInfo(ReportTab::class, Messages.REPORTS),
     TabInfo(InstallationTab::class, Messages.INSTALLATIONS),
     TabInfo(StatisticsTab::class, Messages.STATISTICS),
     TabInfo(AdminTab::class, Messages.ADMIN)
-)
+) {
+    companion object {
+        fun getNavigationParams(appId: AppId) = mapOf(PARAM_APP to appId.toString())
+    }
+}

@@ -116,9 +116,9 @@ open class Translatable<T : Component> protected constructor(protected val t: T,
         fun <T> createComboBox(items: Collection<T>, captionId: String, vararg params: Any) =
             ValidatedValue(ComboBox("", items), ComboBox<T>::setLabel, captionId, *params)
 
-        fun <T> createSelect(items: Collection<T>, captionId: String, vararg params: Any) = Translatable(Select<T>().apply { setItems(items) }) {
+        fun <T> createSelect(items: Collection<T>, getLabel: (T) -> String, captionId: String, vararg params: Any) = Value(Select<T>().apply { setItems(items) }) {
             label = getTranslation(captionId, *params)
-            setItemLabelGenerator(itemLabelGenerator)
+            setItemLabelGenerator(getLabel)
         }
 
         fun createCheckbox(captionId: String, vararg params: Any) = Value(Checkbox(), Checkbox::setLabel, captionId, *params)
