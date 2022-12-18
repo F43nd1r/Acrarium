@@ -24,14 +24,7 @@ import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.DetachEvent
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.tabs.Tab
-import com.vaadin.flow.router.AfterNavigationEvent
-import com.vaadin.flow.router.AfterNavigationListener
-import com.vaadin.flow.router.BeforeEnterEvent
-import com.vaadin.flow.router.BeforeEnterObserver
-import com.vaadin.flow.router.ParentLayout
-import com.vaadin.flow.router.Route
-import com.vaadin.flow.router.RouteParameters
-import com.vaadin.flow.router.RoutePrefix
+import com.vaadin.flow.router.*
 import com.vaadin.flow.shared.Registration
 import org.springframework.context.support.GenericApplicationContext
 import org.springframework.core.annotation.AnnotationUtils
@@ -42,7 +35,7 @@ import kotlin.reflect.full.isSubclassOf
  * @author lukas
  * @since 18.10.18
  */
-class Path(private val applicationContext: GenericApplicationContext) : SubTabs(), AfterNavigationListener, BeforeEnterObserver {
+class AppPath(private val applicationContext: GenericApplicationContext) : SubTabs(), AfterNavigationListener, BeforeEnterObserver {
     private var registration: Registration? = null
 
     private lateinit var parameters: RouteParameters
@@ -62,32 +55,34 @@ class Path(private val applicationContext: GenericApplicationContext) : SubTabs(
 
     private fun findPathElements(hasElement: KClass<out Component>): List<Element<*>> {
         val routeAnnotation = AnnotationUtils.findAnnotation(hasElement.java, Route::class.java)
-        return if (routeAnnotation != null && routeAnnotation.value.isNotEmpty()) {
+        if (routeAnnotation != null && routeAnnotation.value.isNotEmpty()) {
             val layouts = if (routeAnnotation.layout != UI::class) {
                 generateSequence(routeAnnotation.layout) { AnnotationUtils.findAnnotation(it.java, ParentLayout::class.java)?.value }.toList()
             } else emptyList()
-            val classes = listOf(hasElement) + layouts
-            val availableParameters = routeAnnotation.value.getAvailablePathParams() +
-                    layouts.mapNotNull { AnnotationUtils.findAnnotation(it.java, RoutePrefix::class.java) }.flatMap { it.value.getAvailablePathParams() }
-            val parameters = availableParameters.associateWith { parameters[it].orElse("") }
-            val title = classes.find {
-                it.isSubclassOf(HasAcrariumTitle::class) && AnnotationUtils.findAnnotation(
-                    it.java,
-                    org.springframework.stereotype.Component::class.java
-                ) != null
-            }?.let { (applicationContext.getBean(it.java) as HasAcrariumTitle).title } ?: TranslatableText(Messages.ONE_ARG, "MISSING TITLE")
-            val logicalParent =
-                classes.firstNotNullOfOrNull {
-                    AnnotationUtils.findAnnotation(
+            if (routeAnnotation.value.startsWith("app") || layouts.lastOrNull()
+                    ?.let { AnnotationUtils.findAnnotation(it.java, RoutePrefix::class.java) }?.value?.startsWith("app") == true
+            ) {
+                val classes = listOf(hasElement) + layouts
+                val availableParameters = routeAnnotation.value.getAvailablePathParams() +
+                        layouts.mapNotNull { AnnotationUtils.findAnnotation(it.java, RoutePrefix::class.java) }
+                            .flatMap { it.value.getAvailablePathParams() }
+                val parameters = availableParameters.associateWith { parameters[it].orElse("") }
+                val title = classes.find {
+                    it.isSubclassOf(HasAcrariumTitle::class) && AnnotationUtils.findAnnotation(
                         it.java,
-                        LogicalParent::class.java
-                    )
-                }?.value?.takeIf { it.isSubclassOf(Component::class) }
-            listOf(Element(hasElement, parameters, title.id, *title.params)) +
-                    logicalParent?.let { @Suppress("UNCHECKED_CAST") findPathElements(it as KClass<out Component>) }.orEmpty()
-        } else {
-            emptyList()
+                        org.springframework.stereotype.Component::class.java
+                    ) != null
+                }?.let { (applicationContext.getBean(it.java) as HasAcrariumTitle).title } ?: TranslatableText(Messages.ONE_ARG, "MISSING TITLE")
+                val logicalParent =
+                    classes.firstNotNullOfOrNull {
+                        AnnotationUtils.findAnnotation(it.java, LogicalParent::class.java)
+                    }?.value?.takeIf { it.isSubclassOf(Component::class) }
+                return listOf(Element(hasElement, parameters, title.id, *title.params)) +
+                        logicalParent?.let { @Suppress("UNCHECKED_CAST") findPathElements(it as KClass<out Component>) }.orEmpty()
+            }
         }
+        return emptyList()
+
     }
 
     private fun String.getAvailablePathParams() = split("/").filter { it.startsWith(':') }.map { it.drop(1) }

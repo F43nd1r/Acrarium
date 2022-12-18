@@ -16,9 +16,10 @@
 package com.faendir.acra.ui.view.app.tabs.admincards
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.jooq.generated.Tables.REPORT
+import com.faendir.acra.jooq.generated.tables.references.REPORT
 import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
+import com.faendir.acra.persistence.NOT_NULL
 import com.faendir.acra.persistence.report.ReportRepository
 import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.Translatable
@@ -55,7 +56,7 @@ class ExportCard(
                 try {
                     val where = null.eqIfNotBlank(REPORT.USER_EMAIL, mailBox.value).eqIfNotBlank(REPORT.INSTALLATION_ID, idBox.value)
                     ByteArrayInputStream(
-                        if (where == null) ByteArray(0) else reportRepository.get(appId, REPORT.CONTENT, where, sorted = false)
+                        if (where == null) ByteArray(0) else reportRepository.get(appId, REPORT.CONTENT.NOT_NULL, where, sorted = false)
                             .joinToString(", ", "[", "]") { it.data() }.toByteArray(StandardCharsets.UTF_8)
                     )
                 } finally {
@@ -67,5 +68,6 @@ class ExportCard(
         }
     }
 
-    private fun Condition?.eqIfNotBlank(path: Field<String>, value: String?): Condition? = if (!value.isNullOrBlank()) this?.and(path.eq(value)) ?: path.eq(value) else null
+    private fun Condition?.eqIfNotBlank(path: Field<String?>, value: String?): Condition? =
+        if (!value.isNullOrBlank()) this?.and(path.eq(value)) ?: path.eq(value) else null
 }

@@ -34,28 +34,30 @@ export default class Card extends LitElement {
 
                 .acrarium-card-header {
                     padding: 1rem;
-                    box-sizing: border-box;
-                    background-color: var(--acrarium-card-header-color, var(--lumo-contrast-5pct));
-                    color: var(--acrarium-card-header-text-color);
-                    display: inline-block;
-                    width: 100%;
+                  box-sizing: border-box;
+                  background-color: var(--acrarium-card-header-color, var(--lumo-contrast-5pct));
+                  color: var(--acrarium-card-header-text-color);
+                  display: inline-block;
+                  width: 100%;
                 }
 
-                .acrarium-card-content {
-                    padding: 1rem;
-                    box-sizing: border-box;
-                    display: inline-block;
-                    width: 100%;
-                    height: 100%;
-                }
+          .acrarium-card-content {
+            padding: 1rem;
+            box-sizing: border-box;
+            display: inline-flex;
+            flex-direction: column;
+            align-content: center;
+            width: 100%;
+            height: 100%;
+          }
 
-                .acrarium-card-content-wrapper {
-                    width: 100%;
-                    flex: 1;
-                    min-height: 0;
-                }
+          .acrarium-card-content-wrapper {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+          }
 
-                .collapse {
+          .collapse {
                     display: none;
                 }
 

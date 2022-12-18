@@ -1,6 +1,6 @@
 package com.faendir.acra.persistence.mailsettings
 
-import com.faendir.acra.jooq.generated.Tables.MAIL_SETTINGS
+import com.faendir.acra.jooq.generated.tables.references.MAIL_SETTINGS
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.fetchListInto
 import com.faendir.acra.persistence.fetchValueInto

@@ -104,13 +104,13 @@ class VersionRepositoryTest(
         @Test
         fun `should delete version`() {
             val id = testDataBuilder.createVersion(appId)
-            val version = versionRepository.find(id)
+            val version = versionRepository.find(appId, id)
 
             expectThat(version).isNotNull()
 
             versionRepository.delete(version!!)
 
-            expectThat(versionRepository.find(id)).isNull()
+            expectThat(versionRepository.find(appId, id)).isNull()
         }
     }
 
@@ -139,7 +139,7 @@ class VersionRepositoryTest(
             val flavor = "Flavor"
             testDataBuilder.createVersion(code = versionCode, name = versionName, app = appId, flavor = flavor)
 
-            expectThat(versionRepository.find(VersionKey(appId, versionCode, flavor))).isNotNull().and {
+            expectThat(versionRepository.find(appId, VersionKey(versionCode, flavor))).isNotNull().and {
                 get { this.code }.isEqualTo(versionCode)
                 get { this.name }.isEqualTo(versionName)
                 get { this.flavor }.isEqualTo(flavor)

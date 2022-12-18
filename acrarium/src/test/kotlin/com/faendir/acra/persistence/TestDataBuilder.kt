@@ -1,13 +1,6 @@
 package com.faendir.acra.persistence
 
-import com.faendir.acra.jooq.generated.Tables.APP
-import com.faendir.acra.jooq.generated.Tables.BUG
-import com.faendir.acra.jooq.generated.Tables.BUG_IDENTIFIER
-import com.faendir.acra.jooq.generated.Tables.REPORT
-import com.faendir.acra.jooq.generated.Tables.USER
-import com.faendir.acra.jooq.generated.Tables.USER_PERMISSIONS
-import com.faendir.acra.jooq.generated.Tables.USER_ROLES
-import com.faendir.acra.jooq.generated.Tables.VERSION
+import com.faendir.acra.jooq.generated.tables.references.*
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.bug.BugId
 import com.faendir.acra.persistence.bug.BugIdentifier
@@ -15,6 +8,7 @@ import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.persistence.user.Role
 import com.faendir.acra.persistence.version.VersionKey
 import org.apache.commons.text.RandomStringGenerator
+import org.intellij.lang.annotations.Language
 import org.jooq.DSLContext
 import org.jooq.JSON
 import java.time.Instant
@@ -44,6 +38,7 @@ class TestDataBuilder(private val jooq: DSLContext, private val randomStringGene
             .set(USER_PERMISSIONS.USER_USERNAME, username)
             .set(USER_PERMISSIONS.APP_ID, appId)
             .set(USER_PERMISSIONS.LEVEL, level.name)
+            .execute()
     }
 
     fun createApp(reporter: String = createUser(), name: String = randomString("test-app")) = jooq.insertInto(APP)
@@ -51,14 +46,19 @@ class TestDataBuilder(private val jooq: DSLContext, private val randomStringGene
         .set(APP.NAME, name)
         .returningResult(APP.ID).fetchValue()!!
 
-    fun createVersion(app: AppId = createApp(), code: Int = random.nextInt(), flavor: String = "", name: String = randomString("test-version")): VersionKey {
+    fun createVersion(
+        app: AppId = createApp(),
+        code: Int = random.nextInt(),
+        flavor: String = "",
+        name: String = randomString("test-version")
+    ): VersionKey {
         jooq.insertInto(VERSION)
             .set(VERSION.CODE, code)
             .set(VERSION.NAME, name)
             .set(VERSION.FLAVOR, flavor)
             .set(VERSION.APP_ID, app)
             .execute()
-        return VersionKey(app, code, flavor)
+        return VersionKey(code, flavor)
     }
 
     fun createBug(app: AppId = createApp(), title: String = randomString("title")) = jooq.insertInto(BUG)
@@ -91,7 +91,10 @@ class TestDataBuilder(private val jooq: DSLContext, private val randomStringGene
         bugIdentifier: BugIdentifier = createBugIdentifier(app, bug),
         version: VersionKey = createVersion(app),
         date: Instant = Instant.now(),
-        id: String = randomString("report")
+        id: String = randomString("report"),
+        installationId: String = randomString("installationId"),
+        @Language("JSON")
+        content: String = "{\"REPORT_ID\": \"${id}\"}",
     ): String {
         jooq.insertInto(REPORT)
             .set(REPORT.ID, id)
@@ -99,8 +102,8 @@ class TestDataBuilder(private val jooq: DSLContext, private val randomStringGene
             .set(REPORT.BUG_ID, bug)
             .set(REPORT.VERSION_CODE, version.code)
             .set(REPORT.VERSION_FLAVOR, version.flavor)
-            .set(REPORT.CONTENT, JSON.json("{\"REPORT_ID\": \"${id}\"}"))
-            .set(REPORT.INSTALLATION_ID, randomString("installationId"))
+            .set(REPORT.CONTENT, JSON.json(content))
+            .set(REPORT.INSTALLATION_ID, installationId)
             .set(REPORT.DATE, date)
             .set(REPORT.IS_SILENT, false)
             .set(REPORT.DEVICE, randomString("device"))

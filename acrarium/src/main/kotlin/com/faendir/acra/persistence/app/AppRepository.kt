@@ -2,13 +2,10 @@ package com.faendir.acra.persistence.app
 
 import com.faendir.acra.dataprovider.AcrariumDataProvider
 import com.faendir.acra.dataprovider.AcrariumSort
-import com.faendir.acra.jooq.generated.Tables.APP
-import com.faendir.acra.jooq.generated.Tables.APP_REPORT_COLUMNS
-import com.faendir.acra.jooq.generated.Tables.REPORT
-import com.faendir.acra.persistence.fetchList
-import com.faendir.acra.persistence.fetchListInto
-import com.faendir.acra.persistence.fetchValue
-import com.faendir.acra.persistence.fetchValueInto
+import com.faendir.acra.jooq.generated.tables.references.APP
+import com.faendir.acra.jooq.generated.tables.references.APP_REPORT_COLUMNS
+import com.faendir.acra.jooq.generated.tables.references.REPORT
+import com.faendir.acra.persistence.*
 import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.persistence.user.Role
 import com.faendir.acra.persistence.user.UserRepository
@@ -78,7 +75,7 @@ class AppRepository(private val jooq: DSLContext, private val userRepository: Us
     }
 
     @PreAuthorize("isUser()")
-    fun getVisibleIds(): List<AppId> = jooq.select(APP.ID).from(APP).where(hasViewPermission()).fetchList()
+    fun getVisibleIds(): List<AppId> = jooq.select(APP.ID.NOT_NULL).from(APP).where(hasViewPermission()).fetchList()
 
     @PreAuthorize("isAdmin()")
     fun getAllNames(): List<AppName> = jooq.select(APP.ID, APP.NAME).from(APP).fetchListInto()

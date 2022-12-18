@@ -55,20 +55,23 @@ class WebSecurityConfiguration(private val userRepository: UserRepository) : Vaa
 
     @Bean(name = [BeanIds.AUTHENTICATION_MANAGER])
     fun authenticationManager(http: HttpSecurity): AuthenticationManager =
-        http.getSharedObject(AuthenticationManagerBuilder::class.java).authenticationProvider(object : AuthenticationProvider {
-            override fun authenticate(authentication: Authentication): Authentication? {
-                if (authentication is UsernamePasswordAuthenticationToken) {
-                    val username = authentication.name
-                    if (userRepository.checkPassword(username, authentication.credentials as String)) {
-                        return UsernamePasswordAuthenticationToken(username, null, userRepository.getAuthorities(username))
+        http.getSharedObject(AuthenticationManagerBuilder::class.java)
+            .parentAuthenticationManager(null)
+            .authenticationProvider(object : AuthenticationProvider {
+                override fun authenticate(authentication: Authentication): Authentication? {
+                    if (authentication is UsernamePasswordAuthenticationToken) {
+                        val username = authentication.name
+                        if (userRepository.checkPassword(username, authentication.credentials as String)) {
+                            return UsernamePasswordAuthenticationToken(username, null, userRepository.getAuthorities(username))
+                        }
+                        throw BadCredentialsException("Bad username/password combination for $username")
                     }
-                    throw BadCredentialsException("Bad username/password combination for $username")
+                    return null
                 }
-                return null
-            }
 
-            override fun supports(authentication: Class<*>): Boolean = UsernamePasswordAuthenticationToken::class.java.isAssignableFrom(authentication)
-        }).build()
+                override fun supports(authentication: Class<*>): Boolean =
+                    UsernamePasswordAuthenticationToken::class.java.isAssignableFrom(authentication)
+            }).build()
 
     @Bean
     @Order(1)

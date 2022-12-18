@@ -43,7 +43,8 @@ internal abstract class Chart<T>(captionId: String, vararg params: Any) : Compos
         val chart = createChart(map)
         content.add(chart)
         if (!reload) {
-            chart.element.executeJs("setTimeout(() => { this.updateConfig(); this.chartComponent.updateOptions(this.config); this.chartComponent.render() }, 0)")
+            //language=javascript
+            chart.element.executeJs("this.theme = `{ \"mode\": \"\${document.body.getAttribute('theme')}\" }`")
         }
     }
 

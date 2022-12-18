@@ -1,6 +1,7 @@
 package com.faendir.acra.persistence.app
 
-import com.faendir.acra.jooq.generated.Tables
+import com.faendir.acra.jooq.generated.tables.references.APP
+import com.faendir.acra.jooq.generated.tables.references.REPORT
 import com.faendir.acra.persistence.SortDefinition
 import org.jooq.Field
 import org.jooq.impl.AbstractConverter
@@ -24,10 +25,10 @@ class AppIdConverter : AbstractConverter<Int, AppId>(Int::class.javaPrimitiveTyp
 data class App(val id: AppId, val name: String, val reporterUsername: String)
 
 data class AppStats(val id: AppId, val name: String, val reportCount: Int, val bugCount: Int) {
-    enum class Sort(override val field: Field<out Any>) : SortDefinition {
-        NAME(Tables.APP.NAME),
-        REPORT_COUNT(DSL.count(Tables.REPORT.ID)),
-        BUG_COUNT(DSL.countDistinct(Tables.REPORT.BUG_ID))
+    enum class Sort(override val field: Field<*>) : SortDefinition {
+        NAME(APP.NAME),
+        REPORT_COUNT(DSL.count(REPORT.ID)),
+        BUG_COUNT(DSL.countDistinct(REPORT.BUG_ID))
     }
 }
 

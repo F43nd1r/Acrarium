@@ -74,7 +74,7 @@ class ReportList(
             }
             sort(GridSortOrder.desc(dateColumn).build())
             val versions = versionRepository.getVersionNames(app)
-            column(VersionRenderer(versions) { it.versionCode to it.versionFlavor }) {
+            column(VersionRenderer(versions) { it.versionKey }) {
                 setFilterableIs(versions, { it.name }, { ReportRow.Filter.VERSION(it.code, it.flavor) }, Messages.APP_VERSION)
                 setCaption(Messages.APP_VERSION)
             }

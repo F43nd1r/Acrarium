@@ -1,9 +1,12 @@
 package com.faendir.acra.persistence.report
 
 import com.faendir.acra.annotation.PersistenceTest
+import com.faendir.acra.dataprovider.AcrariumSort
 import com.faendir.acra.persistence.TestDataBuilder
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.bug.BugId
+import com.faendir.acra.persistence.version.VersionKey
+import com.vaadin.flow.data.provider.SortDirection
 import org.jooq.JSON
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -61,7 +64,10 @@ internal class ReportRepositoryTest(
             val reportIn2 = testDataBuilder.createReport(appId, date = now.plus(Duration.ofHours(23)))
             testDataBuilder.createReport(appId, date = now.plus(Duration.ofHours(25)))
 
-            expectThat(reportRepository.listIds(appId, now.minus(Duration.ofDays(1)), now.plus(Duration.ofDays(1)))).containsExactlyInAnyOrder(reportIn1, reportIn2)
+            expectThat(reportRepository.listIds(appId, now.minus(Duration.ofDays(1)), now.plus(Duration.ofDays(1)))).containsExactlyInAnyOrder(
+                reportIn1,
+                reportIn2
+            )
         }
 
         @Test
@@ -97,13 +103,12 @@ internal class ReportRepositoryTest(
                 marketingDevice = "marketingDevice",
                 bugId = bugId,
                 appId = appId,
-                versionCode = version.code,
-                versionFlavor = version.flavor,
                 stacktrace = "stacktrace",
                 exceptionClass = "exceptionClass",
                 message = "message",
                 crashLine = "crashLine",
-                cause = "cause"
+                cause = "cause",
+                versionKey = version
             )
 
             reportRepository.create(report, emptyMap())
@@ -130,13 +135,12 @@ internal class ReportRepositoryTest(
                 marketingDevice = "marketingDevice",
                 bugId = bugId,
                 appId = appId,
-                versionCode = version.code,
-                versionFlavor = version.flavor,
                 stacktrace = "stacktrace",
                 exceptionClass = "exceptionClass",
                 message = null,
                 crashLine = null,
-                cause = null
+                cause = null,
+                versionKey = version
             )
 
             reportRepository.create(report, emptyMap())
@@ -167,13 +171,12 @@ internal class ReportRepositoryTest(
                         marketingDevice = "marketingDevice",
                         bugId = bugId,
                         appId = appId,
-                        versionCode = version.code,
-                        versionFlavor = version.flavor,
                         stacktrace = "stacktrace",
                         exceptionClass = "exceptionClass",
                         message = null,
                         crashLine = null,
-                        cause = null
+                        cause = null,
+                        versionKey = version
                     ), emptyMap()
                 )
             }
@@ -200,13 +203,12 @@ internal class ReportRepositoryTest(
                         marketingDevice = "marketingDevice",
                         bugId = bugId,
                         appId = appId,
-                        versionCode = 0,
-                        versionFlavor = "",
                         stacktrace = "stacktrace",
                         exceptionClass = "exceptionClass",
                         message = null,
                         crashLine = null,
-                        cause = null
+                        cause = null,
+                        versionKey = VersionKey(0, "")
                     ), emptyMap()
                 )
             }
@@ -234,13 +236,12 @@ internal class ReportRepositoryTest(
                         marketingDevice = "marketingDevice",
                         bugId = bugId,
                         appId = AppId(0),
-                        versionCode = version.code,
-                        versionFlavor = version.flavor,
                         stacktrace = "stacktrace",
                         exceptionClass = "exceptionClass",
                         message = null,
                         crashLine = null,
-                        cause = null
+                        cause = null,
+                        versionKey = version
                     ), emptyMap()
                 )
             }
@@ -267,13 +268,12 @@ internal class ReportRepositoryTest(
                         marketingDevice = "marketingDevice",
                         bugId = BugId(0),
                         appId = AppId(0),
-                        versionCode = version.code,
-                        versionFlavor = version.flavor,
                         stacktrace = "stacktrace",
                         exceptionClass = "exceptionClass",
                         message = null,
                         crashLine = null,
-                        cause = null
+                        cause = null,
+                        versionKey = version
                     ), emptyMap()
                 )
             }
@@ -297,6 +297,127 @@ internal class ReportRepositoryTest(
 
     @Nested
     inner class Provider {
-        // TODO
+
+        @Test
+        fun `should return all reports from app`() {
+            val provider = reportRepository.getProvider(appId, emptyList())
+            val r1 = testDataBuilder.createReport(appId)
+            val r2 = testDataBuilder.createReport(appId)
+            val otherAppId = testDataBuilder.createApp()
+            testDataBuilder.createReport(otherAppId)
+
+            expectThat(provider.size(emptySet())).isEqualTo(2)
+            expectThat(provider.fetch(emptySet(), emptyList(), 0, 10).toList().map { it.id }).containsExactlyInAnyOrder(r1, r2)
+        }
+
+        @Test
+        fun `should return all reports from bug`() {
+            val bugId = testDataBuilder.createBug(appId)
+            val provider = reportRepository.getProvider(appId, bugId, emptyList())
+            val r1 = testDataBuilder.createReport(appId, bugId)
+            val r2 = testDataBuilder.createReport(appId, bugId)
+            val otherBugId = testDataBuilder.createBug(appId)
+            testDataBuilder.createReport(appId, otherBugId)
+
+            expectThat(provider.size(emptySet())).isEqualTo(2)
+            expectThat(provider.fetch(emptySet(), emptyList(), 0, 10).toList().map { it.id }).containsExactlyInAnyOrder(r1, r2)
+        }
+
+        @Test
+        fun `should return all reports from installation`() {
+            val installationId = "installation-id"
+            val provider = reportRepository.getProvider(appId, installationId, emptyList())
+            val r1 = testDataBuilder.createReport(appId, installationId = installationId)
+            val r2 = testDataBuilder.createReport(appId, installationId = installationId)
+            testDataBuilder.createReport(appId, installationId = "other")
+
+            expectThat(provider.size(emptySet())).isEqualTo(2)
+            expectThat(provider.fetch(emptySet(), emptyList(), 0, 10).toList().map { it.id }).containsExactlyInAnyOrder(r1, r2)
+        }
+
+        @Test
+        fun `should return all data including custom columns`() {
+            val bugId = testDataBuilder.createBug(appId)
+            val version = testDataBuilder.createVersion(appId)
+            val report = Report(
+                id = "id",
+                androidVersion = "androidVersion",
+                content = JSON.json("{\"CUSTOM_FIELD\": \"customField\", \"NESTED_CUSTOM_FIELD\": {\"foo\": \"bar\"}}"),
+                date = Instant.now().truncatedTo(ChronoUnit.SECONDS),
+                phoneModel = "phoneModel",
+                userComment = "userComment",
+                userEmail = "userEmail",
+                brand = "brand",
+                installationId = "installationId",
+                isSilent = true,
+                device = "device",
+                marketingDevice = "marketingDevice",
+                bugId = bugId,
+                appId = appId,
+                stacktrace = "stacktrace",
+                exceptionClass = "exceptionClass",
+                message = "message",
+                crashLine = "crashLine",
+                cause = "cause",
+                versionKey = version
+            )
+            reportRepository.create(report, emptyMap())
+            val provider = reportRepository.getProvider(appId, listOf("NESTED_CUSTOM_FIELD", "CUSTOM_FIELD"))
+
+            expectThat(provider.fetch(emptySet(), emptyList(), 0, 1).toList().first()).isEqualTo(
+                ReportRow(
+                    id = "id",
+                    androidVersion = "androidVersion",
+                    phoneModel = "phoneModel",
+                    date = report.date,
+                    marketingDevice = "marketingDevice",
+                    installationId = "installationId",
+                    isSilent = true,
+                    exceptionClass = "exceptionClass",
+                    message = "message",
+                    versionKey = version,
+                    bugId = bugId,
+                    customColumns = listOf("{\"foo\": \"bar\"}", "customField")
+                )
+            )
+        }
+
+        @Test
+        fun `should not fail for missing custom columns`() {
+            val bugId = testDataBuilder.createBug(appId)
+            val version = testDataBuilder.createVersion(appId)
+            val report = testDataBuilder.createReport(appId, version = version, content = "{\"CUSTOM_FIELD\": \"customField\"}")
+            val provider = reportRepository.getProvider(appId, listOf("NESTED_CUSTOM_FIELD", "CUSTOM_FIELD"))
+
+            expectThat(provider.fetch(emptySet(), emptyList(), 0, 1).toList().first().customColumns).isEqualTo(listOf(null, "customField"))
+        }
+
+        @Test
+        fun `should sort returned reports`() {
+            val provider = reportRepository.getProvider(appId, emptyList())
+            val r1 = testDataBuilder.createReport(appId, installationId = "a")
+            val r2 = testDataBuilder.createReport(appId, installationId = "b")
+
+            expectThat(
+                provider.fetch(emptySet(), listOf(AcrariumSort(ReportRow.Sort.INSTALLATION_ID, SortDirection.ASCENDING)), 0, 10).toList()
+                    .map { it.id }
+            ).isEqualTo(listOf(r1, r2))
+        }
+
+        @Test
+        fun `should offset and limit returned reports`() {
+            val provider = reportRepository.getProvider(appId, emptyList())
+            val r1 = testDataBuilder.createReport(appId, installationId = "a")
+            val r2 = testDataBuilder.createReport(appId, installationId = "b")
+
+            expectThat(
+                provider.fetch(emptySet(), listOf(AcrariumSort(ReportRow.Sort.INSTALLATION_ID, SortDirection.ASCENDING)), 0, 1).toList()
+                    .map { it.id })
+                .isEqualTo(listOf(r1))
+            expectThat(
+                provider.fetch(emptySet(), listOf(AcrariumSort(ReportRow.Sort.INSTALLATION_ID, SortDirection.ASCENDING)), 1, 1).toList()
+                    .map { it.id })
+                .isEqualTo(listOf(r2))
+        }
     }
 }

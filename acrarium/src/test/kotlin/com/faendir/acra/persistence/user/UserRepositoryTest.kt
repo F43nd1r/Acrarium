@@ -14,14 +14,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import strikt.api.expectThat
-import strikt.assertions.contains
-import strikt.assertions.containsExactlyInAnyOrder
-import strikt.assertions.doesNotContain
-import strikt.assertions.isEqualTo
-import strikt.assertions.isFalse
-import strikt.assertions.isNotNull
-import strikt.assertions.isNull
-import strikt.assertions.isTrue
+import strikt.assertions.*
 import kotlin.properties.Delegates
 
 
@@ -323,19 +316,43 @@ class UserRepositoryTest(
             val u1 = testDataBuilder.createUser(username = "u1", roles = arrayOf(Role.USER))
             val u2 = testDataBuilder.createUser(username = "u2", roles = arrayOf(Role.USER))
 
-            expectThat(provider.fetch(emptySet(), listOf(AcrariumSort(UserAuthorities.Sort.USERNAME, SortDirection.ASCENDING)), 0, 10).toList().map { it.username })
+            expectThat(
+                provider.fetch(emptySet(), listOf(AcrariumSort(UserAuthorities.Sort.USERNAME, SortDirection.ASCENDING)), 0, 10).toList()
+                    .map { it.username })
                 .isEqualTo(listOf(u1, u2))
         }
 
         @Test
-        fun `should offset and limit returned versions`() {
+        fun `should offset and limit returned users`() {
             val u1 = testDataBuilder.createUser(username = "u1", roles = arrayOf(Role.USER))
             val u2 = testDataBuilder.createUser(username = "u2", roles = arrayOf(Role.USER))
 
-            expectThat(provider.fetch(emptySet(), listOf(AcrariumSort(UserAuthorities.Sort.USERNAME, SortDirection.ASCENDING)), 0, 1).toList().map { it.username })
+            expectThat(
+                provider.fetch(emptySet(), listOf(AcrariumSort(UserAuthorities.Sort.USERNAME, SortDirection.ASCENDING)), 0, 1).toList()
+                    .map { it.username })
                 .isEqualTo(listOf(u1))
-            expectThat(provider.fetch(emptySet(), listOf(AcrariumSort(UserAuthorities.Sort.USERNAME, SortDirection.ASCENDING)), 1, 1).toList().map { it.username })
+            expectThat(
+                provider.fetch(emptySet(), listOf(AcrariumSort(UserAuthorities.Sort.USERNAME, SortDirection.ASCENDING)), 1, 1).toList()
+                    .map { it.username })
                 .isEqualTo(listOf(u2))
+        }
+
+        @Test
+        fun `should limit correctly regardless of number of roles and permissions`() {
+            val u1 = testDataBuilder.createUser(username = "u1", roles = arrayOf(Role.USER, Role.ADMIN, Role.API))
+            testDataBuilder.createPermission(u1, testDataBuilder.createApp(), Permission.Level.ADMIN)
+            testDataBuilder.createPermission(u1, testDataBuilder.createApp(), Permission.Level.ADMIN)
+            testDataBuilder.createPermission(u1, testDataBuilder.createApp(), Permission.Level.EDIT)
+            testDataBuilder.createPermission(u1, testDataBuilder.createApp(), Permission.Level.VIEW)
+            testDataBuilder.createPermission(u1, testDataBuilder.createApp(), Permission.Level.NONE)
+
+            expectThat(
+                provider.fetch(emptySet(), listOf(AcrariumSort(UserAuthorities.Sort.USERNAME, SortDirection.ASCENDING)), 0, 1).toList().first()
+            ) {
+                get { this.username }.isEqualTo(u1)
+                get { this.roles }.containsExactlyInAnyOrder(Role.USER, Role.ADMIN, Role.API)
+                get { this.permissions }.hasSize(5)
+            }
         }
     }
 }

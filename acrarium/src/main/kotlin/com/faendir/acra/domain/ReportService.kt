@@ -6,6 +6,7 @@ import com.faendir.acra.persistence.bug.BugRepository
 import com.faendir.acra.persistence.device.DeviceRepository
 import com.faendir.acra.persistence.report.Report
 import com.faendir.acra.persistence.report.ReportRepository
+import com.faendir.acra.persistence.version.VersionKey
 import com.faendir.acra.persistence.version.VersionRepository
 import com.faendir.acra.settings.AcrariumConfiguration
 import com.faendir.acra.util.findInt
@@ -74,13 +75,12 @@ class ReportService(
             marketingDevice = deviceRepository.findMarketingName(phoneModel, device) ?: device,
             bugId = bugId,
             appId = appId,
-            versionCode = versionCode,
-            versionFlavor = flavor ?: "",
             stacktrace = stacktrace,
             exceptionClass = bugIdentifier.exceptionClass,
             message = bugIdentifier.message,
             crashLine = bugIdentifier.crashLine,
             cause = bugIdentifier.cause,
+            versionKey = VersionKey(versionCode, flavor ?: ""),
         )
         reportRepository.create(report, attachments.associate { (it.originalFilename ?: it.name) to it.bytes })
         mailService?.onNewReport(report)

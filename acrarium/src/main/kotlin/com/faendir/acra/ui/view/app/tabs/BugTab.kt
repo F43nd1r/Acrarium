@@ -22,6 +22,7 @@ import com.faendir.acra.persistence.bug.BugRepository
 import com.faendir.acra.persistence.bug.BugStats
 import com.faendir.acra.persistence.version.VersionName
 import com.faendir.acra.persistence.version.VersionRepository
+import com.faendir.acra.persistence.version.toVersionKey
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.settings.LocalSettings
 import com.faendir.acra.ui.component.Translatable
@@ -104,7 +105,7 @@ class BugTab(
             sort(GridSortOrder.desc(this).build())
         }
         val versions = versionRepository.getVersionNames(appId)
-        column(VersionRenderer(versions) { it.latestVersionCode to it.latestVersionFlavor }) {
+        column(VersionRenderer(versions) { it.latestVersionKey }) {
             setSortable(BugStats.Sort.LATEST_VERSION_CODE)
             setFilterableIs(versions, { it.name }, { BugStats.Filter.LATEST_VERSION(it.code, it.flavor) }, Messages.APP_VERSION)
             setCaption(Messages.LATEST_VERSION)
@@ -126,14 +127,14 @@ class BugTab(
                 setTextRenderer { it.name }
                 isEmptySelectionAllowed = true
                 emptySelectionCaption = getTranslation(Messages.NOT_SOLVED)
-                value = versions.first { bug.latestVersionCode == it.code && bug.latestVersionFlavor == it.flavor }
+                value = versions.first { bug.latestVersionKey.code == it.code && bug.latestVersionKey.flavor == it.flavor }
                 isEnabled = SecurityUtils.hasPermission(appId, com.faendir.acra.persistence.user.Permission.Level.EDIT)
                 addValueChangeListener { e: ComponentValueChangeEvent<Select<VersionName?>?, VersionName?> ->
-                    bugRepository.setSolved(appId, bug.id, e.value?.let { it.code to it.flavor })
+                    bugRepository.setSolved(appId, bug.id, e.value?.toVersionKey())
                     style["--select-background-color"] =
-                        if (bug.latestVersionCode > (bug.solvedVersionCode ?: Int.MAX_VALUE)) "var(--lumo-error-color-50pct)" else null
+                        if (bug.latestVersionKey.code > (bug.solvedVersionKey?.code ?: Int.MAX_VALUE)) "var(--lumo-error-color-50pct)" else null
                 }
-                if (bug.latestVersionCode > (bug.solvedVersionCode ?: Int.MAX_VALUE)) {
+                if (bug.latestVersionKey.code > (bug.solvedVersionKey?.code ?: Int.MAX_VALUE)) {
                     style["--select-background-color"] = "var(--lumo-error-color-50pct)"
                 }
             }

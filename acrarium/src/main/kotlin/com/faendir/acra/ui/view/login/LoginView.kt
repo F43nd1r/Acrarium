@@ -30,25 +30,22 @@ import com.vaadin.flow.component.login.LoginI18n
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.router.Route
-import com.vaadin.flow.server.VaadinServletRequest
-import com.vaadin.flow.server.VaadinServletResponse
 import com.vaadin.flow.server.VaadinSession
 import com.vaadin.flow.server.auth.AnonymousAllowed
-import com.vaadin.flow.spring.security.VaadinDefaultRequestCache
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.InsufficientAuthenticationException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
-import org.springframework.security.web.savedrequest.DefaultSavedRequest
 import java.util.*
 
 @JsModule("./styles/shared-styles.js")
 @View
 @Route(ROUTE)
 @AnonymousAllowed
-class LoginView(private val authenticationManager: AuthenticationManager, private val requestCache: VaadinDefaultRequestCache) : Composite<FlexLayout>(),
+class LoginView(private val authenticationManager: AuthenticationManager) :
+    Composite<FlexLayout>(),
     HasAcrariumTitle {
     companion object {
         const val ROUTE = "login"
@@ -88,19 +85,15 @@ class LoginView(private val authenticationManager: AuthenticationManager, privat
                 throw InsufficientAuthenticationException("Missing required role")
             }
             SecurityContextHolder.getContext().authentication = token
-            VaadinSession.getCurrent().session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext())
-            UI.getCurrent().apply {
-                navigate(resolveRedirectUrl())
-            }
+            VaadinSession.getCurrent().session.setAttribute(
+                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                SecurityContextHolder.getContext()
+            )
+            UI.getCurrent().page.reload()
             true
         } catch (ex: AuthenticationException) {
             false
         }
-    }
-
-    private fun resolveRedirectUrl(): String {
-        val savedRequest = requestCache.getRequest(VaadinServletRequest.getCurrent().httpServletRequest, VaadinServletResponse.getCurrent().httpServletResponse)
-        return (savedRequest as? DefaultSavedRequest)?.requestURI?.takeIf { it.isNotBlank() && !it.contains(ROUTE) }?.removePrefix("/") ?: ""
     }
 
     override val title: TranslatableText = TranslatableText(Messages.LOGIN)

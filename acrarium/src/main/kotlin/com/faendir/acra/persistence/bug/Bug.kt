@@ -1,9 +1,10 @@
 package com.faendir.acra.persistence.bug
 
-import com.faendir.acra.jooq.generated.Tables.BUG
+import com.faendir.acra.jooq.generated.tables.references.BUG
 import com.faendir.acra.persistence.FilterDefinition
 import com.faendir.acra.persistence.SortDefinition
 import com.faendir.acra.persistence.app.AppId
+import com.faendir.acra.persistence.version.VersionKey
 import com.faendir.acra.settings.AcrariumConfiguration
 import org.jooq.Condition
 import org.jooq.Field
@@ -31,10 +32,8 @@ data class Bug(
     val appId: AppId,
     val reportCount: Int,
     val latestReport: Instant?,
-    val solvedVersionCode: Int?,
-    val solvedVersionFlavor: String?,
-    val latestVersionCode: Int?,
-    val latestVersionFlavor: String?,
+    val solvedVersionKey: VersionKey?,
+    val latestVersionKey: VersionKey?,
     val affectedInstallations: Int,
 )
 
@@ -53,7 +52,8 @@ data class BugIdentifier(
             return BugIdentifier(
                 appId = appId,
                 exceptionClass = lines.first().substringBefore(':'),
-                message = lines.first().takeIf { it.contains(':') }?.substringAfter(':')?.replace(acrariumConfiguration.messageIgnoreRegex, "")?.take(255),
+                message = lines.first().takeIf { it.contains(':') }?.substringAfter(':')?.replace(acrariumConfiguration.messageIgnoreRegex, "")
+                    ?.take(255),
                 crashLine = lines.mapNotNull { codePointRegex.matchEntire(it) }
                     .mapNotNull { it.groups["codepoint"]?.value }
                     .firstOrNull { !it.startsWith("android.") && !it.startsWith("java.") }?.take(255),
@@ -67,11 +67,9 @@ data class BugStats(
     val id: BugId,
     val title: String,
     val reportCount: Int,
-    val latestVersionCode: Int,
-    val latestVersionFlavor: String,
+    val latestVersionKey: VersionKey,
     val latestReport: Instant,
-    val solvedVersionCode: Int?,
-    val solvedVersionFlavor: String?,
+    val solvedVersionKey: VersionKey?,
     val affectedInstallations: Int,
 ) {
     sealed class Filter(override val condition: Condition) : FilterDefinition {
@@ -80,7 +78,7 @@ data class BugStats(
         object IS_NOT_SOLVED_OR_REGRESSION : Filter(BUG.SOLVED_VERSION_CODE.isNull.or(BUG.SOLVED_VERSION_CODE.lt(BUG.LATEST_VERSION_CODE)))
     }
 
-    enum class Sort(override val field: Field<out Any>) : SortDefinition {
+    enum class Sort(override val field: Field<*>) : SortDefinition {
         TITLE(BUG.TITLE),
         REPORT_COUNT(BUG.REPORT_COUNT),
         LATEST_VERSION_CODE(BUG.LATEST_VERSION_CODE),

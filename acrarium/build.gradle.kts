@@ -1,4 +1,6 @@
 import com.vaadin.gradle.vaadin
+import org.jooq.meta.jaxb.EmbeddableDefinitionType
+import org.jooq.meta.jaxb.EmbeddableField
 import org.jooq.meta.jaxb.ForcedType
 import org.jooq.meta.jaxb.Property
 
@@ -32,7 +34,10 @@ dependencies {
     implementation(libs.orgSpringframeworkBoot.springBootStarterSecurity)
     implementation(libs.orgSpringframeworkBoot.springBootStarterMail)
     implementation(libs.orgSpringframeworkBoot.springBootStarterActuator)
-    implementation(libs.orgSpringframeworkBoot.springBootStarterJooq)
+    implementation(libs.orgSpringframeworkBoot.springBootStarterJooq) {
+        exclude(group = "org.jooq")
+    }
+    implementation(libs.orgJooq.jooq)
     implementation(libs.comVaadin.vaadin)
     implementation(libs.comVaadin.vaadinSpringBootStarter)
     implementation(libs.mysql.mysqlConnectorJava)
@@ -120,7 +125,7 @@ tasks.withType<Test> {
 }
 
 vaadin {
-    productionMode = true
+    // productionMode = true
 }
 
 val changelogPath = "src/main/resources/db/db.changelog-master.yml"
@@ -135,7 +140,7 @@ jooq {
                     url = ""
                 }
                 generator.apply {
-                    //name = "org.jooq.codegen.KotlinGenerator" TODO enable this once nonnull pojos are supported in kotlin
+                    name = "org.jooq.codegen.KotlinGenerator"
                     database.apply {
                         name = "com.faendir.jooq.MySqlLiquibaseDatabase"
                         includes = ".*"
@@ -145,34 +150,58 @@ jooq {
                             Property().withKey("databaseName").withValue(inputSchema),
                             Property().withKey("scripts").withValue(changelogPath),
                         )
-                        forcedTypes.apply {
-                            add(ForcedType().apply {
+                        forcedTypes = listOf(
+                            ForcedType().apply {
                                 userType = "com.faendir.acra.persistence.app.AppId"
                                 converter = "com.faendir.acra.persistence.app.AppIdConverter"
                                 includeExpression = ".*\\.app_id|app.id"
-                            })
-                            add(ForcedType().apply {
+                            },
+                            ForcedType().apply {
                                 userType = "com.faendir.acra.persistence.bug.BugId"
                                 converter = "com.faendir.acra.persistence.bug.BugIdConverter"
                                 includeExpression = ".*\\.bug_id|bug.id"
-                            })
-                            add(ForcedType().apply {
+                            },
+                            ForcedType().apply {
                                 userType = "java.time.Instant"
                                 converter = "com.faendir.acra.persistence.jooq.InstantConverter"
                                 includeTypes = "DATETIME"
-                            })
-                        }
+                            },
+                        )
+                        embeddables = listOf(
+                            EmbeddableDefinitionType().apply {
+                                name = "VERSION_KEY"
+                                tables = "REPORT"
+                                fields = listOf(
+                                    EmbeddableField().withName("CODE").withExpression("VERSION_CODE"),
+                                    EmbeddableField().withName("FLAVOR").withExpression("VERSION_FLAVOR"),
+                                )
+                            },
+                            EmbeddableDefinitionType().apply {
+                                name = "VERSION_KEY"
+                                referencingName = "LATEST_VERSION_KEY"
+                                tables = "BUG"
+                                fields = listOf(
+                                    EmbeddableField().withName("CODE").withExpression("LATEST_VERSION_CODE"),
+                                    EmbeddableField().withName("FLAVOR").withExpression("LATEST_VERSION_FLAVOR"),
+                                )
+                            },
+                            EmbeddableDefinitionType().apply {
+                                name = "VERSION_KEY"
+                                referencingName = "SOLVED_VERSION_KEY"
+                                tables = "BUG"
+                                fields = listOf(
+                                    EmbeddableField().withName("CODE").withExpression("SOLVED_VERSION_CODE"),
+                                    EmbeddableField().withName("FLAVOR").withExpression("SOLVED_VERSION_FLAVOR"),
+                                )
+                            },
+                        )
                     }
                     target.apply {
                         packageName = "com.faendir.acra.jooq.generated"
                         directory = "$buildDir/generated/source/jooq/main"
                     }
                     generate.apply {
-                        isSpringAnnotations = true
-                        isNonnullAnnotation = true
-                        isNullableAnnotation = true
-                        nonnullAnnotationType = "org.springframework.lang.NonNull"
-                        nullableAnnotationType = "org.springframework.lang.Nullable"
+                        isImmutableInterfaces = true
                     }
                 }
             }

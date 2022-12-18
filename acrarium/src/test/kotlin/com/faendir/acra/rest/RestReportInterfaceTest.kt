@@ -20,6 +20,7 @@ import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.bug.BugId
 import com.faendir.acra.persistence.report.Report
 import com.faendir.acra.persistence.user.UserRepository
+import com.faendir.acra.persistence.version.VersionKey
 import com.faendir.acra.rest.RestReportInterface.Companion.ATTACHMENT
 import com.faendir.acra.rest.RestReportInterface.Companion.REPORT
 import com.faendir.acra.rest.RestReportInterface.Companion.REPORT_PATH
@@ -35,10 +36,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.ComponentScan
-import org.springframework.http.MediaType.APPLICATION_JSON
-import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
-import org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE
-import org.springframework.http.MediaType.MULTIPART_FORM_DATA
+import org.springframework.http.MediaType.*
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.test.context.support.WithMockUser
@@ -80,7 +78,26 @@ class RestReportInterfaceTest {
     @BeforeEach
     fun setUp() {
         every { reportService.create(any(), any(), any()) } returns Report(
-            "", null, JSON.json("{}"), Instant.now(), null, null, null, null, "", false, "", "", BugId(0), AppId(0), 0, "", "", "", null, null, null
+            "",
+            null,
+            JSON.json("{}"),
+            Instant.now(),
+            null,
+            null,
+            null,
+            null,
+            "",
+            false,
+            "",
+            "",
+            BugId(0),
+            AppId(0),
+            "",
+            "",
+            null,
+            null,
+            null,
+            VersionKey(0, "")
         )
         every { requestCache.getMatchingRequest(any(), any()) } returns null
     }

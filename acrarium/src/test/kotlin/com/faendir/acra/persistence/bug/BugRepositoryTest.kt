@@ -6,6 +6,7 @@ import com.faendir.acra.dataprovider.AcrariumSort
 import com.faendir.acra.persistence.TestDataBuilder
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.report.ReportRepository
+import com.faendir.acra.persistence.version.VersionKey
 import com.faendir.acra.persistence.version.VersionRepository
 import com.faendir.acra.settings.AcrariumConfiguration
 import com.ninjasquad.springmockk.MockkBean
@@ -16,13 +17,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import strikt.api.expect
 import strikt.api.expectThat
-import strikt.assertions.containsExactly
-import strikt.assertions.containsExactlyInAnyOrder
-import strikt.assertions.hasSize
-import strikt.assertions.isEqualTo
-import strikt.assertions.isNotEqualTo
-import strikt.assertions.isNotNull
-import strikt.assertions.isNull
+import strikt.assertions.*
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import kotlin.properties.Delegates
@@ -132,7 +127,7 @@ class BugRepositoryTest(
             val id = bugRepository.create(identifier, "title")
 
             expectThat(bugRepository.findId(identifier)).isEqualTo(id)
-            expectThat(bugRepository.find(id)).isEqualTo(Bug(id, "title", appId, 0, null, null, null, null, null, 0))
+            expectThat(bugRepository.find(id)).isEqualTo(Bug(id, "title", appId, 0, null, null, null, 0))
         }
     }
 
@@ -144,22 +139,19 @@ class BugRepositoryTest(
             val version = testDataBuilder.createVersion(appId)
 
             expectThat(bugRepository.find(id)).isNotNull().and {
-                get { solvedVersionCode }.isNull()
-                get { solvedVersionFlavor }.isNull()
+                get { solvedVersionKey }.isNull()
             }
 
-            bugRepository.setSolved(appId, id, version.code to version.flavor)
+            bugRepository.setSolved(appId, id, version)
 
             expectThat(bugRepository.find(id)).isNotNull().and {
-                get { solvedVersionCode }.isEqualTo(version.code)
-                get { solvedVersionFlavor }.isEqualTo(version.flavor)
+                get { solvedVersionKey }.isEqualTo(version)
             }
 
             bugRepository.setSolved(appId, id, null)
 
             expectThat(bugRepository.find(id)).isNotNull().and {
-                get { solvedVersionCode }.isNull()
-                get { solvedVersionFlavor }.isNull()
+                get { solvedVersionKey }.isNull()
             }
         }
     }
@@ -213,8 +205,7 @@ class BugRepositoryTest(
             testDataBuilder.createReport(appId, bug2, id2, v2, d2)
 
             expectThat(bugRepository.find(bug1)!!) {
-                get { latestVersionCode }.isEqualTo(v1.code)
-                get { latestVersionFlavor }.isEqualTo(v1.flavor)
+                get { latestVersionKey }.isEqualTo(v1)
                 get { latestReport }.isEqualTo(d1)
                 get { reportCount }.isEqualTo(1)
                 get { affectedInstallations }.isEqualTo(1)
@@ -223,8 +214,7 @@ class BugRepositoryTest(
             bugRepository.mergeBugs(appId, setOf(bug1, bug2), "")
 
             expectThat(bugRepository.find(bugRepository.findId(id1)!!)!!) {
-                get { latestVersionCode }.isEqualTo(v2.code)
-                get { latestVersionFlavor }.isEqualTo(v2.flavor)
+                get { latestVersionKey }.isEqualTo(v2)
                 get { latestReport }.isEqualTo(d2)
                 get { reportCount }.isEqualTo(2)
                 get { affectedInstallations }.isEqualTo(2)
@@ -264,8 +254,7 @@ class BugRepositoryTest(
             val report2 = testDataBuilder.createReport(appId, bug, id2, v2, d2)
 
             expectThat(bugRepository.find(bug)).isNotNull().and {
-                get { latestVersionCode }.isEqualTo(v2.code)
-                get { latestVersionFlavor }.isEqualTo(v2.flavor)
+                get { latestVersionKey }.isEqualTo(v2)
                 get { latestReport }.isEqualTo(d2)
                 get { reportCount }.isEqualTo(2)
                 get { affectedInstallations }.isEqualTo(2)
@@ -277,16 +266,14 @@ class BugRepositoryTest(
                 println(reportRepository.find(report1))
                 println(reportRepository.find(report2))
                 expectThat(bugRepository.find(bug)).isNotNull().and {
-                    get { latestVersionCode }.isEqualTo(v1.code)
-                    get { latestVersionFlavor }.isEqualTo(v1.flavor)
+                    get { latestVersionKey }.isEqualTo(v1)
                     get { latestReport }.isEqualTo(d1)
                     get { reportCount }.isEqualTo(1)
                     get { affectedInstallations }.isEqualTo(1)
                 }
 
                 expectThat(bugRepository.find(bugRepository.findId(id2)!!)).isNotNull().and {
-                    get { latestVersionCode }.isEqualTo(v2.code)
-                    get { latestVersionFlavor }.isEqualTo(v2.flavor)
+                    get { latestVersionKey }.isEqualTo(v2)
                     get { latestReport }.isEqualTo(d2)
                     get { reportCount }.isEqualTo(1)
                     get { affectedInstallations }.isEqualTo(1)
@@ -341,12 +328,12 @@ class BugRepositoryTest(
             val bug2 = testDataBuilder.createBug(appId, "bug2")
             val d3 = OffsetDateTime.of(2021, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC).toInstant()
             testDataBuilder.createReport(appId, bug2, version = v1, date = d3)
-            bugRepository.setSolved(appId, bug2, v2.code to v2.flavor)
+            bugRepository.setSolved(appId, bug2, v2)
 
             expectThat(provider.size(emptySet())).isEqualTo(2)
             expectThat(provider.fetch(emptySet(), emptyList(), 0, 10).toList()).containsExactlyInAnyOrder(
-                BugStats(bug1, "bug1", 2, 2, "two", d1, null, null, 2),
-                BugStats(bug2, "bug2", 1, 1, "one", d3, v2.code, v2.flavor, 1)
+                BugStats(bug1, "bug1", 2, VersionKey(2, "two"), d1, null, 2),
+                BugStats(bug2, "bug2", 1, VersionKey(1, "one"), d3, v2, 1)
             )
         }
 
@@ -382,11 +369,11 @@ class BugRepositoryTest(
             val bug2 = testDataBuilder.createBug(appId, "bug2")
             val d3 = OffsetDateTime.of(2021, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC).toInstant()
             testDataBuilder.createReport(appId, bug2, version = v1, date = d3)
-            bugRepository.setSolved(appId, bug2, v2.code to v2.flavor)
+            bugRepository.setSolved(appId, bug2, v2)
             val bug3 = testDataBuilder.createBug(appId, "bug3")
             testDataBuilder.createReport(appId, bug3, version = v1, date = d1)
             testDataBuilder.createReport(appId, bug3, version = v2, date = d2)
-            bugRepository.setSolved(appId, bug3, v1.code to v1.flavor)
+            bugRepository.setSolved(appId, bug3, v1)
 
             expectThat(provider.size(setOf(BugStats.Filter.LATEST_VERSION(2, "two")))).isEqualTo(2)
             expectThat(provider.fetch(setOf(BugStats.Filter.LATEST_VERSION(2, "two")), emptyList(), 0, 10).toList().map { it.id })

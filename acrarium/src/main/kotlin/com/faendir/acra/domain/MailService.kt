@@ -83,7 +83,7 @@ class MailService(
         val spikeReceiver = getMailsBy(settings, MailSettings::spike)
         val bug by lazy { bugRepository.find(report.bugId)!! }
         val app by lazy { appRepository.find(report.appId)!! }
-        val version by lazy { versionRepository.find(report.appId, report.versionCode, report.versionFlavor)!! }
+        val version by lazy { versionRepository.find(report.appId, report.versionKey)!! }
         if (newBugReceiver.isNotEmpty() && bug.reportCount == 1
         ) {
             sendMessage(
@@ -98,14 +98,14 @@ class MailService(
                     version.name
                 ), getTranslation(Messages.NEW_BUG_MAIL_SUBJECT, app.name)
             )
-        } else if (regressionReceiver.isNotEmpty() && bug.solvedVersionCode != null && bug.solvedVersionCode!! <= version.code) {
+        } else if (regressionReceiver.isNotEmpty() && bug.solvedVersionKey != null && bug.solvedVersionKey!!.code <= version.code) {
             sendMessage(
                 regressionReceiver, getTranslation(
                     Messages.REGRESSION_MAIL_TEMPLATE,
                     getBugUrl(bug),
                     bug.title,
                     report.brand ?: "",
-                    versionRepository.find(bug.appId, bug.solvedVersionCode!!, bug.solvedVersionFlavor!!)!!.name,
+                    versionRepository.find(bug.appId, bug.solvedVersionKey!!)!!.name,
                     report.phoneModel ?: "",
                     report.androidVersion ?: "",
                     app.name,

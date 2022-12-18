@@ -18,12 +18,7 @@ package com.faendir.acra.ui.view.report
 import com.faendir.acra.domain.AvatarService
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.i18n.TranslatableText
-import com.faendir.acra.navigation.LogicalParent
-import com.faendir.acra.navigation.PARAM_APP
-import com.faendir.acra.navigation.PARAM_BUG
-import com.faendir.acra.navigation.PARAM_REPORT
-import com.faendir.acra.navigation.RouteParams
-import com.faendir.acra.navigation.View
+import com.faendir.acra.navigation.*
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.bug.BugId
 import com.faendir.acra.persistence.report.ReportRepository
@@ -66,7 +61,7 @@ class ReportView(
     private val prettyTime: PrettyTime = PrettyTime(Locale.US)
 
     init {
-        val version = versionRepository.find(report.appId, report.versionCode, report.versionFlavor) ?: throw NotFoundException()
+        val version = versionRepository.find(report.appId, report.versionKey) ?: throw NotFoundException()
         content {
             card {
                 setHeader(Translatable.createLabel(Messages.SUMMARY))
@@ -77,7 +72,14 @@ class ReportView(
                     setAlignItems(Align.FIRST_BASELINE)
 
                     translatableLabel(Messages.VERSION) { secondary() }
-                    label(version.name)
+                    gridLayout {
+                        translatableLabel(Messages.NAME) { secondary() }
+                        label(version.name)
+                        translatableLabel(Messages.VERSION_CODE) { secondary() }
+                        label(version.code.toString())
+                        translatableLabel(Messages.VERSION_FLAVOR) { secondary() }
+                        label(version.flavor)
+                    }
                     translatableLabel(Messages.DATE) { secondary() }
                     label(prettyTime.formatUnrounded(report.date.toUtcLocal()))
                     translatableLabel(Messages.INSTALLATION) {

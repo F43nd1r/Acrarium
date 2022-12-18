@@ -4,11 +4,7 @@ import com.faendir.acra.dataprovider.AcrariumSort
 import com.faendir.acra.jooq.generated.tables.Report
 import com.faendir.acra.persistence.bug.BugIdentifier
 import com.vaadin.flow.data.provider.SortDirection
-import org.jooq.Condition
-import org.jooq.Field
-import org.jooq.Record1
-import org.jooq.ResultQuery
-import org.jooq.SortField
+import org.jooq.*
 
 fun <T, R : Record1<T>> ResultQuery<R>.fetchValue(): T? = fetchOne()?.value1()
 
@@ -39,3 +35,6 @@ fun com.faendir.acra.jooq.generated.tables.BugIdentifier.matches(bugIdentifier: 
         .and(CAUSE.nullSafeEq(bugIdentifier.cause))
 
 fun <T> Field<T>.nullSafeEq(value: T?) = if (value != null) eq(value) else isNull
+
+@Suppress("UNCHECKED_CAST")
+val <T : Any> Field<T?>.NOT_NULL: Field<T> get() = this as Field<T>

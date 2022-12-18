@@ -1,6 +1,6 @@
 package com.faendir.acra.persistence.device
 
-import com.faendir.acra.jooq.generated.Tables.DEVICE
+import com.faendir.acra.jooq.generated.tables.references.DEVICE
 import com.faendir.acra.persistence.fetchValue
 import org.jooq.DSLContext
 import org.springframework.stereotype.Repository

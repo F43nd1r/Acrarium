@@ -2,18 +2,12 @@ package com.faendir.acra.persistence.bug
 
 import com.faendir.acra.dataprovider.AcrariumDataProvider
 import com.faendir.acra.dataprovider.AcrariumSort
-import com.faendir.acra.jooq.generated.Tables.BUG
-import com.faendir.acra.jooq.generated.Tables.BUG_IDENTIFIER
-import com.faendir.acra.jooq.generated.Tables.REPORT
-import com.faendir.acra.persistence.and
+import com.faendir.acra.jooq.generated.tables.references.BUG
+import com.faendir.acra.jooq.generated.tables.references.BUG_IDENTIFIER
+import com.faendir.acra.jooq.generated.tables.references.REPORT
+import com.faendir.acra.persistence.*
 import com.faendir.acra.persistence.app.AppId
-import com.faendir.acra.persistence.asOrderFields
-import com.faendir.acra.persistence.fetchList
-import com.faendir.acra.persistence.fetchListInto
-import com.faendir.acra.persistence.fetchValue
-import com.faendir.acra.persistence.fetchValueInto
-import com.faendir.acra.persistence.hasBugIdentifier
-import com.faendir.acra.persistence.matches
+import com.faendir.acra.persistence.version.VersionKey
 import jakarta.validation.constraints.Size
 import org.jooq.DSLContext
 import org.springframework.security.access.prepost.PostAuthorize
@@ -29,18 +23,32 @@ class BugRepository(
 ) {
 
     @PreAuthorize("hasViewPermission(#identifier.appId)")
-    fun findId(identifier: BugIdentifier): BugId? = jooq.select(BUG_IDENTIFIER.BUG_ID).from(BUG_IDENTIFIER).where(BUG_IDENTIFIER.matches(identifier)).fetchValue()
+    fun findId(identifier: BugIdentifier): BugId? =
+        jooq.select(BUG_IDENTIFIER.BUG_ID).from(BUG_IDENTIFIER).where(BUG_IDENTIFIER.matches(identifier)).fetchValue()
 
     @PostAuthorize("returnObject == null || hasViewPermission(returnObject.appId)")
-    fun find(bugId: BugId): Bug? = jooq.selectFrom(BUG).where(BUG.ID.eq(bugId)).fetchValueInto()
+    fun find(bugId: BugId): Bug? =
+        jooq.select(
+            BUG.ID,
+            BUG.TITLE,
+            BUG.APP_ID,
+            BUG.REPORT_COUNT,
+            BUG.LATEST_REPORT,
+            BUG.SOLVED_VERSION_KEY,
+            BUG.LATEST_VERSION_KEY,
+            BUG.AFFECTED_INSTALLATIONS
+        )
+            .from(BUG).where(BUG.ID.eq(bugId)).fetchValueInto()
 
     fun findInRange(appId: AppId, range: ClosedRange<Instant>): List<Bug> =
-        jooq.selectFrom(BUG).where(BUG.APP_ID.eq(appId), BUG.LATEST_REPORT.greaterOrEqual(range.start), BUG.LATEST_REPORT.lessOrEqual(range.endInclusive)).fetchListInto()
+        jooq.selectFrom(BUG)
+            .where(BUG.APP_ID.eq(appId), BUG.LATEST_REPORT.greaterOrEqual(range.start), BUG.LATEST_REPORT.lessOrEqual(range.endInclusive))
+            .fetchListInto()
 
     fun getIdentifiers(bugId: BugId): List<BugIdentifier> = jooq.selectFrom(BUG_IDENTIFIER).where(BUG_IDENTIFIER.BUG_ID.eq(bugId)).fetchListInto()
 
     @PreAuthorize("hasViewPermission(#appId)")
-    fun getAllIds(appId: AppId): List<BugId> = jooq.select(BUG.ID).from(BUG).where(BUG.APP_ID.eq(appId)).fetchList()
+    fun getAllIds(appId: AppId): List<BugId> = jooq.select(BUG.ID.NOT_NULL).from(BUG).where(BUG.APP_ID.eq(appId)).fetchList()
 
 
     @PreAuthorize("isReporter()")
@@ -62,10 +70,10 @@ class BugRepository(
     }
 
     @PreAuthorize("hasEditPermission(#appId)")
-    fun setSolved(appId: AppId, bugId: BugId, solvedVersion: Pair<Int, String>?) {
+    fun setSolved(appId: AppId, bugId: BugId, solvedVersion: VersionKey?) {
         jooq.update(BUG)
-            .set(BUG.SOLVED_VERSION_CODE, solvedVersion?.first)
-            .set(BUG.SOLVED_VERSION_FLAVOR, solvedVersion?.second)
+            .set(BUG.SOLVED_VERSION_CODE, solvedVersion?.code)
+            .set(BUG.SOLVED_VERSION_FLAVOR, solvedVersion?.flavor)
             .where(BUG.ID.eq(bugId), BUG.APP_ID.eq(appId))
             .execute()
     }
@@ -100,12 +108,11 @@ class BugRepository(
     @PreAuthorize("hasEditPermission(#identifier.appId)")
     @Transactional
     fun splitFromBug(bugId: BugId, identifier: BugIdentifier) {
-        val title = jooq.select(REPORT.EXCEPTION_CLASS, REPORT.MESSAGE).from(REPORT)
+        val title = jooq.select(REPORT.EXCEPTION_CLASS.NOT_NULL, REPORT.MESSAGE).from(REPORT)
             .where(REPORT.hasBugIdentifier(identifier))
             .limit(1)
             .fetchOne {
-                val exceptionClass: String = it[REPORT.EXCEPTION_CLASS]
-                val message: String? = it[REPORT.MESSAGE]
+                val (exceptionClass: String, message: String?) = it
                 if (message != null) "$exceptionClass:$message" else exceptionClass
             }!!
         val newBugId = jooq.insertInto(BUG)
@@ -136,11 +143,9 @@ class BugRepository(
                 BUG.ID,
                 BUG.TITLE,
                 BUG.REPORT_COUNT,
-                BUG.LATEST_VERSION_CODE,
-                BUG.LATEST_VERSION_FLAVOR,
+                BUG.LATEST_VERSION_KEY,
                 BUG.LATEST_REPORT,
-                BUG.SOLVED_VERSION_CODE,
-                BUG.SOLVED_VERSION_FLAVOR,
+                BUG.SOLVED_VERSION_KEY,
                 BUG.AFFECTED_INSTALLATIONS,
             )
                 .from(BUG)

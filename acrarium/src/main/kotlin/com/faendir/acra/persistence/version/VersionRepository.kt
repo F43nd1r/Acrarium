@@ -2,7 +2,7 @@ package com.faendir.acra.persistence.version
 
 import com.faendir.acra.dataprovider.AcrariumDataProvider
 import com.faendir.acra.dataprovider.AcrariumSort
-import com.faendir.acra.jooq.generated.Tables.VERSION
+import com.faendir.acra.jooq.generated.tables.references.VERSION
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.asOrderFields
 import com.faendir.acra.persistence.fetchListInto
@@ -52,7 +52,8 @@ class VersionRepository(private val jooq: DSLContext) {
     }
 
     @PreAuthorize("hasViewPermission(#appId)")
-    fun find(key: VersionKey): Version? = find(key.appId, key.code, key.flavor)
+    fun find(appId: AppId, key: VersionKey): Version? =
+        find(appId, key.code, key.flavor)
 
     @PreAuthorize("hasViewPermission(#appId)")
     fun find(appId: AppId, versionCode: Int, flavor: String): Version? =

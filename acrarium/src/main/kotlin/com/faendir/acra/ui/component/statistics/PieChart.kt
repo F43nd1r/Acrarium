@@ -31,7 +31,7 @@ internal class PieChart(captionId: String, vararg params: Any) : Chart<String>(c
         val list = map.entries.map { it.key to it.value }.sortedByDescending { it.second }.toMutableList()
         if (list.size > MAX_PARTS) {
             val replace = list.subList(MAX_PARTS, list.size)
-            val other = getTranslation(Messages.OTHER) to replace.map { it.second }.sum()
+            val other = getTranslation(Messages.OTHER) to replace.sumOf { it.second }
             replace.clear()
             list.add(other)
         }

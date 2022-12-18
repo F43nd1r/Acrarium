@@ -15,7 +15,7 @@
  */
 package com.faendir.acra.ui.view.bug.tabs
 
-import com.faendir.acra.jooq.generated.Tables.REPORT
+import com.faendir.acra.jooq.generated.tables.references.REPORT
 import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
 import com.faendir.acra.persistence.report.ReportRepository

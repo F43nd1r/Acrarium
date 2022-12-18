@@ -16,7 +16,8 @@
 package com.faendir.acra.ui.component.statistics
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.jooq.generated.Tables.REPORT
+import com.faendir.acra.jooq.generated.tables.references.REPORT
+import com.faendir.acra.persistence.NOT_NULL
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.report.ReportRepository
 import com.faendir.acra.persistence.version.VersionRepository
@@ -42,17 +43,18 @@ open class Statistics(appId: AppId, private val baseExpression: Condition?, repo
         val filterLayout = FormLayout()
         filterLayout.setResponsiveSteps(ResponsiveStep("0px", 1))
         filterLayout.setWidthFull()
+        filterLayout.style["--vaadin-form-item-label-width"] = "10em"
         val card = Card(filterLayout)
         card.setHeader(Translatable.createLabel(Messages.FILTER))
         card.setWidth(500, SizeUnit.PIXEL)
         val dayStepper = NumberField()
         dayStepper.value = 30.0
         val factory = Property.Factory(reportRepository, versionRepository, baseExpression, appId)
-        properties.add(factory.createAgeProperty(REPORT.DATE, Messages.LAST_X_DAYS, Messages.REPORTS_OVER_TIME))
-        properties.add(factory.createStringProperty(REPORT.ANDROID_VERSION, Messages.ANDROID_VERSION, Messages.REPORTS_PER_ANDROID_VERSION))
-        properties.add(factory.createVersionProperty(REPORT.VERSION_CODE, REPORT.VERSION_FLAVOR, Messages.APP_VERSION, Messages.REPORTS_PER_APP_VERSION))
-        properties.add(factory.createStringProperty(REPORT.PHONE_MODEL, Messages.PHONE_MODEL, Messages.REPORTS_PER_PHONE_MODEL))
-        properties.add(factory.createStringProperty(REPORT.BRAND, Messages.PHONE_BRAND, Messages.REPORTS_PER_BRAND))
+        properties.add(factory.createAgeProperty(REPORT.DATE.NOT_NULL, Messages.LAST_X_DAYS, Messages.REPORTS_OVER_TIME))
+        properties.add(factory.createStringProperty(REPORT.ANDROID_VERSION.NOT_NULL, Messages.ANDROID_VERSION, Messages.REPORTS_PER_ANDROID_VERSION))
+        properties.add(factory.createVersionProperty(REPORT.VERSION_KEY, Messages.APP_VERSION, Messages.REPORTS_PER_APP_VERSION))
+        properties.add(factory.createStringProperty(REPORT.PHONE_MODEL.NOT_NULL, Messages.PHONE_MODEL, Messages.REPORTS_PER_PHONE_MODEL))
+        properties.add(factory.createStringProperty(REPORT.BRAND.NOT_NULL, Messages.PHONE_BRAND, Messages.REPORTS_PER_BRAND))
         content.flexWrap = FlexLayout.FlexWrap.WRAP
         content.setWidthFull()
         content.removeAll()

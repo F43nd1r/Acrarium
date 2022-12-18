@@ -18,13 +18,9 @@ package com.faendir.acra.ui.view.main
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.persistence.user.Role
 import com.faendir.acra.security.SecurityUtils
-import com.faendir.acra.ui.component.Path
+import com.faendir.acra.ui.component.AppPath
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.ui.ext.SizeUnit
-import com.faendir.acra.ui.ext.content
-import com.faendir.acra.ui.ext.setFlexGrow
-import com.faendir.acra.ui.ext.setHeight
-import com.faendir.acra.ui.ext.setPaddingRight
+import com.faendir.acra.ui.ext.*
 import com.faendir.acra.ui.view.AboutView
 import com.faendir.acra.ui.view.Overview
 import com.faendir.acra.ui.view.SettingsView
@@ -64,7 +60,7 @@ class MainView(applicationContext: GenericApplicationContext) : Composite<AppLay
         tabs = Tabs().apply {
             orientation = Tabs.Orientation.VERTICAL
             add(createTab<Overview>(Messages.HOME))
-            add(Path(applicationContext))
+            add(AppPath(applicationContext))
             add(createTab<AccountView>(Messages.ACCOUNT))
             if (SecurityUtils.hasRole(Role.ADMIN)) {
                 add(createTab<UserManager>(Messages.USER_MANAGER))
@@ -100,7 +96,7 @@ class MainView(applicationContext: GenericApplicationContext) : Composite<AppLay
     }
 
     private fun logout() {
-        SecurityContextHolder.clearContext()
+        SecurityContextHolder.getContext().authentication = null
         ui.ifPresent {
             it.page.reload()
             it.session.close()

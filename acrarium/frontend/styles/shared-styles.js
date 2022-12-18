@@ -13,7 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
  */
-import {registerStyles, css} from '@vaadin/vaadin-themable-mixin/register-styles.js';
+import {css, registerStyles} from '@vaadin/vaadin-themable-mixin/register-styles.js';
 
 registerStyles("vaadin-login-form-wrapper",
     // language=css
@@ -38,5 +38,22 @@ registerStyles("vaadin-select",
             background-color: var(--select-background-color, var(--lumo-contrast-10pct));
         }
     `
-    )
+)
+
+registerStyles("vaadin-text-field",
+    // language=css
+    css`
+        [part="label"] {
+            line-height: 1.1;
+        }
+    `
+)
+registerStyles("vaadin-password-field",
+    // language=css
+    css`
+        [part="label"] {
+            line-height: 1.1;
+        }
+    `
+)
 

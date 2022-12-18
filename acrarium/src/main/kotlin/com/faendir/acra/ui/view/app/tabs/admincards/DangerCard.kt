@@ -16,7 +16,7 @@
 package com.faendir.acra.ui.view.app.tabs.admincards
 
 import com.faendir.acra.i18n.Messages
-import com.faendir.acra.jooq.generated.Tables.REPORT
+import com.faendir.acra.jooq.generated.tables.references.REPORT
 import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
 import com.faendir.acra.persistence.app.AppRepository
@@ -28,12 +28,7 @@ import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.closeButton
 import com.faendir.acra.ui.component.dialog.confirmButtons
 import com.faendir.acra.ui.component.dialog.showFluentDialog
-import com.faendir.acra.ui.ext.box
-import com.faendir.acra.ui.ext.comboBox
-import com.faendir.acra.ui.ext.configurationLabel
-import com.faendir.acra.ui.ext.content
-import com.faendir.acra.ui.ext.translatableNumberField
-import com.faendir.acra.ui.ext.translatableText
+import com.faendir.acra.ui.ext.*
 import com.faendir.acra.ui.view.Overview
 import com.vaadin.flow.component.UI
 import java.time.Instant

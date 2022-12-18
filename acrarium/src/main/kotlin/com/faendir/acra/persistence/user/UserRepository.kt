@@ -2,14 +2,11 @@ package com.faendir.acra.persistence.user
 
 import com.faendir.acra.dataprovider.AcrariumDataProvider
 import com.faendir.acra.dataprovider.AcrariumSort
-import com.faendir.acra.jooq.generated.Tables.USER
-import com.faendir.acra.jooq.generated.Tables.USER_PERMISSIONS
-import com.faendir.acra.jooq.generated.Tables.USER_ROLES
+import com.faendir.acra.jooq.generated.tables.references.USER
+import com.faendir.acra.jooq.generated.tables.references.USER_PERMISSIONS
+import com.faendir.acra.jooq.generated.tables.references.USER_ROLES
+import com.faendir.acra.persistence.*
 import com.faendir.acra.persistence.app.AppId
-import com.faendir.acra.persistence.asOrderFields
-import com.faendir.acra.persistence.fetchListInto
-import com.faendir.acra.persistence.fetchValue
-import com.faendir.acra.persistence.fetchValueInto
 import org.jooq.DSLContext
 import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
@@ -91,7 +88,8 @@ class UserRepository(private val jooq: DSLContext, private val passwordEncoder: 
 
     fun getAuthorities(username: String): List<GrantedAuthority> =
         jooq.select(USER_ROLES.ROLES).from(USER_ROLES).where(USER_ROLES.USER_USERNAME.eq(username)).fetchListInto<Role>() +
-                jooq.select(USER_PERMISSIONS.APP_ID, USER_PERMISSIONS.LEVEL).from(USER_PERMISSIONS).where(USER_PERMISSIONS.USER_USERNAME.eq(username)).fetchListInto<Permission>()
+                jooq.select(USER_PERMISSIONS.APP_ID, USER_PERMISSIONS.LEVEL).from(USER_PERMISSIONS).where(USER_PERMISSIONS.USER_USERNAME.eq(username))
+                    .fetchListInto<Permission>()
 
     @Transactional
     @PreAuthorize("#username != principal.username && isAdmin()")
@@ -107,36 +105,45 @@ class UserRepository(private val jooq: DSLContext, private val passwordEncoder: 
     fun hasAnyAdmin(): Boolean = jooq.selectOne().from(USER_ROLES).where(USER_ROLES.ROLES.eq(Role.ADMIN.name)).limit(1).fetchValue() != null
 
     @PreAuthorize("isAdmin()")
-    fun getProvider(): AcrariumDataProvider<UserAuthorities, Nothing, UserAuthorities.Sort> = object : AcrariumDataProvider<UserAuthorities, Nothing, UserAuthorities.Sort>() {
-        private val USERNAME_FROM_ROLE = USER_ROLES.USER_USERNAME.`as`(DSL.name("user"))
-        override fun fetch(filters: Set<Nothing>, sort: List<AcrariumSort<UserAuthorities.Sort>>, offset: Int, limit: Int): Stream<UserAuthorities> =
-            jooq.select(
-                USERNAME_FROM_ROLE,
-                USER_ROLES.ROLES,
-                USER_PERMISSIONS.APP_ID,
-                USER_PERMISSIONS.LEVEL,
-            )
-                .from(DSL.select(USERNAME_FROM_ROLE).from(USER_ROLES).where(USER_ROLES.ROLES.eq(Role.USER.name)))
-                .join(USER_ROLES).on(USER_ROLES.USER_USERNAME.eq(USERNAME_FROM_ROLE))
-                .leftJoin(USER_PERMISSIONS).on(USER_PERMISSIONS.USER_USERNAME.eq(USERNAME_FROM_ROLE))
-                .orderBy(sort.asOrderFields())
-                .offset(offset)
-                .limit(limit)
-                .fetchGroups(USERNAME_FROM_ROLE)
-                .map { (username, rows) ->
-                    UserAuthorities(
-                        username,
-                        rows.intoSet(USER_ROLES.ROLES, Role::class.java),
-                        rows.intoSet {
-                            val appId = it[USER_PERMISSIONS.APP_ID]
-                            val level = it[USER_PERMISSIONS.LEVEL]
-                            if (appId != null && level != null) Permission(appId, Permission.Level.valueOf(level)) else null
-                        }.apply { remove(null) }
+    fun getProvider(): AcrariumDataProvider<UserAuthorities, Nothing, UserAuthorities.Sort> =
+        object : AcrariumDataProvider<UserAuthorities, Nothing, UserAuthorities.Sort>() {
+            private val USERNAME_FROM_ROLE = USER_ROLES.USER_USERNAME.NOT_NULL.`as`("username_from_role")
+            override fun fetch(
+                filters: Set<Nothing>,
+                sort: List<AcrariumSort<UserAuthorities.Sort>>,
+                offset: Int,
+                limit: Int
+            ): Stream<UserAuthorities> =
+                jooq.select(
+                    USERNAME_FROM_ROLE,
+                    USER_ROLES.ROLES,
+                    USER_PERMISSIONS.APP_ID,
+                    USER_PERMISSIONS.LEVEL,
+                )
+                    .from(
+                        DSL.selectDistinct(USERNAME_FROM_ROLE).from(USER_ROLES).where(USER_ROLES.ROLES.eq(Role.USER.name))
+                            .orderBy(sort.asOrderFields())
+                            .offset(offset)
+                            .limit(limit)
                     )
-                }
-                .stream()
+                    .join(USER_ROLES).on(USER_ROLES.USER_USERNAME.eq(USERNAME_FROM_ROLE))
+                    .leftJoin(USER_PERMISSIONS).on(USER_PERMISSIONS.USER_USERNAME.eq(USERNAME_FROM_ROLE))
+                    .orderBy(sort.asOrderFields())
+                    .fetchGroups(USERNAME_FROM_ROLE)
+                    .map { (username, rows) ->
+                        UserAuthorities(
+                            username,
+                            rows.intoSet(USER_ROLES.ROLES, Role::class.java),
+                            rows.intoSet {
+                                val appId = it[USER_PERMISSIONS.APP_ID]
+                                val level = it[USER_PERMISSIONS.LEVEL]
+                                if (appId != null && level != null) Permission(appId, Permission.Level.valueOf(level)) else null
+                            }.apply { remove(null) }
+                        )
+                    }
+                    .stream()
 
-        override fun size(filters: Set<Nothing>): Int =
-            jooq.select(DSL.countDistinct(USER_ROLES.USER_USERNAME)).from(USER_ROLES).where(USER_ROLES.ROLES.eq(Role.USER.name)).fetchValue() ?: 0
-    }
+            override fun size(filters: Set<Nothing>): Int =
+                jooq.select(DSL.countDistinct(USER_ROLES.USER_USERNAME)).from(USER_ROLES).where(USER_ROLES.ROLES.eq(Role.USER.name)).fetchValue() ?: 0
+        }
 }
