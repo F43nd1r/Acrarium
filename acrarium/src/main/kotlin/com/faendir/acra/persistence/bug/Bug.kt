@@ -26,16 +26,22 @@ class BugIdConverter : AbstractConverter<Int, BugId>(Int::class.javaPrimitiveTyp
     override fun to(userObject: BugId?): Int? = userObject?.value
 }
 
+interface BugVersionInfo {
+    val id: BugId
+    val latestVersionKey: VersionKey
+    val solvedVersionKey: VersionKey?
+}
+
 data class Bug(
-    val id: BugId,
+    override val id: BugId,
     val title: String,
     val appId: AppId,
     val reportCount: Int,
     val latestReport: Instant?,
-    val solvedVersionKey: VersionKey?,
-    val latestVersionKey: VersionKey?,
+    override val solvedVersionKey: VersionKey?,
+    override val latestVersionKey: VersionKey,
     val affectedInstallations: Int,
-)
+) : BugVersionInfo
 
 data class BugIdentifier(
     val appId: AppId,
@@ -64,14 +70,14 @@ data class BugIdentifier(
 }
 
 data class BugStats(
-    val id: BugId,
+    override val id: BugId,
     val title: String,
     val reportCount: Int,
-    val latestVersionKey: VersionKey,
+    override val latestVersionKey: VersionKey,
     val latestReport: Instant,
-    val solvedVersionKey: VersionKey?,
+    override val solvedVersionKey: VersionKey?,
     val affectedInstallations: Int,
-) {
+) : BugVersionInfo {
     sealed class Filter(override val condition: Condition) : FilterDefinition {
         class TITLE(contains: String) : Filter(BUG.TITLE.contains(contains))
         class LATEST_VERSION(code: Int, flavor: String) : Filter(BUG.LATEST_VERSION_CODE.eq(code).and(BUG.LATEST_VERSION_FLAVOR.eq(flavor)))

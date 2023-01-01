@@ -20,37 +20,69 @@ import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
 import com.faendir.acra.persistence.bug.BugRepository
 import com.faendir.acra.persistence.user.Permission
+import com.faendir.acra.persistence.version.VersionRepository
 import com.faendir.acra.security.RequiresPermission
 import com.faendir.acra.ui.component.AdminCard
+import com.faendir.acra.ui.component.BugSolvedVersionSelect
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.ui.ext.content
-import com.faendir.acra.ui.ext.flexLayout
-import com.faendir.acra.ui.ext.translatableButton
-import com.faendir.acra.ui.ext.translatableTextArea
-import com.vaadin.flow.component.orderedlayout.FlexComponent
+import com.faendir.acra.ui.ext.*
+import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.orderedlayout.FlexLayout
+import com.vaadin.flow.data.value.ValueChangeMode
 import com.vaadin.flow.router.NotFoundException
 
 @View
 @RequiresPermission(Permission.Level.EDIT)
 class PropertiesCard(
     bugRepository: BugRepository,
+    versionRepository: VersionRepository,
     routeParams: RouteParams,
 ) : AdminCard() {
     private val appId = routeParams.appId()
     private val bugId = routeParams.bugId()
+    private val bug = bugRepository.find(bugId) ?: throw NotFoundException()
 
     init {
         content {
             setHeader(Translatable.createLabel(Messages.PROPERTIES))
             flexLayout {
                 flexDirection = FlexLayout.FlexDirection.COLUMN
-                alignItems = FlexComponent.Alignment.END
-                val title = translatableTextArea(Messages.TITLE) {
-                    value = (bugRepository.find(bugId) ?: throw NotFoundException()).title
+                alignContent = FlexLayout.ContentAlignment.CENTER
+                translatableTextArea(Messages.TITLE) {
+                    value = bug.title
                     setWidthFull()
+                    isClearButtonVisible
+                    val saveButton = Translatable.createButton(Messages.SAVE, theme = ButtonVariant.LUMO_TERTIARY_INLINE) {
+                        bugRepository.setTitle(
+                            appId,
+                            bugId,
+                            value
+                        )
+                        it.source.isEnabled = false
+                        it.source.style["color"] = "var(--lumo-disabled-text-color)"
+                    }.with {
+                        setAlignSelf(Align.CENTER)
+                        setPaddingLeft(0.5, SizeUnit.EM)
+                        setPaddingRight(0.5, SizeUnit.EM)
+                        style["color"] = "var(--lumo-disabled-text-color)"
+                        isEnabled = false
+                    }
+                    valueChangeMode = ValueChangeMode.EAGER
+                    addValueChangeListener {
+                        saveButton.content.isEnabled = true
+                        saveButton.content.style["color"] = "var(--lumo-primary-text-color)"
+                    }
+                    element.appendChild(saveButton.element.apply {
+                        setAttribute("slot", "suffix")
+                    })
                 }
-                translatableButton(Messages.SAVE) { bugRepository.setTitle(appId, bugId, title.content.value) }
+                add(
+                    BugSolvedVersionSelect(
+                        appId,
+                        bug,
+                        versionRepository.getVersionNames(appId),
+                        bugRepository
+                    ).apply { setTranslatableLabel(Messages.SOLVED) })
             }
         }
     }

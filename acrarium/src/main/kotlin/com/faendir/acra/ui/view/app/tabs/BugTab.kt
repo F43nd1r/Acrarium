@@ -20,11 +20,9 @@ import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
 import com.faendir.acra.persistence.bug.BugRepository
 import com.faendir.acra.persistence.bug.BugStats
-import com.faendir.acra.persistence.version.VersionName
 import com.faendir.acra.persistence.version.VersionRepository
-import com.faendir.acra.persistence.version.toVersionKey
-import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.settings.LocalSettings
+import com.faendir.acra.ui.component.BugSolvedVersionSelect
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.dialog.createButton
 import com.faendir.acra.ui.component.dialog.showFluentDialog
@@ -36,7 +34,6 @@ import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.view.app.AppView
 import com.faendir.acra.ui.view.bug.BugView
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
-import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
@@ -44,7 +41,6 @@ import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.GridSortOrder
 import com.vaadin.flow.component.notification.Notification
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup
-import com.vaadin.flow.component.select.Select
 import com.vaadin.flow.data.renderer.ComponentRenderer
 import com.vaadin.flow.router.Route
 
@@ -121,24 +117,7 @@ class BugTab(
             isAutoWidth = false
             flexGrow = 1
         }
-        column(ComponentRenderer { bug: BugStats ->
-            Select<VersionName>().apply {
-                setItems(versions)
-                setTextRenderer { it.name }
-                isEmptySelectionAllowed = true
-                emptySelectionCaption = getTranslation(Messages.NOT_SOLVED)
-                value = versions.first { bug.latestVersionKey.code == it.code && bug.latestVersionKey.flavor == it.flavor }
-                isEnabled = SecurityUtils.hasPermission(appId, com.faendir.acra.persistence.user.Permission.Level.EDIT)
-                addValueChangeListener { e: ComponentValueChangeEvent<Select<VersionName?>?, VersionName?> ->
-                    bugRepository.setSolved(appId, bug.id, e.value?.toVersionKey())
-                    style["--select-background-color"] =
-                        if (bug.latestVersionKey.code > (bug.solvedVersionKey?.code ?: Int.MAX_VALUE)) "var(--lumo-error-color-50pct)" else null
-                }
-                if (bug.latestVersionKey.code > (bug.solvedVersionKey?.code ?: Int.MAX_VALUE)) {
-                    style["--select-background-color"] = "var(--lumo-error-color-50pct)"
-                }
-            }
-        }) {
+        column(ComponentRenderer { bug: BugStats -> BugSolvedVersionSelect(appId, bug, versions, bugRepository) }) {
             setSortable(BugStats.Sort.SOLVED_VERSION_CODE)
             setFilterableToggle(BugStats.Filter.IS_NOT_SOLVED_OR_REGRESSION, true, Messages.HIDE_SOLVED)
             setCaption(Messages.SOLVED)
