@@ -22,12 +22,13 @@ import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.report.ReportRepository
 import com.faendir.acra.persistence.version.VersionRepository
 import com.faendir.acra.ui.component.Card
+import com.faendir.acra.ui.component.CssGridLayout
 import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.ext.Align
 import com.faendir.acra.ui.ext.SizeUnit
+import com.faendir.acra.ui.ext.setAlignItems
 import com.faendir.acra.ui.ext.setWidth
 import com.vaadin.flow.component.Composite
-import com.vaadin.flow.component.formlayout.FormLayout
-import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.component.textfield.NumberField
 import org.jooq.Condition
@@ -40,10 +41,11 @@ open class Statistics(appId: AppId, private val baseExpression: Condition?, repo
     private val properties: MutableList<Property<*, *, *, *, *>> = mutableListOf()
 
     init {
-        val filterLayout = FormLayout()
-        filterLayout.setResponsiveSteps(ResponsiveStep("0px", 1))
+        val filterLayout = CssGridLayout()
         filterLayout.setWidthFull()
-        filterLayout.style["--vaadin-form-item-label-width"] = "10em"
+        filterLayout.setTemplateColumns("auto auto")
+        filterLayout.setRowGap(0.5, SizeUnit.EM)
+        filterLayout.setAlignItems(Align.CENTER)
         val card = Card(filterLayout)
         card.setHeader(Translatable.createLabel(Messages.FILTER))
         card.setWidth(500, SizeUnit.PIXEL)
@@ -61,7 +63,7 @@ open class Statistics(appId: AppId, private val baseExpression: Condition?, repo
         content.add(card)
         content.expand(card)
         properties.forEach { it.addTo(filterLayout, content) }
-        filterLayout.add(Translatable.createButton(Messages.APPLY) { update() })
+        filterLayout.addSpanning(Translatable.createButton(Messages.APPLY) { update() }, 2)
         update()
     }
 

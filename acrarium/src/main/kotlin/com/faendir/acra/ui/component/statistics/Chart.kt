@@ -42,10 +42,8 @@ internal abstract class Chart<T>(captionId: String, vararg params: Any) : Compos
         }
         val chart = createChart(map)
         content.add(chart)
-        if (!reload) {
-            //language=javascript
-            chart.element.executeJs("this.theme = `{ \"mode\": \"\${document.body.getAttribute('theme')}\" }`")
-        }
+        //language=javascript
+        chart.element.executeJs("let t = document.body.getAttribute('theme'); this.theme = `{ \"mode\": \"\${t}\", \"monochrome\": { \"enabled\": true, \"color\": \"\${t === 'dark' ? '#0c6ce9' : '#006af5'}\", \"shadeTo\": \"light\", \"shadeIntensity\": 0.65 } }`")
     }
 
     protected abstract fun createChart(map: Map<T, Int>): ApexCharts

@@ -25,9 +25,6 @@ abstract class AbstractCustomColumnGrid<T, C : Grid.Column<T>> : Grid<T>() {
     override fun <V : Comparable<V>?> addColumn(valueProvider: ValueProvider<T, V>, vararg sortingProperties: String) = throw UnsupportedOperationException()
 
     @Deprecated("Not supported")
-    override fun addColumn(renderer: Renderer<T>, vararg sortingProperties: String) = throw UnsupportedOperationException()
-
-    @Deprecated("Not supported")
     override fun <V : Component?> addComponentColumn(componentProvider: ValueProvider<T, V>?) = throw UnsupportedOperationException()
 }
 

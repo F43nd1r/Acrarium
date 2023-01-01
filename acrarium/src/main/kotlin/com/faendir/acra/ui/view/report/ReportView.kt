@@ -27,6 +27,7 @@ import com.faendir.acra.ui.component.HasAcrariumTitle
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.*
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
+import com.faendir.acra.ui.view.installation.InstallationView
 import com.faendir.acra.ui.view.main.MainView
 import com.faendir.acra.util.retrace
 import com.faendir.acra.util.toUtcLocal
@@ -35,6 +36,7 @@ import com.vaadin.flow.component.HasComponents
 import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.router.NotFoundException
 import com.vaadin.flow.router.Route
+import com.vaadin.flow.router.RouteParameters
 import com.vaadin.flow.server.InputStreamFactory
 import com.vaadin.flow.server.StreamResource
 import org.json.JSONObject
@@ -73,6 +75,8 @@ class ReportView(
 
                     translatableLabel(Messages.VERSION) { secondary() }
                     gridLayout {
+                        setTemplateColumns("max-content max-content")
+                        setColumnGap(1, SizeUnit.EM)
                         translatableLabel(Messages.NAME) { secondary() }
                         label(version.name)
                         translatableLabel(Messages.VERSION_CODE) { secondary() }
@@ -86,7 +90,12 @@ class ReportView(
                         secondary()
                         setAlignSelf(Align.CENTER)
                     }
-                    installationView(avatarService, report.installationId)
+                    routerLink(
+                        com.faendir.acra.ui.view.installation.tabs.ReportTab::class.java,
+                        RouteParameters(InstallationView.getNavigationParams(report.appId, report.installationId))
+                    ) {
+                        installationView(avatarService, report.installationId)
+                    }
                     translatableLabel(Messages.EMAIL) { secondary() }
                     label(report.userEmail ?: "")
                     translatableLabel(Messages.COMMENT) { secondary() }

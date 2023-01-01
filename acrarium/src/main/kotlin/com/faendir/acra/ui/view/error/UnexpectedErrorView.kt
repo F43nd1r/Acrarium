@@ -9,7 +9,6 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.router.BeforeEnterEvent
 import com.vaadin.flow.router.ErrorParameter
 import com.vaadin.flow.router.HasErrorParameter
-import com.vaadin.flow.router.RouterLink
 import com.vaadin.flow.server.auth.AnonymousAllowed
 import mu.KotlinLogging
 
@@ -21,7 +20,7 @@ private val logger = KotlinLogging.logger {}
 class UnexpectedErrorView : FlexLayout(), HasErrorParameter<Exception> {
     init {
         setSizeFull()
-        setFlexDirection(FlexDirection.COLUMN)
+        flexDirection = FlexDirection.COLUMN
         alignItems = FlexComponent.Alignment.CENTER
         justifyContentMode = FlexComponent.JustifyContentMode.CENTER
         paragraph("500") {
@@ -30,9 +29,9 @@ class UnexpectedErrorView : FlexLayout(), HasErrorParameter<Exception> {
             setMargin(0, SizeUnit.PIXEL)
         }
         translatableParagraph(Messages.SOMETHING_WENT_WRONG)
-        add(RouterLink("", Overview::class.java).apply {
+        routerLink(Overview::class.java) {
             translatableButton(Messages.GO_HOME)
-        })
+        }
     }
 
     override fun setErrorParameter(event: BeforeEnterEvent?, parameter: ErrorParameter<Exception>): Int {

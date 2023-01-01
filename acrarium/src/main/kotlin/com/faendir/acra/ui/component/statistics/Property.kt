@@ -21,10 +21,10 @@ import com.faendir.acra.persistence.report.ReportRepository
 import com.faendir.acra.persistence.version.VersionKey
 import com.faendir.acra.persistence.version.VersionName
 import com.faendir.acra.persistence.version.VersionRepository
+import com.faendir.acra.ui.component.CssGridLayout
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.preventWhiteSpaceBreaking
 import com.vaadin.flow.component.*
-import com.vaadin.flow.component.formlayout.FormLayout
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.select.Select
 import com.vaadin.flow.component.textfield.NumberField
@@ -59,8 +59,8 @@ constructor(
         checkBox.addValueChangeListener { filterComponent.isEnabled = it.value }
     }
 
-    fun addTo(filterLayout: FormLayout, chartLayout: FlexComponent) {
-        filterLayout.addFormItem(filterComponent, checkBox)
+    fun addTo(filterLayout: CssGridLayout, chartLayout: FlexComponent) {
+        filterLayout.add(checkBox, filterComponent)
         chartLayout.add(chart)
         chartLayout.expand(chart)
     }

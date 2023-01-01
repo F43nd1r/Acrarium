@@ -59,8 +59,8 @@ class AppPath(private val applicationContext: GenericApplicationContext) : SubTa
             val layouts = if (routeAnnotation.layout != UI::class) {
                 generateSequence(routeAnnotation.layout) { AnnotationUtils.findAnnotation(it.java, ParentLayout::class.java)?.value }.toList()
             } else emptyList()
-            if (routeAnnotation.value.startsWith("app") || layouts.lastOrNull()
-                    ?.let { AnnotationUtils.findAnnotation(it.java, RoutePrefix::class.java) }?.value?.startsWith("app") == true
+            if (routeAnnotation.value.startsWith("app") || layouts
+                    .mapNotNull { AnnotationUtils.findAnnotation(it.java, RoutePrefix::class.java) }.lastOrNull()?.value?.startsWith("app") == true
             ) {
                 val classes = listOf(hasElement) + layouts
                 val availableParameters = routeAnnotation.value.getAvailablePathParams() +
