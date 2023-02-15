@@ -1,4 +1,4 @@
-[![Actions Status](https://img.shields.io/github/workflow/status/F43nd1r/Acrarium/tests?label=Tests&style=for-the-badge)](https://github.com/F43nd1r/Acrarium/actions)
+[![Actions Status](https://img.shields.io/github/actions/workflow/status/F43nd1r/Acrarium/tests.yml?label=Tests&style=for-the-badge)](https://github.com/F43nd1r/Acrarium/actions)
 [![License](https://img.shields.io/github/license/F43nd1r/Acrarium?style=for-the-badge)](https://github.com/F43nd1r/Acrarium/blob/master/LICENSE)
 [![Docker Pulls](https://img.shields.io/docker/pulls/f43nd1r/acrarium?style=for-the-badge)](https://hub.docker.com/repository/docker/f43nd1r/acrarium)
 [![Github Downloads](https://img.shields.io/github/downloads/F43nd1r/Acrarium/total?label=Github%20Downloads&style=for-the-badge)](https://github.com/F43nd1r/Acrarium/releases)
