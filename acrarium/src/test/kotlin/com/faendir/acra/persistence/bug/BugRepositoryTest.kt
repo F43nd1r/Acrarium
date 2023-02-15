@@ -18,8 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import strikt.api.expect
 import strikt.api.expectThat
 import strikt.assertions.*
+import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 import kotlin.properties.Delegates
 
 
@@ -123,11 +125,14 @@ class BugRepositoryTest(
         @Test
         fun `should create bug and identifier`() {
             val identifier = BugIdentifier(appId, "exceptionClass", "message", "crashLine", "cause")
+            val version = testDataBuilder.createVersion(appId)
+            val now = Instant.now().truncatedTo(ChronoUnit.SECONDS)
 
             val id = bugRepository.create(identifier, "title")
+            testDataBuilder.createReport(appId, id, identifier, version, now)
 
             expectThat(bugRepository.findId(identifier)).isEqualTo(id)
-            expectThat(bugRepository.find(id)).isEqualTo(Bug(id, "title", appId, 0, null, null, null, 0))
+            expectThat(bugRepository.find(id)).isEqualTo(Bug(id, "title", appId, 1, now, null, version, 1))
         }
     }
 
