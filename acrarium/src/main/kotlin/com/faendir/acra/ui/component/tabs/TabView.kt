@@ -19,7 +19,6 @@ import com.faendir.acra.i18n.Messages
 import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.ui.component.HasAcrariumTitle
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.ui.ext.forEach
 import com.faendir.acra.ui.ext.setFlexGrow
 import com.faendir.acra.ui.ext.tabs
 import com.faendir.acra.util.indexOfFirstOrNull
@@ -57,8 +56,8 @@ open class TabView(
     override fun beforeEnter(event: BeforeEnterEvent) {
         parameters = event.routeParameters
         header.removeAll()
-        header.forEach(tabs.toList()) {
-            add(Tab(Translatable.createRouterLink(it.tabClass, parameters, it.labelId)))
+        tabs.toList().forEach {
+            header.add(Tab(Translatable.createRouterLink(it.tabClass, parameters, it.labelId)))
         }
     }
 

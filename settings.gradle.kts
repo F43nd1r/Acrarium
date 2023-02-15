@@ -1,13 +1,25 @@
 import com.faendir.gradle.createWithBomSupport
 
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        maven { setUrl("https://maven.vaadin.com/vaadin-prereleases/") }
+    }
+}
 plugins {
     id("com.faendir.gradle.bom-version-catalog") version "1.3.0"
 }
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
+        google()
+        maven { setUrl("https://maven.vaadin.com/vaadin-addons") }
+        maven { setUrl("https://oss.sonatype.org/content/repositories/snapshots") }
         maven { setUrl("https://repo.spring.io/milestone") }
         maven { setUrl("https://maven.vaadin.com/vaadin-prereleases/") }
+        maven { setUrl("https://repository.apache.org/content/repositories/snapshots") }
+        mavenLocal()
     }
     versionCatalogs {
         createWithBomSupport("libs") {

@@ -6,27 +6,15 @@ import org.jooq.meta.jaxb.Property
 
 plugins {
     java
-    org.jetbrains.kotlin.jvm
-    org.jetbrains.kotlin.plugin.allopen
-    org.jetbrains.kotlin.plugin.spring
-    org.jetbrains.kotlin.plugin.noarg
-    org.jetbrains.kotlin.plugin.jpa
-    org.springframework.boot
-    com.vaadin
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.allopen)
+    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlin.noarg)
+    alias(libs.plugins.springBoot)
+    alias(libs.plugins.vaadin)
     war
-    com.palantir.docker
+    alias(libs.plugins.docker)
     alias(libs.plugins.jooq)
-}
-
-repositories {
-    mavenCentral()
-    google()
-    maven { setUrl("https://maven.vaadin.com/vaadin-addons") }
-    maven { setUrl("https://oss.sonatype.org/content/repositories/snapshots") }
-    maven { setUrl("https://repo.spring.io/milestone") }
-    maven { setUrl("https://maven.vaadin.com/vaadin-prereleases/") }
-    maven { setUrl("https://repository.apache.org/content/repositories/snapshots") }
-    mavenLocal()
 }
 
 dependencies {
@@ -112,9 +100,13 @@ noArg {
 docker {
     name = "f43nd1r/acrarium"
     tag("hubLatest", "$name:latest")
-    tag("hubVersion", "$name:$version")
     tag("ghLatest", "ghcr.io/$name:latest")
+    tag("hubVersion", "$name:$version")
     tag("ghVersion", "ghcr.io/$name:$version")
+    if (version.toString().matches(Regex("\\d(\\.\\d)*"))) {
+        tag("hubStable", "$name:stable")
+        tag("ghStable", "ghcr.io/$name:stable")
+    }
     files(tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar").outputs)
     copySpec.into("build/libs")
 }

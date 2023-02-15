@@ -1,31 +1,20 @@
 [versions]
-kotlin = "1.7.22"
+kotlin = "1.8.10"
 dokka = "1.7.20"
-jgitver = "0.10.0-rc03"
 nexusPublish = "1.1.0"
 springBoot = "3.0.1"
-vaadin-flow = "24.0.0.alpha11"
-vaadin-base = "24.0.0.alpha7"
+vaadin-flow = "24.0.0.alpha16"
+vaadin-base = "24.0.0.alpha9"
 kotlinPoet = "1.12.0"
 docker-gradle = "0.34.0"
-jooq = "3.17.6"
+jooq = "3.17.8"
 mprV7 = "fail"
 
 [libraries]
-kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-kotlin-allopen = { module = "org.jetbrains.kotlin:kotlin-allopen", version.ref = "kotlin" }
-kotlin-noarg = { module = "org.jetbrains.kotlin:kotlin-noarg", version.ref = "kotlin" }
-dokka-gradle = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
-dokka-core = { module = "org.jetbrains.dokka:dokka-core", version.ref = "dokka" }
-jgitver = { module = "gradle.plugin.fr.brouillard.oss.gradle:gradle-jgitver-plugin", version.ref = "jgitver" }
-nexusPublish = { module = "io.github.gradle-nexus:publish-plugin", version.ref = "nexusPublish" }
-spring-boot-gradle = { module = "org.springframework.boot:spring-boot-gradle-plugin", version.ref = "springBoot" }
-vaadin-flow-gradle = { module = "com.vaadin:vaadin-gradle-plugin", version.ref = "vaadin-base" }
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
 vaadin-base-bom = { module = "com.vaadin:vaadin-bom", version.ref = "vaadin-base" }
 vaadin-flow-bom = { module = "com.vaadin:flow-bom", version.ref = "vaadin-flow" }
 kotlinPoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinPoet" }
-docker-gradle = { module = "com.palantir.gradle.docker:gradle-docker", version.ref = "docker-gradle" }
 ektorp = "org.ektorp:org.ektorp.spring:1.5.0"
 acraJava = "ch.acra:acra-javacore:5.8.4"
 orgJson = "org.codeartisans:org.json:20161124"
@@ -45,6 +34,17 @@ strikt = "io.strikt:strikt-core:0.34.1"
 mariadb4j = "org.craftercms.mariaDB4j:mariaDB4j-springboot:2.5.3"
 mariadbClient = "org.mariadb.jdbc:mariadb-java-client:3.1.2"
 springdoc = "org.springdoc:springdoc-openapi-ui:1.6.14"
+guava = "com.google.guava:guava:31.1-jre"
+testContainers = "org.testcontainers:mysql:1.17.5"
 
 [plugins]
 jooq = { id = "nu.studer.jooq", version = "8.0" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+jgitver = { id = "fr.brouillard.oss.gradle.jgitver", version = "0.10.0-rc03" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
+kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+kotlin-noarg = { id = "org.jetbrains.kotlin.plugin.noarg", version.ref = "kotlin" }
+springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
+vaadin = { id = "com.vaadin", version.ref = "vaadin-base" }
+docker = { id = "com.palantir.docker", version = "0.34.0" }

@@ -1,5 +1,5 @@
 plugins {
-    org.jetbrains.kotlin.jvm
+    alias(libs.plugins.kotlin.jvm)
 }
 
 dependencies {
@@ -8,5 +8,5 @@ dependencies {
     implementation(libs.orgJooq.jooqMeta)
     implementation(libs.orgSlf4j.slf4jApi)
     implementation(libs.orgSlf4j.slf4jSimple)
-    implementation("org.testcontainers:mysql:1.17.5")
+    implementation(libs.testContainers)
 }
