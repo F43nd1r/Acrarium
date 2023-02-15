@@ -15,7 +15,7 @@ plugins {
     com.vaadin
     war
     com.palantir.docker
-    id("nu.studer.jooq") version "8.0"
+    alias(libs.plugins.jooq)
 }
 
 repositories {
