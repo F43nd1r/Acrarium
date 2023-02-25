@@ -21,15 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.context.SecurityContextImpl
 import org.springframework.security.crypto.password.PasswordEncoder
 import strikt.api.expectThat
-import strikt.assertions.any
-import strikt.assertions.containsExactly
-import strikt.assertions.containsExactlyInAnyOrder
-import strikt.assertions.hasSize
-import strikt.assertions.isEmpty
-import strikt.assertions.isEqualTo
-import strikt.assertions.isNotBlank
-import strikt.assertions.isNotNull
-import strikt.assertions.isNull
+import strikt.assertions.*
 
 @PersistenceTest
 class AppRepositoryTest(
@@ -70,6 +62,23 @@ class AppRepositoryTest(
             testDataBuilder.createApp()
 
             expectThat(appRepository.find(AppId(0))).isNull()
+        }
+    }
+
+    @Nested
+    inner class FindName {
+        @Test
+        fun `should find app name`() {
+            val appId = testDataBuilder.createApp(name = appName)
+
+            expectThat(appRepository.findName(appId)).isEqualTo(appName)
+        }
+
+        @Test
+        fun `should return null for unknown id`() {
+            testDataBuilder.createApp()
+
+            expectThat(appRepository.findName(AppId(0))).isNull()
         }
     }
 
@@ -208,6 +217,35 @@ class AppRepositoryTest(
     }
 
     @Nested
+    inner class GetCustomColumns {
+        @Test
+        fun `should return custom columns for app`() {
+            val app1 = testDataBuilder.createApp()
+            val app2 = testDataBuilder.createApp()
+            val c1 = testDataBuilder.createCustomColumn(app1)
+            val c2 = testDataBuilder.createCustomColumn(app1)
+            testDataBuilder.createCustomColumn(app2)
+
+            expectThat(appRepository.getCustomColumns(app1)).containsExactlyInAnyOrder(c1, c2)
+        }
+    }
+
+    @Nested
+    inner class SetCustomColumns {
+        @Test
+        fun `should overwrite custom columns for app`() {
+            val app1 = testDataBuilder.createApp()
+            testDataBuilder.createCustomColumn(app1)
+
+            val columns = listOf(CustomColumn("c1", "p1"), CustomColumn("c2", "p2"))
+
+            appRepository.setCustomColumns(app1, columns)
+
+            expectThat(appRepository.getCustomColumns(app1)).containsExactlyInAnyOrder(columns)
+        }
+    }
+
+    @Nested
     inner class Provider {
         private lateinit var provider: AcrariumDataProvider<AppStats, Nothing, AppStats.Sort>
 
@@ -226,7 +264,15 @@ class AppRepositoryTest(
             testDataBuilder.createReport(app1, bug2)
             val app2 = testDataBuilder.createApp(name = "app2")
             val app3 = testDataBuilder.createApp()
-            SecurityContextHolder.setContext(SecurityContextImpl(TestingAuthenticationToken(null, null, listOf(Role.ADMIN, Permission(app3, Permission.Level.NONE)))))
+            SecurityContextHolder.setContext(
+                SecurityContextImpl(
+                    TestingAuthenticationToken(
+                        null,
+                        null,
+                        listOf(Role.ADMIN, Permission(app3, Permission.Level.NONE))
+                    )
+                )
+            )
 
             expectThat(provider.size(emptySet())).isEqualTo(2)
             expectThat(provider.fetch(emptySet(), emptyList(), 0, 10).toList()).containsExactlyInAnyOrder(
@@ -237,23 +283,57 @@ class AppRepositoryTest(
 
         @Test
         fun `should sort returned apps`() {
-            SecurityContextHolder.setContext(SecurityContextImpl(TestingAuthenticationToken(null, null, listOf(Role.ADMIN))))
+            SecurityContextHolder.setContext(
+                SecurityContextImpl(
+                    TestingAuthenticationToken(
+                        null,
+                        null,
+                        listOf(Role.ADMIN)
+                    )
+                )
+            )
             val app1 = testDataBuilder.createApp(name = "app1")
             val app2 = testDataBuilder.createApp(name = "app2")
 
-            expectThat(provider.fetch(emptySet(), listOf(AcrariumSort(AppStats.Sort.NAME, SortDirection.ASCENDING)), 0, 10).toList().map { it.id })
+            expectThat(
+                provider.fetch(
+                    emptySet(),
+                    listOf(AcrariumSort(AppStats.Sort.NAME, SortDirection.ASCENDING)),
+                    0,
+                    10
+                ).toList().map { it.id })
                 .containsExactly(app1, app2)
         }
 
         @Test
         fun `should offset and limit returned apps`() {
-            SecurityContextHolder.setContext(SecurityContextImpl(TestingAuthenticationToken(null, null, listOf(Role.ADMIN))))
+            SecurityContextHolder.setContext(
+                SecurityContextImpl(
+                    TestingAuthenticationToken(
+                        null,
+                        null,
+                        listOf(Role.ADMIN)
+                    )
+                )
+            )
             val app1 = testDataBuilder.createApp(name = "app1")
             val app2 = testDataBuilder.createApp(name = "app2")
 
-            expectThat(provider.fetch(emptySet(), listOf(AcrariumSort(AppStats.Sort.NAME, SortDirection.ASCENDING)), 0, 1).toList().map { it.id })
+            expectThat(
+                provider.fetch(
+                    emptySet(),
+                    listOf(AcrariumSort(AppStats.Sort.NAME, SortDirection.ASCENDING)),
+                    0,
+                    1
+                ).toList().map { it.id })
                 .containsExactly(app1)
-            expectThat(provider.fetch(emptySet(), listOf(AcrariumSort(AppStats.Sort.NAME, SortDirection.ASCENDING)), 1, 1).toList().map { it.id })
+            expectThat(
+                provider.fetch(
+                    emptySet(),
+                    listOf(AcrariumSort(AppStats.Sort.NAME, SortDirection.ASCENDING)),
+                    1,
+                    1
+                ).toList().map { it.id })
                 .containsExactly(app2)
         }
     }

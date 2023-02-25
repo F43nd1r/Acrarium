@@ -1,14 +1,11 @@
 [versions]
 kotlin = "1.8.10"
 dokka = "1.7.20"
-nexusPublish = "1.1.0"
 springBoot = "3.0.1"
-vaadin-flow = "24.0.0.alpha16"
-vaadin-base = "24.0.0.alpha9"
+vaadin-flow = "24.0.0.beta4"
+vaadin-base = "24.0.0.beta5"
 kotlinPoet = "1.12.0"
-docker-gradle = "0.34.0"
 jooq = "3.17.8"
-mprV7 = "fail"
 
 [libraries]
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }

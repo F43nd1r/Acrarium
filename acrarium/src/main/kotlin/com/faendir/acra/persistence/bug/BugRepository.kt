@@ -28,27 +28,26 @@ class BugRepository(
 
     @PostAuthorize("returnObject == null || hasViewPermission(returnObject.appId)")
     fun find(bugId: BugId): Bug? =
-        jooq.select(
-            BUG.ID,
-            BUG.TITLE,
-            BUG.APP_ID,
-            BUG.REPORT_COUNT,
-            BUG.LATEST_REPORT,
-            BUG.SOLVED_VERSION_KEY,
-            BUG.LATEST_VERSION_KEY,
-            BUG.AFFECTED_INSTALLATIONS
-        )
-            .from(BUG).where(BUG.ID.eq(bugId)).fetchValueInto()
+        jooq.select(Bug.FIELDS).from(BUG).where(BUG.ID.eq(bugId)).fetchValueInto()
 
     fun findInRange(appId: AppId, range: ClosedRange<Instant>): List<Bug> =
-        jooq.selectFrom(BUG)
-            .where(BUG.APP_ID.eq(appId), BUG.LATEST_REPORT.greaterOrEqual(range.start), BUG.LATEST_REPORT.lessOrEqual(range.endInclusive))
+        jooq.select(Bug.FIELDS).from(BUG)
+            .where(
+                BUG.APP_ID.eq(appId),
+                BUG.LATEST_REPORT.greaterOrEqual(range.start),
+                BUG.LATEST_REPORT.lessOrEqual(range.endInclusive)
+            )
             .fetchListInto()
 
-    fun getIdentifiers(bugId: BugId): List<BugIdentifier> = jooq.selectFrom(BUG_IDENTIFIER).where(BUG_IDENTIFIER.BUG_ID.eq(bugId)).fetchListInto()
+    fun getIdentifiers(bugId: BugId): List<BugIdentifier> =
+        jooq.select(BUG_IDENTIFIER.fields().toList() - BUG_IDENTIFIER.BUG_ID)
+            .from(BUG_IDENTIFIER)
+            .where(BUG_IDENTIFIER.BUG_ID.eq(bugId))
+            .fetchListInto()
 
     @PreAuthorize("hasViewPermission(#appId)")
-    fun getAllIds(appId: AppId): List<BugId> = jooq.select(BUG.ID.NOT_NULL).from(BUG).where(BUG.APP_ID.eq(appId)).fetchList()
+    fun getAllIds(appId: AppId): List<BugId> =
+        jooq.select(BUG.ID.NOT_NULL).from(BUG).where(BUG.APP_ID.eq(appId)).fetchList()
 
 
     @PreAuthorize("isReporter()")
@@ -138,7 +137,12 @@ class BugRepository(
 
     @PreAuthorize("hasViewPermission(#appId)")
     fun getProvider(appId: AppId) = object : AcrariumDataProvider<BugStats, BugStats.Filter, BugStats.Sort>() {
-        override fun fetch(filters: Set<BugStats.Filter>, sort: List<AcrariumSort<BugStats.Sort>>, offset: Int, limit: Int): Stream<BugStats> {
+        override fun fetch(
+            filters: Set<BugStats.Filter>,
+            sort: List<AcrariumSort<BugStats.Sort>>,
+            offset: Int,
+            limit: Int
+        ): Stream<BugStats> {
             return jooq.select(
                 BUG.ID,
                 BUG.TITLE,
@@ -157,7 +161,8 @@ class BugRepository(
                 .stream()
         }
 
-        override fun size(filters: Set<BugStats.Filter>) = jooq.selectCount().from(BUG).where(BUG.APP_ID.eq(appId).and(filters)).fetchValue() ?: 0
+        override fun size(filters: Set<BugStats.Filter>) =
+            jooq.selectCount().from(BUG).where(BUG.APP_ID.eq(appId).and(filters)).fetchValue() ?: 0
 
     }
 }

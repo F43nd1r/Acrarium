@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.jgitver)
+    alias(libs.plugins.kotlin.jvm) apply false
 }
 
 jgitver {

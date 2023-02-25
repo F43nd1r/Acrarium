@@ -2,6 +2,7 @@ package com.faendir.acra.persistence
 
 import com.faendir.acra.jooq.generated.tables.references.*
 import com.faendir.acra.persistence.app.AppId
+import com.faendir.acra.persistence.app.CustomColumn
 import com.faendir.acra.persistence.bug.BugId
 import com.faendir.acra.persistence.bug.BugIdentifier
 import com.faendir.acra.persistence.user.Permission
@@ -45,6 +46,19 @@ class TestDataBuilder(private val jooq: DSLContext, private val randomStringGene
         .set(APP.REPORTER_USERNAME, reporter)
         .set(APP.NAME, name)
         .returningResult(APP.ID).fetchValue()!!
+
+    fun createCustomColumn(
+        app: AppId = createApp(),
+        name: String = randomString("test-name"),
+        path: String = randomString("test-path")
+    ): CustomColumn {
+        jooq.insertInto(APP_REPORT_COLUMNS)
+            .set(APP_REPORT_COLUMNS.APP_ID, app)
+            .set(APP_REPORT_COLUMNS.NAME, name)
+            .set(APP_REPORT_COLUMNS.PATH, path)
+            .execute()
+        return CustomColumn(name, path)
+    }
 
     fun createVersion(
         app: AppId = createApp(),

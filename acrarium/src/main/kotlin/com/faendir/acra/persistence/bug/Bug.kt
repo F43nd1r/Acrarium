@@ -41,7 +41,20 @@ data class Bug(
     override val solvedVersionKey: VersionKey?,
     override val latestVersionKey: VersionKey,
     val affectedInstallations: Int,
-) : BugVersionInfo
+) : BugVersionInfo {
+    companion object {
+        val FIELDS = listOf(
+            BUG.ID,
+            BUG.TITLE,
+            BUG.APP_ID,
+            BUG.REPORT_COUNT,
+            BUG.LATEST_REPORT,
+            BUG.SOLVED_VERSION_KEY,
+            BUG.LATEST_VERSION_KEY,
+            BUG.AFFECTED_INSTALLATIONS
+        )
+    }
+}
 
 data class BugIdentifier(
     val appId: AppId,
@@ -53,17 +66,23 @@ data class BugIdentifier(
     companion object {
         private val codePointRegex = Regex("\\s*at\\s+(<?codepoint>.*)")
         private val causeRegex = Regex("\\s*Caused by:\\s+(<?cause>.*)")
-        fun fromStacktrace(acrariumConfiguration: AcrariumConfiguration, appId: AppId, stacktrace: String): BugIdentifier {
+        fun fromStacktrace(
+            acrariumConfiguration: AcrariumConfiguration,
+            appId: AppId,
+            stacktrace: String
+        ): BugIdentifier {
             val lines = stacktrace.split('\n')
             return BugIdentifier(
                 appId = appId,
                 exceptionClass = lines.first().substringBefore(':'),
-                message = lines.first().takeIf { it.contains(':') }?.substringAfter(':')?.replace(acrariumConfiguration.messageIgnoreRegex, "")
+                message = lines.first().takeIf { it.contains(':') }?.substringAfter(':')
+                    ?.replace(acrariumConfiguration.messageIgnoreRegex, "")
                     ?.take(255),
                 crashLine = lines.mapNotNull { codePointRegex.matchEntire(it) }
                     .mapNotNull { it.groups["codepoint"]?.value }
                     .firstOrNull { !it.startsWith("android.") && !it.startsWith("java.") }?.take(255),
-                cause = lines.mapNotNull { causeRegex.matchEntire(it) }.firstNotNullOfOrNull { it.groups["cause"]?.value }?.take(255)
+                cause = lines.mapNotNull { causeRegex.matchEntire(it) }
+                    .firstNotNullOfOrNull { it.groups["cause"]?.value }?.take(255)
             )
         }
     }
@@ -80,8 +99,11 @@ data class BugStats(
 ) : BugVersionInfo {
     sealed class Filter(override val condition: Condition) : FilterDefinition {
         class TITLE(contains: String) : Filter(BUG.TITLE.contains(contains))
-        class LATEST_VERSION(code: Int, flavor: String) : Filter(BUG.LATEST_VERSION_CODE.eq(code).and(BUG.LATEST_VERSION_FLAVOR.eq(flavor)))
-        object IS_NOT_SOLVED_OR_REGRESSION : Filter(BUG.SOLVED_VERSION_CODE.isNull.or(BUG.SOLVED_VERSION_CODE.lt(BUG.LATEST_VERSION_CODE)))
+        class LATEST_VERSION(code: Int, flavor: String) :
+            Filter(BUG.LATEST_VERSION_CODE.eq(code).and(BUG.LATEST_VERSION_FLAVOR.eq(flavor)))
+
+        object IS_NOT_SOLVED_OR_REGRESSION :
+            Filter(BUG.SOLVED_VERSION_CODE.isNull.or(BUG.SOLVED_VERSION_CODE.lt(BUG.LATEST_VERSION_CODE)))
     }
 
     enum class Sort(override val field: Field<*>) : SortDefinition {

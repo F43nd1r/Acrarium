@@ -64,7 +64,9 @@ class BugRepositoryTest(
             val cause = "cause"
             testDataBuilder.createBugIdentifier(appId, bugId, exceptionClass, message, crashLine, cause)
 
-            expectThat(bugRepository.findId(BugIdentifier(appId, exceptionClass, message, crashLine, cause))).isEqualTo(bugId)
+            expectThat(bugRepository.findId(BugIdentifier(appId, exceptionClass, message, crashLine, cause))).isEqualTo(
+                bugId
+            )
         }
 
         @Test
@@ -75,7 +77,9 @@ class BugRepositoryTest(
             val cause = null
             testDataBuilder.createBugIdentifier(appId, bugId, exceptionClass, message, crashLine, cause)
 
-            expectThat(bugRepository.findId(BugIdentifier(appId, exceptionClass, message, crashLine, cause))).isEqualTo(bugId)
+            expectThat(bugRepository.findId(BugIdentifier(appId, exceptionClass, message, crashLine, cause))).isEqualTo(
+                bugId
+            )
         }
 
         @Test
@@ -84,7 +88,14 @@ class BugRepositoryTest(
             val message = "message"
             val crashLine = "crashLine"
             val cause = "cause"
-            testDataBuilder.createBugIdentifier(testDataBuilder.createApp(), bugId, exceptionClass, message, crashLine, cause)
+            testDataBuilder.createBugIdentifier(
+                testDataBuilder.createApp(),
+                bugId,
+                exceptionClass,
+                message,
+                crashLine,
+                cause
+            )
             testDataBuilder.createBugIdentifier(appId, bugId, "other", message, crashLine, cause)
             testDataBuilder.createBugIdentifier(appId, bugId, exceptionClass, "other", crashLine, cause)
             testDataBuilder.createBugIdentifier(appId, bugId, exceptionClass, message, "other", cause)
@@ -106,6 +117,42 @@ class BugRepositoryTest(
         @Test
         fun `should return null if id does not exist`() {
             expectThat(bugRepository.find(BugId(1))).isNull()
+        }
+    }
+
+    @Nested
+    inner class FindInRange {
+        @Test
+        fun `should return exactly bugs in time range`() {
+            val now = Instant.now()
+            testDataBuilder.createReport(appId, date = now.minus(10, ChronoUnit.DAYS))
+            val bug1 = testDataBuilder.createBug(appId)
+            testDataBuilder.createReport(appId, bug1, date = now.minus(5, ChronoUnit.DAYS))
+            val bug2 = testDataBuilder.createBug(appId)
+            testDataBuilder.createReport(appId, bug2, date = now)
+            val bug3 = testDataBuilder.createBug(appId)
+            testDataBuilder.createReport(appId, bug3, date = now.plus(10, ChronoUnit.HOURS))
+            testDataBuilder.createReport(appId, date = now.plus(30, ChronoUnit.HOURS))
+
+            expectThat(
+                bugRepository.findInRange(
+                    appId,
+                    now.minus(7, ChronoUnit.DAYS)..now.plus(1, ChronoUnit.DAYS)
+                ).map { it.id }
+            ).containsExactly(bug1, bug2, bug3)
+        }
+    }
+
+    @Nested
+    inner class GetIdentifiers {
+        @Test
+        fun `should get all identifiers for bug`() {
+            val bug = testDataBuilder.createBug(appId)
+            val i1 = testDataBuilder.createBugIdentifier(appId, bug)
+            val i2 = testDataBuilder.createBugIdentifier(appId, bug)
+            testDataBuilder.createBugIdentifier(appId)
+
+            expectThat(bugRepository.getIdentifiers(bug)).containsExactlyInAnyOrder(i1, i2)
         }
     }
 
@@ -158,6 +205,20 @@ class BugRepositoryTest(
             expectThat(bugRepository.find(id)).isNotNull().and {
                 get { solvedVersionKey }.isNull()
             }
+        }
+    }
+
+    @Nested
+    inner class SetTitle {
+        @Test
+        fun `should update title`() {
+            val bug = testDataBuilder.createBug(appId, title = "t1")
+
+            expectThat(bugRepository.find(bug)!!.title).isEqualTo("t1")
+
+            bugRepository.setTitle(appId, bug, "t2")
+
+            expectThat(bugRepository.find(bug)!!.title).isEqualTo("t2")
         }
     }
 
@@ -347,7 +408,13 @@ class BugRepositoryTest(
             val bug1 = testDataBuilder.createBug(appId, "bug1")
             val bug2 = testDataBuilder.createBug(appId, "bug2")
 
-            expectThat(provider.fetch(emptySet(), listOf(AcrariumSort(BugStats.Sort.TITLE, SortDirection.ASCENDING)), 0, 10).toList().map { it.id })
+            expectThat(
+                provider.fetch(
+                    emptySet(),
+                    listOf(AcrariumSort(BugStats.Sort.TITLE, SortDirection.ASCENDING)),
+                    0,
+                    10
+                ).toList().map { it.id })
                 .containsExactly(bug1, bug2)
         }
 
@@ -356,9 +423,21 @@ class BugRepositoryTest(
             val bug1 = testDataBuilder.createBug(appId, "bug1")
             val bug2 = testDataBuilder.createBug(appId, "bug2")
 
-            expectThat(provider.fetch(emptySet(), listOf(AcrariumSort(BugStats.Sort.TITLE, SortDirection.ASCENDING)), 0, 1).toList().map { it.id })
+            expectThat(
+                provider.fetch(
+                    emptySet(),
+                    listOf(AcrariumSort(BugStats.Sort.TITLE, SortDirection.ASCENDING)),
+                    0,
+                    1
+                ).toList().map { it.id })
                 .containsExactly(bug1)
-            expectThat(provider.fetch(emptySet(), listOf(AcrariumSort(BugStats.Sort.TITLE, SortDirection.ASCENDING)), 1, 1).toList().map { it.id })
+            expectThat(
+                provider.fetch(
+                    emptySet(),
+                    listOf(AcrariumSort(BugStats.Sort.TITLE, SortDirection.ASCENDING)),
+                    1,
+                    1
+                ).toList().map { it.id })
                 .containsExactly(bug2)
         }
 
@@ -381,7 +460,9 @@ class BugRepositoryTest(
             bugRepository.setSolved(appId, bug3, v1)
 
             expectThat(provider.size(setOf(BugStats.Filter.LATEST_VERSION(2, "two")))).isEqualTo(2)
-            expectThat(provider.fetch(setOf(BugStats.Filter.LATEST_VERSION(2, "two")), emptyList(), 0, 10).toList().map { it.id })
+            expectThat(
+                provider.fetch(setOf(BugStats.Filter.LATEST_VERSION(2, "two")), emptyList(), 0, 10).toList()
+                    .map { it.id })
                 .containsExactly(bug1, bug3)
 
             expectThat(provider.size(setOf(BugStats.Filter.TITLE("bug1")))).isEqualTo(1)
@@ -389,7 +470,9 @@ class BugRepositoryTest(
                 .containsExactly(bug1)
 
             expectThat(provider.size(setOf(BugStats.Filter.IS_NOT_SOLVED_OR_REGRESSION))).isEqualTo(2)
-            expectThat(provider.fetch(setOf(BugStats.Filter.IS_NOT_SOLVED_OR_REGRESSION), emptyList(), 0, 10).toList().map { it.id })
+            expectThat(
+                provider.fetch(setOf(BugStats.Filter.IS_NOT_SOLVED_OR_REGRESSION), emptyList(), 0, 10).toList()
+                    .map { it.id })
                 .containsExactly(bug1, bug3)
         }
     }
