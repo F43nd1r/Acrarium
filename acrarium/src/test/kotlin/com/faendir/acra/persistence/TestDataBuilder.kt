@@ -130,4 +130,21 @@ class TestDataBuilder(private val jooq: DSLContext, private val randomStringGene
             .execute()
         return id
     }
+
+    fun createMailSettings(
+        app: AppId = createApp(),
+        user: String = createUser(),
+        newBug: Boolean = false,
+        regression: Boolean = false,
+        spike: Boolean = false,
+        summary: Boolean = false,
+    ) =
+        jooq.insertInto(MAIL_SETTINGS)
+            .set(MAIL_SETTINGS.APP_ID, app)
+            .set(MAIL_SETTINGS.USERNAME, user)
+            .set(MAIL_SETTINGS.NEW_BUG, newBug)
+            .set(MAIL_SETTINGS.REGRESSION, regression)
+            .set(MAIL_SETTINGS.SPIKE, spike)
+            .set(MAIL_SETTINGS.SUMMARY, summary)
+            .execute()
 }
