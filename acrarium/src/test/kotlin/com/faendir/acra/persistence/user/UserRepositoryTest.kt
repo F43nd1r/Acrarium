@@ -288,6 +288,26 @@ class UserRepositoryTest(
     }
 
     @Nested
+    inner class HasAnyAdmin {
+        @Test
+        fun `should return true if an admin exists`() {
+            testDataBuilder.createUser(roles = arrayOf(Role.ADMIN))
+            testDataBuilder.createUser(roles = arrayOf(Role.USER, Role.ADMIN, Role.API))
+            testDataBuilder.createUser(roles = arrayOf(Role.USER))
+
+            expectThat(userRepository.hasAnyAdmin()).isTrue()
+        }
+
+        @Test
+        fun `should return false if no admin exists`() {
+            testDataBuilder.createUser(roles = arrayOf(Role.REPORTER))
+            testDataBuilder.createUser(roles = arrayOf(Role.USER, Role.API))
+
+            expectThat(userRepository.hasAnyAdmin()).isFalse()
+        }
+    }
+
+    @Nested
     inner class Provider {
         private lateinit var provider: AcrariumDataProvider<UserAuthorities, Nothing, UserAuthorities.Sort>
 

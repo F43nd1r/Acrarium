@@ -20,7 +20,11 @@ class TestDataBuilder(private val jooq: DSLContext, private val randomStringGene
 
     private fun randomString(prefix: String = "string") = "$prefix-${randomStringGenerator.generate(16)}"
 
-    fun createUser(username: String = randomString("test-user"), password: String = randomString("test-password"), vararg roles: Role): String {
+    fun createUser(
+        username: String = randomString("test-user"),
+        password: String = randomString("test-password"),
+        vararg roles: Role
+    ): String {
         jooq.insertInto(USER)
             .set(USER.USERNAME, username)
             .set(USER.PASSWORD, password)
@@ -129,6 +133,18 @@ class TestDataBuilder(private val jooq: DSLContext, private val randomStringGene
             .set(REPORT.CAUSE, bugIdentifier.cause)
             .execute()
         return id
+    }
+
+    fun createAttachment(
+        report: String = createReport(),
+        fileName: String = randomString("fileName"),
+        content: ByteArray = randomString("content").encodeToByteArray()
+    ) {
+        jooq.insertInto(ATTACHMENT)
+            .set(ATTACHMENT.REPORT_ID, report)
+            .set(ATTACHMENT.FILENAME, fileName)
+            .set(ATTACHMENT.CONTENT, content)
+            .execute()
     }
 
     fun createMailSettings(

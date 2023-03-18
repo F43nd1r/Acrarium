@@ -45,7 +45,7 @@ class ReportRepository(
 
     @PreAuthorize("hasViewPermission(#appId)")
     fun <T> get(appId: AppId, field: SelectField<T>, where: Condition? = null, sorted: Boolean = true): List<T> =
-        jooq.selectDistinct(field).from(REPORT).where(REPORT.APP_ID.eq(appId), *listOfNotNull(where).toTypedArray())
+        jooq.selectDistinct(field).from(REPORT).where(listOfNotNull(REPORT.APP_ID.eq(appId), where))
             .run { if (sorted && field is OrderField<*>) orderBy(field) else this }.fetchList()
 
     @PreAuthorize("hasViewPermission(#appId)")
@@ -62,6 +62,9 @@ class ReportRepository(
             )
             .associate { (value, count) -> value to count }
 
+    fun countInRange(appId: AppId, bugId: BugId, range: ClosedRange<Instant>): Int = jooq.selectCount().from(REPORT)
+        .where(REPORT.APP_ID.eq(appId), REPORT.BUG_ID.eq(bugId), REPORT.DATE.greaterOrEqual(range.start), REPORT.DATE.lessOrEqual(range.endInclusive))
+        .fetchValue() ?: 0
 
     @Transactional
     @PreAuthorize("isReporter()")
@@ -99,10 +102,6 @@ class ReportRepository(
     fun deleteBefore(appId: AppId, versionCode: Int) {
         jooq.deleteFrom(REPORT).where(REPORT.VERSION_CODE.lt(versionCode)).execute()
     }
-
-    fun countInRange(appId: AppId, bugId: BugId, range: ClosedRange<Instant>): Int = jooq.selectCount().from(REPORT)
-        .where(REPORT.APP_ID.eq(appId), REPORT.BUG_ID.eq(bugId), REPORT.DATE.greaterOrEqual(range.start), REPORT.DATE.lessOrEqual(range.endInclusive))
-        .fetchValue() ?: 0
 
     @PreAuthorize("hasViewPermission(#appId)")
     fun getProvider(appId: AppId, customColumns: List<String>) = getProvider(REPORT.APP_ID.eq(appId), customColumns)
