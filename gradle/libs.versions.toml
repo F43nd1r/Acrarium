@@ -3,7 +3,7 @@ kotlin = "1.8.10"
 dokka = "1.8.10"
 springBoot = "3.0.5"
 vaadin-flow = "24.0.2"
-vaadin-base = "24.0.0.beta5"
+vaadin-base = "24.0.2"
 kotlinPoet = "1.12.0"
 
 [libraries]
