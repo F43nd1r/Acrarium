@@ -22,10 +22,7 @@ dependencies {
     implementation(libs.orgSpringframeworkBoot.springBootStarterSecurity)
     implementation(libs.orgSpringframeworkBoot.springBootStarterMail)
     implementation(libs.orgSpringframeworkBoot.springBootStarterActuator)
-    implementation(libs.orgSpringframeworkBoot.springBootStarterJooq) {
-        exclude(group = "org.jooq")
-    }
-    implementation(libs.orgJooq.jooq)
+    implementation(libs.orgSpringframeworkBoot.springBootStarterJooq)
     implementation(libs.comVaadin.vaadin)
     implementation(libs.comVaadin.vaadinSpringBootStarter)
     implementation(libs.comMysql.mysqlConnectorJ)
