@@ -76,10 +76,11 @@ val generateMessageClasses by tasks.creating(com.faendir.acra.gradle.I18nClassGe
     className = "Messages"
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "17"
-    }
     dependsOn(generateMessageClasses)
 }
 

@@ -10,3 +10,7 @@ dependencies {
     implementation(libs.orgSlf4j.slf4jSimple)
     implementation(libs.testContainers)
 }
+
+kotlin {
+    jvmToolchain(17)
+}
