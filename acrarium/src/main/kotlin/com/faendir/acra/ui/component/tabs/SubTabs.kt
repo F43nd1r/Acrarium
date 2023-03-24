@@ -15,12 +15,9 @@
  */
 package com.faendir.acra.ui.component.tabs
 
-import com.faendir.acra.util.toNullable
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.Component
-import com.vaadin.flow.component.ComponentEventListener
 import com.vaadin.flow.component.DetachEvent
-import com.vaadin.flow.component.HasComponents
 import com.vaadin.flow.component.Synchronize
 import com.vaadin.flow.component.tabs.Tab
 import com.vaadin.flow.component.tabs.Tabs
@@ -31,7 +28,7 @@ import com.vaadin.flow.shared.Registration
  * @author lukas
  * @since 06.09.19
  */
-open class SubTabs(vararg tabs: Tab) : Tab(), HasComponents {
+open class SubTabs(vararg tabs: Tab) : Tab() {
     private val content: Tabs = Tabs(false, *tabs)
     private var registration: Registration? = null
 
@@ -45,7 +42,7 @@ open class SubTabs(vararg tabs: Tab) : Tab(), HasComponents {
             }
         }
         content.setWidthFull()
-        super<Tab>.add(content)
+        super.add(content)
         hideIfEmpty()
     }
 
@@ -69,8 +66,12 @@ open class SubTabs(vararg tabs: Tab) : Tab(), HasComponents {
         registration?.remove()
     }
 
-    override fun add(vararg components: Component) {
-        content.add(*components)
+    override fun add(vararg component: Component) {
+        add(*component.filterIsInstance<Tab>().toTypedArray())
+    }
+
+    fun add(vararg tabs: Tab) {
+        content.add(*tabs)
         hideIfEmpty()
     }
 
