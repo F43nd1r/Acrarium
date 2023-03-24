@@ -28,7 +28,7 @@ dependencies {
     implementation(libs.orgJooq.jooq)
     implementation(libs.comVaadin.vaadin)
     implementation(libs.comVaadin.vaadinSpringBootStarter)
-    implementation(libs.mysql.mysqlConnectorJava)
+    implementation(libs.comMysql.mysqlConnectorJ)
     implementation(libs.orgLiquibase.liquibaseCore)
     implementation(libs.ektorp)
     implementation(libs.acraJava)
@@ -54,7 +54,7 @@ dependencies {
     testImplementation(libs.strikt)
     testImplementation(libs.mariadb4j)
     testImplementation(libs.mariadbClient)
-    jooqGenerator(libs.mysql.mysqlConnectorJava)
+    jooqGenerator(libs.comMysql.mysqlConnectorJ)
     jooqGenerator(libs.orgYaml.snakeyaml)
     jooqGenerator(projects.jooqHelper)
 }
