@@ -99,8 +99,8 @@ docker {
     name = "f43nd1r/acrarium"
 //    tag("hubLatest", "$name:latest")
 //    tag("ghLatest", "ghcr.io/$name:latest")
-//    tag("hubVersion", "$name:$version")
-//    tag("ghVersion", "ghcr.io/$name:$version")
+    tag("hubVersion", "$name:$version")
+    tag("ghVersion", "ghcr.io/$name:$version")
 //    if (version.toString().matches(Regex("\\d(\\.\\d)*"))) {
 //        tag("hubStable", "$name:stable")
 //        tag("ghStable", "ghcr.io/$name:stable")
