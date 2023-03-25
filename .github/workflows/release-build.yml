@@ -21,7 +21,7 @@ jobs:
       - name: Build release
         uses: burrunan/gradle-cache-action@v1
         with:
-          job-id: jdk11
+          job-id: jdk17
           arguments: bootJar bootWar
           properties: vaadin.productionMode=true
         env:
