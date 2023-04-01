@@ -18,4 +18,4 @@ class RouteButtonRenderer<T>(icon: VaadinIcon, target: Class<out Component>, get
                 addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE)
             })
         }
-    })
+    }), InteractiveColumnRenderer

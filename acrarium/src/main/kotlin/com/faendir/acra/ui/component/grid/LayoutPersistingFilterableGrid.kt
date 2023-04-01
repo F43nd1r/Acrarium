@@ -3,6 +3,7 @@ package com.faendir.acra.ui.component.grid
 import com.faendir.acra.dataprovider.AcrariumDataProvider
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.settings.GridSettings
+import com.faendir.acra.ui.component.grid.renderer.InteractiveColumnRenderer
 import com.faendir.acra.ui.component.grid.renderer.RouteButtonRenderer
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.grid.ItemClickEvent
@@ -11,7 +12,7 @@ import com.vaadin.flow.router.RouteParameters
 
 abstract class LayoutPersistingFilterableGrid<T : Any, F : Any, S : Any, C : FilterableSortableLocalizedColumn<T, F, S>>(
     val dataProvider: AcrariumDataProvider<T, F, S>,
-    var gridSettings: GridSettings? = null
+    private var gridSettings: GridSettings? = null
 ) :
     AbstractCustomColumnGrid<T, C>() {
 
@@ -56,7 +57,9 @@ abstract class LayoutPersistingFilterableGrid<T : Any, F : Any, S : Any, C : Fil
 
     fun addOnClickNavigation(target: Class<out Component>, getParameters: (T) -> Map<String, String>) {
         addItemClickListener { e: ItemClickEvent<T> ->
-            ui.ifPresent { it.navigate(target, RouteParameters(getParameters(e.item))) }
+            if (e.column.renderer !is InteractiveColumnRenderer) {
+                ui.ifPresent { it.navigate(target, RouteParameters(getParameters(e.item))) }
+            }
         }
         column(RouteButtonRenderer(VaadinIcon.EXTERNAL_LINK, target, getParameters)) {
             setCaption(Messages.OPEN)

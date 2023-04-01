@@ -11,4 +11,4 @@ class ButtonRenderer<T>(icon: VaadinIcon, onCreate: Button.(T) -> Unit = {}, onC
         addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE)
         onCreate(t)
     }
-})
+}), InteractiveColumnRenderer
