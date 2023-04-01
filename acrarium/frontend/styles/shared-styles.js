@@ -64,4 +64,12 @@ registerStyles("vaadin-grid",
         }
     `
 )
+registerStyles("vaadin-button",
+    // language=css
+    css`
+        :host(:hover)::before {
+            opacity: 0.05;
+        }
+    `
+)
 

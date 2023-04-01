@@ -52,7 +52,7 @@ class PropertiesCard(
                     value = bug.title
                     setWidthFull()
                     isClearButtonVisible
-                    val saveButton = Translatable.createButton(Messages.SAVE, theme = ButtonVariant.LUMO_TERTIARY_INLINE) {
+                    val saveButton = Translatable.createButton(Messages.SAVE, theme = ButtonVariant.LUMO_TERTIARY) {
                         bugRepository.setTitle(
                             appId,
                             bugId,

@@ -1,5 +1,7 @@
 package com.faendir.acra.ui.component.grid.renderer
 
+import com.faendir.acra.ui.ext.SizeUnit
+import com.faendir.acra.ui.ext.setMargin
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
@@ -15,7 +17,8 @@ class RouteButtonRenderer<T>(icon: VaadinIcon, target: Class<out Component>, get
             element.setAttribute("target", "_blank")
             element.setAttribute("rel", "noopener noreferrer")
             add(Button(Icon(icon)).apply {
-                addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE)
+                addThemeVariants(ButtonVariant.LUMO_TERTIARY)
+                setMargin(0, SizeUnit.PIXEL)
             })
         }
     }), InteractiveColumnRenderer

@@ -83,7 +83,7 @@ class MainView(applicationContext: GenericApplicationContext) : Composite<AppLay
                     icon = VaadinIcon.POWER_OFF.create()
                     removeThemeVariants(ButtonVariant.LUMO_PRIMARY)
                     addThemeVariants(ButtonVariant.LUMO_TERTIARY)
-                    setPaddingRight(10.0, SizeUnit.PIXEL)
+                    setMarginRight(10.0, SizeUnit.PIXEL)
                 }
             )
         }
