@@ -56,4 +56,12 @@ registerStyles("vaadin-password-field",
         }
     `
 )
+registerStyles("vaadin-grid",
+    // language=css
+    css`
+        [part~="row"]:hover [part~="body-cell"] {
+            background-color: var(--lumo-primary-color-10pct);
+        }
+    `
+)
 
