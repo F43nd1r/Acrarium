@@ -97,6 +97,7 @@ noArg {
 
 docker {
     name = "f43nd1r/acrarium"
+
 //    tag("hubLatest", "$name:latest")
 //    tag("ghLatest", "ghcr.io/$name:latest")
     tag("hubVersion", "$name:$version")
@@ -107,8 +108,12 @@ docker {
 //    }
     tag("hubNext", "$name:next")
     tag("ghNext", "ghcr.io/$name:next")
+
     files(tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar").outputs)
     copySpec.into("build/libs")
+
+    buildx(true)
+    platform("linux/amd64", "linux/arm64/v8")
 }
 
 tasks.withType<Test> {
