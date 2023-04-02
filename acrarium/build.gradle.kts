@@ -94,21 +94,6 @@ noArg {
     annotation("com.faendir.acra.util.NoArgConstructor")
 }
 
-tasks.create("listDockerTags") {
-    val name = "f43nd1r/acrarium"
-    fun tag(tag: String) {
-        println("$name:$tag")
-        println("ghcr.io/$name:$tag")
-    }
-
-//    tag("latest")
-//    if (version.toString().matches(Regex("\\d(\\.\\d)*"))) {
-//        tag("stable")
-//    }
-    tag(version.toString())
-    tag("next")
-}
-
 tasks.withType<Test> {
     project.properties["vaadinProKey"]?.let { systemProperty("vaadin.proKey", it) }
     useJUnitPlatform()

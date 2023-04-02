@@ -41,13 +41,13 @@ jobs:
           properties: vaadin.productionMode=true
       - name: Get docker tags
         id: tags
-        run: ./gradlew listDockerTags --quiet --console=plain >> $GITHUB_OUTPUT
+        run: echo "TAGS=$(./listDockerTags.sh)" >> $GITHUB_OUTPUT
       - name: Build and push docker images
         uses: docker/build-push-action@v4
         with:
           context: "{{defaultContext}}:acrarium"
           push: true
-          tags: ${{ steps.tags.outputs }}
+          tags: ${{ steps.tags.outputs.TAGS }}
           platforms: |
             linux/amd64
             linux/arm64/v8
