@@ -44,7 +44,7 @@ import kotlin.contracts.contract
 class UserEditor(userRepository: UserRepository, mailService: MailService?, existingUsername: String? = null, grantRoles: Set<Role> = emptySet(), onSuccess: () -> Unit) :
     Composite<FlexLayout>() {
     private val isExistingUser = existingUsername != null
-    private val user = MutableUser(existingUsername, null, existingUsername?.let { userRepository.find(existingUsername)?.mail })
+    private val user = MutableUser(existingUsername ?: "", "", existingUsername?.let { userRepository.find(existingUsername)?.mail } ?: "")
 
     init {
         setId(EDITOR_ID)
@@ -65,7 +65,7 @@ class UserEditor(userRepository: UserRepository, mailService: MailService?, exis
         mail.setId(MAIL_ID)
         val emailValidator = EmailValidator(getTranslation(Messages.INVALID_MAIL))
         binder.forField(mail).withValidator { m: String, c: ValueContext? -> if (m.isEmpty()) ValidationResult.ok() else emailValidator.apply(m, c) }
-            .bind({ it.mail ?: "" }) { u, value -> u.mail = value }
+            .bind({ it.mail }) { u, value -> u.mail = value }
         content.add(mail)
         val newPassword = Translatable.createPasswordField(Messages.NEW_PASSWORD)
         exposeInput(newPassword)
@@ -81,7 +81,7 @@ class UserEditor(userRepository: UserRepository, mailService: MailService?, exis
             oldPassword.setWidthFull()
             oldPassword.setId(OLD_PASSWORD_ID)
             val oldPasswordBinding = binder.forField(oldPassword).withValidator({
-                if (user.username != null && (newPassword.value.isNotEmpty() || oldPassword.value.isNotEmpty())) userRepository.checkPassword(user.username!!, it) else true
+                if (user.username.isNotBlank() && (newPassword.value.isNotEmpty() || oldPassword.value.isNotEmpty())) userRepository.checkPassword(user.username, it) else true
             }, getTranslation(Messages.INCORRECT_PASSWORD)).bind({ "" }) { _, _ -> }
             content.add(oldPassword)
             newPassword.addValueChangeListener { oldPasswordBinding.validate() }
@@ -95,7 +95,7 @@ class UserEditor(userRepository: UserRepository, mailService: MailService?, exis
             repeatPasswordBindingBuilder.asRequired(getTranslation(Messages.PASSWORD_REQUIRED))
         }
         newPasswordBindingBuilder.bind({ "" }) { u, rawPassword ->
-            if (rawPassword != null && "" != rawPassword) {
+            if (rawPassword.isNotBlank()) {
                 u.rawPassword = rawPassword
             }
         }
@@ -108,9 +108,9 @@ class UserEditor(userRepository: UserRepository, mailService: MailService?, exis
         val button = Translatable.createButton(Messages.CONFIRM) {
             if (binder.writeBeanIfValid(user)) {
                 if (isExistingUser) {
-                    userRepository.update(user.username!!, user.rawPassword, user.mail)
+                    userRepository.update(user.username, user.rawPassword.takeIf { it.isNotBlank() }, user.mail.takeIf { it.isNotBlank() })
                 } else {
-                    userRepository.create(user.username!!, user.rawPassword!!, user.mail, roles = grantRoles.toTypedArray())
+                    userRepository.create(user.username, user.rawPassword, user.mail.takeIf { it.isNotBlank() }, roles = grantRoles.toTypedArray())
                 }
                 onSuccess()
             }
@@ -122,7 +122,7 @@ class UserEditor(userRepository: UserRepository, mailService: MailService?, exis
         content.add(button)
         val testMailButton = Translatable.createButton(Messages.SEND_TEST_MAIL) {
             if (canSendTestMail(mailService)) {
-                mailService.testMessage(user.mail!!)
+                mailService.testMessage(user.mail)
             }
         }
         testMailButton.setWidthFull()
@@ -139,7 +139,7 @@ class UserEditor(userRepository: UserRepository, mailService: MailService?, exis
         contract {
             returns(true) implies (mailService != null)
         }
-        return user.mail?.isNotBlank() == true && mailService != null
+        return user.mail.isNotBlank() == true && mailService != null
     }
 
     /**
@@ -164,4 +164,4 @@ class UserEditor(userRepository: UserRepository, mailService: MailService?, exis
     }
 }
 
-private class MutableUser(var username: String?, var rawPassword: String?, var mail: String?)
+private class MutableUser(var username: String, var rawPassword: String, var mail: String)
