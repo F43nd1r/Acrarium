@@ -41,7 +41,13 @@ jobs:
           properties: vaadin.productionMode=true
       - name: Get docker tags
         id: tags
-        run: echo "TAGS=$(./listDockerTags.sh)" >> $GITHUB_OUTPUT
+        run: |
+          delimiter="$(openssl rand -hex 8)"
+          {
+            echo "TAGS<<${delimiter}"
+            ./listDockerTags.sh
+            echo "${delimiter}"
+          } >> $GITHUB_OUTPUT
       - name: Build and push docker images
         uses: docker/build-push-action@v4
         with:
