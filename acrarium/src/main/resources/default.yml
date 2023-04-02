@@ -37,12 +37,14 @@ springdoc:
   show-actuator: true
   swagger-ui:
     enabled: false
-  use-management-port: true
 vaadin:
   pnpm:
     enable: true
   servlet:
     productionMode: true
+  exclude-urls:
+    - /swagger-ui.html
+    - /swagger-ui/**
 
 acrarium:
   message-ignore-pattern: "[0-9]{4,}"

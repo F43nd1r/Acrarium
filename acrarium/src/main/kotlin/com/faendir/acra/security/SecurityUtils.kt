@@ -19,6 +19,7 @@ import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.user.Role
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.security.authentication.AnonymousAuthenticationToken
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 
@@ -32,6 +33,13 @@ object SecurityUtils {
 
     @JvmStatic
     fun getAuthorities(): Collection<GrantedAuthority> = SecurityContextHolder.getContext().authentication?.authorities ?: emptySet()
+
+    @JvmStatic
+    fun setAuthorities(authorities: Collection<GrantedAuthority>) {
+        if (isLoggedIn()) {
+            SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken(getUsername(), null, authorities)
+        }
+    }
 
     @JvmStatic
     fun getUsername(): String = SecurityContextHolder.getContext().authentication?.name ?: ""

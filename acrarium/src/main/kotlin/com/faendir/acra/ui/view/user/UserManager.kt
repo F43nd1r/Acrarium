@@ -82,6 +82,9 @@ class UserManager(private val userRepository: UserRepository, private val appRep
                     Checkbox(user.roles.contains(Role.API)).apply {
                         addValueChangeListener {
                             userRepository.setRole(user.username, Role.API, it.value)
+                            if (user.username == SecurityUtils.getUsername()) {
+                                SecurityUtils.setAuthorities(userRepository.getAuthorities(user.username))
+                            }
                             dataProvider.refreshAll()
                         }
                     }

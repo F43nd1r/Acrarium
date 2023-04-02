@@ -6,6 +6,7 @@ vaadin-flow = "24.0.3"
 vaadin-base = "24.0.2"
 kotlinPoet = "1.12.0"
 testContainers = "1.17.6"
+liquibase = "4.20.0"
 
 [libraries]
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
@@ -28,7 +29,7 @@ kotlin-coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
 kotlin-logging = "io.github.microutils:kotlin-logging-jvm:3.0.5"
 spring-mockk = "com.ninja-squad:springmockk:4.0.2"
 strikt = "io.strikt:strikt-core:0.34.1"
-springdoc = "org.springdoc:springdoc-openapi-ui:1.6.15"
+springdoc = "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0"
 guava = "com.google.guava:guava:31.1-jre"
 testContainers-mysql = { module = "org.testcontainers:mysql", version.ref = "testContainers" }
 testContainers-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testContainers" }
