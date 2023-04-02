@@ -8,7 +8,7 @@ dependencies {
     implementation(libs.orgJooq.jooqMeta)
     implementation(libs.orgSlf4j.slf4jApi)
     implementation(libs.orgSlf4j.slf4jSimple)
-    implementation(libs.testContainers)
+    implementation(libs.testContainers.mysql)
 }
 
 kotlin {

@@ -2,6 +2,7 @@ package com.faendir.acra.setup
 
 import com.faendir.acra.persistence.device.DeviceRepository
 import com.faendir.acra.settings.AcrariumConfiguration
+import com.faendir.acra.util.NoArgConstructor
 import com.univocity.parsers.annotations.Parsed
 import com.univocity.parsers.common.processor.BeanListProcessor
 import com.univocity.parsers.csv.CsvParser
@@ -38,6 +39,7 @@ class DeviceSetup(private val deviceRepository: DeviceRepository, private val co
     }
 }
 
+@NoArgConstructor
 class Device(
     @Parsed(field = ["Device"])
     val device: String,

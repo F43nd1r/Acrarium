@@ -1,6 +1,6 @@
 package com.faendir.acra.annotation
 
-import com.faendir.acra.MariaDBTestConfiguration
+import com.faendir.acra.DatabaseTestConfiguration
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.context.annotation.Import
 import org.springframework.test.annotation.DirtiesContext
@@ -12,5 +12,5 @@ import java.lang.annotation.Inherited
 @Inherited
 @ExtendWith(SpringExtension::class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@Import(MariaDBTestConfiguration::class)
+@Import(DatabaseTestConfiguration::class)
 annotation class AcrariumTest
