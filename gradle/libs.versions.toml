@@ -43,4 +43,3 @@ kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotl
 kotlin-noarg = { id = "org.jetbrains.kotlin.plugin.noarg", version.ref = "kotlin" }
 springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
 vaadin = { id = "com.vaadin", version.ref = "vaadin-base" }
-docker = { id = "com.palantir.docker", version = "0.34.0" }

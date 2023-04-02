@@ -13,7 +13,6 @@ plugins {
     alias(libs.plugins.springBoot)
     alias(libs.plugins.vaadin)
     war
-    alias(libs.plugins.docker)
     alias(libs.plugins.jooq)
 }
 
@@ -95,25 +94,19 @@ noArg {
     annotation("com.faendir.acra.util.NoArgConstructor")
 }
 
-docker {
-    name = "f43nd1r/acrarium"
+tasks.create("listDockerTags") {
+    val name = "f43nd1r/acrarium"
+    fun tag(tag: String) {
+        println("$name:$tag")
+        println("ghcr.io/$name:$tag")
+    }
 
-//    tag("hubLatest", "$name:latest")
-//    tag("ghLatest", "ghcr.io/$name:latest")
-    tag("hubVersion", "$name:$version")
-    tag("ghVersion", "ghcr.io/$name:$version")
+//    tag("latest")
 //    if (version.toString().matches(Regex("\\d(\\.\\d)*"))) {
-//        tag("hubStable", "$name:stable")
-//        tag("ghStable", "ghcr.io/$name:stable")
+//        tag("stable")
 //    }
-    tag("hubNext", "$name:next")
-    tag("ghNext", "ghcr.io/$name:next")
-
-    files(tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar").outputs)
-    copySpec.into("build/libs")
-
-    buildx(true)
-    platform("linux/amd64", "linux/arm64/v8")
+    tag(version.toString())
+    tag("next")
 }
 
 tasks.withType<Test> {

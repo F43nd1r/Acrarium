@@ -33,11 +33,21 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and publish release
+      - name: Build release
         uses: burrunan/gradle-cache-action@v1
         with:
           job-id: jdk17
-          arguments: dockerTagsPush
+          arguments: bootJar
           properties: vaadin.productionMode=true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get docker tags
+        id: tags
+        run: ./gradlew listDockerTags --quiet --console=plain >> $GITHUB_OUTPUT
+      - name: Build and push docker images
+        uses: docker/build-push-action@v4
+        with:
+          context: "{{defaultContext}}:acrarium"
+          push: true
+          tags: ${{ steps.tags.outputs }}
+          platforms: |
+            linux/amd64
+            linux/arm64/v8
