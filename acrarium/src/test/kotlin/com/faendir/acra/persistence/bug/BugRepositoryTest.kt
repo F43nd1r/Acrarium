@@ -124,9 +124,10 @@ class BugRepositoryTest(
     inner class Find {
         @Test
         fun `should find bug by id`() {
-            val id = testDataBuilder.createBug(appId)
+            val bugId = testDataBuilder.createBug(appId)
+            testDataBuilder.createReport(appId, bugId)
 
-            expectThat(bugRepository.find(id)).isNotNull()
+            expectThat(bugRepository.find(bugId)).isNotNull()
         }
 
         @Test
@@ -203,6 +204,7 @@ class BugRepositoryTest(
         @Test
         fun `should set and reset solved version`() {
             val id = testDataBuilder.createBug(appId)
+            testDataBuilder.createReport(appId, id)
             val version = testDataBuilder.createVersion(appId)
 
             expectThat(bugRepository.find(id)).isNotNull().and {
@@ -228,6 +230,7 @@ class BugRepositoryTest(
         @Test
         fun `should update title`() {
             val bug = testDataBuilder.createBug(appId, title = "t1")
+            testDataBuilder.createReport(appId, bug)
 
             expectThat(bugRepository.find(bug)!!.title).isEqualTo("t1")
 
@@ -243,8 +246,10 @@ class BugRepositoryTest(
         fun `should update title`() {
             val bug1 = testDataBuilder.createBug(appId)
             val id1 = testDataBuilder.createBugIdentifier(appId, bug1)
+            testDataBuilder.createReport(appId, bug1)
             val bug2 = testDataBuilder.createBug(appId)
             val id2 = testDataBuilder.createBugIdentifier(appId, bug2)
+            testDataBuilder.createReport(appId, bug2)
 
             bugRepository.mergeBugs(appId, setOf(bug1, bug2), "newTitle")
 
@@ -367,13 +372,14 @@ class BugRepositoryTest(
     inner class Delete {
         @Test
         fun `should delete bug`() {
-            val id = testDataBuilder.createBug(appId)
+            val bugId = testDataBuilder.createBug(appId)
+            testDataBuilder.createReport(appId, bugId)
 
-            expectThat(bugRepository.find(id)).isNotNull()
+            expectThat(bugRepository.find(bugId)).isNotNull()
 
-            bugRepository.delete(appId, id)
+            bugRepository.delete(appId, bugId)
 
-            expectThat(bugRepository.find(id)).isNull()
+            expectThat(bugRepository.find(bugId)).isNull()
         }
 
         @Test
@@ -421,7 +427,9 @@ class BugRepositoryTest(
         @Test
         fun `should sort returned bugs`() {
             val bug1 = testDataBuilder.createBug(appId, "bug1")
+            testDataBuilder.createReport(appId, bug1)
             val bug2 = testDataBuilder.createBug(appId, "bug2")
+            testDataBuilder.createReport(appId, bug2)
 
             expectThat(
                 provider.fetch(
@@ -436,7 +444,9 @@ class BugRepositoryTest(
         @Test
         fun `should offset and limit returned bugs`() {
             val bug1 = testDataBuilder.createBug(appId, "bug1")
+            testDataBuilder.createReport(appId, bug1)
             val bug2 = testDataBuilder.createBug(appId, "bug2")
+            testDataBuilder.createReport(appId, bug2)
 
             expectThat(
                 provider.fetch(

@@ -35,15 +35,13 @@ import java.time.Instant
 import java.util.stream.Stream
 
 private val logger = KotlinLogging.logger {}
-private val REPORT_FIELDS = REPORT.fields().toList() - setOf(REPORT.VERSION_CODE, REPORT.VERSION_FLAVOR) +
-        REPORT.VERSION_KEY
 
 @Repository
 class ReportRepository(
     private val jooq: DSLContext
 ) {
     @PostAuthorize("returnObject == null || hasViewPermission(returnObject.appId)")
-    fun find(id: String): Report? = jooq.select(REPORT_FIELDS).from(REPORT).where(REPORT.ID.eq(id)).fetchValueInto()
+    fun find(id: String): Report? = jooq.selectFrom(REPORT).where(REPORT.ID.eq(id)).fetchValueInto()
 
     @PostAuthorize("returnObject == null || hasViewPermission(returnObject.appId)")
     fun findAttachmentNames(id: String) = jooq.select(ATTACHMENT.FILENAME.NOT_NULL).from(ATTACHMENT).where(ATTACHMENT.REPORT_ID.eq(id)).fetchList()
@@ -85,7 +83,7 @@ class ReportRepository(
     @PreAuthorize("isReporter()")
     fun create(report: Report, attachments: Map<String, ByteArray>) {
         jooq.insertInto(REPORT)
-            .set(ReportRecord().apply { from(report) })
+            .set(REPORT.newRecord().apply { from(report) })
             .execute()
         for ((name, content) in attachments) {
             try {
@@ -141,7 +139,8 @@ class ReportRepository(
                     REPORT.IS_SILENT,
                     REPORT.EXCEPTION_CLASS,
                     REPORT.MESSAGE,
-                    REPORT.VERSION_KEY,
+                    REPORT.VERSION_CODE,
+                    REPORT.VERSION_FLAVOR,
                     REPORT.BUG_ID,
                     if (customColumns.isNotEmpty()) {
                         DSL.row(customColumns.map { DSL.function("JSON_UNQUOTE", String::class.java, DSL.jsonValue(REPORT.CONTENT, "$.$it")) })

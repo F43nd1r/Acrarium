@@ -23,6 +23,7 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeNames
 import com.squareup.kotlinpoet.TypeSpec
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.FileTree
 import org.gradle.api.tasks.*
 import org.gradle.plugins.ide.idea.IdeaPlugin
 /**
@@ -34,7 +35,7 @@ class I18nClassGenerator extends DefaultTask {
     @PathSensitive(PathSensitivity.RELATIVE)
     @SkipWhenEmpty
     @InputDirectory
-    File inputDirectory
+    FileTree inputDirectory
     @OutputDirectory
     File outputDirectory
     @Input
@@ -52,7 +53,7 @@ class I18nClassGenerator extends DefaultTask {
     @TaskAction
     void exec() {
         Set<String> keys = new HashSet<>()
-        for (File file : project.fileTree(inputDirectory)) {
+        for (File file : inputDirectory) {
             try {
                 Properties properties = new Properties()
                 properties.load(file.newReader())

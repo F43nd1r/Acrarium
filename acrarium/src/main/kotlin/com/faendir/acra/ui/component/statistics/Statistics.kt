@@ -20,6 +20,7 @@ import com.faendir.acra.jooq.generated.tables.references.REPORT
 import com.faendir.acra.persistence.NOT_NULL
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.report.ReportRepository
+import com.faendir.acra.persistence.version.VersionKey
 import com.faendir.acra.persistence.version.VersionRepository
 import com.faendir.acra.ui.component.Card
 import com.faendir.acra.ui.component.CssGridLayout
@@ -32,6 +33,7 @@ import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.component.textfield.NumberField
 import org.jooq.Condition
+import org.jooq.impl.DSL
 
 /**
  * @author lukas
@@ -54,7 +56,13 @@ open class Statistics(appId: AppId, private val baseExpression: Condition?, repo
         val factory = Property.Factory(reportRepository, versionRepository, baseExpression, appId)
         properties.add(factory.createAgeProperty(REPORT.DATE.NOT_NULL, Messages.LAST_X_DAYS, Messages.REPORTS_OVER_TIME))
         properties.add(factory.createStringProperty(REPORT.ANDROID_VERSION.NOT_NULL, Messages.ANDROID_VERSION, Messages.REPORTS_PER_ANDROID_VERSION))
-        properties.add(factory.createVersionProperty(REPORT.VERSION_KEY, Messages.APP_VERSION, Messages.REPORTS_PER_APP_VERSION))
+        properties.add(
+            factory.createVersionProperty(
+                DSL.field(DSL.row(REPORT.VERSION_CODE, REPORT.VERSION_FLAVOR).mapping { code, flavor -> VersionKey(code!!, flavor!!) }),
+                Messages.APP_VERSION,
+                Messages.REPORTS_PER_APP_VERSION
+            )
+        )
         properties.add(factory.createStringProperty(REPORT.PHONE_MODEL.NOT_NULL, Messages.PHONE_MODEL, Messages.REPORTS_PER_PHONE_MODEL))
         properties.add(factory.createStringProperty(REPORT.BRAND.NOT_NULL, Messages.PHONE_BRAND, Messages.REPORTS_PER_BRAND))
         content.flexWrap = FlexLayout.FlexWrap.WRAP

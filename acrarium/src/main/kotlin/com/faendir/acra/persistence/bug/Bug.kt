@@ -25,6 +25,7 @@ import org.jooq.Condition
 import org.jooq.Field
 import org.jooq.impl.AbstractConverter
 import org.springframework.stereotype.Component
+import java.beans.ConstructorProperties
 import java.time.Instant
 
 @JvmInline
@@ -57,18 +58,29 @@ data class Bug(
     override val latestVersionKey: VersionKey,
     val affectedInstallations: Int,
 ) : BugVersionInfo {
-    companion object {
-        val FIELDS = listOf(
-            BUG.ID,
-            BUG.TITLE,
-            BUG.APP_ID,
-            BUG.REPORT_COUNT,
-            BUG.LATEST_REPORT,
-            BUG.SOLVED_VERSION_KEY,
-            BUG.LATEST_VERSION_KEY,
-            BUG.AFFECTED_INSTALLATIONS
-        )
-    }
+
+    @ConstructorProperties
+    constructor(
+        id: BugId,
+        title: String,
+        appId: AppId,
+        reportCount: Int,
+        latestReport: Instant?,
+        solvedVersionCode: Int?,
+        solvedVersionFlavor: String?,
+        latestVersionCode: Int,
+        latestVersionFlavor: String,
+        affectedInstallations: Int,
+    ) : this(
+        id = id,
+        title = title,
+        appId = appId,
+        reportCount = reportCount,
+        latestReport = latestReport,
+        solvedVersionKey = if (solvedVersionCode != null && solvedVersionFlavor != null) VersionKey(solvedVersionCode, solvedVersionFlavor) else null,
+        latestVersionKey = VersionKey(latestVersionCode, latestVersionFlavor),
+        affectedInstallations = affectedInstallations
+    )
 }
 
 data class BugIdentifier(
@@ -112,6 +124,27 @@ data class BugStats(
     override val solvedVersionKey: VersionKey?,
     val affectedInstallations: Int,
 ) : BugVersionInfo {
+    @ConstructorProperties
+    constructor(
+        id: BugId,
+        title: String,
+        reportCount: Int,
+        latestVersionCode: Int,
+        latestVersionFlavor: String,
+        latestReport: Instant,
+        solvedVersionCode: Int?,
+        solvedVersionFlavor: String?,
+        affectedInstallations: Int,
+    ) : this(
+        id = id,
+        title = title,
+        reportCount = reportCount,
+        latestVersionKey = VersionKey(latestVersionCode, latestVersionFlavor),
+        latestReport = latestReport,
+        solvedVersionKey = if (solvedVersionCode != null && solvedVersionFlavor != null) VersionKey(solvedVersionCode, solvedVersionFlavor) else null,
+        affectedInstallations = affectedInstallations
+    )
+
     sealed class Filter(override val condition: Condition) : FilterDefinition {
         class TITLE(contains: String) : Filter(BUG.TITLE.contains(contains))
         class LATEST_VERSION(code: Int, flavor: String) :

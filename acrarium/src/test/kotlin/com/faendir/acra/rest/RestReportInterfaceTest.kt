@@ -78,26 +78,27 @@ class RestReportInterfaceTest {
     @BeforeEach
     fun setUp() {
         every { reportService.create(any(), any(), any()) } returns Report(
-            "",
-            null,
-            JSON.json("{}"),
-            Instant.now(),
-            null,
-            null,
-            null,
-            null,
-            "",
-            false,
-            "",
-            "",
-            BugId(0),
-            AppId(0),
-            "",
-            "",
-            null,
-            null,
-            null,
-            VersionKey(0, "")
+            id = "",
+            androidVersion = null,
+            content = JSON.json("{}"),
+            date = Instant.now(),
+            phoneModel = null,
+            userComment = null,
+            userEmail = null,
+            brand = null,
+            installationId = "",
+            isSilent = false,
+            device = "",
+            marketingDevice = "",
+            bugId = BugId(0),
+            appId = AppId(0),
+            stacktrace = "",
+            exceptionClass = "",
+            message = null,
+            crashLine = null,
+            cause = null,
+            versionCode = 0,
+            versionFlavor = ""
         )
         every { requestCache.getMatchingRequest(any(), any()) } returns null
     }

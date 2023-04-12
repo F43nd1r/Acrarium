@@ -3,7 +3,13 @@ import org.jooq.meta.jaxb.EmbeddableDefinitionType
 import org.jooq.meta.jaxb.EmbeddableField
 import org.jooq.meta.jaxb.ForcedType
 import org.jooq.meta.jaxb.Property
-
+buildscript {
+    configurations["classpath"].resolutionStrategy.eachDependency {
+        if (requested.group == "org.jooq") {
+            useVersion(libs.versions.jooq.get())
+        }
+    }
+}
 plugins {
     java
     alias(libs.plugins.kotlin.jvm)
@@ -66,7 +72,7 @@ sourceSets {
 }
 
 val generateMessageClasses by tasks.creating(com.faendir.acra.gradle.I18nClassGenerator::class) {
-    inputDirectory = file("src/main/resources/i18n/com/faendir/acra")
+    inputDirectory = fileTree("src/main/resources/i18n/com/faendir/acra")
     outputDirectory = messagesOutput
     packageName = "com.faendir.acra.i18n"
     className = "Messages"
@@ -105,6 +111,7 @@ vaadin {
 
 val changelogPath = "src/main/resources/db/db.changelog-master.yml"
 jooq {
+    version.set(libs.versions.jooq.get())
     configurations {
         create("main") {
             generateSchemaSourceOnCompilation.set(true)
@@ -142,34 +149,6 @@ jooq {
                                 includeTypes = "DATETIME"
                             },
                         )
-                        embeddables = listOf(
-                            EmbeddableDefinitionType().apply {
-                                name = "VERSION_KEY"
-                                tables = "REPORT"
-                                fields = listOf(
-                                    EmbeddableField().withName("CODE").withExpression("VERSION_CODE"),
-                                    EmbeddableField().withName("FLAVOR").withExpression("VERSION_FLAVOR"),
-                                )
-                            },
-                            EmbeddableDefinitionType().apply {
-                                name = "VERSION_KEY"
-                                referencingName = "LATEST_VERSION_KEY"
-                                tables = "BUG"
-                                fields = listOf(
-                                    EmbeddableField().withName("CODE").withExpression("LATEST_VERSION_CODE"),
-                                    EmbeddableField().withName("FLAVOR").withExpression("LATEST_VERSION_FLAVOR"),
-                                )
-                            },
-                            EmbeddableDefinitionType().apply {
-                                name = "VERSION_KEY"
-                                referencingName = "SOLVED_VERSION_KEY"
-                                tables = "BUG"
-                                fields = listOf(
-                                    EmbeddableField().withName("CODE").withExpression("SOLVED_VERSION_CODE"),
-                                    EmbeddableField().withName("FLAVOR").withExpression("SOLVED_VERSION_FLAVOR"),
-                                )
-                            },
-                        )
                     }
                     target.apply {
                         packageName = "com.faendir.acra.jooq.generated"
@@ -177,6 +156,9 @@ jooq {
                     }
                     generate.apply {
                         isImmutableInterfaces = true
+                        isKotlinNotNullInterfaceAttributes = true
+
+                        isKotlinNotNullRecordAttributes = true
                     }
                 }
             }

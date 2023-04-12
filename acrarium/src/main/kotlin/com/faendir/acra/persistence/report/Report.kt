@@ -50,10 +50,10 @@ data class Report(
     override val message: String?,
     override val crashLine: String?,
     override val cause: String?,
-    override val versionKey: VersionKey,
+    override val versionCode: Int,
+    override val versionFlavor: String,
 ) : IReport {
-    override val versionCode: Int get() = versionKey.code
-    override val versionFlavor: String get() = versionKey.flavor
+    val versionKey: VersionKey = VersionKey(versionCode, versionFlavor)
 }
 
 data class ReportRow(
@@ -66,10 +66,13 @@ data class ReportRow(
     val isSilent: Boolean,
     val exceptionClass: String,
     val message: String?,
-    val versionKey: VersionKey,
+    val versionCode: Int,
+    val versionFlavor: String,
     val bugId: BugId,
     val customColumns: List<String?>,
 ) {
+    val versionKey: VersionKey = VersionKey(versionCode, versionFlavor)
+
     sealed class Filter(override val condition: Condition) : FilterDefinition {
         class BUG(id: BugId) : Filter(REPORT.BUG_ID.eq(id))
         class INSTALLATION_ID(contains: String) : Filter(REPORT.INSTALLATION_ID.contains(contains))

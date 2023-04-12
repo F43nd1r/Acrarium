@@ -972,3 +972,17 @@ databaseChangeLog:
             valueComputed: (`path`)
             constraints:
               nullable: false
+- changeSet:
+    id: 2.0.0-cascade-on-bug-delete
+    author: *F43ND1R
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: *REPORT
+        constraintName: FK_report_bug
+    - addForeignKeyConstraint:
+        baseTableName: *REPORT
+        baseColumnNames: bug_id
+        referencedTableName: *BUG
+        referencedColumnNames: *BUG_ID
+        constraintName: FK_report_bug
+        onDelete: CASCADE

@@ -95,7 +95,8 @@ class ReportService(
             message = bugIdentifier.message,
             crashLine = bugIdentifier.crashLine,
             cause = bugIdentifier.cause,
-            versionKey = VersionKey(versionCode, flavor ?: ""),
+            versionCode = versionCode,
+            versionFlavor = flavor ?: "",
         )
         reportRepository.create(report, attachments.associate { (it.originalFilename ?: it.name) to it.bytes })
         mailService?.onNewReport(report)

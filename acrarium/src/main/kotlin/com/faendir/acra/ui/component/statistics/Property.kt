@@ -15,12 +15,12 @@
  */
 package com.faendir.acra.ui.component.statistics
 
-import com.faendir.acra.jooq.generated.embeddables.records.VersionKeyRecord
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.report.ReportRepository
 import com.faendir.acra.persistence.version.VersionKey
 import com.faendir.acra.persistence.version.VersionName
 import com.faendir.acra.persistence.version.VersionRepository
+import com.faendir.acra.persistence.version.toVersionKey
 import com.faendir.acra.ui.component.CssGridLayout
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.preventWhiteSpaceBreaking
@@ -28,9 +28,7 @@ import com.vaadin.flow.component.*
 import com.vaadin.flow.component.orderedlayout.FlexComponent
 import com.vaadin.flow.component.select.Select
 import com.vaadin.flow.component.textfield.NumberField
-import org.jooq.Condition
-import org.jooq.Field
-import org.jooq.SelectField
+import org.jooq.*
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -91,8 +89,8 @@ constructor(
             return Property(appId, select, { field.eq(it) }, PieChart(chartTitleId), reportRepository, field, { it }, filterTextId)
         }
 
-        fun createVersionProperty(field: Field<VersionKeyRecord>, filterTextId: String, chartTitleId: String): Property<*, *, *, *, *> {
-            val list = reportRepository.get(appId, field, where = expression).map { (code, flavor) -> VersionKey(code!!, flavor!!) }
+        fun createVersionProperty(field: Field<VersionKey>, filterTextId: String, chartTitleId: String): Property<*, *, *, *, *> {
+            val list = reportRepository.get(appId, field, where = expression)
             val versionNames = versionRepository.getVersionNames(appId)
             val select = Select<VersionName>()
             select.setItems(versionNames)
@@ -103,7 +101,7 @@ constructor(
             return Property(
                 appId,
                 select,
-                { field.eq(VersionKeyRecord(it.code, it.flavor)) },
+                { field.eq(it.toVersionKey()) },
                 PieChart(chartTitleId),
                 reportRepository,
                 field,

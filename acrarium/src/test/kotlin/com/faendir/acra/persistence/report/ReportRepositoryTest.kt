@@ -211,7 +211,8 @@ internal class ReportRepositoryTest(
                 message = "message",
                 crashLine = "crashLine",
                 cause = "cause",
-                versionKey = version
+                versionCode = version.code,
+                versionFlavor = version.flavor,
             )
 
             reportRepository.create(report, emptyMap())
@@ -243,7 +244,8 @@ internal class ReportRepositoryTest(
                 message = null,
                 crashLine = null,
                 cause = null,
-                versionKey = version
+                versionCode = version.code,
+                versionFlavor = version.flavor,
             )
 
             reportRepository.create(report, emptyMap())
@@ -279,7 +281,8 @@ internal class ReportRepositoryTest(
                         message = null,
                         crashLine = null,
                         cause = null,
-                        versionKey = version
+                        versionCode = version.code,
+                        versionFlavor = version.flavor,
                     ), emptyMap()
                 )
             }
@@ -311,7 +314,8 @@ internal class ReportRepositoryTest(
                         message = null,
                         crashLine = null,
                         cause = null,
-                        versionKey = VersionKey(0, "")
+                        versionCode = 0,
+                        versionFlavor = "",
                     ), emptyMap()
                 )
             }
@@ -344,7 +348,8 @@ internal class ReportRepositoryTest(
                         message = null,
                         crashLine = null,
                         cause = null,
-                        versionKey = version
+                        versionCode = version.code,
+                        versionFlavor = version.flavor,
                     ), emptyMap()
                 )
             }
@@ -376,7 +381,8 @@ internal class ReportRepositoryTest(
                         message = null,
                         crashLine = null,
                         cause = null,
-                        versionKey = version
+                        versionCode = version.code,
+                        versionFlavor = version.flavor,
                     ), emptyMap()
                 )
             }
@@ -406,7 +412,8 @@ internal class ReportRepositoryTest(
                 message = null,
                 crashLine = null,
                 cause = null,
-                versionKey = version
+                versionCode = version.code,
+                versionFlavor = version.flavor,
             )
 
             reportRepository.create(report, mapOf("attachment" to byteArrayOf(0, 1, 2), "attachment2" to byteArrayOf(1, 2)))
@@ -530,7 +537,8 @@ internal class ReportRepositoryTest(
                 message = "message",
                 crashLine = "crashLine",
                 cause = "cause",
-                versionKey = version
+                versionCode = version.code,
+                versionFlavor = version.flavor,
             )
             reportRepository.create(report, emptyMap())
             val provider = reportRepository.getProvider(appId, listOf("NESTED_CUSTOM_FIELD", "CUSTOM_FIELD"))
@@ -546,7 +554,8 @@ internal class ReportRepositoryTest(
                     isSilent = true,
                     exceptionClass = "exceptionClass",
                     message = "message",
-                    versionKey = version,
+                    versionCode = version.code,
+                    versionFlavor = version.flavor,
                     bugId = bugId,
                     customColumns = listOf("{\"foo\": \"bar\"}", "customField")
                 )

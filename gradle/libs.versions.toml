@@ -7,6 +7,7 @@ vaadin-base = "24.1.1"
 kotlinPoet = "1.14.2"
 testContainers = "1.18.3"
 liquibase = "4.20.0"
+jooq = "3.18.5"
 
 [libraries]
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
@@ -35,7 +36,7 @@ testContainers-mysql = { module = "org.testcontainers:mysql", version.ref = "tes
 testContainers-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testContainers" }
 
 [plugins]
-jooq = { id = "nu.studer.jooq", version = "8.0" }
+jooq = { id = "nu.studer.jooq", version = "8.2.1" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 jgitver = { id = "fr.brouillard.oss.gradle.jgitver", version = "0.10.0-rc03" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

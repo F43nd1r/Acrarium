@@ -94,6 +94,9 @@ class TestDataBuilder(private val jooq: DSLContext, private val randomStringGene
         return VersionKey(code, flavor)
     }
 
+    /**
+     * Use with caution! The created bug is not valid without a report!
+     */
     fun createBug(app: AppId = createApp(), title: String = randomString("title")) = jooq.insertInto(BUG)
         .set(BUG.APP_ID, app)
         .set(BUG.TITLE, title)

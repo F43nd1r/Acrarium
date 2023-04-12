@@ -43,10 +43,10 @@ class BugRepository(
 
     @PostAuthorize("returnObject == null || hasViewPermission(returnObject.appId)")
     fun find(bugId: BugId): Bug? =
-        jooq.select(Bug.FIELDS).from(BUG).where(BUG.ID.eq(bugId)).fetchValueInto()
+        jooq.selectFrom(BUG).where(BUG.ID.eq(bugId)).fetchValueInto()
 
     fun findInRange(appId: AppId, range: ClosedRange<Instant>): List<Bug> =
-        jooq.select(Bug.FIELDS).from(BUG)
+        jooq.selectFrom(BUG)
             .where(
                 BUG.APP_ID.eq(appId),
                 BUG.LATEST_REPORT.greaterOrEqual(range.start),
@@ -162,9 +162,11 @@ class BugRepository(
                 BUG.ID,
                 BUG.TITLE,
                 BUG.REPORT_COUNT,
-                BUG.LATEST_VERSION_KEY,
+                BUG.LATEST_VERSION_CODE,
+                BUG.LATEST_VERSION_FLAVOR,
                 BUG.LATEST_REPORT,
-                BUG.SOLVED_VERSION_KEY,
+                BUG.SOLVED_VERSION_CODE,
+                BUG.SOLVED_VERSION_FLAVOR,
                 BUG.AFFECTED_INSTALLATIONS,
             )
                 .from(BUG)
