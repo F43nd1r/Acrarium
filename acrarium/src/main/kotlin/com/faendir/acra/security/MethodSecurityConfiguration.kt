@@ -89,9 +89,12 @@ class CustomMethodSecurityExpressionRoot(authentication: Supplier<Authentication
 
     fun isApi() = SecurityUtils.hasRole(Role.API)
 
+    @JvmName("hasViewPermission")
     fun hasViewPermission(appId: AppId) = SecurityUtils.hasPermission(appId, Permission.Level.VIEW)
 
+    @JvmName("hasEditPermission")
     fun hasEditPermission(appId: AppId) = SecurityUtils.hasPermission(appId, Permission.Level.EDIT)
 
+    @JvmName("hasAdminPermission")
     fun hasAdminPermission(appId: AppId) = SecurityUtils.hasPermission(appId, Permission.Level.ADMIN)
 }
