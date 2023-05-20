@@ -24,7 +24,9 @@ class GridColumnMenu(private val grid: LayoutPersistingFilterableGrid<*, *, *, *
         update()
         add(VerticalLayout(Translatable.createLabel(Messages.EDIT_COLUMNS).with {
             style.set("font-weight", "bold")
-        }, content))
+        }, content).apply {
+            style.set("background-color", "var(--lumo-shade-5pct)")
+        })
     }
 
     fun update() {

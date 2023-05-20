@@ -7,7 +7,10 @@ import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 
 class GridFilterMenu(private val grid: LayoutPersistingFilterableGrid<*, *, *, *>) : PopupButton(VaadinIcon.FILTER) {
-    private val content = VerticalLayout().also { add(it) }
+    private val content = VerticalLayout().also {
+        it.style.set("background-color", "var(--lumo-shade-5pct)")
+        add(it)
+    }
 
     init {
         update()
