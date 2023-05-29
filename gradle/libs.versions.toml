@@ -4,7 +4,7 @@ dokka = "1.8.10"
 springBoot = "3.1.0"
 vaadin-flow = "24.0.8"
 vaadin-base = "24.0.5"
-kotlinPoet = "1.14.0"
+kotlinPoet = "1.14.1"
 testContainers = "1.18.1"
 liquibase = "4.20.0"
 
