@@ -42,6 +42,7 @@ subprojects {
 
     apply<SpotlessPlugin>()
     extensions.getByType<SpotlessExtension>().apply {
+        ratchetFrom("origin/master")
         kotlin {
             target("src/**/*.kt")
             licenseHeader(buildLicenseHeader("/*", " * ", " */"))
