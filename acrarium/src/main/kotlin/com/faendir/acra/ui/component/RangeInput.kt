@@ -1,11 +1,11 @@
 /*
- * (C) Copyright 2018 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2020 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,12 +15,7 @@
  */
 package com.faendir.acra.ui.component
 
-import com.vaadin.flow.component.AbstractSinglePropertyField
-import com.vaadin.flow.component.Focusable
-import com.vaadin.flow.component.HasSize
-import com.vaadin.flow.component.HasStyle
-import com.vaadin.flow.component.PropertyDescriptors
-import com.vaadin.flow.component.Tag
+import com.vaadin.flow.component.*
 
 /**
  * @author lukas

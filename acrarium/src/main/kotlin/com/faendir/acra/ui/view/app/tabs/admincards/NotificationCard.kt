@@ -1,11 +1,11 @@
 /*
- * (C) Copyright 2019 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2019-2022 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,11 +23,7 @@ import com.faendir.acra.persistence.mailsettings.MailSettingsRepository
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.ui.ext.checkbox
-import com.faendir.acra.ui.ext.content
-import com.faendir.acra.ui.ext.forEach
-import com.faendir.acra.ui.ext.gridLayout
-import com.faendir.acra.ui.ext.translatableLabel
+import com.faendir.acra.ui.ext.*
 
 @View
 class NotificationCard(

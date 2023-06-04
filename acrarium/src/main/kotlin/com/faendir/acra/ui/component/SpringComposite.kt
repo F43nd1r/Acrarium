@@ -1,11 +1,11 @@
 /*
- * (C) Copyright 2019 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2019-2021 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,6 @@ import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.internal.ReflectTools
 import com.vaadin.flow.server.VaadinService
-import com.vaadin.flow.spring.annotation.SpringComponent
 import org.springframework.core.annotation.AnnotationUtils
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type

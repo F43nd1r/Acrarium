@@ -1,11 +1,11 @@
 /*
- * (C) Copyright 2019 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2017-2021 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,9 @@
 package com.faendir.acra.ui.view
 
 import com.faendir.acra.i18n.Messages
+import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.navigation.View
 import com.faendir.acra.ui.component.HasAcrariumTitle
-import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.view.main.MainView
 import com.vaadin.flow.component.html.Div
@@ -43,7 +43,7 @@ class AboutView(@Autowired val buildProperties: BuildProperties) : FlexLayout(),
         setSizeFull()
         justifyContentMode = JustifyContentMode.CENTER
         alignItems = FlexComponent.Alignment.CENTER
-        setFlexDirection(FlexDirection.COLUMN)
+        flexDirection = FlexDirection.COLUMN
         val info = Div()
         info.element.setProperty("innerHTML", getTranslation(Messages.FOOTER))
         val version = Translatable.createDiv(Messages.ABOUT_VERSION, buildProperties.version)

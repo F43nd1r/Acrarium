@@ -1,11 +1,11 @@
 /*
- * (C) Copyright 2018 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2017-2021 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,9 +18,6 @@ package com.faendir.acra.ui.component.dialog
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.HasValidation
 import com.vaadin.flow.component.HasValue
-import org.springframework.lang.NonNull
-import java.util.function.Consumer
-import java.util.function.Supplier
 
 /**
  * @author Lukas

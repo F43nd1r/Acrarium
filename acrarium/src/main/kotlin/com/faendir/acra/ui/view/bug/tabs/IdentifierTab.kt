@@ -1,11 +1,11 @@
 /*
- * (C) Copyright 2018 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2020-2022 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,13 +22,7 @@ import com.faendir.acra.persistence.bug.BugRepository
 import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.ui.component.Card
-import com.faendir.acra.ui.ext.Align
-import com.faendir.acra.ui.ext.card
-import com.faendir.acra.ui.ext.flexLayout
-import com.faendir.acra.ui.ext.forEach
-import com.faendir.acra.ui.ext.setAlignSelf
-import com.faendir.acra.ui.ext.translatableButton
-import com.faendir.acra.ui.ext.translatableLabel
+import com.faendir.acra.ui.ext.*
 import com.faendir.acra.ui.view.bug.BugView
 import com.vaadin.flow.component.Text
 import com.vaadin.flow.component.button.Button

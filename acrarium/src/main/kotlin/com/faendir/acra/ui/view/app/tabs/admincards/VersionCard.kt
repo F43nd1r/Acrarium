@@ -1,11 +1,11 @@
 /*
- * (C) Copyright 2019 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2020-2022 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,12 +29,7 @@ import com.faendir.acra.ui.component.dialog.confirmButtons
 import com.faendir.acra.ui.component.dialog.showFluentDialog
 import com.faendir.acra.ui.component.grid.column
 import com.faendir.acra.ui.component.grid.renderer.ButtonRenderer
-import com.faendir.acra.ui.ext.SizeUnit
-import com.faendir.acra.ui.ext.basicLayoutPersistingFilterableGrid
-import com.faendir.acra.ui.ext.content
-import com.faendir.acra.ui.ext.setHeight
-import com.faendir.acra.ui.ext.setMinHeight
-import com.faendir.acra.ui.ext.translatableText
+import com.faendir.acra.ui.ext.*
 import com.vaadin.flow.component.icon.Icon
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.data.renderer.IconRenderer

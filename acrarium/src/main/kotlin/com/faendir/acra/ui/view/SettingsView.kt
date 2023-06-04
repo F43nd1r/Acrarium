@@ -1,11 +1,11 @@
 /*
- * (C) Copyright 2019 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2022 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,12 +20,7 @@ import com.faendir.acra.i18n.TranslatableText
 import com.faendir.acra.navigation.View
 import com.faendir.acra.settings.LocalSettings
 import com.faendir.acra.ui.component.HasAcrariumTitle
-import com.faendir.acra.ui.ext.Align
-import com.faendir.acra.ui.ext.content
-import com.faendir.acra.ui.ext.formLayout
-import com.faendir.acra.ui.ext.setAlignSelf
-import com.faendir.acra.ui.ext.translatableCheckbox
-import com.faendir.acra.ui.ext.translatableSelect
+import com.faendir.acra.ui.ext.*
 import com.faendir.acra.ui.view.main.MainView
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep

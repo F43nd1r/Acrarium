@@ -1,11 +1,11 @@
 /*
- * (C) Copyright 2019 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2022 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,12 +15,7 @@
  */
 package com.faendir.acra.ui.component
 
-import com.faendir.acra.ui.ext.SizeUnit
-import com.faendir.acra.ui.ext.content
-import com.faendir.acra.ui.ext.setFlexGrow
-import com.faendir.acra.ui.ext.setMaxHeight
-import com.faendir.acra.ui.ext.setMaxWidth
-import com.faendir.acra.ui.ext.setWidth
+import com.faendir.acra.ui.ext.*
 import com.vaadin.flow.component.Composite
 
 abstract class AdminCard : Composite<Card>() {

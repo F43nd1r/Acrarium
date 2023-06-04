@@ -1,11 +1,11 @@
 /*
- * (C) Copyright 2018 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2022 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,26 +15,13 @@
  */
 package com.faendir.acra.ui.component
 
+import com.vaadin.flow.component.*
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent
-import com.vaadin.flow.component.ClickEvent
-import com.vaadin.flow.component.Component
-import com.vaadin.flow.component.ComponentEvent
-import com.vaadin.flow.component.Composite
-import com.vaadin.flow.component.HasSize
-import com.vaadin.flow.component.HasStyle
-import com.vaadin.flow.component.HasText
-import com.vaadin.flow.component.HasValidation
-import com.vaadin.flow.component.HasValue
-import com.vaadin.flow.component.Text
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.combobox.ComboBox
-import com.vaadin.flow.component.html.Div
-import com.vaadin.flow.component.html.H3
-import com.vaadin.flow.component.html.Image
-import com.vaadin.flow.component.html.Label
-import com.vaadin.flow.component.html.Paragraph
+import com.vaadin.flow.component.html.*
 import com.vaadin.flow.component.select.Select
 import com.vaadin.flow.component.textfield.NumberField
 import com.vaadin.flow.component.textfield.PasswordField

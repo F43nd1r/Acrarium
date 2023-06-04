@@ -1,959 +1,974 @@
+#
+# (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 variables:
   author:
-  - &F43ND1R f43nd1r
+    - &F43ND1R f43nd1r
   types:
-  - &STRING VARCHAR(255)
-  - &STRING_CS VARCHAR(255) BINARY
-  - &INT INT
-  - &BOOLEAN BOOLEAN
-  - &TEXT LONGTEXT
-  - &DATETIME DATETIME
-  - &BLOB LONGBLOB
-  - &JSON JSON
+    - &STRING VARCHAR(255)
+    - &STRING_CS VARCHAR(255) BINARY
+    - &INT INT
+    - &BOOLEAN BOOLEAN
+    - &TEXT LONGTEXT
+    - &DATETIME DATETIME
+    - &BLOB LONGBLOB
+    - &JSON JSON
 databaseChangeLog:
-- changeSet:
-    id: 1.0.0-create-user
-    author: *F43ND1R
-    logicalFilePath: com/faendir/acra/liquibase/changelog/v1_0_0/user.changelog.kts
-    changes:
-    - createTable:
-        tableName: &USER user
-        columns:
-        - column:
-            name: &USER_USERNAME username
-            type: *STRING
-            constraints:
-              nullable: false
-              primaryKey: true
-              primaryKeyName: PK_user
-        - column:
-            name: password
-            type: *STRING
-            constraints:
-              nullable: false
-        - column:
-            name: mail
-            type: *STRING
-            constraints:
-              nullable: true
+  - changeSet:
+      id: 1.0.0-create-user
+      author: *F43ND1R
+      logicalFilePath: com/faendir/acra/liquibase/changelog/v1_0_0/user.changelog.kts
+      changes:
+        - createTable:
+            tableName: &USER user
+            columns:
+              - column:
+                  name: &USER_USERNAME username
+                  type: *STRING
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: PK_user
+              - column:
+                  name: password
+                  type: *STRING
+                  constraints:
+                    nullable: false
+              - column:
+                  name: mail
+                  type: *STRING
+                  constraints:
+                    nullable: true
 - changeSet:
     id: 1.0.0-create-roles
     author: *F43ND1R
     logicalFilePath: com/faendir/acra/liquibase/changelog/v1_0_0/roles.changelog.kts
     changes:
-    - createTable:
-        tableName: &ROLE user_roles
-        columns:
-        - column:
-            name: user_username
-            type: *STRING
-            constraints:
-              nullable: false
-              referencedTableName: *USER
-              referencedColumnNames: *USER_USERNAME
-              deleteCascade: true
-              foreignKeyName: FK_roles_username
-        - column:
-            name: roles
-            type: *STRING
-            constraints:
-              nullable: false
+      - createTable:
+          tableName: &ROLE user_roles
+          columns:
+            - column:
+                name: user_username
+                type: *STRING
+                constraints:
+                  nullable: false
+                  referencedTableName: *USER
+                  referencedColumnNames: *USER_USERNAME
+                  deleteCascade: true
+                  foreignKeyName: FK_roles_username
+            - column:
+                name: roles
+                type: *STRING
+                constraints:
+                  nullable: false
 - changeSet:
     id: 1.0.0-create-app
     author: *F43ND1R
     logicalFilePath: com/faendir/acra/liquibase/changelog/v1_0_0/app.changelog.kts
     changes:
-    - createTable:
-        tableName: &APP app
-        columns:
-        - column:
-            name: &APP_ID id
-            type: *INT
-            autoIncrement: true
-            constraints:
-              nullable: false
-              primaryKey: true
-              primaryKeyName: PK_app
-        - column:
-            name: name
-            type: *STRING
-            constraints:
-              nullable: false
-        - column:
-            name: reporter_username
-            type: *STRING
-            constraints:
-              nullable: false
-              unique: true
-              uniqueConstraintName: UK_app_reporter
-              referencedTableName: *USER
-              referencedColumnNames: *USER_USERNAME
-              deleteCascade: true
-              foreignKeyName: FK_app_reporter
-        - column:
-            name: min_score
-            type: *INT
-            defaultValueNumeric: 95
-            constraints:
-              nullable: false
+      - createTable:
+          tableName: &APP app
+          columns:
+            - column:
+                name: &APP_ID id
+                type: *INT
+                autoIncrement: true
+                constraints:
+                  nullable: false
+                  primaryKey: true
+                  primaryKeyName: PK_app
+            - column:
+                name: name
+                type: *STRING
+                constraints:
+                  nullable: false
+            - column:
+                name: reporter_username
+                type: *STRING
+                constraints:
+                  nullable: false
+                  unique: true
+                  uniqueConstraintName: UK_app_reporter
+                  referencedTableName: *USER
+                  referencedColumnNames: *USER_USERNAME
+                  deleteCascade: true
+                  foreignKeyName: FK_app_reporter
+            - column:
+                name: min_score
+                type: *INT
+                defaultValueNumeric: 95
+                constraints:
+                  nullable: false
 - changeSet:
     id: 1.0.0-create-permissions
     author: *F43ND1R
     logicalFilePath: com/faendir/acra/liquibase/changelog/v1_0_0/permissions.changelog.kts
     changes:
-    - createTable:
-        tableName: &PERMISSIONS user_permissions
-        columns:
-        - column:
-            name: user_username
-            type: *STRING
-            constraints:
-              nullable: false
-              referencedTableName: *USER
-              referencedColumnNames: *USER_USERNAME
-              deleteCascade: true
-              foreignKeyName: FK_permissions_username
-        - column:
-            name: app_id
-            type: *INT
-            constraints:
-              nullable: false
-              referencedTableName: *APP
-              referencedColumnNames: *APP_ID
-              deleteCascade: true
-              foreignKeyName: FK_permissions_app
-        - column:
-            name: &PERMISSIONS_LEVEL level
-            type: *INT
-            constraints:
-              nullable: false
-    - addPrimaryKey:
-        tableName: *PERMISSIONS
-        columnNames: user_username, app_id
-        constraintName: PK_user_permissions
+      - createTable:
+          tableName: &PERMISSIONS user_permissions
+          columns:
+            - column:
+                name: user_username
+                type: *STRING
+                constraints:
+                  nullable: false
+                  referencedTableName: *USER
+                  referencedColumnNames: *USER_USERNAME
+                  deleteCascade: true
+                  foreignKeyName: FK_permissions_username
+            - column:
+                name: app_id
+                type: *INT
+                constraints:
+                  nullable: false
+                  referencedTableName: *APP
+                  referencedColumnNames: *APP_ID
+                  deleteCascade: true
+                  foreignKeyName: FK_permissions_app
+            - column:
+                name: &PERMISSIONS_LEVEL level
+                type: *INT
+                constraints:
+                  nullable: false
+      - addPrimaryKey:
+          tableName: *PERMISSIONS
+          columnNames: user_username, app_id
+          constraintName: PK_user_permissions
 - changeSet:
     id: 1.0.0-create-mail
     author: *F43ND1R
     logicalFilePath: com/faendir/acra/liquibase/changelog/v1_0_0/mail.changelog.kts
     changes:
-    - createTable:
-        tableName: &MAIL_SETTINGS mail_settings
-        columns:
-        - column:
-            name: app_id
-            type: *INT
-            constraints:
-              nullable: false
-              referencedTableName: *APP
-              referencedColumnNames: *APP_ID
-              deleteCascade: true
-              foreignKeyName: FK_mail_app
-        - column:
-            name: username
-            type: *STRING
-            constraints:
-              nullable: false
-              referencedTableName: *USER
-              referencedColumnNames: *USER_USERNAME
-              deleteCascade: true
-              foreignKeyName: FK_mail_username
-        - column:
-            name: new_bug
-            type: *BOOLEAN
-            constraints:
-              nullable: false
-        - column:
-            name: regression
-            type: *BOOLEAN
-            constraints:
-              nullable: false
-        - column:
-            name: spike
-            type: *BOOLEAN
-            constraints:
-              nullable: false
-        - column:
-            name: summary
-            type: *BOOLEAN
-            constraints:
-              nullable: false
-    - addPrimaryKey:
-        tableName: *MAIL_SETTINGS
-        columnNames: app_id, username
-        constraintName: PK_mail
+      - createTable:
+          tableName: &MAIL_SETTINGS mail_settings
+          columns:
+            - column:
+                name: app_id
+                type: *INT
+                constraints:
+                  nullable: false
+                  referencedTableName: *APP
+                  referencedColumnNames: *APP_ID
+                  deleteCascade: true
+                  foreignKeyName: FK_mail_app
+            - column:
+                name: username
+                type: *STRING
+                constraints:
+                  nullable: false
+                  referencedTableName: *USER
+                  referencedColumnNames: *USER_USERNAME
+                  deleteCascade: true
+                  foreignKeyName: FK_mail_username
+            - column:
+                name: new_bug
+                type: *BOOLEAN
+                constraints:
+                  nullable: false
+            - column:
+                name: regression
+                type: *BOOLEAN
+                constraints:
+                  nullable: false
+            - column:
+                name: spike
+                type: *BOOLEAN
+                constraints:
+                  nullable: false
+            - column:
+                name: summary
+                type: *BOOLEAN
+                constraints:
+                  nullable: false
+      - addPrimaryKey:
+          tableName: *MAIL_SETTINGS
+          columnNames: app_id, username
+          constraintName: PK_mail
 - changeSet:
     id: 1.0.0-create-version
     author: *F43ND1R
     logicalFilePath: com/faendir/acra/liquibase/changelog/v1_0_0/version.changelog.kts
     changes:
-    - createTable:
-        tableName: &VERSION version
-        columns:
-        - column:
-            name: &VERSION_ID id
-            type: *INT
-            autoIncrement: true
-            constraints:
-              nullable: false
-              primaryKey: true
-              primaryKeyName: PK_version
-        - column:
-            name: &VERSION_CODE code
-            type: *INT
-            constraints:
-              nullable: false
-        - column:
-            name: name
-            type: *STRING
-            constraints:
-              nullable: false
-        - column:
-            name: &VERSION_APP app_id
-            type: *INT
-            constraints:
-              nullable: false
-              referencedTableName: *APP
-              referencedColumnNames: *APP_ID
-              deleteCascade: true
-              foreignKeyName: FK_version_app
-        - column:
-            name: mappings
-            type: *TEXT
-            constraints:
-              nullable: true
-    - addUniqueConstraint:
-        tableName: *VERSION
-        columnNames: code, app_id
-        constraintName: UK_version
+      - createTable:
+          tableName: &VERSION version
+          columns:
+            - column:
+                name: &VERSION_ID id
+                type: *INT
+                autoIncrement: true
+                constraints:
+                  nullable: false
+                  primaryKey: true
+                  primaryKeyName: PK_version
+            - column:
+                name: &VERSION_CODE code
+                type: *INT
+                constraints:
+                  nullable: false
+            - column:
+                name: name
+                type: *STRING
+                constraints:
+                  nullable: false
+            - column:
+                name: &VERSION_APP app_id
+                type: *INT
+                constraints:
+                  nullable: false
+                  referencedTableName: *APP
+                  referencedColumnNames: *APP_ID
+                  deleteCascade: true
+                  foreignKeyName: FK_version_app
+            - column:
+                name: mappings
+                type: *TEXT
+                constraints:
+                  nullable: true
+      - addUniqueConstraint:
+          tableName: *VERSION
+          columnNames: code, app_id
+          constraintName: UK_version
 - changeSet:
     id: 1.0.0-create-bug
     author: *F43ND1R
     logicalFilePath: com/faendir/acra/liquibase/changelog/v1_0_0/bug.changelog.kts
     changes:
-    - createTable:
-        tableName: &BUG bug
-        columns:
-        - column:
-            name: &BUG_ID id
-            type: *INT
-            autoIncrement: true
-            constraints:
-              nullable: false
-              primaryKey: true
-              primaryKeyName: PK_bug
-        - column:
-            name: title
-            type: *TEXT
-            constraints:
-              nullable: false
-        - column:
-            name: app_id
-            type: *INT
-            constraints:
-              nullable: false
-              referencedTableName: *APP
-              referencedColumnNames: *APP_ID
-              deleteCascade: true
-              foreignKeyName: FK_bug_app
-        - column:
-            name: &BUG_SOLVED_VERSION solved_version
-            type: *INT
-            constraints:
-              nullable: true
-              referencedTableName: *VERSION
-              referencedColumnNames: *VERSION_ID
-              foreignKeyName: FK_bug_solved_version
+      - createTable:
+          tableName: &BUG bug
+          columns:
+            - column:
+                name: &BUG_ID id
+                type: *INT
+                autoIncrement: true
+                constraints:
+                  nullable: false
+                  primaryKey: true
+                  primaryKeyName: PK_bug
+            - column:
+                name: title
+                type: *TEXT
+                constraints:
+                  nullable: false
+            - column:
+                name: app_id
+                type: *INT
+                constraints:
+                  nullable: false
+                  referencedTableName: *APP
+                  referencedColumnNames: *APP_ID
+                  deleteCascade: true
+                  foreignKeyName: FK_bug_app
+            - column:
+                name: &BUG_SOLVED_VERSION solved_version
+                type: *INT
+                constraints:
+                  nullable: true
+                  referencedTableName: *VERSION
+                  referencedColumnNames: *VERSION_ID
+                  foreignKeyName: FK_bug_solved_version
 - changeSet:
     id: 1.0.0-create-stacktrace
     author: *F43ND1R
     logicalFilePath: com/faendir/acra/liquibase/changelog/v1_0_0/stacktrace.changelog.kts
     changes:
-    - createTable:
-        tableName: &STACKTRACE stacktrace
-        columns:
-        - column:
-            name: &STACKTRACE_ID id
-            type: *INT
-            autoIncrement: true
-            constraints:
-              nullable: false
-              primaryKey: true
-              primaryKeyName: PK_stacktrace
-        - column:
-            name: bug_id
-            type: *INT
-            constraints:
-              nullable: false
-              referencedTableName: *BUG
-              referencedColumnNames: *BUG_ID
-              deleteCascade: true
-              foreignKeyName: FK_stacktrace_bug
-        - column:
-            name: stacktrace
-            type: *TEXT
-            constraints:
-              nullable: false
-        - column:
-            name: version_id
-            type: *INT
-            constraints:
-              nullable: false
-              referencedTableName: *VERSION
-              referencedColumnNames: *VERSION_ID
-              deleteCascade: true
-              foreignKeyName: FK_stacktrace_version
+      - createTable:
+          tableName: &STACKTRACE stacktrace
+          columns:
+            - column:
+                name: &STACKTRACE_ID id
+                type: *INT
+                autoIncrement: true
+                constraints:
+                  nullable: false
+                  primaryKey: true
+                  primaryKeyName: PK_stacktrace
+            - column:
+                name: bug_id
+                type: *INT
+                constraints:
+                  nullable: false
+                  referencedTableName: *BUG
+                  referencedColumnNames: *BUG_ID
+                  deleteCascade: true
+                  foreignKeyName: FK_stacktrace_bug
+            - column:
+                name: stacktrace
+                type: *TEXT
+                constraints:
+                  nullable: false
+            - column:
+                name: version_id
+                type: *INT
+                constraints:
+                  nullable: false
+                  referencedTableName: *VERSION
+                  referencedColumnNames: *VERSION_ID
+                  deleteCascade: true
+                  foreignKeyName: FK_stacktrace_version
 - changeSet:
     id: 1.0.0-create-stacktrace-match
     author: *F43ND1R
     logicalFilePath: com/faendir/acra/liquibase/changelog/v1_0_0/stacktrace_match.changelog.kts
     changes:
-    - createTable:
-        tableName: &STACKTRACE_MATCH stacktrace_match
-        columns:
-        - column:
-            name: left_id
-            type: *INT
-            constraints:
-              nullable: false
-              referencedTableName: *STACKTRACE
-              referencedColumnNames: *STACKTRACE_ID
-              deleteCascade: true
-              foreignKeyName: FK_match_left_stacktrace
-        - column:
-            name: right_id
-            type: *INT
-            constraints:
-              nullable: false
-              referencedTableName: *STACKTRACE
-              referencedColumnNames: *STACKTRACE_ID
-              deleteCascade: true
-              foreignKeyName: FK_match_tight_stacktrace # typo must be kept
-        - column:
-            name: score
-            type: *INT
-            constraints:
-              nullable: false
-    - addUniqueConstraint:
-        tableName: *STACKTRACE_MATCH
-        columnNames: left_id, right_id
-        constraintName: UK_match
+      - createTable:
+          tableName: &STACKTRACE_MATCH stacktrace_match
+          columns:
+            - column:
+                name: left_id
+                type: *INT
+                constraints:
+                  nullable: false
+                  referencedTableName: *STACKTRACE
+                  referencedColumnNames: *STACKTRACE_ID
+                  deleteCascade: true
+                  foreignKeyName: FK_match_left_stacktrace
+            - column:
+                name: right_id
+                type: *INT
+                constraints:
+                  nullable: false
+                  referencedTableName: *STACKTRACE
+                  referencedColumnNames: *STACKTRACE_ID
+                  deleteCascade: true
+                  foreignKeyName: FK_match_tight_stacktrace # typo must be kept
+            - column:
+                name: score
+                type: *INT
+                constraints:
+                  nullable: false
+      - addUniqueConstraint:
+          tableName: *STACKTRACE_MATCH
+          columnNames: left_id, right_id
+          constraintName: UK_match
 - changeSet:
     id: 1.0.0-create-report
     author: *F43ND1R
     logicalFilePath: com/faendir/acra/liquibase/changelog/v1_0_0/report.changelog.kts
     changes:
-    - createTable:
-        tableName: &REPORT report
-        columns:
-        - column:
-            name: &REPORT_ID id
-            type: *STRING
-            constraints:
-              nullable: false
-              primaryKey: true
-              primaryKeyName: PK_report
-        - column:
-            name: android_version
-            type: *STRING
-            constraints:
-              nullable: true
-        - column:
-            name: &REPORT_CONTENT content
-            type: *TEXT
-            constraints:
-              nullable: false
-        - column:
-            name: &REPORT_DATE date
-            type: *DATETIME
-            constraints:
-              nullable: false
-        - column:
-            name: phone_model
-            type: *STRING
-            constraints:
-              nullable: true
-        - column:
-            name: user_comment
-            type: *TEXT
-            constraints:
-              nullable: true
-        - column:
-            name: user_email
-            type: *STRING
-            constraints:
-              nullable: true
-        - column:
-            name: brand
-            type: *STRING
-            constraints:
-              nullable: true
-        - column:
-            name: installation_id
-            type: *STRING
-            constraints:
-              nullable: false
-        - column:
-            name: stacktrace_id
-            type: *INT
-            constraints:
-              nullable: false
-              referencedTableName: *STACKTRACE
-              referencedColumnNames: *STACKTRACE_ID
-              deleteCascade: true
-              foreignKeyName: FK_report_stacktrace
+      - createTable:
+          tableName: &REPORT report
+          columns:
+            - column:
+                name: &REPORT_ID id
+                type: *STRING
+                constraints:
+                  nullable: false
+                  primaryKey: true
+                  primaryKeyName: PK_report
+            - column:
+                name: android_version
+                type: *STRING
+                constraints:
+                  nullable: true
+            - column:
+                name: &REPORT_CONTENT content
+                type: *TEXT
+                constraints:
+                  nullable: false
+            - column:
+                name: &REPORT_DATE date
+                type: *DATETIME
+                constraints:
+                  nullable: false
+            - column:
+                name: phone_model
+                type: *STRING
+                constraints:
+                  nullable: true
+            - column:
+                name: user_comment
+                type: *TEXT
+                constraints:
+                  nullable: true
+            - column:
+                name: user_email
+                type: *STRING
+                constraints:
+                  nullable: true
+            - column:
+                name: brand
+                type: *STRING
+                constraints:
+                  nullable: true
+            - column:
+                name: installation_id
+                type: *STRING
+                constraints:
+                  nullable: false
+            - column:
+                name: stacktrace_id
+                type: *INT
+                constraints:
+                  nullable: false
+                  referencedTableName: *STACKTRACE
+                  referencedColumnNames: *STACKTRACE_ID
+                  deleteCascade: true
+                  foreignKeyName: FK_report_stacktrace
 - changeSet:
     id: 1.0.0-create-attachment
     author: *F43ND1R
     logicalFilePath: com/faendir/acra/liquibase/changelog/v1_0_0/attachment.changelog.kts
     changes:
-    - createTable:
-        tableName: &ATTACHMENT attachment
-        columns:
-        - column:
-            name: filename
-            type: *STRING
-            constraints:
-              nullable: false
-        - column:
-            name: report_id
-            type: *STRING
-            constraints:
-              nullable: false
-              referencedTableName: *REPORT
-              referencedColumnNames: *REPORT_ID
-              deleteCascade: true
-              foreignKeyName: FK_attachment_report
-        - column:
-            name: content
-            type: *BLOB
-            constraints:
-              nullable: false
-    - addPrimaryKey:
-        tableName: *ATTACHMENT
-        columnNames: filename, report_id
-        constraintName: PK_attachment
+      - createTable:
+          tableName: &ATTACHMENT attachment
+          columns:
+            - column:
+                name: filename
+                type: *STRING
+                constraints:
+                  nullable: false
+            - column:
+                name: report_id
+                type: *STRING
+                constraints:
+                  nullable: false
+                  referencedTableName: *REPORT
+                  referencedColumnNames: *REPORT_ID
+                  deleteCascade: true
+                  foreignKeyName: FK_attachment_report
+            - column:
+                name: content
+                type: *BLOB
+                constraints:
+                  nullable: false
+      - addPrimaryKey:
+          tableName: *ATTACHMENT
+          columnNames: filename, report_id
+          constraintName: PK_attachment
 - changeSet:
     id: 1.3.0-report-set-json-type
     author: *F43ND1R
     logicalFilePath: com/faendir/acra/liquibase/changelog/v1_3_0/main.changelog.kts
     changes:
-    - modifyDataType:
-        tableName: *REPORT
-        columnName: *REPORT_CONTENT
-        newDataType: *JSON
+      - modifyDataType:
+          tableName: *REPORT
+          columnName: *REPORT_CONTENT
+          newDataType: *JSON
 - changeSet:
     id: 1.3.0-extract-stacktrace-class
     author: *F43ND1R
     logicalFilePath: com/faendir/acra/liquibase/changelog/v1_3_0/main.changelog.kts
     changes:
-    - addColumn:
-        tableName: *STACKTRACE
-        columns:
-        - column:
-            name: class
-            type: *STRING
-            valueComputed: SUBSTRING_INDEX(`stacktrace`,':',1)
-            constraints:
-              nullable: false
+      - addColumn:
+          tableName: *STACKTRACE
+          columns:
+            - column:
+                name: class
+                type: *STRING
+                valueComputed: SUBSTRING_INDEX(`stacktrace`,':',1)
+                constraints:
+                  nullable: false
 - changeSet:
     id: 1.3.0-add-silent
     author: *F43ND1R
     logicalFilePath: com/faendir/acra/liquibase/changelog/v1_3_0/main.changelog.kts
     changes:
-    - addColumn:
-        tableName: *REPORT
-        columns:
-        - column:
-            name: is_silent
-            type: *BOOLEAN
-            valueComputed: JSON_EXTRACT(`content`, '$.IS_SILENT') = true
-            constraints:
-              nullable: false
+      - addColumn:
+          tableName: *REPORT
+          columns:
+            - column:
+                name: is_silent
+                type: *BOOLEAN
+                valueComputed: JSON_EXTRACT(`content`, '$.IS_SILENT') = true
+                constraints:
+                  nullable: false
 - changeSet:
     id: 1.3.0-add-device-marketing-name-table
     author: *F43ND1R
     logicalFilePath: com/faendir/acra/liquibase/changelog/v1_3_0/main.changelog.kts
     changes:
-    - createTable:
-        tableName: device
-        columns:
-        - column:
-            name: device
-            type: *STRING_CS
-            constraints:
-              nullable: false
-              primaryKey: true
-              primaryKeyName: PK_device
-        - column:
-            name: model
-            type: *STRING_CS
-            constraints:
-              nullable: false
-              primaryKey: true
-              primaryKeyName: PK_device
-        - column:
-            name: marketing_name
-            type: *STRING
-            constraints:
-              nullable: false
-    - addColumn:
-        tableName: *REPORT
-        columns:
-        - column:
-            name: device
-            type: *STRING
-            valueComputed: IFNULL(JSON_UNQUOTE(JSON_EXTRACT(`content`,'$.BUILD.DEVICE')), '')
-            constraints:
-              nullable: false
+      - createTable:
+          tableName: device
+          columns:
+            - column:
+                name: device
+                type: *STRING_CS
+                constraints:
+                  nullable: false
+                  primaryKey: true
+                  primaryKeyName: PK_device
+            - column:
+                name: model
+                type: *STRING_CS
+                constraints:
+                  nullable: false
+                  primaryKey: true
+                  primaryKeyName: PK_device
+            - column:
+                name: marketing_name
+                type: *STRING
+                constraints:
+                  nullable: false
+      - addColumn:
+          tableName: *REPORT
+          columns:
+            - column:
+                name: device
+                type: *STRING
+                valueComputed: IFNULL(JSON_UNQUOTE(JSON_EXTRACT(`content`,'$.BUILD.DEVICE')), '')
+                constraints:
+                  nullable: false
 - changeSet:
     id: 1.3.0-add-custom-report-columns-table
     author: *F43ND1R
     logicalFilePath: com/faendir/acra/liquibase/changelog/v1_3_0/main.changelog.kts
     changes:
-    - createTable:
-        tableName: &APP_CUSTOM_COLUMNS app_report_columns
-        columns:
-        - column:
-            name: app_id
-            type: *INT
-            constraints:
-              nullable: false
-              primaryKey: true
-              primaryKeyName: PK_app_report_columns
-              referencedTableName: *APP
-              referencedColumnNames: *APP_ID
-              deleteCascade: true
-              foreignKeyName: FK_report_columns_app
-        - column:
-            name: path
-            type: *STRING
-            constraints:
-              nullable: false
-              primaryKey: true
-              primaryKeyName: PK_app_report_columns
+      - createTable:
+          tableName: &APP_CUSTOM_COLUMNS app_report_columns
+          columns:
+            - column:
+                name: app_id
+                type: *INT
+                constraints:
+                  nullable: false
+                  primaryKey: true
+                  primaryKeyName: PK_app_report_columns
+                  referencedTableName: *APP
+                  referencedColumnNames: *APP_ID
+                  deleteCascade: true
+                  foreignKeyName: FK_report_columns_app
+            - column:
+                name: path
+                type: *STRING
+                constraints:
+                  nullable: false
+                  primaryKey: true
+                  primaryKeyName: PK_app_report_columns
 - changeSet:
     id: 1.4.0-drop-stacktrace-match
     author: *F43ND1R
     logicalFilePath: com/faendir/acra/liquibase/changelog/v1_4_0/main.changelog.kts
     changes:
-    - dropTable:
-        tableName: *STACKTRACE_MATCH
+      - dropTable:
+          tableName: *STACKTRACE_MATCH
 - changeSet:
     id: 1.8.0-bug-solved-version-on-delete-set-null
     author: *F43ND1R
     logicalFilePath: com/faendir/acra/liquibase/changelog/v1_8_0/main.changelog.kts
     changes:
-    - dropForeignKeyConstraint:
-        baseTableName: *BUG
-        constraintName: FK_bug_solved_version
-    - addForeignKeyConstraint:
-        baseTableName: *BUG
-        baseColumnNames: *BUG_SOLVED_VERSION
-        referencedTableName: *VERSION
-        referencedColumnNames: *VERSION_ID
-        constraintName: FK_bug_solved_version2
-        onDelete: SET NULL
+      - dropForeignKeyConstraint:
+          baseTableName: *BUG
+          constraintName: FK_bug_solved_version
+      - addForeignKeyConstraint:
+          baseTableName: *BUG
+          baseColumnNames: *BUG_SOLVED_VERSION
+          referencedTableName: *VERSION
+          referencedColumnNames: *VERSION_ID
+          constraintName: FK_bug_solved_version2
+          onDelete: SET NULL
 - changeSet:
     id: 1.9.0-report-indexes
     author: *F43ND1R
     logicalFilePath: com/faendir/acra/liquibase/changelog/v1_9_0/main.changelog.kts
     changes:
-    - createIndex:
-        tableName: *REPORT
-        indexName: IDX_report_date
-        columns:
-        - column:
-            name: date
-    - createIndex:
-        tableName: *REPORT
-        indexName: IDX_report_installation_id
-        columns:
-        - column:
-            name: installation_id
-    - createIndex:
-        tableName: *REPORT
-        indexName: IDX_report_android_version
-        columns:
-        - column:
-            name: android_version
-    - createIndex:
-        tableName: *REPORT
-        indexName: IDX_report_is_silent
-        columns:
-        - column:
-            name: is_silent
+      - createIndex:
+          tableName: *REPORT
+          indexName: IDX_report_date
+          columns:
+            - column:
+                name: date
+      - createIndex:
+          tableName: *REPORT
+          indexName: IDX_report_installation_id
+          columns:
+            - column:
+                name: installation_id
+      - createIndex:
+          tableName: *REPORT
+          indexName: IDX_report_android_version
+          columns:
+            - column:
+                name: android_version
+      - createIndex:
+          tableName: *REPORT
+          indexName: IDX_report_is_silent
+          columns:
+            - column:
+                name: is_silent
 - changeSet:
     id: 2.0.0-add-version-flavor
     author: *F43ND1R
     changes:
-    - addColumn:
-        tableName: *VERSION
-        columns:
-        - column:
-            name: flavor
-            type: *STRING
-            value: ''
-            constraints:
-              nullable: true
+      - addColumn:
+          tableName: *VERSION
+          columns:
+            - column:
+                name: flavor
+                type: *STRING
+                value: ''
+                constraints:
+                  nullable: true
 - changeSet:
     id: 2.0.0-expand-report-table
     author: *F43ND1R
     changes:
-    - addColumn:
-        tableName: *REPORT
-        columns:
-        - column:
-            name: marketing_device
-            type: *STRING
-            valueComputed: IFNULL((SELECT d.`marketing_name` FROM `device` d WHERE d.`model` = `phone_model` AND d.`device` = `device`), `device`)
-            constraints:
-              nullable: false
-        - column:
-            name: bug_id
-            type: *INT
-            valueComputed: (SELECT s.`bug_id` FROM `stacktrace` s WHERE s.`id` = `stacktrace_id`)
-            constraints:
-              nullable: false
-              referencedTableName: *BUG
-              referencedColumnNames: *BUG_ID
-              foreignKeyName: FK_report_bug
-        - column:
-            name: app_id
-            type: *INT
-            valueComputed: (SELECT b.`app_id` FROM `bug` b WHERE b.`id` = `bug_id`)
-            constraints:
-              nullable: false
-              referencedTableName: *APP
-              referencedColumnNames: *APP_ID
-              foreignKeyName: FK_report_app
-        - column:
-            name: version_code
-            type: *INT
-            valueComputed: (SELECT v.`code` FROM `stacktrace` s JOIN `version` v ON s.`version_id` = v.`id` WHERE s.`id` = `stacktrace_id`)
-            constraints:
-              nullable: false
-        - column:
-            name: version_flavor
-            type: *STRING
-            value: ''
-            constraints:
-              nullable: false
-        - column:
-            name: stacktrace
-            type: *TEXT
-            valueComputed: IFNULL(JSON_UNQUOTE(JSON_EXTRACT(`content`,'$.STACK_TRACE')), '')
-            constraints:
-              nullable: false
-        - column:
-            name: exception_class
-            type: *STRING
-            valueComputed: SUBSTRING_INDEX(`stacktrace`,':',1)
-            constraints:
-              nullable: false
-        - column:
-            name: message
-            type: *TEXT
-            valueComputed: SUBSTRING(`stacktrace`, POSITION(':' IN `stacktrace`) + 1, POSITION('\n' IN `stacktrace`) - POSITION(':' IN `stacktrace`) - 1)
-            constraints:
-              nullable: true
-        - column:
-            name: crash_line
-            type: *TEXT
-            constraints:
-              nullable: true
-        - column:
-            name: cause
-            type: *TEXT
-            constraints:
-              nullable: true
-    - createIndex:
-        tableName: *REPORT
-        indexName: IDX_report_marketing_device
-        columns:
-        - column:
-            name: marketing_device
-    - createIndex:
-        tableName: *REPORT
-        indexName: IDX_report_version_code
-        columns:
-        - column:
-            name: version_code
+      - addColumn:
+          tableName: *REPORT
+          columns:
+            - column:
+                name: marketing_device
+                type: *STRING
+                valueComputed: IFNULL((SELECT d.`marketing_name` FROM `device` d WHERE d.`model` = `phone_model` AND d.`device` = `device`), `device`)
+                constraints:
+                  nullable: false
+            - column:
+                name: bug_id
+                type: *INT
+                valueComputed: (SELECT s.`bug_id` FROM `stacktrace` s WHERE s.`id` = `stacktrace_id`)
+                constraints:
+                  nullable: false
+                  referencedTableName: *BUG
+                  referencedColumnNames: *BUG_ID
+                  foreignKeyName: FK_report_bug
+            - column:
+                name: app_id
+                type: *INT
+                valueComputed: (SELECT b.`app_id` FROM `bug` b WHERE b.`id` = `bug_id`)
+                constraints:
+                  nullable: false
+                  referencedTableName: *APP
+                  referencedColumnNames: *APP_ID
+                  foreignKeyName: FK_report_app
+            - column:
+                name: version_code
+                type: *INT
+                valueComputed: (SELECT v.`code` FROM `stacktrace` s JOIN `version` v ON s.`version_id` = v.`id` WHERE s.`id` = `stacktrace_id`)
+                constraints:
+                  nullable: false
+            - column:
+                name: version_flavor
+                type: *STRING
+                value: ''
+                constraints:
+                  nullable: false
+            - column:
+                name: stacktrace
+                type: *TEXT
+                valueComputed: IFNULL(JSON_UNQUOTE(JSON_EXTRACT(`content`,'$.STACK_TRACE')), '')
+                constraints:
+                  nullable: false
+            - column:
+                name: exception_class
+                type: *STRING
+                valueComputed: SUBSTRING_INDEX(`stacktrace`,':',1)
+                constraints:
+                  nullable: false
+            - column:
+                name: message
+                type: *TEXT
+                valueComputed: SUBSTRING(`stacktrace`, POSITION(':' IN `stacktrace`) + 1, POSITION('\n' IN `stacktrace`) - POSITION(':' IN `stacktrace`) - 1)
+                constraints:
+                  nullable: true
+            - column:
+                name: crash_line
+                type: *TEXT
+                constraints:
+                  nullable: true
+            - column:
+                name: cause
+                type: *TEXT
+                constraints:
+                  nullable: true
+      - createIndex:
+          tableName: *REPORT
+          indexName: IDX_report_marketing_device
+          columns:
+            - column:
+                name: marketing_device
+      - createIndex:
+          tableName: *REPORT
+          indexName: IDX_report_version_code
+          columns:
+            - column:
+                name: version_code
 - changeSet:
     id: 2.0.0-expand-bug
     author: *F43ND1R
     changes:
-    - addColumn:
-        tableName: *BUG
-        columns:
-        - column:
-            name: report_count
-            type: *INT
-            valueComputed: (SELECT COUNT(r.`id`) FROM `report` r WHERE r.`bug_id` = `bug`.`id`)
-            defaultValueNumeric: 0
-            constraints:
-              nullable: false
-        - column:
-            name: latest_report
-            type: *DATETIME
-            valueComputed: (SELECT MAX(r.`date`) FROM `report` r WHERE r.`bug_id` = `bug`.`id`)
-            constraints:
-              nullable: true
-        - column:
-            name: solved_version_code
-            type: *INT
-            valueComputed: (SELECT v.`code` FROM `version` v WHERE `solved_version` = v.`id`)
-            constraints:
-              nullable: true
-        - column:
-            name: solved_version_flavor
-            type: *STRING
-            valueComputed: IF(`solved_version` IS NULL, NULL, '')
-            constraints:
-              nullable: true
-        - column:
-            name: latest_version_code
-            type: *INT
-            valueComputed: (SELECT MAX(v.`code`) FROM `stacktrace` s JOIN `version` v ON s.`version_id` = v.`id` WHERE s.`bug_id` = `bug`.`id`)
-            constraints:
-              nullable: true
-        - column:
-            name: latest_version_flavor
-            type: *STRING
-            value: ''
-            constraints:
-              nullable: true
-        - column:
-            name: affected_installations
-            type: *INT
-            defaultValueNumeric: 0
-            valueComputed: (SELECT COUNT(DISTINCT r.`installation_id`) FROM `report` r WHERE r.`bug_id` = `bug`.`id`)
-            constraints:
-              nullable: false
-    - sql:
-        endDelimiter: GO
-        sql: |
-          DROP PROCEDURE IF EXISTS update_bug_report_stats
-          GO
-          DROP TRIGGER IF EXISTS bug_report_insert
-          GO
-          DROP TRIGGER IF EXISTS bug_report_update
-          GO
-          DROP TRIGGER IF EXISTS bug_report_delete
-          GO
-          CREATE PROCEDURE update_bug_report_stats(IN update_bug_id INT)
-          BEGIN 
-            UPDATE 
-              `bug` LEFT JOIN (
-                SELECT
-                  inner_stats.*,
-                  `report`.`version_flavor` AS `latest_version_flavor`
-                FROM `report` RIGHT JOIN (
-                  SELECT 
-                    `report`.bug_id AS `bug_id`,
-                    COUNT(`report`.`id`) AS `report_count`, 
-                    MAX(`report`.`date`) AS `latest_report`, 
-                    MAX(`report`.`version_code`) AS `latest_version_code`,
-                    COUNT(DISTINCT `report`.`installation_id`) AS `affected_installations`
-                  FROM `report`
-                  WHERE `report`.`bug_id` = update_bug_id
-                  GROUP BY `report`.`bug_id`
-                ) AS inner_stats ON `report`.`bug_id` = inner_stats.`bug_id` AND `report`.`version_code` = inner_stats.`latest_version_code`
-              ) AS stats ON `bug`.id = stats.`bug_id`
-            SET 
-              `bug`.`report_count` = stats.`report_count`,
-              `bug`.`latest_report` = stats.`latest_report`,
-              `bug`.`latest_version_code` = stats.`latest_version_code`,
-              `bug`.`latest_version_flavor` = stats.`latest_version_flavor`,
-              `bug`.`affected_installations` = stats.`affected_installations`
-            WHERE `bug`.`id` = update_bug_id;
-          END
-          GO
-          CREATE TRIGGER bug_report_insert AFTER INSERT ON `report` FOR EACH ROW CALL update_bug_report_stats(NEW.`bug_id`)
-          GO
-          CREATE TRIGGER bug_report_update AFTER UPDATE ON `report` FOR EACH ROW 
-          BEGIN
-            IF NEW.`bug_id` != OLD.`bug_id` THEN
-              CALL update_bug_report_stats(NEW.`bug_id`);
-              IF NOT EXISTS (SELECT 1 FROM `report` WHERE `report`.`bug_id` = OLD.`bug_id` LIMIT 1) THEN
-                DELETE FROM `bug` WHERE `bug`.`id` = OLD.`bug_id`;
-              ELSE
-                CALL update_bug_report_stats(OLD.`bug_id`);
+      - addColumn:
+          tableName: *BUG
+          columns:
+            - column:
+                name: report_count
+                type: *INT
+                valueComputed: (SELECT COUNT(r.`id`) FROM `report` r WHERE r.`bug_id` = `bug`.`id`)
+                defaultValueNumeric: 0
+                constraints:
+                  nullable: false
+            - column:
+                name: latest_report
+                type: *DATETIME
+                valueComputed: (SELECT MAX(r.`date`) FROM `report` r WHERE r.`bug_id` = `bug`.`id`)
+                constraints:
+                  nullable: true
+            - column:
+                name: solved_version_code
+                type: *INT
+                valueComputed: (SELECT v.`code` FROM `version` v WHERE `solved_version` = v.`id`)
+                constraints:
+                  nullable: true
+            - column:
+                name: solved_version_flavor
+                type: *STRING
+                valueComputed: IF(`solved_version` IS NULL, NULL, '')
+                constraints:
+                  nullable: true
+            - column:
+                name: latest_version_code
+                type: *INT
+                valueComputed: (SELECT MAX(v.`code`) FROM `stacktrace` s JOIN `version` v ON s.`version_id` = v.`id` WHERE s.`bug_id` = `bug`.`id`)
+                constraints:
+                  nullable: true
+            - column:
+                name: latest_version_flavor
+                type: *STRING
+                value: ''
+                constraints:
+                  nullable: true
+            - column:
+                name: affected_installations
+                type: *INT
+                defaultValueNumeric: 0
+                valueComputed: (SELECT COUNT(DISTINCT r.`installation_id`) FROM `report` r WHERE r.`bug_id` = `bug`.`id`)
+                constraints:
+                  nullable: false
+      - sql:
+          endDelimiter: GO
+          sql: |
+            DROP PROCEDURE IF EXISTS update_bug_report_stats
+            GO
+            DROP TRIGGER IF EXISTS bug_report_insert
+            GO
+            DROP TRIGGER IF EXISTS bug_report_update
+            GO
+            DROP TRIGGER IF EXISTS bug_report_delete
+            GO
+            CREATE PROCEDURE update_bug_report_stats(IN update_bug_id INT)
+            BEGIN 
+              UPDATE 
+                `bug` LEFT JOIN (
+                  SELECT
+                    inner_stats.*,
+                    `report`.`version_flavor` AS `latest_version_flavor`
+                  FROM `report` RIGHT JOIN (
+                    SELECT 
+                      `report`.bug_id AS `bug_id`,
+                      COUNT(`report`.`id`) AS `report_count`, 
+                      MAX(`report`.`date`) AS `latest_report`, 
+                      MAX(`report`.`version_code`) AS `latest_version_code`,
+                      COUNT(DISTINCT `report`.`installation_id`) AS `affected_installations`
+                    FROM `report`
+                    WHERE `report`.`bug_id` = update_bug_id
+                    GROUP BY `report`.`bug_id`
+                  ) AS inner_stats ON `report`.`bug_id` = inner_stats.`bug_id` AND `report`.`version_code` = inner_stats.`latest_version_code`
+                ) AS stats ON `bug`.id = stats.`bug_id`
+              SET 
+                `bug`.`report_count` = stats.`report_count`,
+                `bug`.`latest_report` = stats.`latest_report`,
+                `bug`.`latest_version_code` = stats.`latest_version_code`,
+                `bug`.`latest_version_flavor` = stats.`latest_version_flavor`,
+                `bug`.`affected_installations` = stats.`affected_installations`
+              WHERE `bug`.`id` = update_bug_id;
+            END
+            GO
+            CREATE TRIGGER bug_report_insert AFTER INSERT ON `report` FOR EACH ROW CALL update_bug_report_stats(NEW.`bug_id`)
+            GO
+            CREATE TRIGGER bug_report_update AFTER UPDATE ON `report` FOR EACH ROW 
+            BEGIN
+              IF NEW.`bug_id` != OLD.`bug_id` THEN
+                CALL update_bug_report_stats(NEW.`bug_id`);
+                IF NOT EXISTS (SELECT 1 FROM `report` WHERE `report`.`bug_id` = OLD.`bug_id` LIMIT 1) THEN
+                  DELETE FROM `bug` WHERE `bug`.`id` = OLD.`bug_id`;
+                ELSE
+                  CALL update_bug_report_stats(OLD.`bug_id`);
+                END IF;
               END IF;
-            END IF;
-          END
-          GO
-          CREATE TRIGGER bug_report_delete AFTER DELETE ON `report` FOR EACH ROW 
-          BEGIN
-            IF NOT EXISTS (SELECT 1 FROM `report` WHERE 
-                `report`.`app_id` = OLD.`app_id` AND 
-                `report`.`exception_class` <=> OLD.`exception_class` AND 
-                `report`.`message` <=> OLD.`message` AND 
-                `report`.`crash_line` <=> OLD.`crash_line` AND 
-                `report`.`cause` <=> OLD.`cause` LIMIT 1) THEN
-              DELETE FROM `bug_identifier` WHERE 
-                `bug_identifier`.`app_id` = OLD.`app_id` AND 
-                `bug_identifier`.`exception_class` <=> OLD.`exception_class` AND 
-                `bug_identifier`.`message` <=> OLD.`message` AND 
-                `bug_identifier`.`crash_line` <=> OLD.`crash_line` AND 
-                `bug_identifier`.`cause` <=> OLD.`cause`;
-            END IF;
-            IF EXISTS (SELECT 1 FROM `report` WHERE `report`.`bug_id` = OLD.`bug_id` LIMIT 1) THEN
-              CALL update_bug_report_stats(OLD.`bug_id`);
-            ELSE
-              DELETE FROM `bug` WHERE `bug`.`id` = OLD.`bug_id`;
-            END IF;
-          END
-    - createTable:
-        tableName: bug_identifier
-        columns:
-        - column:
-            name: bug_id
-            type: *INT
-            constraints:
-              nullable: false
-              referencedTableName: *BUG
-              referencedColumnNames: *BUG_ID
-              deleteCascade: true
-              foreignKeyName: FK_bug_identifier_bug
-        - column:
-            name: app_id
-            type: *INT
-            constraints:
-              nullable: false
-              referencedTableName: *APP
-              referencedColumnNames: *APP_ID
-              deleteCascade: true
-              foreignKeyName: FK_bug_identifier_app
-        - column:
-            name: exception_class
-            type: *STRING
-            constraints:
-              nullable: false
-        - column:
-            name: message
-            type: *STRING
-            constraints:
-              nullable: true
-        - column:
-            name: crash_line
-            type: *STRING
-            constraints:
-              nullable: true
-        - column:
-            name: cause
-            type: *STRING
-            constraints:
-              nullable: true
+            END
+            GO
+            CREATE TRIGGER bug_report_delete AFTER DELETE ON `report` FOR EACH ROW 
+            BEGIN
+              IF NOT EXISTS (SELECT 1 FROM `report` WHERE 
+                  `report`.`app_id` = OLD.`app_id` AND 
+                  `report`.`exception_class` <=> OLD.`exception_class` AND 
+                  `report`.`message` <=> OLD.`message` AND 
+                  `report`.`crash_line` <=> OLD.`crash_line` AND 
+                  `report`.`cause` <=> OLD.`cause` LIMIT 1) THEN
+                DELETE FROM `bug_identifier` WHERE 
+                  `bug_identifier`.`app_id` = OLD.`app_id` AND 
+                  `bug_identifier`.`exception_class` <=> OLD.`exception_class` AND 
+                  `bug_identifier`.`message` <=> OLD.`message` AND 
+                  `bug_identifier`.`crash_line` <=> OLD.`crash_line` AND 
+                  `bug_identifier`.`cause` <=> OLD.`cause`;
+              END IF;
+              IF EXISTS (SELECT 1 FROM `report` WHERE `report`.`bug_id` = OLD.`bug_id` LIMIT 1) THEN
+                CALL update_bug_report_stats(OLD.`bug_id`);
+              ELSE
+                DELETE FROM `bug` WHERE `bug`.`id` = OLD.`bug_id`;
+              END IF;
+            END
+      - createTable:
+          tableName: bug_identifier
+          columns:
+            - column:
+                name: bug_id
+                type: *INT
+                constraints:
+                  nullable: false
+                  referencedTableName: *BUG
+                  referencedColumnNames: *BUG_ID
+                  deleteCascade: true
+                  foreignKeyName: FK_bug_identifier_bug
+            - column:
+                name: app_id
+                type: *INT
+                constraints:
+                  nullable: false
+                  referencedTableName: *APP
+                  referencedColumnNames: *APP_ID
+                  deleteCascade: true
+                  foreignKeyName: FK_bug_identifier_app
+            - column:
+                name: exception_class
+                type: *STRING
+                constraints:
+                  nullable: false
+            - column:
+                name: message
+                type: *STRING
+                constraints:
+                  nullable: true
+            - column:
+                name: crash_line
+                type: *STRING
+                constraints:
+                  nullable: true
+            - column:
+                name: cause
+                type: *STRING
+                constraints:
+                  nullable: true
 - changeSet:
     id: 2.0.0-remove-stacktrace-table
     author: *F43ND1R
     changes:
-    - dropForeignKeyConstraint:
-        baseTableName: *REPORT
-        constraintName: FK_report_stacktrace
-    - dropColumn:
-        tableName: *REPORT
-        columnName: stacktrace_id
-    - dropTable:
-        tableName: *STACKTRACE
+      - dropForeignKeyConstraint:
+          baseTableName: *REPORT
+          constraintName: FK_report_stacktrace
+      - dropColumn:
+          tableName: *REPORT
+          columnName: stacktrace_id
+      - dropTable:
+          tableName: *STACKTRACE
 - changeSet:
     id: 2.0.0-remove-version-id
     author: *F43ND1R
     changes:
-    - dropUniqueConstraint:
-        tableName: *VERSION
-        constraintName: UK_version
-    - dropForeignKeyConstraint:
-        baseTableName: *BUG
-        constraintName: FK_bug_solved_version2
-    - dropColumn:
-        tableName: *BUG
-        columnName: solved_version
-    - dropColumn:
-        tableName: *VERSION
-        columnName: *VERSION_ID
-    - addPrimaryKey:
-        tableName: *VERSION
-        columnNames: app_id, code, flavor
-    - addForeignKeyConstraint:
-        baseTableName: *REPORT
-        baseColumnNames: app_id, version_code, version_flavor
-        referencedTableName: *VERSION
-        referencedColumnNames: app_id, code, flavor
-        constraintName: FK_report_version
-        onDelete: CASCADE
-    - addForeignKeyConstraint:
-        baseTableName: *BUG
-        baseColumnNames: app_id, solved_version_code, solved_version_flavor
-        referencedTableName: *VERSION
-        referencedColumnNames: app_id, code, flavor
-        constraintName: FK_bug_solved_version
-    - addForeignKeyConstraint:
-        baseTableName: *BUG
-        baseColumnNames: app_id, latest_version_code, latest_version_flavor
-        referencedTableName: *VERSION
-        referencedColumnNames: app_id, code, flavor
-        constraintName: FK_bug_latest_version
-    - sql:
-        endDelimiter: GO
-        sql: |
-          DROP TRIGGER IF EXISTS bug_version_set_null
-          GO
-          CREATE TRIGGER bug_version_set_null BEFORE DELETE ON `version` FOR EACH ROW 
-          BEGIN
-            UPDATE `bug` SET `solved_version_code` = NULL, `solved_version_flavor` = NULL WHERE `bug`.`app_id` = OLD.`app_id` AND `bug`.`solved_version_code` = OLD.`code` AND `bug`.`solved_version_flavor` = OLD.`flavor`;
-            UPDATE `bug` SET `latest_version_code` = NULL, `latest_version_flavor` = NULL WHERE `bug`.`app_id` = OLD.`app_id` AND `bug`.`latest_version_code` = OLD.`code` AND `bug`.`latest_version_flavor` = OLD.`flavor`;
-          END
+      - dropUniqueConstraint:
+          tableName: *VERSION
+          constraintName: UK_version
+      - dropForeignKeyConstraint:
+          baseTableName: *BUG
+          constraintName: FK_bug_solved_version2
+      - dropColumn:
+          tableName: *BUG
+          columnName: solved_version
+      - dropColumn:
+          tableName: *VERSION
+          columnName: *VERSION_ID
+      - addPrimaryKey:
+          tableName: *VERSION
+          columnNames: app_id, code, flavor
+      - addForeignKeyConstraint:
+          baseTableName: *REPORT
+          baseColumnNames: app_id, version_code, version_flavor
+          referencedTableName: *VERSION
+          referencedColumnNames: app_id, code, flavor
+          constraintName: FK_report_version
+          onDelete: CASCADE
+      - addForeignKeyConstraint:
+          baseTableName: *BUG
+          baseColumnNames: app_id, solved_version_code, solved_version_flavor
+          referencedTableName: *VERSION
+          referencedColumnNames: app_id, code, flavor
+          constraintName: FK_bug_solved_version
+      - addForeignKeyConstraint:
+          baseTableName: *BUG
+          baseColumnNames: app_id, latest_version_code, latest_version_flavor
+          referencedTableName: *VERSION
+          referencedColumnNames: app_id, code, flavor
+          constraintName: FK_bug_latest_version
+      - sql:
+          endDelimiter: GO
+          sql: |
+            DROP TRIGGER IF EXISTS bug_version_set_null
+            GO
+            CREATE TRIGGER bug_version_set_null BEFORE DELETE ON `version` FOR EACH ROW 
+            BEGIN
+              UPDATE `bug` SET `solved_version_code` = NULL, `solved_version_flavor` = NULL WHERE `bug`.`app_id` = OLD.`app_id` AND `bug`.`solved_version_code` = OLD.`code` AND `bug`.`solved_version_flavor` = OLD.`flavor`;
+              UPDATE `bug` SET `latest_version_code` = NULL, `latest_version_flavor` = NULL WHERE `bug`.`app_id` = OLD.`app_id` AND `bug`.`latest_version_code` = OLD.`code` AND `bug`.`latest_version_flavor` = OLD.`flavor`;
+            END
 - changeSet:
     id: 2.0.0-permission-level-as-string
     author: *F43ND1R
     changes:
-    - modifyDataType:
-        tableName: *PERMISSIONS
-        columnName: *PERMISSIONS_LEVEL
-        newDataType: *STRING
-    - update:
-        tableName: *PERMISSIONS
-        columns:
-        - column:
-            name: *PERMISSIONS_LEVEL
-            valueComputed: (CASE WHEN `level` = 3 THEN 'ADMIN' WHEN `level` = 2 THEN 'EDIT' WHEN `level` = 1 THEN 'VIEW' ELSE 'NONE' END)
+      - modifyDataType:
+          tableName: *PERMISSIONS
+          columnName: *PERMISSIONS_LEVEL
+          newDataType: *STRING
+      - update:
+          tableName: *PERMISSIONS
+          columns:
+            - column:
+                name: *PERMISSIONS_LEVEL
+                valueComputed: (CASE WHEN `level` = 3 THEN 'ADMIN' WHEN `level` = 2 THEN 'EDIT' WHEN `level` = 1 THEN 'VIEW' ELSE 'NONE' END)
 - changeSet:
     id: 2.0.0-roles-primary-key
     author: *F43ND1R
     changes:
-    - addPrimaryKey:
-        tableName: *ROLE
-        columnNames: user_username, roles
+      - addPrimaryKey:
+          tableName: *ROLE
+          columnNames: user_username, roles
 - changeSet:
     id: 2.0.0-restore-constraints-of-modified-columns
     author: *F43ND1R
     changes:
-    - addNotNullConstraint:
-        tableName: *REPORT
-        columnName: *REPORT_CONTENT
-        columnDataType: *JSON
-    - addNotNullConstraint:
-        tableName: *PERMISSIONS
-        columnName: *PERMISSIONS_LEVEL
-        columnDataType: *STRING
+      - addNotNullConstraint:
+          tableName: *REPORT
+          columnName: *REPORT_CONTENT
+          columnDataType: *JSON
+      - addNotNullConstraint:
+          tableName: *PERMISSIONS
+          columnName: *PERMISSIONS_LEVEL
+          columnDataType: *STRING
 - changeSet:
     id: 2.0.0-remove-app-min-score
     author: *F43ND1R
     changes:
-    - dropColumn:
-        tableName: *APP
-        columnName: min_score
+      - dropColumn:
+          tableName: *APP
+          columnName: min_score
 - changeSet:
     id: 2.0.0-custom-column-name
     author: *F43ND1R
     changes:
-    - addColumn:
-        tableName: *APP_CUSTOM_COLUMNS
-        columns:
-        - column:
-            name: name
-            type: *STRING
-            valueComputed: (`path`)
-            constraints:
-              nullable: false
+      - addColumn:
+          tableName: *APP_CUSTOM_COLUMNS
+          columns:
+            - column:
+                name: name
+                type: *STRING
+                valueComputed: (`path`)
+                constraints:
+                  nullable: false

@@ -1,3 +1,18 @@
+/*
+ * (C) Copyright 2021-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.faendir.acra.security
 
 import com.faendir.acra.navigation.RouteParams
@@ -23,6 +38,7 @@ class AuthenticationUIListener(private val userRepository: UserRepository, priva
                         event.rerouteTo(SetupView::class.java)
                     }
                 }
+
                 SetupView::class.java -> {
                     if (SecurityUtils.isLoggedIn()) {
                         event.rerouteTo(Overview::class.java)
@@ -30,6 +46,7 @@ class AuthenticationUIListener(private val userRepository: UserRepository, priva
                         event.rerouteTo(LoginView::class.java)
                     }
                 }
+
                 else -> if (!SecurityUtils.isLoggedIn()) {
                     event.rerouteTo(if (userRepository.hasAnyAdmin()) LoginView::class.java else SetupView::class.java)
                 } else if (!SecurityUtils.hasAccess(routeParams::appId, event.navigationTarget)) {
