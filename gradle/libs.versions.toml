@@ -5,7 +5,7 @@ springBoot = "3.1.0"
 vaadin-flow = "24.0.8"
 vaadin-base = "24.0.5"
 kotlinPoet = "1.14.2"
-testContainers = "1.18.1"
+testContainers = "1.18.3"
 liquibase = "4.20.0"
 
 [libraries]
