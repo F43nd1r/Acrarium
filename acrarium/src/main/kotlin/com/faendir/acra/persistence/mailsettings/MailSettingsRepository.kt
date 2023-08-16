@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Repository
 @Repository
 class MailSettingsRepository(private val jooq: DSLContext) {
 
-    @PreAuthorize("#username == principal.username")
+    @PreAuthorize("isCurrentUser(#username)")
     fun find(appId: AppId, username: String): MailSettings? =
         jooq.selectFrom(MAIL_SETTINGS).where(MAIL_SETTINGS.APP_ID.eq(appId), MAIL_SETTINGS.USERNAME.eq(username)).fetchValueInto()
 
@@ -35,7 +35,7 @@ class MailSettingsRepository(private val jooq: DSLContext) {
     fun findAll(appId: AppId): List<MailSettings> =
         jooq.selectFrom(MAIL_SETTINGS).where(MAIL_SETTINGS.APP_ID.eq(appId)).fetchListInto()
 
-    @PreAuthorize("#mailSettings.username == principal.username")
+    @PreAuthorize("isCurrentUser(#mailSettings.username)")
     fun store(mailSettings: MailSettings) {
         jooq.insertInto(MAIL_SETTINGS)
             .set(MAIL_SETTINGS.APP_ID, mailSettings.appId)

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.config.BeanIds
+import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.builders.WebSecurity
@@ -38,8 +39,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint
-import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher
 import org.springframework.security.web.util.matcher.OrRequestMatcher
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector
 
@@ -77,31 +78,34 @@ class WebSecurityConfiguration(private val userRepository: UserRepository) : Vaa
     @Order(1)
     fun reportSecurityChain(http: HttpSecurity): SecurityFilterChain =
         http.securityMatcher("/$REPORT_PATH")
-            .csrf().disable()
-            .exceptionHandling().authenticationEntryPoint(Http403ForbiddenEntryPoint()).and()
-            .authorizeHttpRequests { it.anyRequest().hasRole(Role.REPORTER.name) }.httpBasic().and()
+            .csrf { it.disable() }
+            .exceptionHandling { it.authenticationEntryPoint(Http403ForbiddenEntryPoint()) }
+            .authorizeHttpRequests { it.anyRequest().hasRole(Role.REPORTER.name) }
+            .httpBasic(Customizer.withDefaults())
             .build()
 
     @Bean
     @Order(2)
     fun apiSecurityChain(http: HttpSecurity): SecurityFilterChain =
         http.securityMatcher("/$API_PATH/.*")
-            .csrf().disable()
-            .headers().disable()
-            .anonymous().disable()
-            .exceptionHandling().authenticationEntryPoint(Http403ForbiddenEntryPoint()).and()
-            .authorizeHttpRequests { it.anyRequest().hasRole(Role.API.name) }.httpBasic().and()
+            .csrf { it.disable() }
+            .headers { it.disable() }
+            .anonymous { it.disable() }
+            .exceptionHandling { it.authenticationEntryPoint(Http403ForbiddenEntryPoint()) }
+            .authorizeHttpRequests { it.anyRequest().hasRole(Role.API.name) }
+            .httpBasic(Customizer.withDefaults())
             .build()
 
     @Bean
     @Order(3)
     fun actuatorSecurityChain(http: HttpSecurity, introspector: HandlerMappingIntrospector): SecurityFilterChain =
         http.securityMatcher(OrRequestMatcher(EndpointRequest.toAnyEndpoint(), MvcRequestMatcher(introspector, ".*/swagger-ui/.*")))
-            .csrf().disable()
-            .headers().disable()
-            .anonymous().disable()
-            .exceptionHandling().authenticationEntryPoint(BasicAuthenticationEntryPoint()).and()
-            .authorizeHttpRequests { it.anyRequest().hasRole(Role.API.name) }.httpBasic().and()
+            .csrf { it.disable() }
+            .headers { it.disable() }
+            .anonymous { it.disable() }
+            .exceptionHandling { it.authenticationEntryPoint(Http403ForbiddenEntryPoint()) }
+            .authorizeHttpRequests { it.anyRequest().hasRole(Role.ADMIN.name) }
+            .httpBasic(Customizer.withDefaults())
             .build()
 
     @Bean("VaadinSecurityFilterChainBean")
@@ -111,24 +115,25 @@ class WebSecurityConfiguration(private val userRepository: UserRepository) : Vaa
     }
 
     override fun configure(http: HttpSecurity) {
-        http.authorizeHttpRequests().requestMatchers("/${SetupView.ROUTE}").permitAll()
-        http.formLogin().loginPage("/${LoginView.ROUTE}").permitAll()
+        http.authorizeHttpRequests { it.requestMatchers(antMatcher("/${SetupView.ROUTE}")).permitAll() }
+        http.formLogin { it.loginPage("/${LoginView.ROUTE}").permitAll() }
         super.configure(http)
     }
 
     override fun configure(web: WebSecurity) {
         super.configure(web)
         web.ignoring().requestMatchers(
-            "/images/**",
+            antMatcher("/images/**"),
 
             // Vaadin Flow static resources
-            "/VAADIN/**",
+            antMatcher("/VAADIN/**"),
 
             // the robots exclusion standard
-            "/robots.txt",
+            antMatcher("/robots.txt"),
 
             // (production mode) static resources
-            "/frontend-es5/**", "/frontend-es6/**"
+            antMatcher("/frontend-es5/**"),
+            antMatcher("/frontend-es6/**"),
         )
     }
 }

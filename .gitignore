@@ -46,3 +46,4 @@ pnpmfile.js
 /acrarium/vite.generated.ts
 /acrarium/.pnpm-debug.log
 /acrarium/frontend/generated
+/acrarium/.pnpmfile.cjs

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,14 +37,14 @@ class UserRepository(private val jooq: DSLContext, private val passwordEncoder: 
 
     fun exists(username: String): Boolean = jooq.fetchExists(USER, USER.USERNAME.eq(username))
 
-    @PreAuthorize("#username == principal.username || isAdmin()")
+    @PreAuthorize("isCurrentUser(#username) || isAdmin()")
     fun find(username: String): User? = jooq.selectFrom(USER).where(USER.USERNAME.eq(username)).fetchValueInto<User>()
 
     /**
      * @return if the user was successfully created
      */
     @Transactional
-    @PreAuthorize("isAdmin()")
+    @PreAuthorize("isAdmin() || hasNoAdmins()")
     fun create(username: String, rawPassword: String, mail: String?, vararg roles: Role): Boolean = try {
         val name = username.lowercase()
         jooq.insertInto(USER)
@@ -64,7 +64,7 @@ class UserRepository(private val jooq: DSLContext, private val passwordEncoder: 
     }
 
     @Transactional
-    @PreAuthorize("#username == principal.username || isAdmin()")
+    @PreAuthorize("isCurrentUser(#username) || isAdmin()")
     fun update(username: String, rawPassword: String?, mail: String?) {
         jooq.update(USER)
             .apply { if (rawPassword != null) set(USER.PASSWORD, passwordEncoder.encode(rawPassword)) }
@@ -107,7 +107,7 @@ class UserRepository(private val jooq: DSLContext, private val passwordEncoder: 
                     .fetchListInto<Permission>()
 
     @Transactional
-    @PreAuthorize("#username != principal.username && isAdmin()")
+    @PreAuthorize("!isCurrentUser(#username) && isAdmin()")
     fun delete(username: String) {
         jooq.deleteFrom(USER).where(USER.USERNAME.eq(username)).execute()
     }

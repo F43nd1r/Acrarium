@@ -18,11 +18,13 @@ package com.faendir.acra.security
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.persistence.user.Role
+import com.faendir.acra.persistence.user.UserRepository
 import org.aopalliance.intercept.MethodInvocation
 import org.springframework.aop.framework.AopProxyUtils
 import org.springframework.aop.support.AopUtils
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
 import org.springframework.context.expression.MethodBasedEvaluationContext
 import org.springframework.expression.EvaluationContext
@@ -36,7 +38,7 @@ import java.util.function.Supplier
 
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true)
-class MethodSecurityConfiguration {
+class MethodSecurityConfiguration(@Lazy private val userRepository: UserRepository) {
     @Primary
     @Bean
     fun customMethodSecurityExpressionHandler(): MethodSecurityExpressionHandler = object : DefaultMethodSecurityExpressionHandler() {
@@ -46,7 +48,7 @@ class MethodSecurityConfiguration {
         private fun createCustomSecurityExpressionRoot(
             authentication: Supplier<Authentication>,
             invocation: MethodInvocation
-        ) = CustomMethodSecurityExpressionRoot(authentication).apply {
+        ) = CustomMethodSecurityExpressionRoot(authentication, userRepository).apply {
             setThis(invocation.`this`)
             setPermissionEvaluator(permissionEvaluator)
             setTrustResolver(trustResolver)
@@ -65,7 +67,11 @@ class MethodSecurityConfiguration {
     }
 }
 
-class CustomMethodSecurityExpressionRoot(authentication: Supplier<Authentication>) : SecurityExpressionRoot(authentication), MethodSecurityExpressionOperations {
+class CustomMethodSecurityExpressionRoot(
+    authentication: Supplier<Authentication>,
+    private val userRepository: UserRepository
+) : SecurityExpressionRoot(authentication),
+    MethodSecurityExpressionOperations {
     private var filterObject: Any? = null
 
     private var returnObject: Any? = null
@@ -96,6 +102,8 @@ class CustomMethodSecurityExpressionRoot(authentication: Supplier<Authentication
         return target
     }
 
+    fun hasNoAdmins() = !userRepository.hasAnyAdmin()
+
     fun isAdmin() = SecurityUtils.hasRole(Role.ADMIN)
 
     fun isUser() = SecurityUtils.hasRole(Role.USER)
@@ -103,6 +111,8 @@ class CustomMethodSecurityExpressionRoot(authentication: Supplier<Authentication
     fun isReporter() = SecurityUtils.hasRole(Role.REPORTER)
 
     fun isApi() = SecurityUtils.hasRole(Role.API)
+
+    fun isCurrentUser(username: String) = SecurityUtils.getUsername() == username
 
     @JvmName("hasViewPermission")
     fun hasViewPermission(appId: AppId) = SecurityUtils.hasPermission(appId, Permission.Level.VIEW)
