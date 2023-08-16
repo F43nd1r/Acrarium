@@ -40,4 +40,6 @@ All source code in this repository is licensed under the Apache License 2.0 (see
 
 # Credits
 
- Thanks to [Mirza Zulfan](https://github.com/mirzazulfan) for creating the logo.
+ Thanks to 
+  - [Mirza Zulfan](https://github.com/mirzazulfan) for creating the logo.
+  - [aptly-io](https://github.com/aptly-io) (Dutch), [Federico Iosue](https://github.com/federicoiosue) (Italian), [Astarivi](https://github.com/astarivi) (Spanish) for contributing to localization.
