@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out Project
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v3.6.0
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0
