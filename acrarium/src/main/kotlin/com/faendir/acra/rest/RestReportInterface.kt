@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import java.security.Principal
  * @since 22.03.2017
  */
 @RestController
+@PreAuthorize("isReporter()")
 class RestReportInterface(private val reportService: ReportService) {
-    @PreAuthorize("hasRole(T(com.faendir.acra.persistence.user.Role).REPORTER)")
     @RequestMapping(value = [REPORT_PATH], consumes = [MediaType.APPLICATION_JSON_VALUE], method = [RequestMethod.POST])
     fun report(
         @RequestBody
@@ -46,7 +46,6 @@ class RestReportInterface(private val reportService: ReportService) {
         }
     }
 
-    @PreAuthorize("hasRole(T(com.faendir.acra.persistence.user.Role).REPORTER)")
     @RequestMapping(value = [REPORT_PATH], consumes = [MediaType.MULTIPART_FORM_DATA_VALUE], method = [RequestMethod.POST])
     @Throws(IOException::class)
     fun report(request: MultipartHttpServletRequest, principal: Principal): ResponseEntity<*> {

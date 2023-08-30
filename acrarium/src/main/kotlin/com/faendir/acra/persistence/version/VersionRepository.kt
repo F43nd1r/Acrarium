@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import java.util.stream.Stream
 class VersionRepository(private val jooq: DSLContext) {
 
     @Transactional
-    @PreAuthorize("hasEditPermission(#appId)")
+    @PreAuthorize("isReporter() || hasEditPermission(#appId)")
     fun ensureExists(appId: AppId, code: Int, flavor: String?, name: String) {
         jooq.insertInto(VERSION)
             .set(VERSION.APP_ID, appId)

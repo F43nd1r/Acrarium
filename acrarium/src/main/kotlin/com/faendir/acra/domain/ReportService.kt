@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ class ReportService(
 ) {
 
     @Transactional
-    @PreAuthorize("hasRole(T(com.faendir.acra.persistence.user.Role).REPORTER)")
+    @PreAuthorize("isReporter()")
     fun create(
         reporterUserName: String,
         @Language("JSON")

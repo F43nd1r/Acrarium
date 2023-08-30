@@ -37,7 +37,7 @@ class BugRepository(
     private val jooq: DSLContext,
 ) {
 
-    @PreAuthorize("hasViewPermission(#identifier.appId)")
+    @PreAuthorize("isReporter() || hasViewPermission(#identifier.appId)")
     fun findId(identifier: BugIdentifier): BugId? =
         jooq.select(BUG_IDENTIFIER.BUG_ID).from(BUG_IDENTIFIER).where(BUG_IDENTIFIER.matches(identifier)).fetchValue()
 
