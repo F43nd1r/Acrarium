@@ -39,6 +39,6 @@ class DeviceSetupTest(
     fun `should set up devices`() {
         deviceSetup.onStartup(ContextRefreshedEvent(applicationContext))
 
-        expectThat(jooq.fetchCount(DEVICE)).isEqualTo(35002)
+        expectThat(jooq.fetchCount(DEVICE)).isEqualTo(36317)
     }
 }

@@ -50,14 +50,14 @@ class DeviceSetup(private val deviceRepository: DeviceRepository, private val co
             isHeaderExtractionEnabled = true
             setProcessor(processor)
         }).parse(stream.bufferedReader(Charsets.UTF_16LE))
-        processor.beans.filter { it.marketingName != null }.forEach { deviceRepository.store(it.device, it.model, it.marketingName!!) }
+        processor.beans.filter { it.device != null && it.marketingName != null }.forEach { deviceRepository.store(it.device!!, it.model, it.marketingName!!) }
     }
 }
 
 @NoArgConstructor
 class Device(
     @Parsed(field = ["Device"])
-    val device: String,
+    val device: String?,
     @Parsed(field = ["Model"])
     val model: String,
     @Parsed(field = ["Marketing Name"])
