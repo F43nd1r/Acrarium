@@ -15,7 +15,7 @@
  */
 package com.faendir.acra.rest
 
-import com.faendir.acra.DatabaseTestConfiguration
+import com.faendir.acra.annotation.AcrariumTest
 import com.faendir.acra.persistence.app.AppRepository
 import com.faendir.acra.persistence.app.Reporter
 import com.faendir.acra.persistence.user.Role
@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.context.annotation.Import
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -35,8 +34,7 @@ import org.springframework.http.MediaType
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(DatabaseTestConfiguration::class)
+@AcrariumTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class RestReportInterfaceIntegrationTest(
     @Autowired private val restTemplate: TestRestTemplate,
     @Autowired private val appRepository: AppRepository,

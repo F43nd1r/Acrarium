@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ data class Report(
     override val device: String,
     override val marketingDevice: String,
     override val bugId: BugId,
+    @get:JvmName("getAppId")
     override val appId: AppId,
     override val stacktrace: String,
     override val exceptionClass: String,

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2020-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ class VersionEditorDialog(versionRepository: VersionRepository, appId: AppId, on
             if (old == null) {
                 isRequired = true
             } else {
-                value = old.name
+                value = old.flavor
                 isEnabled = false
             }
         }
@@ -59,7 +59,7 @@ class VersionEditorDialog(versionRepository: VersionRepository, appId: AppId, on
             onUpdate.invoke()
         }
         negativeAction(Messages.CANCEL)
-        val layout = FlexLayout(code, name, upload)
+        val layout = FlexLayout(code, flavor, name, upload)
         layout.flexDirection = FlexLayout.FlexDirection.COLUMN
         add(layout)
     }

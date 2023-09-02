@@ -15,17 +15,18 @@
  */
 package com.faendir.acra.annotation
 
-import com.faendir.acra.DatabaseTestConfiguration
-import org.junit.jupiter.api.extension.ExtendWith
+import com.faendir.acra.common.DatabaseTestConfiguration
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.core.annotation.AliasFor
 import java.lang.annotation.Inherited
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 @Inherited
-@ExtendWith(SpringExtension::class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@SpringBootTest
 @Import(DatabaseTestConfiguration::class)
-annotation class AcrariumTest
+annotation class AcrariumTest(
+    @get:AliasFor(annotation = SpringBootTest::class, attribute = "webEnvironment")
+    val webEnvironment: SpringBootTest.WebEnvironment = SpringBootTest.WebEnvironment.MOCK
+)

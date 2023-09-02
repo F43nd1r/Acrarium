@@ -27,9 +27,11 @@ import org.apache.commons.text.RandomStringGenerator
 import org.intellij.lang.annotations.Language
 import org.jooq.DSLContext
 import org.jooq.JSON
+import org.springframework.stereotype.Component
 import java.time.Instant
 import java.util.*
 
+@Component
 class TestDataBuilder(private val jooq: DSLContext, private val randomStringGenerator: RandomStringGenerator) {
     private val random = Random()
 

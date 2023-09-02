@@ -18,7 +18,6 @@ package com.faendir.acra.persistence.report
 import com.faendir.acra.dataprovider.AcrariumDataProvider
 import com.faendir.acra.dataprovider.AcrariumSort
 import com.faendir.acra.jooq.generated.indexes.REPORT_IDX_REPORT_INSTALLATION_ID
-import com.faendir.acra.jooq.generated.tables.records.ReportRecord
 import com.faendir.acra.jooq.generated.tables.references.ATTACHMENT
 import com.faendir.acra.jooq.generated.tables.references.REPORT
 import com.faendir.acra.persistence.*
@@ -43,7 +42,6 @@ class ReportRepository(
     @PostAuthorize("returnObject == null || hasViewPermission(returnObject.appId)")
     fun find(id: String): Report? = jooq.selectFrom(REPORT).where(REPORT.ID.eq(id)).fetchValueInto()
 
-    @PostAuthorize("returnObject == null || hasViewPermission(returnObject.appId)")
     fun findAttachmentNames(id: String) = jooq.select(ATTACHMENT.FILENAME.NOT_NULL).from(ATTACHMENT).where(ATTACHMENT.REPORT_ID.eq(id)).fetchList()
 
     fun loadAttachment(reportId: String, filename: String) =

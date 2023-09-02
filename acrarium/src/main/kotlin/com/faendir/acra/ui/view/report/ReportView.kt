@@ -22,7 +22,9 @@ import com.faendir.acra.navigation.*
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.bug.BugId
 import com.faendir.acra.persistence.report.ReportRepository
+import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.persistence.version.VersionRepository
+import com.faendir.acra.security.RequiresPermission
 import com.faendir.acra.ui.component.HasAcrariumTitle
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.*
@@ -52,6 +54,7 @@ import kotlin.math.max
 @View
 @Route(value = "app/:$PARAM_APP/bug/:$PARAM_BUG/report/:$PARAM_REPORT", layout = MainView::class)
 @LogicalParent(ReportTab::class)
+@RequiresPermission(Permission.Level.VIEW)
 class ReportView(
     private val reportRepository: ReportRepository,
     versionRepository: VersionRepository,

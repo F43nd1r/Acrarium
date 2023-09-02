@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.jooq.Field
 data class Version(
     val code: Int,
     val name: String,
+    @get:JvmName("getAppId")
     val appId: AppId,
     val mappings: String? = null,
     val flavor: String,

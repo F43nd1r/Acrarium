@@ -15,7 +15,7 @@
  */
 package com.faendir.acra.annotation
 
-import com.faendir.acra.DatabaseTestConfiguration
+import com.faendir.acra.common.DatabaseTestConfiguration
 import com.faendir.acra.persistence.PersistenceTestConfiguration
 import org.springframework.boot.test.autoconfigure.jooq.JooqTest
 import org.springframework.context.annotation.Import

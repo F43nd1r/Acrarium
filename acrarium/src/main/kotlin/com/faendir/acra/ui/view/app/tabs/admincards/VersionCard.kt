@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2020-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ class VersionCard(
                 }
                 if (SecurityUtils.hasPermission(appId, Permission.Level.EDIT)) {
                     column(ButtonRenderer(VaadinIcon.EDIT) { VersionEditorDialog(versionRepository, appId, { dataProvider.refreshAll() }, it).open() }) {
+                        key = "edit"
                         width = "50px"
                         isAutoWidth = false
                     }
@@ -75,6 +76,7 @@ class VersionCard(
                             }
                         }
                     }) {
+                        key = "delete"
                         width = "50px"
                         isAutoWidth = false
                     }

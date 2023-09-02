@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra
+package com.faendir.acra.common
 
 import com.faendir.acra.persistence.jooq.JooqConfigurationCustomizer
 import org.springframework.boot.jdbc.DataSourceBuilder

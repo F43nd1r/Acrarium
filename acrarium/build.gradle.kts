@@ -56,6 +56,8 @@ dependencies {
     testImplementation(libs.strikt)
     testImplementation(libs.testContainers.mysql)
     testImplementation(libs.testContainers.junit)
+    testImplementation(libs.karibu.testing)
+    testImplementation(libs.karibu.spring)
     jooqGenerator(libs.comMysql.mysqlConnectorJ)
     jooqGenerator(libs.orgYaml.snakeyaml)
     jooqGenerator(projects.jooqHelper)

@@ -51,6 +51,7 @@ interface BugVersionInfo {
 data class Bug(
     override val id: BugId,
     val title: String,
+    @get:JvmName("getAppId")
     val appId: AppId,
     val reportCount: Int,
     val latestReport: Instant?,

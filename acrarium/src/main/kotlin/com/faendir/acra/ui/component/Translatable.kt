@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package com.faendir.acra.ui.component
 
+import com.faendir.acra.ui.ext.label
 import com.vaadin.flow.component.*
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent
 import com.vaadin.flow.component.button.Button
@@ -38,16 +39,15 @@ import kotlin.reflect.KClass
  * @author lukas
  * @since 14.11.18
  */
-open class Translatable<T : Component> protected constructor(protected val t: T, private val setter: T.() -> Unit) :
+open class Translatable<T : Component>(protected val t: T, private val property: T.(String) -> Unit, internal val captionId: String, private vararg val params: Any) :
     Composite<T>(), LocaleChangeObserver, HasSize, HasStyle {
-    constructor(t: T, property: T.(String) -> Unit, captionId: String, vararg params: Any) : this(t, { t.property(t.getTranslation(captionId, *params)) })
 
     override fun initContent(): T {
         return t
     }
 
     override fun localeChange(event: LocaleChangeEvent) {
-        t.setter()
+        t.property(t.getTranslation(captionId, *params))
         fireEvent(TranslatedEvent(this, false))
     }
 
@@ -56,13 +56,18 @@ open class Translatable<T : Component> protected constructor(protected val t: T,
         return this
     }
 
+    override fun isVisible() = when (t) {
+        is Text -> !t.text.isNullOrBlank() // workaround for https://github.com/vaadin/flow/issues/3201
+        else -> t.isVisible
+    }
+
     fun addTranslatedListener(listener: (TranslatedEvent) -> Unit): Registration {
         return addListener(TranslatedEvent::class.java, listener)
     }
 
-    open class Value<T, E : ComponentValueChangeEvent<in T, V>, V>(t: T, setter: T.() -> Unit) : Translatable<T>(t, setter), HasValue<E, V> by t
+    open class Value<T, E : ComponentValueChangeEvent<in T, V>, V>(t: T, property: T.(String) -> Unit, captionId: String, vararg params: Any) :
+        Translatable<T>(t, property, captionId, params), HasValue<E, V> by t
             where T : Component, T : HasValue<E, V> {
-        constructor(t: T, property: T.(String) -> Unit, captionId: String, vararg params: Any) : this(t, { t.property(t.getTranslation(captionId, *params)) })
 
         override fun with(consumer: T.() -> Unit): Value<T, E, V> {
             t.consumer()
@@ -70,9 +75,9 @@ open class Translatable<T : Component> protected constructor(protected val t: T,
         }
     }
 
-    class ValidatedValue<T, E : ComponentValueChangeEvent<in T, V>, V>(t: T, setter: T.() -> Unit) : Value<T, E, V>(t, setter), HasValidation by t
+    class ValidatedValue<T, E : ComponentValueChangeEvent<in T, V>, V>(t: T, property: T.(String) -> Unit, captionId: String, vararg params: Any) :
+        Value<T, E, V>(t, property, captionId, params), HasValidation by t
             where T : Component, T : HasValue<E, V>, T : HasValidation {
-        constructor(t: T, property: T.(String) -> Unit, captionId: String, vararg params: Any) : this(t, { t.property(t.getTranslation(captionId, *params)) })
 
         override fun with(consumer: T.() -> Unit): ValidatedValue<T, E, V> {
             t.consumer()
@@ -103,9 +108,12 @@ open class Translatable<T : Component> protected constructor(protected val t: T,
         fun <T> createComboBox(items: Collection<T>, captionId: String, vararg params: Any) =
             ValidatedValue(ComboBox("", items), ComboBox<T>::setLabel, captionId, *params)
 
-        fun <T> createSelect(items: Collection<T>, getLabel: (T) -> String, captionId: String, vararg params: Any) = Value(Select<T>().apply { setItems(items) }) {
-            label = getTranslation(captionId, *params)
-            setItemLabelGenerator(getLabel)
+        fun <T> createSelect(items: Collection<T>, getLabel: (T) -> String, captionId: String, vararg params: Any) = Value(Select<T>().apply {
+            setItems(items)
+        }, Select<*>::label, captionId, params).apply {
+            addTranslatedListener {
+                t.setItemLabelGenerator(getLabel)
+            }
         }
 
         fun createCheckbox(captionId: String, vararg params: Any) = Value(Checkbox(), Checkbox::setLabel, captionId, *params)

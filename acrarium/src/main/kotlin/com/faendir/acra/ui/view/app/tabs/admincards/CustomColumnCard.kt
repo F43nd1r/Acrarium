@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2021-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2021-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +30,13 @@ import com.faendir.acra.ui.component.grid.renderer.ButtonRenderer
 import com.faendir.acra.ui.ext.*
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.html.Div
-import com.vaadin.flow.component.icon.Icon
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.data.binder.Binder
-import com.vaadin.flow.data.renderer.ComponentRenderer
 import java.util.*
 
 @View
-@RequiresPermission(Permission.Level.EDIT)
+@RequiresPermission(Permission.Level.VIEW)
 class CustomColumnCard(
     appRepository: AppRepository,
     routeParams: RouteParams,
@@ -49,8 +47,7 @@ class CustomColumnCard(
     init {
         content {
             setHeader(Translatable.createLabel(Messages.CUSTOM_COLUMNS))
-            val customColumns = appRepository.getCustomColumns(appId).toMutableList()
-            acrariumGrid(customColumns) {
+            acrariumGrid(appRepository.getCustomColumns(appId)) {
                 setMinHeight(280, SizeUnit.PIXEL)
                 setHeight(100, SizeUnit.PERCENTAGE)
                 val pathColumn = column({ it.path }) {
@@ -74,20 +71,22 @@ class CustomColumnCard(
                     val nameField = TextField().apply {
                         isRequired = true
                     }
-                    editor.binder.forField(pathField)
-                        .withValidator({ it.matches(regex) }, { getTranslation(Messages.ERROR_NOT_JSON_PATH) })
-                        .bind({ it.path }, { old, value -> customColumns[customColumns.indexOf(old)] = old.copy(path = value) })
-                    editor.binder.forField(nameField)
-                        .bind({ it.name }, { old, value -> customColumns[customColumns.indexOf(old)] = old.copy(name = value) })
+                    var currentItem: CustomColumn? = null
+                    editor.addOpenListener { currentItem = it.item }
+                    editor.binder.forField(pathField).withValidator({ it.matches(regex) }, { getTranslation(Messages.ERROR_NOT_JSON_PATH) })
+                        .bind({ it.path }, { _, value -> currentItem = currentItem?.copy(path = value) })
+                    editor.binder.forField(nameField).bind({ it.name }, { _, value -> currentItem = currentItem?.copy(name = value) })
                     pathColumn.editorComponent = pathField
                     nameColumn.editorComponent = nameField
                     val editButtons = Collections.newSetFromMap<Button>(WeakHashMap())
                     editor.addOpenListener { editButtons.forEach { it.isEnabled = !editor.isOpen } }
                     editor.addCloseListener { editButtons.forEach { it.isEnabled = !editor.isOpen } }
                     val save = Translatable.createButton(Messages.SAVE) {
-                        if (!pathField.isInvalid && !nameField.isInvalid) {
-                            editor.save()
-                            appRepository.setCustomColumns(appId, customColumns)
+                        val old = editor.item
+                        if (editor.save()) {
+                            listDataView.addItemAfter(currentItem, old)
+                            listDataView.removeItem(old)
+                            appRepository.setCustomColumns(appId, listDataView.items.toList())
                             dataProvider.refreshAll()
                         }
                     }.with { setMarginRight(5.0, SizeUnit.PIXEL) }
@@ -100,21 +99,21 @@ class CustomColumnCard(
                         pathField.focus()
                         recalculateColumnWidths()
                     }) {
+                        key = "edit"
                         editorComponent = Div(save, cancel)
                         setFlexGrow(1)
                     }
-                    column(ComponentRenderer { customColumn ->
-                        Button(Icon(VaadinIcon.TRASH)) {
-                            customColumns.remove(customColumn)
-                            appRepository.setCustomColumns(appId, customColumns)
-                            dataProvider.refreshAll()
-                        }
-                    })
+                    column(ButtonRenderer(VaadinIcon.TRASH) { customColumn ->
+                        listDataView.removeItem(customColumn)
+                        appRepository.setCustomColumns(appId, listDataView.items.toList())
+                        dataProvider.refreshAll()
+                    }) {
+                        key = "delete"
+                    }
                     appendFooterRow().getCell(columns[0]).component = Translatable.createButton(Messages.ADD_COLUMN) {
                         if (!editor.isOpen) {
                             val customColumn = CustomColumn("", "")
-                            customColumns.add(customColumn)
-                            dataProvider.refreshAll()
+                            listDataView.addItem(customColumn)
                             editor.editItem(customColumn)
                         }
                     }

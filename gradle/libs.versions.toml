@@ -8,6 +8,7 @@ kotlinPoet = "1.14.2"
 testContainers = "1.19.0"
 liquibase = "4.20.0"
 jooq = "3.18.5"
+karibu = "2.1.0"
 
 [libraries]
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
@@ -34,6 +35,8 @@ springdoc = "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0"
 guava = "com.google.guava:guava:32.1.2-jre"
 testContainers-mysql = { module = "org.testcontainers:mysql", version.ref = "testContainers" }
 testContainers-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testContainers" }
+karibu-testing = { module = "com.github.mvysny.kaributesting:karibu-testing-v24", version.ref = "karibu" }
+karibu-spring = { module = "com.github.mvysny.kaributesting:karibu-testing-v10-spring", version.ref = "karibu" }
 
 [plugins]
 jooq = { id = "nu.studer.jooq", version = "8.2.1" }
