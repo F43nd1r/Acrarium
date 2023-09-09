@@ -20,8 +20,9 @@ import com.faendir.acra.dataprovider.AcrariumSort
 import com.faendir.acra.jooq.generated.tables.references.REPORT
 import com.faendir.acra.persistence.TestDataBuilder
 import com.faendir.acra.persistence.app.AppId
+import com.faendir.acra.persistence.app.AppRepository
+import com.faendir.acra.persistence.app.CustomColumn
 import com.faendir.acra.persistence.bug.BugId
-import com.faendir.acra.persistence.version.VersionKey
 import com.vaadin.flow.data.provider.SortDirection
 import org.jooq.JSON
 import org.junit.jupiter.api.BeforeEach
@@ -40,10 +41,9 @@ import kotlin.properties.Delegates
 
 @PersistenceTest
 internal class ReportRepositoryTest(
-    @Autowired
-    private val reportRepository: ReportRepository,
-    @Autowired
-    private val testDataBuilder: TestDataBuilder,
+    @Autowired private val reportRepository: ReportRepository,
+    @Autowired private val appRepository: AppRepository,
+    @Autowired private val testDataBuilder: TestDataBuilder,
 ) {
     private var appId by Delegates.notNull<AppId>()
 
@@ -101,8 +101,7 @@ internal class ReportRepositoryTest(
             testDataBuilder.createReport(appId, date = now.plus(Duration.ofHours(25)))
 
             expectThat(reportRepository.listIds(appId, now.minus(Duration.ofDays(1)), now.plus(Duration.ofDays(1)))).containsExactlyInAnyOrder(
-                reportIn1,
-                reportIn2
+                reportIn1, reportIn2
             )
         }
 
@@ -515,6 +514,12 @@ internal class ReportRepositoryTest(
 
         @Test
         fun `should return all data including custom columns`() {
+            val customColumns = listOf(
+                CustomColumn(name = "nested custom field column name", path = "NESTED_CUSTOM_FIELD"),
+                CustomColumn(name = "custom field column name", path = "CUSTOM_FIELD"),
+                CustomColumn(name = "nested value custom field column name", path = "NESTED_CUSTOM_FIELD.foo"),
+            )
+            appRepository.setCustomColumns(appId, customColumns)
             val bugId = testDataBuilder.createBug(appId)
             val version = testDataBuilder.createVersion(appId)
             val report = Report(
@@ -541,7 +546,7 @@ internal class ReportRepositoryTest(
                 versionFlavor = version.flavor,
             )
             reportRepository.create(report, emptyMap())
-            val provider = reportRepository.getProvider(appId, listOf("NESTED_CUSTOM_FIELD", "CUSTOM_FIELD"))
+            val provider = reportRepository.getProvider(appId, customColumns)
 
             expectThat(provider.fetch(emptySet(), emptyList(), 0, 1).toList().first()).isEqualTo(
                 ReportRow(
@@ -557,16 +562,20 @@ internal class ReportRepositoryTest(
                     versionCode = version.code,
                     versionFlavor = version.flavor,
                     bugId = bugId,
-                    customColumns = listOf("{\"foo\": \"bar\"}", "customField")
+                    customColumns = listOf("{\"foo\": \"bar\"}", "customField", "bar"),
                 )
             )
         }
 
         @Test
         fun `should not fail for missing custom columns`() {
+            val customColumns = listOf(
+                CustomColumn(name = "nested custom field column name", "NESTED_CUSTOM_FIELD"), CustomColumn(name = "custom field column name", "CUSTOM_FIELD")
+            )
+            appRepository.setCustomColumns(appId, customColumns)
             val version = testDataBuilder.createVersion(appId)
             testDataBuilder.createReport(appId, version = version, content = "{\"CUSTOM_FIELD\": \"customField\"}")
-            val provider = reportRepository.getProvider(appId, listOf("NESTED_CUSTOM_FIELD", "CUSTOM_FIELD"))
+            val provider = reportRepository.getProvider(appId, customColumns)
 
             expectThat(provider.fetch(emptySet(), emptyList(), 0, 1).toList().first().customColumns).isEqualTo(listOf(null, "customField"))
         }
@@ -577,10 +586,12 @@ internal class ReportRepositoryTest(
             val r1 = testDataBuilder.createReport(appId, installationId = "a")
             val r2 = testDataBuilder.createReport(appId, installationId = "b")
 
-            expectThat(
-                provider.fetch(emptySet(), listOf(AcrariumSort(ReportRow.Sort.INSTALLATION_ID, SortDirection.ASCENDING)), 0, 10).toList()
-                    .map { it.id }
-            ).isEqualTo(listOf(r1, r2))
+            expectThat(provider.fetch(emptySet(), listOf(AcrariumSort(ReportRow.Sort.INSTALLATION_ID, SortDirection.ASCENDING)), 0, 10).toList().map { it.id }).isEqualTo(
+                listOf(
+                    r1,
+                    r2
+                )
+            )
         }
 
         @Test
@@ -589,14 +600,8 @@ internal class ReportRepositoryTest(
             val r1 = testDataBuilder.createReport(appId, installationId = "a")
             val r2 = testDataBuilder.createReport(appId, installationId = "b")
 
-            expectThat(
-                provider.fetch(emptySet(), listOf(AcrariumSort(ReportRow.Sort.INSTALLATION_ID, SortDirection.ASCENDING)), 0, 1).toList()
-                    .map { it.id })
-                .isEqualTo(listOf(r1))
-            expectThat(
-                provider.fetch(emptySet(), listOf(AcrariumSort(ReportRow.Sort.INSTALLATION_ID, SortDirection.ASCENDING)), 1, 1).toList()
-                    .map { it.id })
-                .isEqualTo(listOf(r2))
+            expectThat(provider.fetch(emptySet(), listOf(AcrariumSort(ReportRow.Sort.INSTALLATION_ID, SortDirection.ASCENDING)), 0, 1).toList().map { it.id }).isEqualTo(listOf(r1))
+            expectThat(provider.fetch(emptySet(), listOf(AcrariumSort(ReportRow.Sort.INSTALLATION_ID, SortDirection.ASCENDING)), 1, 1).toList().map { it.id }).isEqualTo(listOf(r2))
         }
     }
 
@@ -620,10 +625,7 @@ internal class ReportRepositoryTest(
             testDataBuilder.createReport(appId, installationId = "b")
             testDataBuilder.createReport(appId, installationId = "a")
 
-            expectThat(
-                provider.fetch(emptySet(), listOf(AcrariumSort(Installation.Sort.ID, SortDirection.ASCENDING)), 0, 10).toList()
-                    .map { it.id }
-            ).containsExactly("a", "b")
+            expectThat(provider.fetch(emptySet(), listOf(AcrariumSort(Installation.Sort.ID, SortDirection.ASCENDING)), 0, 10).toList().map { it.id }).containsExactly("a", "b")
         }
 
         @Test
@@ -632,14 +634,8 @@ internal class ReportRepositoryTest(
             testDataBuilder.createReport(appId, installationId = "b")
             testDataBuilder.createReport(appId, installationId = "a")
 
-            expectThat(
-                provider.fetch(emptySet(), listOf(AcrariumSort(Installation.Sort.ID, SortDirection.ASCENDING)), 0, 1).toList()
-                    .map { it.id })
-                .containsExactly("a")
-            expectThat(
-                provider.fetch(emptySet(), listOf(AcrariumSort(Installation.Sort.ID, SortDirection.ASCENDING)), 1, 1).toList()
-                    .map { it.id })
-                .containsExactly("b")
+            expectThat(provider.fetch(emptySet(), listOf(AcrariumSort(Installation.Sort.ID, SortDirection.ASCENDING)), 0, 1).toList().map { it.id }).containsExactly("a")
+            expectThat(provider.fetch(emptySet(), listOf(AcrariumSort(Installation.Sort.ID, SortDirection.ASCENDING)), 1, 1).toList().map { it.id }).containsExactly("b")
         }
     }
 }

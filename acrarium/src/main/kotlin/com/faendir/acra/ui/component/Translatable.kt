@@ -66,7 +66,7 @@ open class Translatable<T : Component>(protected val t: T, private val property:
     }
 
     open class Value<T, E : ComponentValueChangeEvent<in T, V>, V>(t: T, property: T.(String) -> Unit, captionId: String, vararg params: Any) :
-        Translatable<T>(t, property, captionId, params), HasValue<E, V> by t
+        Translatable<T>(t, property, captionId, *params), HasValue<E, V> by t
             where T : Component, T : HasValue<E, V> {
 
         override fun with(consumer: T.() -> Unit): Value<T, E, V> {
@@ -76,7 +76,7 @@ open class Translatable<T : Component>(protected val t: T, private val property:
     }
 
     class ValidatedValue<T, E : ComponentValueChangeEvent<in T, V>, V>(t: T, property: T.(String) -> Unit, captionId: String, vararg params: Any) :
-        Value<T, E, V>(t, property, captionId, params), HasValidation by t
+        Value<T, E, V>(t, property, captionId, *params), HasValidation by t
             where T : Component, T : HasValue<E, V>, T : HasValidation {
 
         override fun with(consumer: T.() -> Unit): ValidatedValue<T, E, V> {

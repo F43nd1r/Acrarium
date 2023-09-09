@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,4 +15,17 @@
  */
 package com.faendir.acra.persistence.app
 
-data class CustomColumn(val name: String, val path: String)
+import com.faendir.acra.jooq.generated.tables.references.REPORT
+import org.jooq.Field
+import org.jooq.Index
+import org.jooq.impl.DSL
+
+
+data class CustomColumn(val name: String, val path: String) {
+    val fieldName = "custom_$path"
+    val field = DSL.field(DSL.name(REPORT.name, fieldName))
+    val indexName = "idx_custom_$path"
+}
+
+val Field<*>.isCustomColumn get() = name.startsWith("custom_")
+val Index.isCustomColumnIndex get() = name.startsWith("idx_custom_")

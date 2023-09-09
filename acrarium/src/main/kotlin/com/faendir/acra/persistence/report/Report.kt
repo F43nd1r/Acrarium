@@ -21,6 +21,7 @@ import com.faendir.acra.jooq.generated.tables.references.REPORT
 import com.faendir.acra.persistence.FilterDefinition
 import com.faendir.acra.persistence.SortDefinition
 import com.faendir.acra.persistence.app.AppId
+import com.faendir.acra.persistence.app.CustomColumn
 import com.faendir.acra.persistence.bug.BugId
 import com.faendir.acra.persistence.version.VersionKey
 import org.jooq.Condition
@@ -83,7 +84,7 @@ data class ReportRow(
         class EXCEPTION_CLASS(contains: String) : Filter(REPORT.EXCEPTION_CLASS.contains(contains))
         class MESSAGE(contains: String) : Filter(REPORT.MESSAGE.contains(contains))
         object IS_NOT_SILENT : Filter(REPORT.IS_SILENT.eq(false))
-        class CUSTOM_COLUMN(path: String, contains: String) : Filter(DSL.jsonValue(REPORT.CONTENT, path).cast(String::class.java).contains(contains))
+        class CUSTOM_COLUMN(customColumn: CustomColumn, contains: String) : Filter(customColumn.field.contains(contains))
     }
 
     sealed class Sort(override val field: Field<*>, val index: Index?) : SortDefinition {
@@ -93,6 +94,6 @@ data class ReportRow(
         object IS_SILENT : Sort(REPORT.IS_SILENT, REPORT_IDX_REPORT_IS_SILENT)
         object MARKETING_DEVICE : Sort(REPORT.MARKETING_DEVICE, REPORT_IDX_REPORT_MARKETING_DEVICE)
         object VERSION_CODE : Sort(REPORT.VERSION_CODE, REPORT_IDX_REPORT_VERSION_CODE)
-        class CUSTOM_COLUMN(path: String) : Sort(DSL.jsonValue(REPORT.CONTENT, path), null)
+        class CUSTOM_COLUMN(customColumn: CustomColumn) : Sort(customColumn.field, DSL.index(DSL.name(customColumn.indexName)))
     }
 }

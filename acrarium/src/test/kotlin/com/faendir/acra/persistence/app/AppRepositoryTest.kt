@@ -18,6 +18,7 @@ package com.faendir.acra.persistence.app
 import com.faendir.acra.annotation.PersistenceTest
 import com.faendir.acra.dataprovider.AcrariumDataProvider
 import com.faendir.acra.dataprovider.AcrariumSort
+import com.faendir.acra.jooq.generated.tables.references.REPORT
 import com.faendir.acra.persistence.TestDataBuilder
 import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.persistence.user.Role
@@ -27,6 +28,7 @@ import com.ninjasquad.springmockk.SpykBean
 import com.vaadin.flow.data.provider.SortDirection
 import io.mockk.every
 import io.mockk.verify
+import org.jooq.DSLContext
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -35,21 +37,16 @@ import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.context.SecurityContextImpl
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.test.annotation.DirtiesContext
 import strikt.api.expectThat
 import strikt.assertions.*
 
 @PersistenceTest
 class AppRepositoryTest(
-    @Autowired
-    private val appRepository: AppRepository,
-    @Autowired
-    private val testDataBuilder: TestDataBuilder,
-    @Autowired
-    @SpykBean
-    private val userRepository: UserRepository,
-    @Autowired
-    @MockkBean
-    private val passwordEncoder: PasswordEncoder,
+    @Autowired private val appRepository: AppRepository,
+    @Autowired private val testDataBuilder: TestDataBuilder,
+    @Autowired @SpykBean private val userRepository: UserRepository,
+    @Autowired @MockkBean private val passwordEncoder: PasswordEncoder,
 ) {
     private val appName = "name"
 
@@ -64,12 +61,11 @@ class AppRepositoryTest(
         fun `should find app`() {
             val appId = testDataBuilder.createApp(name = appName)
 
-            expectThat(appRepository.find(appId)).isNotNull()
-                .and {
-                    get { this.id }.isEqualTo(appId)
-                    get { this.name }.isEqualTo(appName)
-                    get { this.reporterUsername }.isNotBlank()
-                }
+            expectThat(appRepository.find(appId)).isNotNull().and {
+                get { this.id }.isEqualTo(appId)
+                get { this.name }.isEqualTo(appName)
+                get { this.reporterUsername }.isNotBlank()
+            }
         }
 
         @Test
@@ -167,10 +163,7 @@ class AppRepositoryTest(
                 SecurityContextImpl(
                     TestingAuthenticationToken(
                         null, null, listOf(
-                            Role.USER,
-                            Permission(app1, Permission.Level.VIEW),
-                            Permission(app2, Permission.Level.EDIT),
-                            Permission(app3, Permission.Level.ADMIN)
+                            Role.USER, Permission(app1, Permission.Level.VIEW), Permission(app2, Permission.Level.EDIT), Permission(app3, Permission.Level.ADMIN)
                         )
                     )
                 )
@@ -189,10 +182,7 @@ class AppRepositoryTest(
                 SecurityContextImpl(
                     TestingAuthenticationToken(
                         null, null, listOf(
-                            Role.ADMIN,
-                            Permission(app1, Permission.Level.VIEW),
-                            Permission(app2, Permission.Level.EDIT),
-                            Permission(app3, Permission.Level.ADMIN)
+                            Role.ADMIN, Permission(app1, Permission.Level.VIEW), Permission(app2, Permission.Level.EDIT), Permission(app3, Permission.Level.ADMIN)
                         )
                     )
                 )
@@ -246,17 +236,85 @@ class AppRepositoryTest(
     }
 
     @Nested
-    inner class SetCustomColumns {
+    @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+    inner class SetCustomColumns(
+        @Autowired private val jooq: DSLContext,
+    ) {
         @Test
-        fun `should overwrite custom columns for app`() {
+        fun `should create custom columns and create report columns and indexes`() {
             val app1 = testDataBuilder.createApp()
-            testDataBuilder.createCustomColumn(app1)
 
             val columns = listOf(CustomColumn("c1", "p1"), CustomColumn("c2", "p2"))
 
             appRepository.setCustomColumns(app1, columns)
 
             expectThat(appRepository.getCustomColumns(app1)).containsExactlyInAnyOrder(columns)
+            val meta = jooq.meta().getTables(REPORT.name).first()
+            expectThat(meta.fields().toList().map { it.name }).contains("custom_p1", "custom_p2")
+            expectThat(meta.indexes.toList().map { it.name }).contains("idx_custom_p1", "idx_custom_p2")
+        }
+
+        @Test
+        fun `should update custom column name while keeping report columns and indexes`() {
+            val app1 = testDataBuilder.createApp()
+
+            appRepository.setCustomColumns(app1, listOf(CustomColumn("old name 1", "p1"), CustomColumn("old name 2", "p2")))
+
+            val columns = listOf(CustomColumn("c1", "p1"), CustomColumn("c2", "p2"))
+
+            appRepository.setCustomColumns(app1, columns)
+
+            expectThat(appRepository.getCustomColumns(app1)).containsExactlyInAnyOrder(columns)
+            val meta = jooq.meta().getTables(REPORT.name).first()
+            expectThat(meta.fields().toList().map { it.name }).contains("custom_p1", "custom_p2")
+            expectThat(meta.indexes.toList().map { it.name }).contains("idx_custom_p1", "idx_custom_p2")
+        }
+
+        @Test
+        fun `should add custom column and create report column and index`() {
+            val app1 = testDataBuilder.createApp()
+
+            appRepository.setCustomColumns(app1, listOf(CustomColumn("c1", "p1")))
+
+            val columns = listOf(CustomColumn("c1", "p1"), CustomColumn("c2", "p2"))
+
+            appRepository.setCustomColumns(app1, columns)
+
+            expectThat(appRepository.getCustomColumns(app1)).containsExactlyInAnyOrder(columns)
+            val meta = jooq.meta().getTables(REPORT.name).first()
+            expectThat(meta.fields().toList().map { it.name }).contains("custom_p1", "custom_p2")
+            expectThat(meta.indexes.toList().map { it.name }).contains("idx_custom_p1", "idx_custom_p2")
+        }
+
+        @Test
+        fun `should remove custom column and remove report column and index`() {
+            val app1 = testDataBuilder.createApp()
+
+            appRepository.setCustomColumns(app1, listOf(CustomColumn("c1", "p1"), CustomColumn("c2", "p2")))
+
+            val columns = listOf(CustomColumn("c1", "p1"))
+
+            appRepository.setCustomColumns(app1, columns)
+
+            expectThat(appRepository.getCustomColumns(app1)).containsExactlyInAnyOrder(columns)
+            val meta = jooq.meta().getTables(REPORT.name).first()
+            expectThat(meta.fields().toList().map { it.name }).contains("custom_p1").and { doesNotContain("custom_p2") }
+            expectThat(meta.indexes.toList().map { it.name }).contains("idx_custom_p1").and { doesNotContain("idx_custom_p2") }
+        }
+
+        @Test
+        fun `should not touch any other columns or indexes`() {
+            val originalMeta = jooq.meta().getTables(REPORT.name).first()
+            val originalFields = originalMeta.fields()
+            val originalIndexes = originalMeta.indexes
+
+            val app1 = testDataBuilder.createApp()
+
+            appRepository.setCustomColumns(app1, listOf())
+
+            val meta = jooq.meta().getTables(REPORT.name).first()
+            expectThat(meta.fields().map { it.toString() }).isEqualTo(originalFields.map { it.toString() })
+            expectThat(meta.indexes.map { it.toString() }).isEqualTo(originalIndexes.map { it.toString() })
         }
     }
 
@@ -282,17 +340,14 @@ class AppRepositoryTest(
             SecurityContextHolder.setContext(
                 SecurityContextImpl(
                     TestingAuthenticationToken(
-                        null,
-                        null,
-                        listOf(Role.ADMIN, Permission(app3, Permission.Level.NONE))
+                        null, null, listOf(Role.ADMIN, Permission(app3, Permission.Level.NONE))
                     )
                 )
             )
 
             expectThat(provider.size(emptySet())).isEqualTo(2)
             expectThat(provider.fetch(emptySet(), emptyList(), 0, 10).toList()).containsExactlyInAnyOrder(
-                AppStats(app1, "app1", 3, 2),
-                AppStats(app2, "app2", 0, 0)
+                AppStats(app1, "app1", 3, 2), AppStats(app2, "app2", 0, 0)
             )
         }
 
@@ -301,23 +356,16 @@ class AppRepositoryTest(
             SecurityContextHolder.setContext(
                 SecurityContextImpl(
                     TestingAuthenticationToken(
-                        null,
-                        null,
-                        listOf(Role.ADMIN)
+                        null, null, listOf(Role.ADMIN)
                     )
                 )
             )
             val app1 = testDataBuilder.createApp(name = "app1")
             val app2 = testDataBuilder.createApp(name = "app2")
 
-            expectThat(
-                provider.fetch(
-                    emptySet(),
-                    listOf(AcrariumSort(AppStats.Sort.NAME, SortDirection.ASCENDING)),
-                    0,
-                    10
-                ).toList().map { it.id })
-                .containsExactly(app1, app2)
+            expectThat(provider.fetch(
+                emptySet(), listOf(AcrariumSort(AppStats.Sort.NAME, SortDirection.ASCENDING)), 0, 10
+            ).toList().map { it.id }).containsExactly(app1, app2)
         }
 
         @Test
@@ -325,31 +373,19 @@ class AppRepositoryTest(
             SecurityContextHolder.setContext(
                 SecurityContextImpl(
                     TestingAuthenticationToken(
-                        null,
-                        null,
-                        listOf(Role.ADMIN)
+                        null, null, listOf(Role.ADMIN)
                     )
                 )
             )
             val app1 = testDataBuilder.createApp(name = "app1")
             val app2 = testDataBuilder.createApp(name = "app2")
 
-            expectThat(
-                provider.fetch(
-                    emptySet(),
-                    listOf(AcrariumSort(AppStats.Sort.NAME, SortDirection.ASCENDING)),
-                    0,
-                    1
-                ).toList().map { it.id })
-                .containsExactly(app1)
-            expectThat(
-                provider.fetch(
-                    emptySet(),
-                    listOf(AcrariumSort(AppStats.Sort.NAME, SortDirection.ASCENDING)),
-                    1,
-                    1
-                ).toList().map { it.id })
-                .containsExactly(app2)
+            expectThat(provider.fetch(
+                emptySet(), listOf(AcrariumSort(AppStats.Sort.NAME, SortDirection.ASCENDING)), 0, 1
+            ).toList().map { it.id }).containsExactly(app1)
+            expectThat(provider.fetch(
+                emptySet(), listOf(AcrariumSort(AppStats.Sort.NAME, SortDirection.ASCENDING)), 1, 1
+            ).toList().map { it.id }).containsExactly(app2)
         }
     }
 }

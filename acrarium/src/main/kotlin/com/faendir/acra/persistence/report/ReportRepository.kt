@@ -22,6 +22,7 @@ import com.faendir.acra.jooq.generated.tables.references.ATTACHMENT
 import com.faendir.acra.jooq.generated.tables.references.REPORT
 import com.faendir.acra.persistence.*
 import com.faendir.acra.persistence.app.AppId
+import com.faendir.acra.persistence.app.CustomColumn
 import com.faendir.acra.persistence.bug.BugId
 import mu.KotlinLogging
 import org.jooq.*
@@ -115,16 +116,16 @@ class ReportRepository(
     }
 
     @PreAuthorize("hasViewPermission(#appId)")
-    fun getProvider(appId: AppId, customColumns: List<String>) = getProvider(REPORT.APP_ID.eq(appId), customColumns)
+    fun getProvider(appId: AppId, customColumns: List<CustomColumn>) = getProvider(REPORT.APP_ID.eq(appId), customColumns)
 
     @PreAuthorize("hasViewPermission(#appId)")
-    fun getProvider(appId: AppId, bugId: BugId, customColumns: List<String>) = getProvider(REPORT.BUG_ID.eq(bugId), customColumns)
+    fun getProvider(appId: AppId, bugId: BugId, customColumns: List<CustomColumn>) = getProvider(REPORT.BUG_ID.eq(bugId), customColumns)
 
     @PreAuthorize("hasViewPermission(#appId)")
-    fun getProvider(appId: AppId, installationId: String, customColumns: List<String>) =
+    fun getProvider(appId: AppId, installationId: String, customColumns: List<CustomColumn>) =
         getProvider(REPORT.INSTALLATION_ID.eq(installationId), customColumns)
 
-    private fun getProvider(condition: Condition, customColumns: List<String>) =
+    private fun getProvider(condition: Condition, customColumns: List<CustomColumn>) =
         object : AcrariumDataProvider<ReportRow, ReportRow.Filter, ReportRow.Sort>() {
             override fun fetch(filters: Set<ReportRow.Filter>, sort: List<AcrariumSort<ReportRow.Sort>>, offset: Int, limit: Int): Stream<ReportRow> {
                 return jooq.select(
@@ -141,7 +142,7 @@ class ReportRepository(
                     REPORT.VERSION_FLAVOR,
                     REPORT.BUG_ID,
                     if (customColumns.isNotEmpty()) {
-                        DSL.row(customColumns.map { DSL.function("JSON_UNQUOTE", String::class.java, DSL.jsonValue(REPORT.CONTENT, "$.$it")) })
+                        DSL.row(customColumns.map { it.field })
                             .mapping { array ->
                                 @Suppress("UNCHECKED_CAST")
                                 array.toList() as List<String>

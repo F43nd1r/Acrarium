@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2020-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,8 +105,8 @@ class ReportList(
             }
             for ((index, column) in customColumns.withIndex()) {
                 column({ it.customColumns[index] }) {
-                    setSortable(ReportRow.Sort.CUSTOM_COLUMN(column.path))
-                    setFilterableContains({ ReportRow.Filter.CUSTOM_COLUMN(column.path, it) }, Messages.ONE_ARG, column.name)
+                    setSortable(ReportRow.Sort.CUSTOM_COLUMN(column))
+                    setFilterableContains({ ReportRow.Filter.CUSTOM_COLUMN(column, it) }, Messages.ONE_ARG, column.name)
                     setCaption(Messages.ONE_ARG, column.name)
                 }
             }
@@ -140,12 +140,12 @@ class ReportList(
     ) {
         fun create(
             app: AppId,
-            getDataProvider: (ReportRepository, appId: AppId, customColumns: List<String>) -> AcrariumDataProvider<ReportRow, ReportRow.Filter, ReportRow.Sort>
+            getDataProvider: (ReportRepository, appId: AppId, customColumns: List<CustomColumn>) -> AcrariumDataProvider<ReportRow, ReportRow.Filter, ReportRow.Sort>
         ): ReportList {
             val customColumns = appRepository.getCustomColumns(app)
             return ReportList(
                 app,
-                getDataProvider(reportRepository, app, customColumns.map { it.path }),
+                getDataProvider(reportRepository, app, customColumns),
                 avatarService,
                 localSettings,
                 versionRepository,
