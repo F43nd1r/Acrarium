@@ -37,7 +37,6 @@ import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.context.SecurityContextImpl
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.test.annotation.DirtiesContext
 import strikt.api.expectThat
 import strikt.assertions.*
 
@@ -236,7 +235,6 @@ class AppRepositoryTest(
     }
 
     @Nested
-    @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
     inner class SetCustomColumns(
         @Autowired private val jooq: DSLContext,
     ) {
@@ -304,17 +302,14 @@ class AppRepositoryTest(
 
         @Test
         fun `should not touch any other columns or indexes`() {
-            val originalMeta = jooq.meta().getTables(REPORT.name).first()
-            val originalFields = originalMeta.fields()
-            val originalIndexes = originalMeta.indexes
 
             val app1 = testDataBuilder.createApp()
 
             appRepository.setCustomColumns(app1, listOf())
 
             val meta = jooq.meta().getTables(REPORT.name).first()
-            expectThat(meta.fields().map { it.toString() }).isEqualTo(originalFields.map { it.toString() })
-            expectThat(meta.indexes.map { it.toString() }).isEqualTo(originalIndexes.map { it.toString() })
+            expectThat(meta.fields().map { it.name }).isEqualTo(REPORT.fields().map { it.name })
+            expectThat(meta.indexes.map { it.name }).isEqualTo(REPORT.indexes.map { it.name })
         }
     }
 

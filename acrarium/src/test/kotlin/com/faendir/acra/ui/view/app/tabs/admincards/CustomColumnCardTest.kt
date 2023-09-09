@@ -22,6 +22,7 @@ import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.app.AppRepository
 import com.faendir.acra.persistence.app.CustomColumn
 import com.faendir.acra.persistence.user.Permission
+import com.faendir.acra.persistence.user.Role
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.grid.LocalizedColumn
 import com.faendir.acra.ui.component.grid.renderer.ButtonRenderer
@@ -63,8 +64,8 @@ class CustomColumnCardTest(
     }
 
     @Test
-    fun `should show edit and delete with EDIT permission`() {
-        withAuth(Permission(appId, Permission.Level.EDIT)) {
+    fun `should show edit and delete with ADMIN role`() {
+        withAuth(Role.ADMIN) {
             navigateTo(AdminTab::class, AppView.getNavigationParams(appId))
             val customColumnCard = _get<CustomColumnCard>()
             val grid = customColumnCard._get<Grid<*>>()
@@ -75,7 +76,7 @@ class CustomColumnCardTest(
 
     @Test
     fun `should be able to add custom column`() {
-        withAuth(Permission(appId, Permission.Level.EDIT)) {
+        withAuth(Role.ADMIN) {
             navigateTo(AdminTab::class, AppView.getNavigationParams(appId))
             val customColumnCard = _get<CustomColumnCard>()
             val grid = customColumnCard._get<Grid<CustomColumn>>()
@@ -94,7 +95,7 @@ class CustomColumnCardTest(
     @Test
     fun `should be able to edit custom column`() {
         val customColumn = testDataBuilder.createCustomColumn(appId)
-        withAuth(Permission(appId, Permission.Level.EDIT)) {
+        withAuth(Role.ADMIN) {
             navigateTo(AdminTab::class, AppView.getNavigationParams(appId))
             val customColumnCard = _get<CustomColumnCard>()
             val grid = customColumnCard._get<Grid<CustomColumn>>()
@@ -116,7 +117,7 @@ class CustomColumnCardTest(
     @Test
     fun `should be able to delete custom column`() {
         testDataBuilder.createCustomColumn(appId)
-        withAuth(Permission(appId, Permission.Level.EDIT)) {
+        withAuth(Role.ADMIN) {
             navigateTo(AdminTab::class, AppView.getNavigationParams(appId))
             val customColumnCard = _get<CustomColumnCard>()
             val grid = customColumnCard._get<Grid<CustomColumn>>()
