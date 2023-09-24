@@ -55,6 +55,7 @@ import kotlin.math.max
 @Route(value = "app/:$PARAM_APP/bug/:$PARAM_BUG/report/:$PARAM_REPORT", layout = MainView::class)
 @LogicalParent(ReportTab::class)
 @RequiresPermission(Permission.Level.VIEW)
+@RequiresPermission(Permission.Level.VIEW)
 class ReportView(
     private val reportRepository: ReportRepository,
     versionRepository: VersionRepository,

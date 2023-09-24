@@ -15,48 +15,25 @@
  */
 package com.faendir.acra.ui.view.report
 
+import com.faendir.acra.common.UiParams
 import com.faendir.acra.common.UiTest
-import com.faendir.acra.common.navigateTo
 import com.faendir.acra.persistence.TestDataBuilder
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.bug.BugId
 import com.faendir.acra.persistence.user.Permission
-import com.faendir.acra.withAuth
-import com.github.mvysny.kaributesting.v10._expectNone
-import com.github.mvysny.kaributesting.v10._expectOne
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import com.faendir.acra.persistence.user.Role
 import org.springframework.beans.factory.annotation.Autowired
 
 class ReportViewTest(
-    @Autowired private val testDataBuilder: TestDataBuilder
+    @Autowired private val testDataBuilder: TestDataBuilder,
 ) : UiTest() {
-    private var appId: AppId = AppId(0)
-    private var bugId: BugId = BugId(0)
-    private lateinit var reportId: String
+    private val appId: AppId = testDataBuilder.createApp()
+    private val bugId: BugId = testDataBuilder.createBug(appId)
+    private val reportId: String = testDataBuilder.createReport(appId, bugId)
 
-    @BeforeEach
-    fun setup() {
-        appId = testDataBuilder.createApp()
-        bugId = testDataBuilder.createBug(appId)
-        reportId = testDataBuilder.createReport(appId, bugId)
-    }
-
-    @Test
-    fun `should load with view permission`() {
-        withAuth(Permission(appId, Permission.Level.VIEW)) {
-            navigateTo(ReportView::class, ReportView.getNavigationParams(appId, bugId, reportId))
-
-            _expectOne<ReportView>()
-        }
-    }
-
-    @Test
-    fun `should not load without view permission`() {
-        withAuth {
-            navigateTo(ReportView::class, ReportView.getNavigationParams(appId, bugId, reportId))
-
-            _expectNone<ReportView>()
-        }
-    }
+    override fun setup() = UiParams(
+        route = ReportView::class,
+        routeParameters = ReportView.getNavigationParams(appId, bugId, reportId),
+        requiredAuthorities = setOf(Role.USER, Permission(appId, Permission.Level.VIEW))
+    )
 }

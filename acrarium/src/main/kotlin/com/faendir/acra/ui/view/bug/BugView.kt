@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import com.faendir.acra.navigation.*
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.bug.BugId
 import com.faendir.acra.persistence.bug.BugRepository
+import com.faendir.acra.persistence.user.Permission
+import com.faendir.acra.security.RequiresPermission
 import com.faendir.acra.ui.component.tabs.TabView
 import com.faendir.acra.ui.view.app.tabs.BugTab
 import com.faendir.acra.ui.view.bug.tabs.AdminTab
@@ -39,6 +41,7 @@ import com.vaadin.flow.router.RoutePrefix
 @RoutePrefix("app/:$PARAM_APP/bug/:$PARAM_BUG")
 @ParentLayout(MainView::class)
 @LogicalParent(BugTab::class)
+@RequiresPermission(Permission.Level.VIEW)
 class BugView(
     bugRepository: BugRepository,
     routeParams: RouteParams,

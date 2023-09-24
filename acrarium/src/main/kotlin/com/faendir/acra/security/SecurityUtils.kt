@@ -17,7 +17,10 @@ package com.faendir.acra.security
 
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.user.Role
+import com.vaadin.flow.server.auth.AnonymousAllowed
 import org.springframework.core.annotation.AnnotationUtils
+import org.springframework.core.annotation.MergedAnnotations
+import org.springframework.core.annotation.RepeatableContainers
 import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
@@ -51,8 +54,12 @@ object SecurityUtils {
 
     @JvmStatic
     fun hasAccess(getApp: () -> AppId, target: Class<*>): Boolean {
-        return AnnotationUtils.findAnnotation(target, RequiresRole::class.java)?.let { hasRole(it.value) } ?: true &&
-                AnnotationUtils.findAnnotation(target, RequiresPermission::class.java)?.let { hasPermission(getApp(), it.value) } ?: true
+        val appId by lazy(getApp)
+        return AnnotationUtils.findAnnotation(target, AnonymousAllowed::class.java) != null ||
+                MergedAnnotations.from(target, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.standardRepeatables())
+                    .stream(RequiresRole::class.java).allMatch { hasRole(it.synthesize().value) } &&
+                MergedAnnotations.from(target, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.standardRepeatables())
+                    .stream(RequiresPermission::class.java).allMatch { hasPermission(appId, it.synthesize().value) }
     }
 
     private fun getPermission(
@@ -60,6 +67,6 @@ object SecurityUtils {
         permissionStream: Collection<com.faendir.acra.persistence.user.Permission>,
         isAdmin: () -> Boolean
     ): com.faendir.acra.persistence.user.Permission.Level =
-        permissionStream.firstOrNull { it.appId == appId }?.level
+        permissionStream.filter { it.appId == appId }.maxByOrNull { it.level }?.level
             ?: if (isAdmin()) com.faendir.acra.persistence.user.Permission.Level.ADMIN else com.faendir.acra.persistence.user.Permission.Level.NONE
 }

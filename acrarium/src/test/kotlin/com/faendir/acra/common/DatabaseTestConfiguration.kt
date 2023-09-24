@@ -15,11 +15,14 @@
  */
 package com.faendir.acra.common
 
+import com.faendir.acra.jooq.generated.Acrarium
 import com.faendir.acra.persistence.jooq.JooqConfigurationCustomizer
+import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.boot.jdbc.DataSourceBuilder
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.test.context.TestExecutionListener
 import javax.sql.DataSource
 
 @TestConfiguration
@@ -31,4 +34,17 @@ class DatabaseTestConfiguration {
         .driverClassName("org.testcontainers.jdbc.ContainerDatabaseDriver")
         .url("jdbc:tc:mysql:8.0:////test?serverTimezone=UTC&TC_MY_CNF=mysql.conf.d")
         .build()
+}
+
+class DatabaseCleanupTestExecutionListener : TestExecutionListener {
+    override fun afterTestMethod(testContext: org.springframework.test.context.TestContext) {
+        try {
+            val jooq = testContext.applicationContext.getBean(org.jooq.DSLContext::class.java)
+            Acrarium.ACRARIUM.tables.forEach {
+                jooq.deleteFrom(it).execute()
+            }
+        } catch (e: NoSuchBeanDefinitionException) {
+            // not a database test
+        }
+    }
 }

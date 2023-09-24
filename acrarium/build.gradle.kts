@@ -1,8 +1,7 @@
 import com.vaadin.gradle.vaadin
-import org.jooq.meta.jaxb.EmbeddableDefinitionType
-import org.jooq.meta.jaxb.EmbeddableField
 import org.jooq.meta.jaxb.ForcedType
 import org.jooq.meta.jaxb.Property
+
 buildscript {
     configurations["classpath"].resolutionStrategy.eachDependency {
         if (requested.group == "org.jooq") {
@@ -63,7 +62,7 @@ dependencies {
     jooqGenerator(projects.jooqHelper)
 }
 
-val messagesOutput = file("$buildDir/generated/source/gradle/main")
+val messagesOutput = file("${layout.buildDirectory.get()}/generated/source/gradle/main")
 
 sourceSets {
     main {
@@ -154,7 +153,7 @@ jooq {
                     }
                     target.apply {
                         packageName = "com.faendir.acra.jooq.generated"
-                        directory = "$buildDir/generated/source/jooq/main"
+                        directory = "${layout.buildDirectory.get()}/generated/source/jooq/main"
                     }
                     generate.apply {
                         isImmutableInterfaces = true

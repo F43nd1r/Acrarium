@@ -28,12 +28,10 @@ import com.faendir.acra.ui.component.grid.LocalizedColumn
 import com.faendir.acra.ui.component.grid.renderer.ButtonRenderer
 import com.faendir.acra.ui.view.app.AppView
 import com.faendir.acra.ui.view.app.tabs.AdminTab
-import com.faendir.acra.withAuth
 import com.github.mvysny.kaributesting.v10.*
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.textfield.TextField
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import strikt.api.expectThat
@@ -44,29 +42,27 @@ import strikt.assertions.isEqualTo
 class CustomColumnCardTest(
     @Autowired private val testDataBuilder: TestDataBuilder,
     @Autowired private val appRepository: AppRepository,
-) : UiTest() {
-    private var appId = AppId(0)
+) : UiTest(
+) {
+    private var appId: AppId = testDataBuilder.createApp()
 
-    @BeforeEach
-    fun setup() {
-        appId = testDataBuilder.createApp()
-    }
+    override fun setup() = UiParams(
+        route = AdminTab::class,
+        routeParameters = AppView.getNavigationParams(appId),
+        requiredAuthorities = setOf(Role.USER, Permission(appId, Permission.Level.VIEW))
+    )
 
     @Test
-    fun `should not show edit or delete with VIEW permission`() {
-        withAuth(Permission(appId, Permission.Level.VIEW)) {
-            navigateTo(AdminTab::class, AppView.getNavigationParams(appId))
-            val customColumnCard = _get<CustomColumnCard>()
-            val grid = customColumnCard._get<Grid<*>>()
+    fun `should not show edit or delete without ADMIN role`() {
+        val customColumnCard = _get<CustomColumnCard>()
+        val grid = customColumnCard._get<Grid<*>>()
 
-            grid._expectNone<LocalizedColumn<*>> { rendererIs(ButtonRenderer::class) }
-        }
+        grid._expectNone<LocalizedColumn<*>> { rendererIs(ButtonRenderer::class) }
     }
 
     @Test
     fun `should show edit and delete with ADMIN role`() {
         withAuth(Role.ADMIN) {
-            navigateTo(AdminTab::class, AppView.getNavigationParams(appId))
             val customColumnCard = _get<CustomColumnCard>()
             val grid = customColumnCard._get<Grid<*>>()
 
@@ -77,7 +73,6 @@ class CustomColumnCardTest(
     @Test
     fun `should be able to add custom column`() {
         withAuth(Role.ADMIN) {
-            navigateTo(AdminTab::class, AppView.getNavigationParams(appId))
             val customColumnCard = _get<CustomColumnCard>()
             val grid = customColumnCard._get<Grid<CustomColumn>>()
             customColumnCard._get<Translatable<Button>> { captionId = Messages.ADD_COLUMN }.content.click()
@@ -96,7 +91,6 @@ class CustomColumnCardTest(
     fun `should be able to edit custom column`() {
         val customColumn = testDataBuilder.createCustomColumn(appId)
         withAuth(Role.ADMIN) {
-            navigateTo(AdminTab::class, AppView.getNavigationParams(appId))
             val customColumnCard = _get<CustomColumnCard>()
             val grid = customColumnCard._get<Grid<CustomColumn>>()
             grid._clickRenderer(0, "edit")
@@ -118,7 +112,6 @@ class CustomColumnCardTest(
     fun `should be able to delete custom column`() {
         testDataBuilder.createCustomColumn(appId)
         withAuth(Role.ADMIN) {
-            navigateTo(AdminTab::class, AppView.getNavigationParams(appId))
             val customColumnCard = _get<CustomColumnCard>()
             val grid = customColumnCard._get<Grid<CustomColumn>>()
             grid._clickRenderer(0, "delete")

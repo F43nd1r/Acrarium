@@ -15,14 +15,15 @@
  */
 package com.faendir.acra.ui.view.app.tabs.admincards
 
+import com.faendir.acra.common.UiParams
 import com.faendir.acra.common.UiTest
 import com.faendir.acra.common.captionId
-import com.faendir.acra.common.navigateTo
 import com.faendir.acra.common.rendererIs
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.persistence.TestDataBuilder
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.user.Permission
+import com.faendir.acra.persistence.user.Role
 import com.faendir.acra.persistence.version.Version
 import com.faendir.acra.persistence.version.VersionRepository
 import com.faendir.acra.ui.component.Translatable
@@ -32,14 +33,12 @@ import com.faendir.acra.ui.component.grid.LocalizedColumn
 import com.faendir.acra.ui.component.grid.renderer.ButtonRenderer
 import com.faendir.acra.ui.view.app.AppView
 import com.faendir.acra.ui.view.app.tabs.AdminTab
-import com.faendir.acra.withAuth
 import com.github.mvysny.kaributesting.v10.*
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.textfield.NumberField
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.component.upload.Upload
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import strikt.api.expectThat
@@ -50,28 +49,25 @@ class VersionCardTest(
     @Autowired private val testDataBuilder: TestDataBuilder,
     @Autowired private val versionRepository: VersionRepository,
 ) : UiTest() {
-    private var appId = AppId(0)
+    private val appId: AppId = testDataBuilder.createApp()
 
-    @BeforeEach
-    fun setup() {
-        appId = testDataBuilder.createApp()
-    }
+    override fun setup() = UiParams(
+        route = AdminTab::class,
+        routeParameters = AppView.getNavigationParams(appId),
+        requiredAuthorities = setOf(Role.USER, Permission(appId, Permission.Level.VIEW))
+    )
 
     @Test
     fun `should not show edit or delete with VIEW permission`() {
-        withAuth(Permission(appId, Permission.Level.VIEW)) {
-            navigateTo(AdminTab::class, AppView.getNavigationParams(appId))
-            val versionCard = _get<VersionCard>()
-            val grid = versionCard._get<Grid<*>>()
+        val versionCard = _get<VersionCard>()
+        val grid = versionCard._get<Grid<*>>()
 
-            grid._expectNone<LocalizedColumn<*>> { rendererIs(ButtonRenderer::class) }
-        }
+        grid._expectNone<LocalizedColumn<*>> { rendererIs(ButtonRenderer::class) }
     }
 
     @Test
     fun `should show edit and delete with EDIT permission`() {
         withAuth(Permission(appId, Permission.Level.EDIT)) {
-            navigateTo(AdminTab::class, AppView.getNavigationParams(appId))
             val versionCard = _get<VersionCard>()
             val grid = versionCard._get<Grid<*>>()
 
@@ -82,7 +78,6 @@ class VersionCardTest(
     @Test
     fun `should be able to create version`() {
         withAuth(Permission(appId, Permission.Level.EDIT)) {
-            navigateTo(AdminTab::class, AppView.getNavigationParams(appId))
             val versionCard = _get<VersionCard>()
             versionCard._get<Translatable<Button>> { captionId = Messages.NEW_VERSION }.content.click()
 
@@ -103,7 +98,6 @@ class VersionCardTest(
     fun `should be able to edit version`() {
         val versionKey = testDataBuilder.createVersion(appId)
         withAuth(Permission(appId, Permission.Level.EDIT)) {
-            navigateTo(AdminTab::class, AppView.getNavigationParams(appId))
             val versionCard = _get<VersionCard>()
             val grid = versionCard._get<Grid<*>>()
             val version = versionRepository.find(appId, versionKey)!!
@@ -135,7 +129,6 @@ class VersionCardTest(
     fun `should be able to delete version`() {
         val versionKey = testDataBuilder.createVersion(appId)
         withAuth(Permission(appId, Permission.Level.EDIT)) {
-            navigateTo(AdminTab::class, AppView.getNavigationParams(appId))
             val versionCard = _get<VersionCard>()
             val grid = versionCard._get<Grid<*>>()
 

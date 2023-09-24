@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2017-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import com.faendir.acra.navigation.PARAM_APP
 import com.faendir.acra.navigation.PARAM_INSTALLATION
 import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.persistence.app.AppId
+import com.faendir.acra.persistence.user.Permission
+import com.faendir.acra.security.RequiresPermission
 import com.faendir.acra.ui.component.tabs.TabView
 import com.faendir.acra.ui.view.app.tabs.InstallationTab
 import com.faendir.acra.ui.view.installation.tabs.ReportTab
@@ -40,6 +42,7 @@ import com.vaadin.flow.spring.annotation.UIScope
 @RoutePrefix("app/:$PARAM_APP/installation/:$PARAM_INSTALLATION")
 @ParentLayout(MainView::class)
 @LogicalParent(InstallationTab::class)
+@RequiresPermission(Permission.Level.VIEW)
 class InstallationView(
     routeParams: RouteParams,
 ) : TabView(

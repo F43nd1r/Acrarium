@@ -15,68 +15,57 @@
  */
 package com.faendir.acra.ui.view.bug.tabs
 
+import com.faendir.acra.common.UiParams
 import com.faendir.acra.common.UiTest
 import com.faendir.acra.common.captionId
-import com.faendir.acra.common.navigateTo
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.persistence.TestDataBuilder
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.bug.BugId
 import com.faendir.acra.persistence.report.ReportRow
 import com.faendir.acra.persistence.user.Permission
+import com.faendir.acra.persistence.user.Role
 import com.faendir.acra.ui.component.grid.LocalizedColumn
 import com.faendir.acra.ui.view.bug.BugView
-import com.faendir.acra.withAuth
 import com.github.mvysny.kaributesting.v10._expectNone
 import com.github.mvysny.kaributesting.v10._expectOne
 import com.github.mvysny.kaributesting.v10._get
 import com.vaadin.flow.component.grid.Grid
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
 class ReportTabTest(
-    @Autowired private val testDataBuilder: TestDataBuilder
+    @Autowired private val testDataBuilder: TestDataBuilder,
 ) : UiTest() {
+    private val appId: AppId = testDataBuilder.createApp()
+    private val bugId: BugId = testDataBuilder.createBug(appId)
+    private val reportId: String = testDataBuilder.createReport(appId, bugId)
 
-    private var appId: AppId = AppId(0)
-    private var bugId: BugId = BugId(0)
-    private lateinit var reportId: String
-
-    @BeforeEach
-    fun setup() {
-        appId = testDataBuilder.createApp()
-        bugId = testDataBuilder.createBug(appId)
-        reportId = testDataBuilder.createReport(appId, bugId)
-    }
-
+    override fun setup() = UiParams(
+        route = ReportTab::class,
+        routeParameters = BugView.getNavigationParams(appId, bugId),
+        requiredAuthorities = setOf(Role.USER, Permission(appId, Permission.Level.VIEW))
+    )
 
     @Test
     fun `should show report list`() {
-        withAuth(Permission(appId, Permission.Level.VIEW)) {
-            navigateTo(ReportTab::class, BugView.getNavigationParams(appId, bugId))
-            val grid = _get<Grid<ReportRow>>()
+        val grid = _get<Grid<ReportRow>>()
 
-            expectThat(grid._get(0).id).isEqualTo(reportId)
-        }
+        expectThat(grid._get(0).id).isEqualTo(reportId)
     }
 
     @Test
     fun `should show not show delete column with VIEW permission`() {
-        withAuth(Permission(appId, Permission.Level.VIEW)) {
-            navigateTo(ReportTab::class, BugView.getNavigationParams(appId, bugId))
-            val grid = _get<Grid<ReportRow>>()
+        val grid = _get<Grid<ReportRow>>()
 
-            grid._expectNone<LocalizedColumn<*>> { captionId = Messages.DELETE }
-        }
+        grid._expectNone<LocalizedColumn<*>> { captionId = Messages.DELETE }
     }
 
     @Test
     fun `should show delete column with EDIT permission`() {
         withAuth(Permission(appId, Permission.Level.EDIT)) {
-            navigateTo(ReportTab::class, BugView.getNavigationParams(appId, bugId))
             val grid = _get<Grid<ReportRow>>()
 
             grid._expectOne<LocalizedColumn<*>> { captionId = Messages.DELETE }

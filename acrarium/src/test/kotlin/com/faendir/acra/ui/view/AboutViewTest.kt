@@ -15,27 +15,10 @@
  */
 package com.faendir.acra.ui.view
 
+import com.faendir.acra.common.UiParams
 import com.faendir.acra.common.UiTest
-import com.faendir.acra.withAuth
-import com.github.mvysny.kaributesting.v10._expectNone
-import com.github.mvysny.kaributesting.v10._expectOne
-import com.github.mvysny.kaributools.navigateTo
-import org.junit.jupiter.api.Test
+import com.faendir.acra.persistence.user.Role
 
 class AboutViewTest : UiTest() {
-    @Test
-    fun `should load`() {
-        withAuth {
-            navigateTo(AboutView::class)
-
-            _expectOne<AboutView>()
-        }
-    }
-
-    @Test
-    fun `should require login`() {
-        navigateTo(AboutView::class)
-
-        _expectNone<AboutView>()
-    }
+    override fun setup() = UiParams(route = AboutView::class, requiredAuthorities = setOf(Role.USER))
 }

@@ -18,11 +18,8 @@ package com.faendir.acra.common
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.component.grid.LocalizedColumn
 import com.github.mvysny.kaributesting.v10.SearchSpec
-import com.vaadin.flow.component.Component
-import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.grid.Grid.Column
 import com.vaadin.flow.data.renderer.Renderer
-import com.vaadin.flow.router.RouteParameters
 import java.util.function.Predicate
 import kotlin.reflect.KClass
 
@@ -47,10 +44,6 @@ var <T : LocalizedColumn<*>> SearchSpec<T>.captionId: String
             override fun toString() = "captionId==$value"
         })
     }
-
-fun navigateTo(route: KClass<out Component>, parameters: Map<String, String>) {
-    UI.getCurrent().navigate(route.java, RouteParameters(parameters))
-}
 
 fun <T : Column<*>> SearchSpec<T>.rendererIs(renderer: KClass<out Renderer<*>>) {
     predicates.add(object : Predicate<T> {

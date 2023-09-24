@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2021-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2021-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ class AuthenticationUIListener(private val userRepository: UserRepository, priva
 
                 else -> if (!SecurityUtils.isLoggedIn()) {
                     event.rerouteTo(if (userRepository.hasAnyAdmin()) LoginView::class.java else SetupView::class.java)
-                } else if (!SecurityUtils.hasAccess(routeParams::appId, event.navigationTarget)) {
+                } else if (!SecurityUtils.hasAccess(routeParams::appId, event.navigationTarget) || event.layouts.any { !SecurityUtils.hasAccess(routeParams::appId, it) }) {
                     event.rerouteToError(NotFoundException::class.java)
                 }
             }

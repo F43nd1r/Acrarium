@@ -16,34 +16,98 @@
 package com.faendir.acra.common
 
 import com.faendir.acra.annotation.AcrariumTest
+import com.faendir.acra.ui.view.error.ErrorView
 import com.github.mvysny.kaributesting.v10.MockVaadin
 import com.github.mvysny.kaributesting.v10.Routes
+import com.github.mvysny.kaributesting.v10._expectOne
 import com.github.mvysny.kaributesting.v10.spring.MockSpringServlet
+import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.UI
-import com.vaadin.flow.spring.SpringServlet
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
+import com.vaadin.flow.router.RouteParameters
+import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.context.SecurityContextHolder
+import java.util.*
+import kotlin.reflect.KClass
 
 
 private val routes = Routes().autoDiscoverViews("com.faendir.acra.ui.view")
 
 @AcrariumTest
 abstract class UiTest {
-
     @Autowired
     private lateinit var applicationContext: ApplicationContext
 
+    private lateinit var uiParams: UiParams
+
+    abstract fun setup(): UiParams
+
+    private val previousAuthentications = Stack<Authentication>()
+
+    private fun setAuthentication(authorities: Collection<GrantedAuthority>) {
+        previousAuthentications.push(SecurityContextHolder.getContext().authentication)
+        SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken(null, null, authorities)
+    }
+
+    private fun resetAuthentication() {
+        SecurityContextHolder.getContext().authentication = previousAuthentications.pop()
+    }
+
+    private fun navigateTo() {
+        UI.getCurrent().navigate(uiParams.route.java, RouteParameters(uiParams.routeParameters))
+    }
+
     @BeforeEach
-    fun setupMockVaadin() {
+    fun setup_internal() {
+        uiParams = setup()
         val uiFactory = ::UI
-        val servlet: SpringServlet = MockSpringServlet(routes, applicationContext, uiFactory)
+        val servlet = MockSpringServlet(routes, applicationContext, uiFactory)
         MockVaadin.setup(uiFactory, servlet)
+
+        setAuthentication(uiParams.requiredAuthorities)
+        navigateTo()
     }
 
     @AfterEach
-    fun tearDownMockVaadin() {
+    fun teardown_internal() {
+        resetAuthentication()
         MockVaadin.tearDown()
     }
+
+    @Test
+    fun `should load`() {
+        _expectOne(uiParams.route.java)
+    }
+
+    @TestFactory
+    fun `test required authorities`(): List<DynamicTest> {
+        return uiParams.requiredAuthorities.map {
+            DynamicTest.dynamicTest("should not load without $it") {
+                setAuthentication(uiParams.requiredAuthorities - it)
+                navigateTo()
+                _expectOne<ErrorView>()
+                resetAuthentication()
+            }
+        }
+    }
+
+    fun withAuth(vararg extraAuthorities: GrantedAuthority, block: () -> Unit) {
+        setAuthentication(uiParams.requiredAuthorities + extraAuthorities)
+        UI.getCurrent().page.reload()
+        try {
+            block()
+        } finally {
+            resetAuthentication()
+        }
+    }
 }
+
+data class UiParams(
+    val route: KClass<out Component>,
+    val routeParameters: Map<String, String> = emptyMap(),
+    val requiredAuthorities: Set<GrantedAuthority>
+)

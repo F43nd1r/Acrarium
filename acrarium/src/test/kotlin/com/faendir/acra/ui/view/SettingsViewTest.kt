@@ -15,15 +15,15 @@
  */
 package com.faendir.acra.ui.view
 
+import com.faendir.acra.common.UiParams
 import com.faendir.acra.common.UiTest
 import com.faendir.acra.common.captionId
 import com.faendir.acra.i18n.Messages
+import com.faendir.acra.persistence.user.Role
 import com.faendir.acra.settings.LocalSettings
 import com.faendir.acra.ui.component.Translatable
-import com.faendir.acra.withAuth
 import com.github.mvysny.kaributesting.v10._get
 import com.github.mvysny.kaributesting.v10._value
-import com.github.mvysny.kaributools.navigateTo
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.select.Select
@@ -41,30 +41,28 @@ class SettingsViewTest(
     @Lazy
     private val localSettings: LocalSettings
 ) : UiTest() {
+    override fun setup() = UiParams(
+        route = SettingsView::class,
+        requiredAuthorities = setOf(Role.USER)
+    )
+
     @Test
     fun `should be able to set dark theme`() {
-        withAuth {
-            navigateTo(SettingsView::class)
+        expectThat(localSettings.darkTheme).isFalse()
 
-            expectThat(localSettings.darkTheme).isFalse()
+        _get<Translatable<Checkbox>> { captionId = Messages.DARK_THEME }.content._value = true
 
-            _get<Translatable<Checkbox>> { captionId = Messages.DARK_THEME }.content._value = true
-
-            expectThat(localSettings.darkTheme).isTrue()
-        }
+        expectThat(localSettings.darkTheme).isTrue()
     }
 
     @Test
     fun `should be able to set locale`() {
-        withAuth {
-            UI.getCurrent().locale = Locale.ENGLISH
-            navigateTo(SettingsView::class)
+        UI.getCurrent().locale = Locale.ENGLISH
 
-            expectThat(localSettings.locale).isEqualTo(Locale.ENGLISH)
+        expectThat(localSettings.locale).isEqualTo(Locale.ENGLISH)
 
-            _get<Translatable<Select<Locale>>> { captionId = Messages.LOCALE }.content._value = Locale.GERMAN
+        _get<Translatable<Select<Locale>>> { captionId = Messages.LOCALE }.content._value = Locale.GERMAN
 
-            expectThat(localSettings.locale).isEqualTo(Locale.GERMAN)
-        }
+        expectThat(localSettings.locale).isEqualTo(Locale.GERMAN)
     }
 }
