@@ -72,7 +72,7 @@ abstract class LayoutPersistingFilterableGrid<T : Any, F : Any, S : Any, C : Fil
 
     fun addOnClickNavigation(target: Class<out Component>, getParameters: (T) -> Map<String, String>) {
         addItemClickListener { e: ItemClickEvent<T> ->
-            if (e.column.renderer !is InteractiveColumnRenderer) {
+            if (e.column?.renderer !is InteractiveColumnRenderer) {
                 ui.ifPresent { it.navigate(target, RouteParameters(getParameters(e.item))) }
             }
         }

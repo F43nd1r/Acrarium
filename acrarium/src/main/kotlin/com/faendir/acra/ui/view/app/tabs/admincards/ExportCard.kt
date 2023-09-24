@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2019-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2019-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ class ExportCard(
             downloadButton(StreamResource("reports.json", InputStreamFactory {
                 SecurityContextHolder.getContext().authentication = authentication
                 try {
-                    val where = null.eqIfNotBlank(REPORT.USER_EMAIL, mailBox.value).eqIfNotBlank(REPORT.INSTALLATION_ID, idBox.value)
+                    val where = listOfNotNull(REPORT.USER_EMAIL.eqIfNotBlank(mailBox.value), REPORT.INSTALLATION_ID.eqIfNotBlank(idBox.value)).reduceOrNull(Condition::and)
                     ByteArrayInputStream(
                         if (where == null) ByteArray(0) else reportRepository.get(appId, REPORT.CONTENT.NOT_NULL, where, sorted = false)
                             .joinToString(", ", "[", "]") { it.data() }.toByteArray(StandardCharsets.UTF_8)
@@ -68,6 +68,5 @@ class ExportCard(
         }
     }
 
-    private fun Condition?.eqIfNotBlank(path: Field<String?>, value: String?): Condition? =
-        if (!value.isNullOrBlank()) this?.and(path.eq(value)) ?: path.eq(value) else null
+    private fun Field<String?>.eqIfNotBlank(value: String?): Condition? = value?.takeIf { it.isNotBlank() }?.let { eq(it) }
 }

@@ -46,7 +46,7 @@ class DangerCardTest(
     @Autowired private val appRepository: AppRepository,
     @Autowired private val reportRepository: ReportRepository,
 ) : UiTest() {
-    private var appId = testDataBuilder.createApp()
+    private val appId = testDataBuilder.createApp()
 
     override fun setup() = UiParams(
         route = AdminTab::class,

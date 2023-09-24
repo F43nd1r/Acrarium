@@ -39,6 +39,8 @@ private val routes = Routes().autoDiscoverViews("com.faendir.acra.ui.view")
 
 @AcrariumTest
 abstract class UiTest {
+    val TEST_USER = "test_user"
+
     @Autowired
     private lateinit var applicationContext: ApplicationContext
 
@@ -50,7 +52,7 @@ abstract class UiTest {
 
     private fun setAuthentication(authorities: Collection<GrantedAuthority>) {
         previousAuthentications.push(SecurityContextHolder.getContext().authentication)
-        SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken(null, null, authorities)
+        SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken(TEST_USER, null, authorities)
     }
 
     private fun resetAuthentication() {
@@ -59,6 +61,10 @@ abstract class UiTest {
 
     private fun navigateTo() {
         UI.getCurrent().navigate(uiParams.route.java, RouteParameters(uiParams.routeParameters))
+    }
+
+    fun reload() {
+        UI.getCurrent().page.reload()
     }
 
     @BeforeEach
@@ -84,20 +90,18 @@ abstract class UiTest {
     }
 
     @TestFactory
-    fun `test required authorities`(): List<DynamicTest> {
-        return uiParams.requiredAuthorities.map {
-            DynamicTest.dynamicTest("should not load without $it") {
-                setAuthentication(uiParams.requiredAuthorities - it)
-                navigateTo()
-                _expectOne<ErrorView>()
-                resetAuthentication()
-            }
+    fun `test required authorities`() = uiParams.requiredAuthorities.map {
+        DynamicTest.dynamicTest("should not load without $it") {
+            setAuthentication(uiParams.requiredAuthorities - it)
+            navigateTo()
+            _expectOne<ErrorView>()
+            resetAuthentication()
         }
     }
 
     fun withAuth(vararg extraAuthorities: GrantedAuthority, block: () -> Unit) {
         setAuthentication(uiParams.requiredAuthorities + extraAuthorities)
-        UI.getCurrent().page.reload()
+        reload()
         try {
             block()
         } finally {

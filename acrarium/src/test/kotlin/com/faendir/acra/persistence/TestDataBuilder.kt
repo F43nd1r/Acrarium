@@ -131,6 +131,7 @@ class TestDataBuilder(private val jooq: DSLContext, private val randomStringGene
         date: Instant = Instant.now(),
         id: String = randomString("report"),
         installationId: String = randomString("installationId"),
+        userMail: String? = null,
         @Language("JSON")
         content: String = "{\"REPORT_ID\": \"${id}\"}",
     ): String {
@@ -151,6 +152,7 @@ class TestDataBuilder(private val jooq: DSLContext, private val randomStringGene
             .set(REPORT.MESSAGE, bugIdentifier.message)
             .set(REPORT.CRASH_LINE, bugIdentifier.crashLine)
             .set(REPORT.CAUSE, bugIdentifier.cause)
+            .set(REPORT.USER_EMAIL, userMail)
             .execute()
         return id
     }

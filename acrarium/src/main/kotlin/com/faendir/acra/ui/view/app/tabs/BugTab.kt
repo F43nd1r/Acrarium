@@ -20,7 +20,9 @@ import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
 import com.faendir.acra.persistence.bug.BugRepository
 import com.faendir.acra.persistence.bug.BugStats
+import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.persistence.version.VersionRepository
+import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.settings.LocalSettings
 import com.faendir.acra.ui.component.BugSolvedVersionSelect
 import com.faendir.acra.ui.component.Translatable
@@ -30,12 +32,10 @@ import com.faendir.acra.ui.component.grid.BasicLayoutPersistingFilterableGridVie
 import com.faendir.acra.ui.component.grid.column
 import com.faendir.acra.ui.component.grid.renderer.InstantRenderer
 import com.faendir.acra.ui.component.grid.renderer.VersionRenderer
-import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.view.app.AppView
 import com.faendir.acra.ui.view.bug.BugView
 import com.faendir.acra.ui.view.bug.tabs.ReportTab
 import com.vaadin.flow.component.Composite
-import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.GridSortOrder
@@ -54,16 +54,47 @@ class BugTab(
     private val bugRepository: BugRepository,
     private val versionRepository: VersionRepository,
     private val localSettings: LocalSettings,
-    routeParams: RouteParams,
+    private val routeParams: RouteParams,
 ) : Composite<BasicLayoutPersistingFilterableGridView<BugStats, BugStats.Filter, BugStats.Sort>>() {
-
-    private val mergeButton: Translatable<Button>
-    private val appId = routeParams.appId()
-
-    init {
-        content {
-            mergeButton = Translatable.createButton(Messages.MERGE_BUGS) {
-                val selectedItems: List<BugStats> = grid.selectedItems.toList()
+    override fun initContent(): BasicLayoutPersistingFilterableGridView<BugStats, BugStats.Filter, BugStats.Sort> {
+        val appId = routeParams.appId()
+        val gridView = BasicLayoutPersistingFilterableGridView(bugRepository.getProvider(appId), localSettings::bugGridSettings) {
+            column({ it.reportCount }) {
+                setSortable(BugStats.Sort.REPORT_COUNT)
+                setCaption(Messages.REPORTS)
+            }
+            column(InstantRenderer { it.latestReport }) {
+                setSortable(BugStats.Sort.LATEST_REPORT)
+                setCaption(Messages.LATEST_REPORT)
+                sort(GridSortOrder.desc(this).build())
+            }
+            val versions = versionRepository.getVersionNames(appId)
+            column(VersionRenderer(versions) { it.latestVersionKey }) {
+                setSortable(BugStats.Sort.LATEST_VERSION_CODE)
+                setFilterableIs(versions, { it.name }, { BugStats.Filter.LATEST_VERSION(it.code, it.flavor) }, Messages.APP_VERSION)
+                setCaption(Messages.LATEST_VERSION)
+            }
+            column({ it.affectedInstallations }) {
+                setSortable(BugStats.Sort.AFFECTED_INSTALLATIONS)
+                setCaption(Messages.AFFECTED_INSTALLATIONS)
+            }
+            column({ it.title }) {
+                setSortable(BugStats.Sort.TITLE)
+                setFilterableContains({ BugStats.Filter.TITLE(it) }, Messages.TITLE)
+                setCaption(Messages.TITLE)
+                isAutoWidth = false
+                flexGrow = 1
+            }
+            column(ComponentRenderer { bug: BugStats -> BugSolvedVersionSelect(appId, bug, versions, bugRepository) }) {
+                setSortable(BugStats.Sort.SOLVED_VERSION_CODE)
+                setFilterableToggle(BugStats.Filter.IS_NOT_SOLVED_OR_REGRESSION, true, Messages.HIDE_SOLVED)
+                setCaption(Messages.SOLVED)
+            }
+            addOnClickNavigation(ReportTab::class.java) { BugView.getNavigationParams(appId, it.id) }
+        }
+        if (SecurityUtils.hasPermission(appId, Permission.Level.EDIT)) {
+            val mergeButton = Translatable.createButton(Messages.MERGE_BUGS) {
+                val selectedItems: List<BugStats> = gridView.grid.selectedItems.toList()
                 if (selectedItems.size > 1) {
                     val titles = RadioButtonGroup<String>()
                     titles.setItems(selectedItems.map { bug: BugStats -> bug.title })
@@ -73,8 +104,8 @@ class BugTab(
                         add(titles)
                         createButton {
                             bugRepository.mergeBugs(appId, selectedItems.map { it.id }, titles.value)
-                            grid.deselectAll()
-                            grid.dataProvider.refreshAll()
+                            gridView.grid.deselectAll()
+                            gridView.grid.dataProvider.refreshAll()
                         }
                     }
                 } else {
@@ -84,44 +115,10 @@ class BugTab(
                 isEnabled = false
                 removeThemeVariants(ButtonVariant.LUMO_PRIMARY)
             }
-            header.addComponentAsFirst(mergeButton)
+            gridView.grid.setSelectionMode(Grid.SelectionMode.MULTI)
+            gridView.grid.asMultiSelect().addSelectionListener { mergeButton.content.isEnabled = it.allSelectedItems.size >= 2 }
+            gridView.header.addComponentAsFirst(mergeButton)
         }
-    }
-
-    override fun initContent() = BasicLayoutPersistingFilterableGridView(bugRepository.getProvider(appId), localSettings::bugGridSettings) {
-        setSelectionMode(Grid.SelectionMode.MULTI)
-        asMultiSelect().addSelectionListener { mergeButton.content.isEnabled = it.allSelectedItems.size >= 2 }
-        column({ it.reportCount }) {
-            setSortable(BugStats.Sort.REPORT_COUNT)
-            setCaption(Messages.REPORTS)
-        }
-        column(InstantRenderer { it.latestReport }) {
-            setSortable(BugStats.Sort.LATEST_REPORT)
-            setCaption(Messages.LATEST_REPORT)
-            sort(GridSortOrder.desc(this).build())
-        }
-        val versions = versionRepository.getVersionNames(appId)
-        column(VersionRenderer(versions) { it.latestVersionKey }) {
-            setSortable(BugStats.Sort.LATEST_VERSION_CODE)
-            setFilterableIs(versions, { it.name }, { BugStats.Filter.LATEST_VERSION(it.code, it.flavor) }, Messages.APP_VERSION)
-            setCaption(Messages.LATEST_VERSION)
-        }
-        column({ it.affectedInstallations }) {
-            setSortable(BugStats.Sort.AFFECTED_INSTALLATIONS)
-            setCaption(Messages.AFFECTED_INSTALLATIONS)
-        }
-        column({ it.title }) {
-            setSortable(BugStats.Sort.TITLE)
-            setFilterableContains({ BugStats.Filter.TITLE(it) }, Messages.TITLE)
-            setCaption(Messages.TITLE)
-            isAutoWidth = false
-            flexGrow = 1
-        }
-        column(ComponentRenderer { bug: BugStats -> BugSolvedVersionSelect(appId, bug, versions, bugRepository) }) {
-            setSortable(BugStats.Sort.SOLVED_VERSION_CODE)
-            setFilterableToggle(BugStats.Filter.IS_NOT_SOLVED_OR_REGRESSION, true, Messages.HIDE_SOLVED)
-            setCaption(Messages.SOLVED)
-        }
-        addOnClickNavigation(ReportTab::class.java) { BugView.getNavigationParams(appId, it.id) }
+        return gridView
     }
 }
