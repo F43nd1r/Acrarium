@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGE_NAME="f43nd1r/acrarium"
+IMAGE_NAME="darthsanches/one_acrarium"
 VERSION="$(git describe --abbrev=0)"
 
 if [[ ${VERSION} == v* ]]; then

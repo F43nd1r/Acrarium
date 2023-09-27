@@ -4,6 +4,11 @@ on:
   push:
     tags:
     - 'v*'
+  workflow_dispatch:
+    inputs:
+      git-ref:
+        description: 'Tag or SHA revision'
+        required: false
 
 jobs:
   release:
