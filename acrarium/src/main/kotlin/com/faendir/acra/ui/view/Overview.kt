@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2017-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import com.faendir.acra.ui.component.dialog.showFluentDialog
 import com.faendir.acra.ui.component.grid.column
 import com.faendir.acra.ui.ext.*
 import com.faendir.acra.ui.view.app.AppView
-import com.faendir.acra.ui.view.app.tabs.BugTab
+import com.faendir.acra.ui.view.app.tabs.BugAppTab
 import com.faendir.acra.ui.view.main.MainView
 import com.faendir.acra.util.catching
 import com.vaadin.flow.component.Composite
@@ -70,7 +70,7 @@ class Overview(private val appRepository: AppRepository, private val reportServi
                     setSortable(AppStats.Sort.REPORT_COUNT)
                     setCaption(Messages.REPORTS)
                 }
-                addOnClickNavigation(BugTab::class.java) { AppView.getNavigationParams(it.id) }
+                addOnClickNavigation(BugAppTab::class.java) { AppView.getNavigationParams(it.id) }
             }
             if (SecurityUtils.hasRole(Role.ADMIN)) {
                 flexLayout {

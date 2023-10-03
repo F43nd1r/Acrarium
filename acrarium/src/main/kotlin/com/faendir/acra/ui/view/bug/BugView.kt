@@ -23,11 +23,11 @@ import com.faendir.acra.persistence.bug.BugRepository
 import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.security.RequiresPermission
 import com.faendir.acra.ui.component.tabs.TabView
-import com.faendir.acra.ui.view.app.tabs.BugTab
-import com.faendir.acra.ui.view.bug.tabs.AdminTab
-import com.faendir.acra.ui.view.bug.tabs.IdentifierTab
-import com.faendir.acra.ui.view.bug.tabs.ReportTab
-import com.faendir.acra.ui.view.bug.tabs.StatisticsTab
+import com.faendir.acra.ui.view.app.tabs.BugAppTab
+import com.faendir.acra.ui.view.bug.tabs.AdminBugTab
+import com.faendir.acra.ui.view.bug.tabs.IdentifierBugTab
+import com.faendir.acra.ui.view.bug.tabs.ReportBugTab
+import com.faendir.acra.ui.view.bug.tabs.StatisticsBugTab
 import com.faendir.acra.ui.view.main.MainView
 import com.vaadin.flow.router.NotFoundException
 import com.vaadin.flow.router.ParentLayout
@@ -40,17 +40,17 @@ import com.vaadin.flow.router.RoutePrefix
 @View
 @RoutePrefix("app/:$PARAM_APP/bug/:$PARAM_BUG")
 @ParentLayout(MainView::class)
-@LogicalParent(BugTab::class)
+@LogicalParent(BugAppTab::class)
 @RequiresPermission(Permission.Level.VIEW)
 class BugView(
     bugRepository: BugRepository,
     routeParams: RouteParams,
 ) : TabView(
     (bugRepository.find(routeParams.bugId()) ?: throw NotFoundException()).title,
-    TabInfo(ReportTab::class, Messages.REPORTS),
-    TabInfo(IdentifierTab::class, Messages.STACKTRACES),
-    TabInfo(StatisticsTab::class, Messages.STATISTICS),
-    TabInfo(AdminTab::class, Messages.ADMIN)
+    TabInfo(ReportBugTab::class, Messages.REPORTS),
+    TabInfo(IdentifierBugTab::class, Messages.STACKTRACES),
+    TabInfo(StatisticsBugTab::class, Messages.STATISTICS),
+    TabInfo(AdminBugTab::class, Messages.ADMIN)
 ) {
     companion object {
         fun getNavigationParams(appId: AppId, bugId: BugId) = mapOf(PARAM_APP to appId.toString(), PARAM_BUG to bugId.toString())

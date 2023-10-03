@@ -35,7 +35,7 @@ import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 
 @View
-class ExportCard(
+class ExportAppAdminCard(
     reportRepository: ReportRepository,
     routeParams: RouteParams,
 ) : AdminCard() {

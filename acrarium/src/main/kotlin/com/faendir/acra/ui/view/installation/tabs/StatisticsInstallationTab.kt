@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2017-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,30 @@
  */
 package com.faendir.acra.ui.view.installation.tabs
 
+import com.faendir.acra.jooq.generated.tables.references.REPORT
 import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
-import com.faendir.acra.ui.component.ReportList
+import com.faendir.acra.persistence.report.ReportRepository
+import com.faendir.acra.persistence.version.VersionRepository
+import com.faendir.acra.ui.component.statistics.Statistics
 import com.faendir.acra.ui.view.installation.InstallationView
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.router.Route
 
 /**
  * @author lukas
- * @since 19.11.18
+ * @since 11.10.18
  */
-@View("installationReportTab")
-@Route(value = "report", layout = InstallationView::class)
-class ReportTab(
-    private val reportListFactory: ReportList.Factory,
+@View
+@Route(value = "statistics", layout = InstallationView::class)
+class StatisticsInstallationTab(
+    private val reportRepository: ReportRepository,
+    private val versionRepository: VersionRepository,
     routeParams: RouteParams,
-) : Composite<ReportList>() {
+) : Composite<Statistics>() {
     private val appId = routeParams.appId()
     private val installationId = routeParams.installationId()
-
-    override fun initContent(): ReportList {
-        return reportListFactory.create(appId) { reportService, appId, customColumns -> reportService.getProvider(appId, installationId, customColumns) }
+    override fun initContent(): Statistics {
+        return Statistics(appId, REPORT.APP_ID.eq(appId).and(REPORT.INSTALLATION_ID.eq(installationId)), reportRepository, versionRepository)
     }
 }

@@ -13,41 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.view.app.tabs
+package com.faendir.acra.ui.view.bug.tabs
 
 import com.faendir.acra.common.UiParams
 import com.faendir.acra.common.UiTest
 import com.faendir.acra.persistence.TestDataBuilder
-import com.faendir.acra.persistence.report.Installation
 import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.persistence.user.Role
-import com.faendir.acra.ui.view.app.AppView
-import com.faendir.acra.ui.view.installation.InstallationView
-import com.github.mvysny.kaributesting.v10._clickItem
-import com.github.mvysny.kaributesting.v10._expectOne
-import com.github.mvysny.kaributesting.v10._get
-import com.vaadin.flow.component.grid.Grid
+import com.faendir.acra.ui.view.bug.BugView
+import com.github.appreciated.apexcharts.ApexCharts
+import com.github.mvysny.kaributesting.v10._find
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import strikt.api.expectThat
+import strikt.assertions.hasSize
 
-class InstallationTabTest(
+class StatisticsBugTabTest(
     @Autowired private val testDataBuilder: TestDataBuilder,
 ) : UiTest() {
     private val appId = testDataBuilder.createApp()
+    private val bugId = testDataBuilder.createBug(appId)
+
+    init {
+        testDataBuilder.createReport(appId, bugId)
+    }
+
     override fun setup() = UiParams(
-        route = InstallationTab::class,
-        routeParameters = AppView.getNavigationParams(appId),
+        route = StatisticsBugTab::class,
+        routeParameters = BugView.getNavigationParams(appId, bugId),
         requiredAuthorities = setOf(Role.USER, Permission(appId, Permission.Level.VIEW))
     )
 
     @Test
-    fun `should navigate to installation view`() {
-        testDataBuilder.createReport(appId)
-        reload()
+    fun `should show statistics`() {
+        val charts = _find<ApexCharts>()
 
-        val grid = _get<Grid<Installation>>()
-        grid._clickItem(0)
-
-        _expectOne<InstallationView>()
+        expectThat(charts).hasSize(5)
     }
 }

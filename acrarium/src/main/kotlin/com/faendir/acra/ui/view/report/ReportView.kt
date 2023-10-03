@@ -28,7 +28,7 @@ import com.faendir.acra.security.RequiresPermission
 import com.faendir.acra.ui.component.HasAcrariumTitle
 import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.*
-import com.faendir.acra.ui.view.bug.tabs.ReportTab
+import com.faendir.acra.ui.view.bug.tabs.ReportBugTab
 import com.faendir.acra.ui.view.installation.InstallationView
 import com.faendir.acra.ui.view.main.MainView
 import com.faendir.acra.util.retrace
@@ -53,7 +53,7 @@ import kotlin.math.max
  */
 @View
 @Route(value = "app/:$PARAM_APP/bug/:$PARAM_BUG/report/:$PARAM_REPORT", layout = MainView::class)
-@LogicalParent(ReportTab::class)
+@LogicalParent(ReportBugTab::class)
 @RequiresPermission(Permission.Level.VIEW)
 @RequiresPermission(Permission.Level.VIEW)
 class ReportView(
@@ -95,7 +95,7 @@ class ReportView(
                         setAlignSelf(Align.CENTER)
                     }
                     routerLink(
-                        com.faendir.acra.ui.view.installation.tabs.ReportTab::class.java,
+                        com.faendir.acra.ui.view.installation.tabs.ReportInstallationTab::class.java,
                         RouteParameters(InstallationView.getNavigationParams(report.appId, report.installationId))
                     ) {
                         installationView(avatarService, report.installationId)

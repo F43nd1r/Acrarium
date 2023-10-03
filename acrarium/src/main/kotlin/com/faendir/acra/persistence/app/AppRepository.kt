@@ -29,7 +29,6 @@ import org.apache.commons.text.RandomStringGenerator
 import org.jooq.Condition
 import org.jooq.DSLContext
 import org.jooq.impl.DSL
-import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
@@ -43,13 +42,15 @@ class AppRepository(private val jooq: DSLContext, private val userRepository: Us
     @PreAuthorize("hasViewPermission(#id)")
     fun findName(id: AppId): String? = jooq.select(APP.NAME).from(APP).where(APP.ID.eq(id)).fetchValue()
 
-    @PostAuthorize("isReporter()")
     fun findId(reporter: String): AppId? = jooq.select(APP.ID).from(APP).where(APP.REPORTER_USERNAME.eq(reporter)).fetchValue()
 
     @Transactional
     @PreAuthorize("isAdmin()")
     fun create(name: String): Reporter {
-        val reporter = createReporterUser()
+        val username = generateSequence { randomStringGenerator.generate(16) }.first { !userRepository.exists(it) }
+        val password = randomStringGenerator.generate(16)
+        if (!userRepository.create(username, password, null, Role.REPORTER)) throw RuntimeException("Failed to create reporter user")
+        val reporter = Reporter(username, password)
         jooq.insertInto(APP)
             .set(APP.REPORTER_USERNAME, reporter.username)
             .set(APP.NAME, name)
@@ -60,25 +61,11 @@ class AppRepository(private val jooq: DSLContext, private val userRepository: Us
     @Transactional
     @PreAuthorize("hasAdminPermission(#id)")
     fun recreateReporter(id: AppId): Reporter {
-        val oldReporterUsername =
-            jooq.select(APP.REPORTER_USERNAME).from(APP).where(APP.ID.eq(id)).fetchValue() ?: throw IllegalArgumentException("Can't recreate reporter for unknown app")
-        val newReporter = createReporterUser()
-        jooq.update(APP)
-            .set(APP.REPORTER_USERNAME, newReporter.username)
-            .where(APP.ID.eq(id))
-            .execute()
-        userRepository.delete(oldReporterUsername)
-        return newReporter
-    }
-
-    private fun createReporterUser(): Reporter {
-        var username: String
-        do {
-            username = randomStringGenerator.generate(16)
-        } while (userRepository.exists(username))
+        val reporterUsername = jooq.select(APP.REPORTER_USERNAME).from(APP).where(APP.ID.eq(id)).fetchValue()
+            ?: throw IllegalArgumentException("Can't recreate reporter for unknown app")
         val password = randomStringGenerator.generate(16)
-        if (!userRepository.create(username, password, null, Role.REPORTER)) throw RuntimeException("Failed to create reporter user")
-        return Reporter(username, password)
+        userRepository.update(reporterUsername, password, null)
+        return Reporter(reporterUsername, password)
     }
 
     @Transactional
@@ -100,7 +87,7 @@ class AppRepository(private val jooq: DSLContext, private val userRepository: Us
         jooq.select(APP_REPORT_COLUMNS.NAME, APP_REPORT_COLUMNS.PATH).from(APP_REPORT_COLUMNS).where(APP_REPORT_COLUMNS.APP_ID.eq(id)).fetchListInto()
 
     @Transactional
-    @PreAuthorize("isAdmin()")
+    @PreAuthorize("hasAdminPermission(#id)")
     fun setCustomColumns(id: AppId, customColumns: List<CustomColumn>) {
         val tableMeta = jooq.meta().getTables(REPORT.name).first()
         val fields = tableMeta.fields()

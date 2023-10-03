@@ -24,9 +24,9 @@ import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.security.RequiresPermission
 import com.faendir.acra.ui.component.tabs.TabView
-import com.faendir.acra.ui.view.app.tabs.InstallationTab
-import com.faendir.acra.ui.view.installation.tabs.ReportTab
-import com.faendir.acra.ui.view.installation.tabs.StatisticsTab
+import com.faendir.acra.ui.view.app.tabs.InstallationAppTab
+import com.faendir.acra.ui.view.installation.tabs.ReportInstallationTab
+import com.faendir.acra.ui.view.installation.tabs.StatisticsInstallationTab
 import com.faendir.acra.ui.view.main.MainView
 import com.vaadin.flow.router.ParentLayout
 import com.vaadin.flow.router.RoutePrefix
@@ -41,14 +41,14 @@ import com.vaadin.flow.spring.annotation.UIScope
 @SpringComponent
 @RoutePrefix("app/:$PARAM_APP/installation/:$PARAM_INSTALLATION")
 @ParentLayout(MainView::class)
-@LogicalParent(InstallationTab::class)
+@LogicalParent(InstallationAppTab::class)
 @RequiresPermission(Permission.Level.VIEW)
 class InstallationView(
     routeParams: RouteParams,
 ) : TabView(
     routeParams.installationId(),
-    TabInfo(ReportTab::class, Messages.REPORTS),
-    TabInfo(StatisticsTab::class, Messages.STATISTICS),
+    TabInfo(ReportInstallationTab::class, Messages.REPORTS),
+    TabInfo(StatisticsInstallationTab::class, Messages.STATISTICS),
 ) {
 
     companion object {

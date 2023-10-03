@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2019-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2019-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.ext.*
 
 @View
-class NotificationCard(
+class NotificationAppAdminCard(
     mailSettingsRepository: MailSettingsRepository,
     routeParams: RouteParams,
 ) : AdminCard() {

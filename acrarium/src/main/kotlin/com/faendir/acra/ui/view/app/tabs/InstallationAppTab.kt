@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import com.faendir.acra.ui.component.grid.BasicLayoutPersistingFilterableGridVie
 import com.faendir.acra.ui.component.grid.column
 import com.faendir.acra.ui.component.grid.renderer.InstantRenderer
 import com.faendir.acra.ui.view.app.AppView
-import com.faendir.acra.ui.view.installation.tabs.ReportTab
+import com.faendir.acra.ui.view.installation.tabs.ReportInstallationTab
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.GridSortOrder
@@ -36,7 +36,7 @@ import com.vaadin.flow.router.Route
 
 @View
 @Route(value = "installation", layout = AppView::class)
-class InstallationTab(
+class InstallationAppTab(
     private val reportRepository: ReportRepository,
     private val avatarService: AvatarService,
     private val localSettings: LocalSettings,
@@ -63,6 +63,6 @@ class InstallationTab(
             setCaption(Messages.LATEST_REPORT)
             sort(GridSortOrder.desc(this).build())
         }
-        addOnClickNavigation(ReportTab::class.java) { com.faendir.acra.ui.view.installation.InstallationView.getNavigationParams(appId, it.id) }
+        addOnClickNavigation(ReportInstallationTab::class.java) { com.faendir.acra.ui.view.installation.InstallationView.getNavigationParams(appId, it.id) }
     }
 }

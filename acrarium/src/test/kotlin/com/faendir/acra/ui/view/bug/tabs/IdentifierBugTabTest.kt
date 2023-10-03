@@ -20,55 +20,51 @@ import com.faendir.acra.common.UiTest
 import com.faendir.acra.common.captionId
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.persistence.TestDataBuilder
-import com.faendir.acra.persistence.app.AppId
-import com.faendir.acra.persistence.bug.BugId
-import com.faendir.acra.persistence.report.ReportRow
+import com.faendir.acra.persistence.bug.BugRepository
 import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.persistence.user.Role
-import com.faendir.acra.ui.component.grid.LocalizedColumn
+import com.faendir.acra.ui.component.Translatable
 import com.faendir.acra.ui.view.bug.BugView
+import com.github.mvysny.kaributesting.v10._click
 import com.github.mvysny.kaributesting.v10._expectNone
-import com.github.mvysny.kaributesting.v10._expectOne
-import com.github.mvysny.kaributesting.v10._get
-import com.vaadin.flow.component.grid.Grid
+import com.github.mvysny.kaributesting.v10._find
+import com.vaadin.flow.component.button.Button
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import strikt.api.expectThat
-import strikt.assertions.isEqualTo
+import strikt.assertions.hasSize
 
-class ReportTabTest(
+class IdentifierBugTabTest(
     @Autowired private val testDataBuilder: TestDataBuilder,
+    @Autowired private val bugRepository: BugRepository,
 ) : UiTest() {
-    private val appId: AppId = testDataBuilder.createApp()
-    private val bugId: BugId = testDataBuilder.createBug(appId)
-    private val reportId: String = testDataBuilder.createReport(appId, bugId)
+    private val appId = testDataBuilder.createApp()
+    private val bugId = testDataBuilder.createBug(appId)
+
+    init {
+        testDataBuilder.createReport(appId, bugId)
+        testDataBuilder.createReport(appId, bugId)
+    }
 
     override fun setup() = UiParams(
-        route = ReportTab::class,
+        route = IdentifierBugTab::class,
         routeParameters = BugView.getNavigationParams(appId, bugId),
         requiredAuthorities = setOf(Role.USER, Permission(appId, Permission.Level.VIEW))
     )
 
     @Test
-    fun `should show report list`() {
-        val grid = _get<Grid<ReportRow>>()
-
-        expectThat(grid._get(0).id).isEqualTo(reportId)
+    fun `should not show unlink button without edit permission`() {
+        _expectNone<Translatable<Button>> { captionId = Messages.NOT_SAME_BUG }
     }
 
     @Test
-    fun `should show not show delete column with VIEW permission`() {
-        val grid = _get<Grid<ReportRow>>()
-
-        grid._expectNone<LocalizedColumn<*>> { captionId = Messages.DELETE }
-    }
-
-    @Test
-    fun `should show delete column with EDIT permission`() {
+    fun `should be able to unlink bug`() {
         withAuth(Permission(appId, Permission.Level.EDIT)) {
-            val grid = _get<Grid<ReportRow>>()
+            expectThat(bugRepository.getIdentifiers(bugId)).hasSize(2)
 
-            grid._expectOne<LocalizedColumn<*>> { captionId = Messages.DELETE }
+            _find<Translatable<Button>> { captionId = Messages.NOT_SAME_BUG }.last().content._click()
+
+            expectThat(bugRepository.getIdentifiers(bugId)).hasSize(1)
         }
     }
 }

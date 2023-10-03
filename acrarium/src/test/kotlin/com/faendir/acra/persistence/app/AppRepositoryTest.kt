@@ -131,8 +131,7 @@ class AppRepositoryTest(
             val newReporter = appRepository.recreateReporter(appId)
 
             expectThat(appRepository.find(appId)?.reporterUsername).isEqualTo(newReporter.username)
-            verify { userRepository.create(newReporter.username, newReporter.rawPassword, null, Role.REPORTER) }
-            verify { userRepository.delete(oldReporter) }
+            verify { userRepository.update(newReporter.username, newReporter.rawPassword, null) }
         }
     }
 

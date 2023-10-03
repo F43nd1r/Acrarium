@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2017-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.view.bug.tabs
+package com.faendir.acra.ui.view.installation.tabs
 
 import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
 import com.faendir.acra.ui.component.ReportList
-import com.faendir.acra.ui.view.bug.BugView
+import com.faendir.acra.ui.view.installation.InstallationView
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.router.Route
 
@@ -26,14 +26,16 @@ import com.vaadin.flow.router.Route
  * @author lukas
  * @since 19.11.18
  */
-@View("bugReportTab")
-@Route(value = "report", layout = BugView::class)
-class ReportTab(
+@View
+@Route(value = "report", layout = InstallationView::class)
+class ReportInstallationTab(
     private val reportListFactory: ReportList.Factory,
-    private val routeParams: RouteParams,
+    routeParams: RouteParams,
 ) : Composite<ReportList>() {
+    private val appId = routeParams.appId()
+    private val installationId = routeParams.installationId()
 
     override fun initContent(): ReportList {
-        return reportListFactory.create(routeParams.appId()) { reportService, appId, customColumns -> reportService.getProvider(appId, routeParams.bugId(), customColumns) }
+        return reportListFactory.create(appId) { reportService, appId, customColumns -> reportService.getProvider(appId, installationId, customColumns) }
     }
 }

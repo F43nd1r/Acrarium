@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2017-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,19 @@ package com.faendir.acra.ui.view.app.tabs
 import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.navigation.View
 import com.faendir.acra.persistence.report.ReportRepository
-import com.faendir.acra.ui.component.ReportList
+import com.faendir.acra.persistence.version.VersionRepository
+import com.faendir.acra.ui.component.statistics.Statistics
 import com.faendir.acra.ui.view.app.AppView
-import com.vaadin.flow.component.Composite
 import com.vaadin.flow.router.Route
 
 /**
  * @author lukas
- * @since 14.07.18
+ * @since 11.10.18
  */
 @View
-@Route(value = "report", layout = AppView::class)
-class ReportTab(
-    private val reportListFactory: ReportList.Factory,
-    private val routeParams: RouteParams,
-) : Composite<ReportList>() {
-    override fun initContent() = reportListFactory.create(routeParams.appId(), ReportRepository::getProvider)
-}
+@Route(value = "statistics", layout = AppView::class)
+class StatisticsAppTab(
+    reportRepository: ReportRepository,
+    versionRepository: VersionRepository,
+    routeParams: RouteParams,
+) : Statistics(routeParams.appId(), null, reportRepository, versionRepository)

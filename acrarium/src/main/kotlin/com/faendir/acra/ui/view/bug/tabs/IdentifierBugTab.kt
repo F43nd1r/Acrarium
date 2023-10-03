@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2020-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.ui.component.Card
 import com.faendir.acra.ui.ext.*
 import com.faendir.acra.ui.view.bug.BugView
-import com.vaadin.flow.component.Text
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.html.Div
+import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.icon.Icon
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.orderedlayout.FlexLayout
@@ -39,7 +39,7 @@ import com.vaadin.flow.router.Route
  */
 @View
 @Route(value = "identifier", layout = BugView::class)
-class IdentifierTab(
+class IdentifierBugTab(
     private val bugRepository: BugRepository,
     routeParams: RouteParams,
 ) : Div() {
@@ -53,18 +53,18 @@ class IdentifierTab(
         forEach(identifiers) { identifier ->
             card {
                 allowCollapse = true
-                setHeader(Text(identifier.exceptionClass + ": " + identifier.message))
-                this@IdentifierTab.children.findAny().ifPresent { isCollapsed = true }
+                setHeader(Span(identifier.exceptionClass + ": " + identifier.message))
+                this@IdentifierBugTab.children.findAny().ifPresent { isCollapsed = true }
                 flexLayout {
                     flexDirection = FlexLayout.FlexDirection.COLUMN
                     translatableLabel(Messages.IDENTIFER_BODY, identifier.crashLine ?: "", identifier.cause ?: "")
                     if (identifiers.size > 1 && SecurityUtils.hasPermission(appId, Permission.Level.EDIT)) {
                         translatableButton(Messages.NOT_SAME_BUG) {
                             bugRepository.splitFromBug(bugId, identifier)
-                            this@IdentifierTab.remove(this@card)
+                            this@IdentifierBugTab.remove(this@card)
                             identifiers.remove(identifier)
                             if (identifiers.size == 1) {
-                                this@IdentifierTab.children.forEach { card ->
+                                this@IdentifierBugTab.children.forEach { card ->
                                     card.children.filter { it is Button }.forEach { (card as Card).remove(it) }
                                 }
                             }

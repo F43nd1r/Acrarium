@@ -35,7 +35,7 @@ import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.data.renderer.IconRenderer
 
 @View
-class VersionCard(
+class VersionAppAdminCard(
     private val versionRepository: VersionRepository,
     routeParams: RouteParams,
 ) : AdminCard() {

@@ -21,8 +21,6 @@ import com.faendir.acra.navigation.View
 import com.faendir.acra.persistence.app.AppRepository
 import com.faendir.acra.persistence.app.CustomColumn
 import com.faendir.acra.persistence.user.Permission
-import com.faendir.acra.persistence.user.Role
-import com.faendir.acra.security.RequiresPermission
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.Translatable
@@ -37,8 +35,7 @@ import com.vaadin.flow.data.binder.Binder
 import java.util.*
 
 @View
-@RequiresPermission(Permission.Level.VIEW)
-class CustomColumnCard(
+class CustomColumnAppAdminCard(
     appRepository: AppRepository,
     routeParams: RouteParams,
 ) : AdminCard() {
@@ -61,7 +58,7 @@ class CustomColumnCard(
                     captionId = Messages.NAME
                     setFlexGrow(1)
                 }
-                if (SecurityUtils.hasRole(Role.ADMIN)) {
+                if (SecurityUtils.hasPermission(appId, Permission.Level.ADMIN)) {
                     editor.binder = Binder(CustomColumn::class.java)
                     editor.isBuffered = true
                     val regex = Regex("[\\w_-]+(\\.[\\w_-]+)*")

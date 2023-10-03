@@ -40,7 +40,7 @@ import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 
-class BugTabTest(
+class BugAppTabTest(
     @Autowired private val testDataBuilder: TestDataBuilder,
     @Autowired private val bugRepository: BugRepository,
     @Autowired private val reportRepository: ReportRepository,
@@ -48,7 +48,7 @@ class BugTabTest(
 ) : UiTest() {
     private val appId = testDataBuilder.createApp()
     override fun setup() = UiParams(
-        route = BugTab::class,
+        route = BugAppTab::class,
         routeParameters = AppView.getNavigationParams(appId),
         requiredAuthorities = setOf(Role.USER, Permission(appId, Permission.Level.VIEW))
     )
@@ -68,7 +68,7 @@ class BugTabTest(
         val report3 = testDataBuilder.createReport(appId, bug = bug3)
 
         withAuth(Permission(appId, Permission.Level.EDIT)) {
-            val tab = _get<BugTab>()
+            val tab = _get<BugAppTab>()
             val grid = _get<Grid<BugStats>>()
 
             val items = grid._findAll()

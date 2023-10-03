@@ -34,7 +34,7 @@ import com.faendir.acra.ui.component.grid.renderer.InstantRenderer
 import com.faendir.acra.ui.component.grid.renderer.VersionRenderer
 import com.faendir.acra.ui.view.app.AppView
 import com.faendir.acra.ui.view.bug.BugView
-import com.faendir.acra.ui.view.bug.tabs.ReportTab
+import com.faendir.acra.ui.view.bug.tabs.ReportBugTab
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.grid.Grid
@@ -50,7 +50,7 @@ import com.vaadin.flow.router.Route
  */
 @View
 @Route(value = "bug", layout = AppView::class)
-class BugTab(
+class BugAppTab(
     private val bugRepository: BugRepository,
     private val versionRepository: VersionRepository,
     private val localSettings: LocalSettings,
@@ -90,7 +90,7 @@ class BugTab(
                 setFilterableToggle(BugStats.Filter.IS_NOT_SOLVED_OR_REGRESSION, true, Messages.HIDE_SOLVED)
                 setCaption(Messages.SOLVED)
             }
-            addOnClickNavigation(ReportTab::class.java) { BugView.getNavigationParams(appId, it.id) }
+            addOnClickNavigation(ReportBugTab::class.java) { BugView.getNavigationParams(appId, it.id) }
         }
         if (SecurityUtils.hasPermission(appId, Permission.Level.EDIT)) {
             val mergeButton = Translatable.createButton(Messages.MERGE_BUGS) {

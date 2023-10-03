@@ -64,7 +64,7 @@ class UserRepository(private val jooq: DSLContext, private val passwordEncoder: 
     }
 
     @Transactional
-    @PreAuthorize("isCurrentUser(#username) || isAdmin()")
+    @PreAuthorize("isCurrentUser(#username) || isAdmin() || hasAdminPermissionForReporter(#username)")
     fun update(username: String, rawPassword: String?, mail: String?) {
         jooq.update(USER)
             .apply { if (rawPassword != null) set(USER.PASSWORD, passwordEncoder.encode(rawPassword)) }
@@ -107,7 +107,7 @@ class UserRepository(private val jooq: DSLContext, private val passwordEncoder: 
                     .fetchListInto<Permission>()
 
     @Transactional
-    @PreAuthorize("!isCurrentUser(#username) && isAdmin()")
+    @PreAuthorize("!isCurrentUser(#username) && isAdmin() || hasAdminPermissionForReporter(#username)")
     fun delete(username: String) {
         jooq.deleteFrom(USER).where(USER.USERNAME.eq(username)).execute()
     }

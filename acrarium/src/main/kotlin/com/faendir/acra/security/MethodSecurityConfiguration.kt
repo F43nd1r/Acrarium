@@ -16,6 +16,7 @@
 package com.faendir.acra.security
 
 import com.faendir.acra.persistence.app.AppId
+import com.faendir.acra.persistence.app.AppRepository
 import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.persistence.user.Role
 import com.faendir.acra.persistence.user.UserRepository
@@ -38,7 +39,7 @@ import java.util.function.Supplier
 
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true)
-class MethodSecurityConfiguration(@Lazy private val userRepository: UserRepository) {
+class MethodSecurityConfiguration(@Lazy private val userRepository: UserRepository, @Lazy private val appRepository: AppRepository) {
     @Primary
     @Bean
     fun customMethodSecurityExpressionHandler(): MethodSecurityExpressionHandler = object : DefaultMethodSecurityExpressionHandler() {
@@ -48,7 +49,7 @@ class MethodSecurityConfiguration(@Lazy private val userRepository: UserReposito
         private fun createCustomSecurityExpressionRoot(
             authentication: Supplier<Authentication>,
             invocation: MethodInvocation
-        ) = CustomMethodSecurityExpressionRoot(authentication, userRepository).apply {
+        ) = CustomMethodSecurityExpressionRoot(authentication, userRepository, appRepository).apply {
             setThis(invocation.`this`)
             setPermissionEvaluator(permissionEvaluator)
             setTrustResolver(trustResolver)
@@ -69,7 +70,8 @@ class MethodSecurityConfiguration(@Lazy private val userRepository: UserReposito
 
 class CustomMethodSecurityExpressionRoot(
     authentication: Supplier<Authentication>,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val appRepository: AppRepository,
 ) : SecurityExpressionRoot(authentication),
     MethodSecurityExpressionOperations {
     private var filterObject: Any? = null
@@ -122,4 +124,6 @@ class CustomMethodSecurityExpressionRoot(
 
     @JvmName("hasAdminPermission")
     fun hasAdminPermission(appId: AppId) = SecurityUtils.hasPermission(appId, Permission.Level.ADMIN)
+
+    fun hasAdminPermissionForReporter(reporter: String) = appRepository.findId(reporter)?.let { hasAdminPermission(it) } ?: false
 }

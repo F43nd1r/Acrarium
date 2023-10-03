@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import com.faendir.acra.persistence.report.ReportRepository
 import com.faendir.acra.persistence.user.User
 import com.faendir.acra.persistence.user.UserRepository
 import com.faendir.acra.persistence.version.VersionRepository
-import com.faendir.acra.ui.view.bug.tabs.ReportTab
+import com.faendir.acra.ui.view.bug.tabs.ReportBugTab
 import com.faendir.acra.util.ensureTrailing
 import com.vaadin.flow.i18n.I18NProvider
 import com.vaadin.flow.router.RouteConfiguration
@@ -184,7 +184,7 @@ class MailService(
 
     private fun getBugUrl(bug: Bug): String {
         return baseUrl?.ensureTrailing("/") + routeConfiguration.getUrl(
-            ReportTab::class.java, RouteParameters(
+            ReportBugTab::class.java, RouteParameters(
                 mapOf(
                     PARAM_APP to bug.appId.toString(),
                     PARAM_BUG to bug.id.toString()

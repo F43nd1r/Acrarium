@@ -33,7 +33,7 @@ import com.vaadin.flow.router.NotFoundException
 
 @View
 @RequiresPermission(Permission.Level.EDIT)
-class PropertiesCard(
+class PropertiesBugAdminCard(
     bugRepository: BugRepository,
     versionRepository: VersionRepository,
     routeParams: RouteParams,

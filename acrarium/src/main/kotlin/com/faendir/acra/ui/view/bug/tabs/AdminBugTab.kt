@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.faendir.acra.ui.view.app.tabs
+package com.faendir.acra.ui.view.bug.tabs
 
 import com.faendir.acra.navigation.View
 import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.CardView
 import com.faendir.acra.ui.component.SpringComposite
-import com.faendir.acra.ui.view.app.AppView
-import com.faendir.acra.ui.view.app.tabs.admincards.*
+import com.faendir.acra.ui.view.bug.BugView
+import com.faendir.acra.ui.view.bug.tabs.admincards.DangerBugAdminCard
+import com.faendir.acra.ui.view.bug.tabs.admincards.PropertiesBugAdminCard
 import com.vaadin.flow.router.Route
 
 /**
@@ -28,9 +29,9 @@ import com.vaadin.flow.router.Route
  * @since 18.10.18
  */
 @View
-@Route(value = "admin", layout = AppView::class)
-class AdminTab : SpringComposite<CardView<AdminCard>>() {
+@Route(value = "admin", layout = BugView::class)
+class AdminBugTab : SpringComposite<CardView<AdminCard>>() {
     init {
-        content.add(VersionCard::class, NotificationCard::class, ExportCard::class, CustomColumnCard::class, DangerCard::class)
+        content.add(PropertiesBugAdminCard::class, DangerBugAdminCard::class)
     }
 }

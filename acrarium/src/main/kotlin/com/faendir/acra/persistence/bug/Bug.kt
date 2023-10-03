@@ -85,6 +85,7 @@ data class Bug(
 }
 
 data class BugIdentifier(
+    @get:JvmName("getAppId")
     val appId: AppId,
     val exceptionClass: String,
     val message: String?,

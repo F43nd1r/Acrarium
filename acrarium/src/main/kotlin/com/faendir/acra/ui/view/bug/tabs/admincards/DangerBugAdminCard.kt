@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ import com.faendir.acra.ui.ext.translatableText
 import com.faendir.acra.ui.view.Overview
 import com.vaadin.flow.component.UI
 
-@View("bugDangerCard")
+@View
 @RequiresPermission(Permission.Level.ADMIN)
-class DangerCard(
+class DangerBugAdminCard(
     private val bugRepository: BugRepository,
     routeParams: RouteParams,
 ) : AdminCard() {
