@@ -20,6 +20,7 @@ import com.faendir.acra.domain.AvatarService
 import com.faendir.acra.persistence.app.Reporter
 import com.faendir.acra.persistence.user.Role
 import com.faendir.acra.ui.component.*
+import com.faendir.acra.ui.component.Translatable.Companion.createSpan
 import com.faendir.acra.ui.component.grid.BasicCustomColumnGrid
 import com.faendir.acra.ui.component.grid.BasicLayoutPersistingFilterableGrid
 import com.faendir.acra.ui.component.tabs.Tab
@@ -46,12 +47,12 @@ fun HasComponents.gridLayout(initializer: CssGridLayout.() -> Unit = {}) {
     add(CssGridLayout().apply(initializer))
 }
 
-fun HasComponents.translatableLabel(captionId: String, vararg params: Any, initializer: Label.() -> Unit = {}) {
-    add(Translatable.createLabel(captionId, *params).with(initializer))
+fun HasComponents.translatableSpan(captionId: String, vararg params: Any, initializer: Span.() -> Unit = {}) {
+    add(Translatable.createSpan(captionId, *params).with(initializer))
 }
 
-fun HasComponents.label(text: String, initializer: Label.() -> Unit = {}) {
-    add(Label(text).apply(initializer))
+fun HasComponents.span(text: String, initializer: Span.() -> Unit = {}) {
+    add(Span(text).apply(initializer))
 }
 
 fun HasComponents.installationView(avatarService: AvatarService, installationId: String) {
@@ -144,8 +145,8 @@ fun HasComponents.tab(captionId: String, vararg params: Any, initializer: Tab.()
 
 fun HasComponents.box(titleId: String, detailsId: String, buttonId: String, clickListener: (ClickEvent<Button>) -> Unit = {}): Box {
     return Box(
-        Translatable.createLabel(titleId),
-        Translatable.createLabel(detailsId),
+        createSpan(titleId),
+        createSpan(detailsId),
         Translatable.createButton(buttonId, clickListener = clickListener)
     ).also { add(it) }
 }

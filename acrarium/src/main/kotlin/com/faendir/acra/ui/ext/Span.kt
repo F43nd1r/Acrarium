@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2020 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,13 @@
  */
 package com.faendir.acra.ui.ext
 
-import com.vaadin.flow.component.html.Label
+import com.vaadin.flow.component.html.Span
 
 
-fun Label.secondary(): Label {
+fun Span.secondary() = apply {
     style.set("color", "var(--lumo-secondary-text-color)")
-    return this
 }
 
-fun Label.honorWhitespaces(): Label {
+fun Span.honorWhitespaces() = apply {
     style.set("white-space", "pre")
-    return this
 }

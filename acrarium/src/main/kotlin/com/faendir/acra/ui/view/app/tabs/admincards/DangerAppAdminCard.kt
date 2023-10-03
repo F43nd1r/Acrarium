@@ -24,7 +24,7 @@ import com.faendir.acra.persistence.report.ReportRepository
 import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.security.RequiresPermission
 import com.faendir.acra.ui.component.AdminCard
-import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.component.Translatable.Companion.createSpan
 import com.faendir.acra.ui.component.dialog.closeButton
 import com.faendir.acra.ui.component.dialog.confirmButtons
 import com.faendir.acra.ui.component.dialog.showFluentDialog
@@ -45,7 +45,7 @@ class DangerAppAdminCard(
 
     init {
         content {
-            setHeader(Translatable.createLabel(Messages.DANGER_ZONE))
+            setHeader(createSpan(Messages.DANGER_ZONE))
             setHeaderColor("var(--lumo-error-contrast-color)", "var(--lumo-error-color)")
             dividerEnabled = true
             box(Messages.NEW_ACRA_CONFIG, Messages.NEW_ACRA_CONFIG_DETAILS, Messages.CREATE) {
@@ -68,7 +68,7 @@ class DangerAppAdminCard(
                         min = 1.0
                         isStepButtonsVisible = true
                         setWidthFull()
-                        suffixComponent = Translatable.createLabel(Messages.REPORTS_OLDER_THAN2)
+                        suffixComponent = createSpan(Messages.REPORTS_OLDER_THAN2)
                     }
                     confirmButtons {
                         reportRepository.deleteBefore(appId, Instant.now().minus(age.getValue().toLong(), ChronoUnit.DAYS))

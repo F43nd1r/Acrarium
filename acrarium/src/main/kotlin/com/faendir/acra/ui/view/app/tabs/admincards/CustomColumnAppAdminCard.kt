@@ -24,6 +24,7 @@ import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.component.Translatable.Companion.createSpan
 import com.faendir.acra.ui.component.grid.column
 import com.faendir.acra.ui.component.grid.renderer.ButtonRenderer
 import com.faendir.acra.ui.ext.*
@@ -44,7 +45,7 @@ class CustomColumnAppAdminCard(
 
     init {
         content {
-            setHeader(Translatable.createLabel(Messages.CUSTOM_COLUMNS))
+            setHeader(createSpan(Messages.CUSTOM_COLUMNS))
             acrariumGrid(appRepository.getCustomColumns(appId)) {
                 setMinHeight(280, SizeUnit.PIXEL)
                 setHeight(100, SizeUnit.PERCENTAGE)

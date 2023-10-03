@@ -22,7 +22,7 @@ import com.faendir.acra.persistence.bug.BugRepository
 import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.security.RequiresPermission
 import com.faendir.acra.ui.component.AdminCard
-import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.component.Translatable.Companion.createSpan
 import com.faendir.acra.ui.component.dialog.confirmButtons
 import com.faendir.acra.ui.component.dialog.showFluentDialog
 import com.faendir.acra.ui.ext.box
@@ -42,7 +42,7 @@ class DangerBugAdminCard(
 
     init {
         content {
-            setHeader(Translatable.createLabel(Messages.DANGER_ZONE))
+            setHeader(createSpan(Messages.DANGER_ZONE))
             setHeaderColor("var(--lumo-error-contrast-color)", "var(--lumo-error-color)")
             dividerEnabled = true
             box(Messages.DELETE_BUG, Messages.DELETE_BUG_DETAILS, Messages.DELETE) {

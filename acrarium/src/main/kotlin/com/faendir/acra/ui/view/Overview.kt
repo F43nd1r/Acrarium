@@ -101,7 +101,7 @@ class Overview(private val appRepository: AppRepository, private val reportServi
                             createButton {
                                 val importResult = importFromAcraStorage(host.getValue(), port.getValue().toInt(), ssl.getValue(), databaseName.getValue())
                                 showFluentDialog {
-                                    translatableLabel(Messages.IMPORT_SUCCESS, importResult.successCount, importResult.totalCount)
+                                    translatableSpan(Messages.IMPORT_SUCCESS, importResult.successCount, importResult.totalCount)
                                     configurationLabel(importResult.reporter)
                                     closeButton()
                                 }

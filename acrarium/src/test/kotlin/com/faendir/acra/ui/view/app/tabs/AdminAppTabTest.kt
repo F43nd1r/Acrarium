@@ -43,7 +43,7 @@ import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.checkbox.Checkbox
 import com.vaadin.flow.component.combobox.ComboBox
 import com.vaadin.flow.component.grid.Grid
-import com.vaadin.flow.component.html.Label
+import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.textfield.NumberField
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.component.upload.Upload
@@ -167,7 +167,7 @@ class AdminAppTabTest(
 
                 expectThat(getPassword()).isNotEqualTo(oldPassword)
 
-                _expectOne<Label> {
+                _expectOne<Span> {
                     predicates.add { it.element.outerHTML?.contains(reporter) == true }
                 }
 
@@ -277,7 +277,7 @@ class AdminAppTabTest(
         @Test
         fun `should be able to set and reset new bug mail setting`() {
             val card = _get<NotificationAppAdminCard>()
-            val checkbox = card._get<Translatable<Label>> { captionId = Messages.NEW_BUG_MAIL_LABEL }.nextSibling() as Checkbox
+            val checkbox = card._get<Translatable<Span>> { captionId = Messages.NEW_BUG_MAIL_LABEL }.nextSibling() as Checkbox
 
             checkbox._value = true
             checkbox._fireValueChange()
@@ -293,7 +293,7 @@ class AdminAppTabTest(
         @Test
         fun `should be able to set and reset regression mail setting`() {
             val card = _get<NotificationAppAdminCard>()
-            val checkbox = card._get<Translatable<Label>> { captionId = Messages.REGRESSION_MAIL_LABEL }.nextSibling() as Checkbox
+            val checkbox = card._get<Translatable<Span>> { captionId = Messages.REGRESSION_MAIL_LABEL }.nextSibling() as Checkbox
 
             checkbox._value = true
             checkbox._fireValueChange()
@@ -309,7 +309,7 @@ class AdminAppTabTest(
         @Test
         fun `should be able to set and reset spike mail setting`() {
             val card = _get<NotificationAppAdminCard>()
-            val checkbox = card._get<Translatable<Label>> { captionId = Messages.SPIKE_MAIL_LABEL }.nextSibling() as Checkbox
+            val checkbox = card._get<Translatable<Span>> { captionId = Messages.SPIKE_MAIL_LABEL }.nextSibling() as Checkbox
 
             checkbox._value = true
             checkbox._fireValueChange()
@@ -325,7 +325,7 @@ class AdminAppTabTest(
         @Test
         fun `should be able to set and reset weekly mail setting`() {
             val card = _get<NotificationAppAdminCard>()
-            val checkbox = card._get<Translatable<Label>> { captionId = Messages.WEEKLY_MAIL_LABEL }.nextSibling() as Checkbox
+            val checkbox = card._get<Translatable<Span>> { captionId = Messages.WEEKLY_MAIL_LABEL }.nextSibling() as Checkbox
 
             checkbox._value = true
             checkbox._fireValueChange()

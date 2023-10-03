@@ -24,6 +24,7 @@ import com.faendir.acra.persistence.version.VersionRepository
 import com.faendir.acra.ui.component.Card
 import com.faendir.acra.ui.component.CssGridLayout
 import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.component.Translatable.Companion.createSpan
 import com.faendir.acra.ui.ext.Align
 import com.faendir.acra.ui.ext.SizeUnit
 import com.faendir.acra.ui.ext.setAlignItems
@@ -48,7 +49,7 @@ open class Statistics(appId: AppId, private val baseExpression: Condition?, repo
         filterLayout.setRowGap(0.5, SizeUnit.EM)
         filterLayout.setAlignItems(Align.CENTER)
         val card = Card(filterLayout)
-        card.setHeader(Translatable.createLabel(Messages.FILTER))
+        card.setHeader(createSpan(Messages.FILTER))
         card.setWidth(500, SizeUnit.PIXEL)
         val dayStepper = NumberField()
         dayStepper.value = 30.0

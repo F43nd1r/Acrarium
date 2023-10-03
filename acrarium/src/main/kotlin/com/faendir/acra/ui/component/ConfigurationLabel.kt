@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import com.faendir.acra.persistence.app.Reporter
 import com.faendir.acra.rest.RestReportInterface
 import com.faendir.acra.ui.view.Overview
 import com.faendir.acra.util.ensureTrailing
-import com.vaadin.flow.component.html.Label
+import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.i18n.LocaleChangeEvent
 import com.vaadin.flow.i18n.LocaleChangeObserver
 import com.vaadin.flow.router.RouteConfiguration
@@ -35,7 +35,7 @@ import org.springframework.beans.factory.annotation.Value
 class ConfigurationLabel private constructor(
     @Value("\${server.context-path}")
     private val baseUrl: String?
-) : Label(""), LocaleChangeObserver {
+) : Span(""), LocaleChangeObserver {
     private lateinit var username: String
     private lateinit var rawPassword: String
 

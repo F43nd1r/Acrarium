@@ -57,7 +57,7 @@ class IdentifierBugTab(
                 this@IdentifierBugTab.children.findAny().ifPresent { isCollapsed = true }
                 flexLayout {
                     flexDirection = FlexLayout.FlexDirection.COLUMN
-                    translatableLabel(Messages.IDENTIFER_BODY, identifier.crashLine ?: "", identifier.cause ?: "")
+                    translatableSpan(Messages.IDENTIFER_BODY, identifier.crashLine ?: "", identifier.cause ?: "")
                     if (identifiers.size > 1 && SecurityUtils.hasPermission(appId, Permission.Level.EDIT)) {
                         translatableButton(Messages.NOT_SAME_BUG) {
                             bugRepository.splitFromBug(bugId, identifier)

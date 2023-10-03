@@ -22,7 +22,7 @@ import com.faendir.acra.navigation.View
 import com.faendir.acra.persistence.NOT_NULL
 import com.faendir.acra.persistence.report.ReportRepository
 import com.faendir.acra.ui.component.AdminCard
-import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.component.Translatable.Companion.createSpan
 import com.faendir.acra.ui.ext.comboBox
 import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.downloadButton
@@ -43,7 +43,7 @@ class ExportAppAdminCard(
 
     init {
         content {
-            setHeader(Translatable.createLabel(Messages.EXPORT))
+            setHeader(createSpan(Messages.EXPORT))
             val mailBox = comboBox(reportRepository.get(appId, REPORT.USER_EMAIL), Messages.BY_MAIL) {
                 setWidthFull()
             }

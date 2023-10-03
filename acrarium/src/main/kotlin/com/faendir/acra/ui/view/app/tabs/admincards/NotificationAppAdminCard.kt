@@ -22,7 +22,7 @@ import com.faendir.acra.persistence.mailsettings.MailSettings
 import com.faendir.acra.persistence.mailsettings.MailSettingsRepository
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.ui.component.AdminCard
-import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.component.Translatable.Companion.createSpan
 import com.faendir.acra.ui.ext.*
 
 @View
@@ -34,7 +34,7 @@ class NotificationAppAdminCard(
 
     init {
         content {
-            setHeader(Translatable.createLabel(Messages.NOTIFICATIONS))
+            setHeader(createSpan(Messages.NOTIFICATIONS))
             gridLayout {
                 setTemplateColumns("auto max-content")
                 setWidthFull()
@@ -48,7 +48,7 @@ class NotificationAppAdminCard(
                         Messages.WEEKLY_MAIL_LABEL to MailSettings::summary
                     )
                 ) { (label, property) ->
-                    translatableLabel(label)
+                    translatableSpan(label)
                     checkbox {
                         value = property.get(settings)
                         addValueChangeListener { event ->

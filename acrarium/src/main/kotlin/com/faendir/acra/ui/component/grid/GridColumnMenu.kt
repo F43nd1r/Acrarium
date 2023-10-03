@@ -17,7 +17,7 @@ package com.faendir.acra.ui.component.grid
 
 import com.faendir.acra.i18n.Messages
 import com.faendir.acra.ui.component.PopupButton
-import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.component.Translatable.Companion.createSpan
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.listbox.MultiSelectListBox
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
@@ -37,7 +37,7 @@ class GridColumnMenu(private val grid: LayoutPersistingFilterableGrid<*, *, *, *
 
     init {
         update()
-        add(VerticalLayout(Translatable.createLabel(Messages.EDIT_COLUMNS).with {
+        add(VerticalLayout(createSpan(Messages.EDIT_COLUMNS).with {
             style.set("font-weight", "bold")
         }, content).apply {
             style.set("background-color", "var(--lumo-shade-5pct)")

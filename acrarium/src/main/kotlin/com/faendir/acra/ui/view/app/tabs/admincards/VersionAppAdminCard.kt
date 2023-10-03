@@ -24,6 +24,7 @@ import com.faendir.acra.persistence.version.VersionRepository
 import com.faendir.acra.security.SecurityUtils
 import com.faendir.acra.ui.component.AdminCard
 import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.component.Translatable.Companion.createSpan
 import com.faendir.acra.ui.component.dialog.VersionEditorDialog
 import com.faendir.acra.ui.component.dialog.confirmButtons
 import com.faendir.acra.ui.component.dialog.showFluentDialog
@@ -43,7 +44,7 @@ class VersionAppAdminCard(
 
     init {
         content {
-            setHeader(Translatable.createLabel(Messages.VERSIONS))
+            setHeader(createSpan(Messages.VERSIONS))
             basicLayoutPersistingFilterableGrid(versionRepository.getProvider(appId)) {
                 setMinHeight(280, SizeUnit.PIXEL)
                 setHeight(100, SizeUnit.PERCENTAGE)

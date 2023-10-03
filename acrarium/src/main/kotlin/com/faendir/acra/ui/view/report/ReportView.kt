@@ -26,7 +26,7 @@ import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.persistence.version.VersionRepository
 import com.faendir.acra.security.RequiresPermission
 import com.faendir.acra.ui.component.HasAcrariumTitle
-import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.component.Translatable.Companion.createSpan
 import com.faendir.acra.ui.ext.*
 import com.faendir.acra.ui.view.bug.tabs.ReportBugTab
 import com.faendir.acra.ui.view.installation.InstallationView
@@ -70,27 +70,27 @@ class ReportView(
         val version = versionRepository.find(report.appId, report.versionKey) ?: throw NotFoundException()
         content {
             card {
-                setHeader(Translatable.createLabel(Messages.SUMMARY))
+                setHeader(createSpan(Messages.SUMMARY))
                 gridLayout {
                     setTemplateColumns("max-content max-content")
                     setColumnGap(1, SizeUnit.EM)
                     setJustifyItems(JustifyItems.START)
                     setAlignItems(Align.FIRST_BASELINE)
 
-                    translatableLabel(Messages.VERSION) { secondary() }
+                    translatableSpan(Messages.VERSION) { secondary() }
                     gridLayout {
                         setTemplateColumns("max-content max-content")
                         setColumnGap(1, SizeUnit.EM)
-                        translatableLabel(Messages.NAME) { secondary() }
-                        label(version.name)
-                        translatableLabel(Messages.VERSION_CODE) { secondary() }
-                        label(version.code.toString())
-                        translatableLabel(Messages.VERSION_FLAVOR) { secondary() }
-                        label(version.flavor)
+                        translatableSpan(Messages.NAME) { secondary() }
+                        span(version.name)
+                        translatableSpan(Messages.VERSION_CODE) { secondary() }
+                        span(version.code.toString())
+                        translatableSpan(Messages.VERSION_FLAVOR) { secondary() }
+                        span(version.flavor)
                     }
-                    translatableLabel(Messages.DATE) { secondary() }
-                    label(prettyTime.formatUnrounded(report.date.toUtcLocal()))
-                    translatableLabel(Messages.INSTALLATION) {
+                    translatableSpan(Messages.DATE) { secondary() }
+                    span(prettyTime.formatUnrounded(report.date.toUtcLocal()))
+                    translatableSpan(Messages.INSTALLATION) {
                         secondary()
                         setAlignSelf(Align.CENTER)
                     }
@@ -100,14 +100,14 @@ class ReportView(
                     ) {
                         installationView(avatarService, report.installationId)
                     }
-                    translatableLabel(Messages.EMAIL) { secondary() }
-                    label(report.userEmail ?: "")
-                    translatableLabel(Messages.COMMENT) { secondary() }
-                    label(report.userComment ?: "")
+                    translatableSpan(Messages.EMAIL) { secondary() }
+                    span(report.userEmail ?: "")
+                    translatableSpan(Messages.COMMENT) { secondary() }
+                    span(report.userComment ?: "")
                     val mapping = version.mappings
-                    translatableLabel(if (mapping != null) Messages.DE_OBFUSCATED_STACKTRACE else Messages.NO_MAPPING_STACKTRACE) { secondary() }
-                    label(mapping?.let { report.stacktrace.retrace(it) } ?: report.stacktrace) { honorWhitespaces() }
-                    translatableLabel(Messages.ATTACHMENTS) { secondary() }
+                    translatableSpan(if (mapping != null) Messages.DE_OBFUSCATED_STACKTRACE else Messages.NO_MAPPING_STACKTRACE) { secondary() }
+                    span(mapping?.let { report.stacktrace.retrace(it) } ?: report.stacktrace) { honorWhitespaces() }
+                    translatableSpan(Messages.ATTACHMENTS) { secondary() }
                     div {
                         forEach(reportRepository.findAttachmentNames(report.id)) {
                             anchor(StreamResource(it, InputStreamFactory { reportRepository.loadAttachment(report.id, it)!!.inputStream() }), it) {
@@ -118,7 +118,7 @@ class ReportView(
                 }
             }
             card {
-                setHeader(Translatable.createLabel(Messages.DETAILS))
+                setHeader(createSpan(Messages.DETAILS))
                 layoutForMap(JSONObject(report.content.data()).toMap())
             }
         }
@@ -131,7 +131,7 @@ class ReportView(
             setJustifyItems(JustifyItems.START)
 
             forEach(map.entries.sortedBy { it.key }) {
-                label(it.key) { secondary() }
+                span(it.key) { secondary() }
                 componentForContent(it.value)
             }
         }
@@ -147,7 +147,7 @@ class ReportView(
                 layoutForMap(values.mapIndexed { i, v -> String.format(format, i) to v }.toMap())
             }
 
-            else -> label(value.toString()) { honorWhitespaces() }
+            else -> span(value.toString()) { honorWhitespaces() }
         }
     }
 

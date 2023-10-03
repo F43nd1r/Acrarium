@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2021-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2021-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class SetupView(userRepository: UserRepository) : Composite<FlexLayout>(), HasAc
                         flexDirection = FlexLayout.FlexDirection.COLUMN
                         setWidth(0, SizeUnit.PIXEL)
                         setFlexGrow(1)
-                        translatableLabel(Messages.WELCOME) {
+                        translatableSpan(Messages.WELCOME) {
                             style["font-size"] = "var(--lumo-font-size-xxl)"
                             setAlignSelf(Align.CENTER)
                         }
@@ -62,7 +62,7 @@ class SetupView(userRepository: UserRepository) : Composite<FlexLayout>(), HasAc
                             setPaddingTop(0.5, SizeUnit.REM)
                             setPaddingBottom(1.0, SizeUnit.REM)
                         }
-                        translatableLabel(Messages.CREATE_ADMIN)
+                        translatableSpan(Messages.CREATE_ADMIN)
                     }
                 }
                 userEditor(userRepository, mutableSetOf(Role.ADMIN, Role.USER)) { UI.getCurrent().page.reload() }

@@ -16,7 +16,7 @@
 package com.faendir.acra.ui.component.statistics
 
 import com.faendir.acra.ui.component.Card
-import com.faendir.acra.ui.component.Translatable
+import com.faendir.acra.ui.component.Translatable.Companion.createSpan
 import com.faendir.acra.ui.ext.SizeUnit
 import com.faendir.acra.ui.ext.setMaxWidthFull
 import com.faendir.acra.ui.ext.setWidth
@@ -32,7 +32,7 @@ internal abstract class Chart<T>(captionId: String, vararg params: Any) : Compos
     init {
         content.setWidth(500, SizeUnit.PIXEL)
         content.setMaxWidthFull()
-        content.setHeader(Translatable.createLabel(captionId, *params))
+        content.setHeader(createSpan(captionId, *params))
     }
 
     fun setContent(map: Map<T, Int>) {
