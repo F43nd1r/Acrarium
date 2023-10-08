@@ -23,10 +23,6 @@ import com.faendir.acra.ui.component.statistics.Statistics
 import com.faendir.acra.ui.view.app.AppView
 import com.vaadin.flow.router.Route
 
-/**
- * @author lukas
- * @since 11.10.18
- */
 @View
 @Route(value = "statistics", layout = AppView::class)
 class StatisticsAppTab(

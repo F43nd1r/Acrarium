@@ -44,10 +44,6 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup
 import com.vaadin.flow.data.renderer.ComponentRenderer
 import com.vaadin.flow.router.Route
 
-/**
- * @author lukas
- * @since 14.07.18
- */
 @View
 @Route(value = "bug", layout = AppView::class)
 class BugAppTab(

@@ -47,10 +47,6 @@ import java.util.*
 import kotlin.math.log10
 import kotlin.math.max
 
-/**
- * @author lukas
- * @since 17.09.18
- */
 @View
 @Route(value = "app/:$PARAM_APP/bug/:$PARAM_BUG/report/:$PARAM_REPORT", layout = MainView::class)
 @LogicalParent(ReportBugTab::class)

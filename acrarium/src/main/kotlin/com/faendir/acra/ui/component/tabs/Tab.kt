@@ -19,10 +19,6 @@ import com.vaadin.flow.component.tabs.Tab
 import com.vaadin.flow.i18n.LocaleChangeEvent
 import com.vaadin.flow.i18n.LocaleChangeObserver
 
-/**
- * @author lukas
- * @since 15.11.18
- */
 open class Tab(private val captionId: String, private vararg val params: Any) : Tab(), LocaleChangeObserver {
     override fun localeChange(event: LocaleChangeEvent) {
         label = getTranslation(captionId, *params)

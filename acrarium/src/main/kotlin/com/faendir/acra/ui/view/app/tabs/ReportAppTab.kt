@@ -23,10 +23,6 @@ import com.faendir.acra.ui.view.app.AppView
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.router.Route
 
-/**
- * @author lukas
- * @since 14.07.18
- */
 @View
 @Route(value = "report", layout = AppView::class)
 class ReportAppTab(

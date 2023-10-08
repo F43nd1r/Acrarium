@@ -33,10 +33,6 @@ import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.router.Route
 
-/**
- * @author lukas
- * @since 19.11.18
- */
 @View
 @Route(value = "identifier", layout = BugView::class)
 class IdentifierBugTab(

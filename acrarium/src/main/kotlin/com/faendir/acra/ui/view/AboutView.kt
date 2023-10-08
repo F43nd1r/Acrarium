@@ -29,11 +29,6 @@ import com.vaadin.flow.router.Route
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.info.BuildProperties
 
-
-/**
- * @author lukas
- * @since 06.09.19
- */
 @Suppress("LeakingThis")
 @View
 @Route(value = "about", layout = MainView::class)

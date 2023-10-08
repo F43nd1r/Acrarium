@@ -20,7 +20,6 @@ import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.bug.BugId
 import com.faendir.acra.persistence.report.Report
 import com.faendir.acra.persistence.user.UserRepository
-import com.faendir.acra.persistence.version.VersionKey
 import com.faendir.acra.rest.RestReportInterface.Companion.ATTACHMENT
 import com.faendir.acra.rest.RestReportInterface.Companion.REPORT
 import com.faendir.acra.rest.RestReportInterface.Companion.REPORT_PATH
@@ -46,10 +45,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.Instant
 
-/**
- * @author lukas
- * @since 26.06.18
- */
 @WebMvcTest(controllers = [RestReportInterface::class], includeFilters = [ComponentScan.Filter(classes = [EnableWebSecurity::class])])
 @WithMockUser(roles = ["REPORTER", "USER"])
 class RestReportInterfaceTest {

@@ -22,10 +22,6 @@ import com.faendir.acra.ui.view.installation.InstallationView
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.router.Route
 
-/**
- * @author lukas
- * @since 19.11.18
- */
 @View
 @Route(value = "report", layout = InstallationView::class)
 class ReportInstallationTab(

@@ -19,11 +19,12 @@ import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.HasValidation
 import com.vaadin.flow.component.HasValue
 
-/**
- * @author Lukas
- * @since 22.06.2017
- */
-class ValidatedField<V, T : Component> private constructor(val field: T, private val getValue: () -> V, registerListener: ((V) -> Unit) -> Unit, private val setMessage: (String?) -> Unit) {
+class ValidatedField<V, T : Component> private constructor(
+    val field: T,
+    private val getValue: () -> V,
+    registerListener: ((V) -> Unit) -> Unit,
+    private val setMessage: (String?) -> Unit
+) {
     private val validators: MutableMap<(V) -> Boolean, String> = mutableMapOf()
     private val listeners: MutableList<(Boolean) -> Unit> = mutableListOf()
     private var valid: Boolean = false
@@ -60,7 +61,7 @@ class ValidatedField<V, T : Component> private constructor(val field: T, private
 
     companion object {
         fun <V, T, E : HasValue.ValueChangeEvent<V>> of(field: T): ValidatedField<V, T> where T : Component, T : HasValue<E, V>, T : HasValidation {
-            return ValidatedField(field, { field.value }, { listener -> field.addValueChangeListener {  listener(it.value) } }, { field.errorMessage = it })
+            return ValidatedField(field, { field.value }, { listener -> field.addValueChangeListener { listener(it.value) } }, { field.errorMessage = it })
         }
 
         fun <V, T> of(field: T, getValue: () -> V, registerListener: ((V) -> Unit) -> Unit): ValidatedField<V, T> where T : Component, T : HasValue<*, V>, T : HasValidation {

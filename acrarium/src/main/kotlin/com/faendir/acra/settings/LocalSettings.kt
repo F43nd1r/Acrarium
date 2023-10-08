@@ -30,10 +30,6 @@ import java.net.URLEncoder
 import java.util.*
 import kotlin.reflect.KProperty
 
-/**
- * @author lukas
- * @since 10.09.19
- */
 @SpringComponent
 @VaadinSessionScope
 class LocalSettings(private val objectMapper: ObjectMapper) : Serializable {

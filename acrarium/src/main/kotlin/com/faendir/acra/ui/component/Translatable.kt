@@ -34,10 +34,6 @@ import com.vaadin.flow.router.RouterLink
 import com.vaadin.flow.shared.Registration
 import kotlin.reflect.KClass
 
-/**
- * @author lukas
- * @since 14.11.18
- */
 open class Translatable<T : Component>(protected val t: T, private val property: T.(String) -> Unit, internal val captionId: String, private vararg val params: Any) :
     Composite<T>(), LocaleChangeObserver, HasSize, HasStyle {
 

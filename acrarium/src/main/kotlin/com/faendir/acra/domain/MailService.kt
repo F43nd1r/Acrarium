@@ -48,10 +48,6 @@ import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
 
-/**
- * @author lukas
- * @since 07.12.18
- */
 @Service
 @EnableScheduling
 @EnableAsync

@@ -44,10 +44,6 @@ import com.vaadin.flow.spring.annotation.UIScope
 import org.springframework.context.support.GenericApplicationContext
 import org.springframework.security.core.context.SecurityContextHolder
 
-/**
- * @author lukas
- * @since 13.07.18
- */
 @JsModule("./styles/shared-styles.js")
 @CssImport("./styles/global.css")
 @UIScope
@@ -89,7 +85,7 @@ class MainView(applicationContext: GenericApplicationContext) : Composite<AppLay
         }
     }
 
-    private inline fun <reified T : Component> createTab(captionId: String) : Tab {
+    private inline fun <reified T : Component> createTab(captionId: String): Tab {
         val tab = Tab(Translatable.createRouterLink(T::class, captionId = captionId))
         targets[T::class.java] = tab
         return tab

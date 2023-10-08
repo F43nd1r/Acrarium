@@ -22,12 +22,6 @@ import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
-/**
- * Implementation of [I18NProvider] that reads messages from [ResourceBundle]s with a specific base name.
- *
- * @author lukas
- * @since 10.11.18
- */
 class ResourceBundleI18NProvider(private val baseName: String) : I18NProvider {
     private fun getResourceBundle(locale: Locale, withFallback: Boolean): ResourceBundle? {
         return try {
@@ -43,13 +37,13 @@ class ResourceBundleI18NProvider(private val baseName: String) : I18NProvider {
     override fun getProvidedLocales() = Locale.getAvailableLocales().filter { getResourceBundle(it, false) != null }
 
     override fun getTranslation(key: String, locale: Locale, vararg params: Any): String? =
-            getResourceBundle(locale, true)?.tryOrNull { getString(key) }?.let { String.format(it, *params) }
+        getResourceBundle(locale, true)?.tryOrNull { getString(key) }?.let { String.format(it, *params) }
 
     private class MessageControl(private val allowFallback: Boolean) : ResourceBundle.Control() {
         override fun getFallbackLocale(baseName: String, locale: Locale): Locale? = if (allowFallback) super.getFallbackLocale(baseName, locale) else null
 
         override fun getCandidateLocales(baseName: String, locale: Locale): List<Locale> =
-                if (allowFallback) super.getCandidateLocales(baseName, locale) else listOf(locale, Locale.ROOT)
+            if (allowFallback) super.getCandidateLocales(baseName, locale) else listOf(locale, Locale.ROOT)
     }
 
 

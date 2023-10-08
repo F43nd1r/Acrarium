@@ -24,10 +24,6 @@ import com.vaadin.flow.component.tabs.Tabs
 import com.vaadin.flow.component.tabs.Tabs.SelectedChangeEvent
 import com.vaadin.flow.shared.Registration
 
-/**
- * @author lukas
- * @since 06.09.19
- */
 open class SubTabs(vararg tabs: Tab) : Tab() {
     private val content: Tabs = Tabs(false, *tabs)
     private var registration: Registration? = null

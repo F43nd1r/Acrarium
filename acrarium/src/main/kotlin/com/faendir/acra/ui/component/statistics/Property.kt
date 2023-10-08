@@ -34,10 +34,6 @@ import org.jooq.SelectField
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-/**
- * @author lukas
- * @since 01.06.18
- */
 internal class Property<F, C, T, E : HasValue.ValueChangeEvent<F>, V> private
 constructor(
     private val appId: AppId,

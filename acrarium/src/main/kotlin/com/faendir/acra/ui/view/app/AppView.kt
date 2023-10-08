@@ -30,10 +30,6 @@ import com.vaadin.flow.router.NotFoundException
 import com.vaadin.flow.router.ParentLayout
 import com.vaadin.flow.router.RoutePrefix
 
-/**
- * @author lukas
- * @since 13.07.18
- */
 @View
 @RoutePrefix("app/:$PARAM_APP")
 @ParentLayout(MainView::class)

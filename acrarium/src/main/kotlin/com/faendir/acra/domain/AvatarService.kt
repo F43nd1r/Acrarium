@@ -27,10 +27,6 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import java.io.ByteArrayInputStream
 
-/**
- * @author lukas
- * @since 29.07.18
- */
 @Service
 class AvatarService {
     private val avatar: Avatar = IdenticonAvatar.newAvatarBuilder().size(32, 32).build()

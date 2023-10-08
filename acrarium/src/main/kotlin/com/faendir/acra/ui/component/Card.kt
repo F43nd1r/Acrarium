@@ -20,10 +20,6 @@ import com.vaadin.flow.component.*
 import com.vaadin.flow.component.dependency.JsModule
 import com.vaadin.flow.component.littemplate.LitTemplate
 
-/**
- * @author lukas
- * @since 18.10.18
- */
 @Tag("acrarium-card")
 @JsModule("./elements/card.ts")
 class Card() : LitTemplate(), HasSize, HasStyle, HasComponents, HasSlottedComponents<Card.Slot> {

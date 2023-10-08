@@ -30,10 +30,6 @@ import com.github.appreciated.apexcharts.helper.Series
 import java.time.Instant
 import java.util.*
 
-/**
- * @author lukas
- * @since 01.06.18
- */
 internal class TimeChart(captionId: String, vararg params: Any) : Chart<Instant>(captionId, *params) {
     override fun createChart(map: Map<Instant, Int>): ApexCharts {
         val list = map.asSequence().sortedBy { it.key }.map { arrayOf<Any>(Date.from(it.key), it.value) }.toList()
@@ -48,9 +44,9 @@ internal class TimeChart(captionId: String, vararg params: Any) : Chart<Instant>
                     .build()
             )
             .withXaxis(XAxisBuilder.get().withType(XAxisType.DATETIME).build())
-                .withSeries(Series(getTranslation(Messages.REPORTS), *list.toTypedArray()))
-                .withDataLabels(DataLabelsBuilder.get().withEnabled(false).build())
-                .withLabels(getTranslation(Messages.REPORTS))
-                .build()
+            .withSeries(Series(getTranslation(Messages.REPORTS), *list.toTypedArray()))
+            .withDataLabels(DataLabelsBuilder.get().withEnabled(false).build())
+            .withLabels(getTranslation(Messages.REPORTS))
+            .build()
     }
 }

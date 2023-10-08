@@ -18,10 +18,6 @@ package com.faendir.acra.ui.component
 import com.vaadin.flow.component.customfield.CustomField
 import com.vaadin.flow.component.textfield.NumberField
 
-/**
- * @author lukas
- * @since 07.05.19
- */
 class RangeField : CustomField<Double>() {
     private val input: RangeInput = RangeInput()
     private val _field: NumberField = NumberField()

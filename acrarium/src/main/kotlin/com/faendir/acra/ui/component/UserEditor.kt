@@ -37,10 +37,6 @@ import java.util.*
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
-/**
- * @author lukas
- * @since 28.02.19
- */
 class UserEditor(userRepository: UserRepository, mailService: MailService?, existingUsername: String? = null, grantRoles: Set<Role> = emptySet(), onSuccess: () -> Unit) :
     Composite<FlexLayout>() {
     private val isExistingUser = existingUsername != null

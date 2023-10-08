@@ -31,10 +31,6 @@ import org.springframework.core.annotation.AnnotationUtils
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 
-/**
- * @author lukas
- * @since 18.10.18
- */
 class AppPath(private val applicationContext: GenericApplicationContext) : SubTabs(), AfterNavigationListener, BeforeEnterObserver {
     private var registration: Registration? = null
 

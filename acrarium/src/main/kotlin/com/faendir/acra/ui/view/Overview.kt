@@ -45,10 +45,6 @@ import org.ektorp.impl.StdCouchDbConnector
 import org.ektorp.impl.StdCouchDbInstance
 import org.json.JSONObject
 
-/**
- * @author lukas
- * @since 13.07.18
- */
 @View
 @Route(value = "", layout = MainView::class)
 class Overview(private val appRepository: AppRepository, private val reportService: ReportService) : Composite<VerticalLayout>(), HasAcrariumTitle {

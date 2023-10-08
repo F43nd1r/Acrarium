@@ -47,10 +47,6 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.data.renderer.ComponentRenderer
 import com.vaadin.flow.router.Route
 
-/**
- * @author lukas
- * @since 15.11.18
- */
 @View
 @Route(value = "user-manager", layout = MainView::class)
 @RequiresRole(Role.ADMIN)

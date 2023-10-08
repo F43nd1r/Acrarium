@@ -20,10 +20,6 @@ import com.vaadin.flow.i18n.I18NProvider
 import com.vaadin.flow.server.VaadinService
 import java.util.*
 
-/**
- * @author lukas
- * @since 06.09.19
- */
 open class TranslatableText(val id: String, vararg val params: Any) {
 
     fun translate(): String {

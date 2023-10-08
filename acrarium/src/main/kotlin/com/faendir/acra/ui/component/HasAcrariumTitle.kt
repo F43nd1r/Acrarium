@@ -23,10 +23,6 @@ import com.vaadin.flow.i18n.LocaleChangeEvent
 import com.vaadin.flow.i18n.LocaleChangeObserver
 import com.vaadin.flow.router.HasDynamicTitle
 
-/**
- * @author lukas
- * @since 06.09.19
- */
 interface HasAcrariumTitle : HasDynamicTitle, LocaleChangeObserver {
     val title: TranslatableText
     override fun getPageTitle(): String {

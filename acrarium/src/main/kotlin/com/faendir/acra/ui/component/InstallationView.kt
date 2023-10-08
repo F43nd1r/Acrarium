@@ -27,10 +27,6 @@ import com.vaadin.flow.server.StreamResource
 import com.vaadin.flow.server.StreamResourceRegistry
 import com.vaadin.flow.server.VaadinSession
 
-/**
- * @author lukas
- * @since 23.04.19
- */
 @Tag("acrarium-image-with-label")
 @JsModule("./elements/image-with-label.ts")
 class InstallationView(private val avatarService: AvatarService) : LitTemplate() {

@@ -44,11 +44,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMa
 import org.springframework.security.web.util.matcher.OrRequestMatcher
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector
 
-
-/**
- * @author Lukas
- * @since 22.03.2017
- */
 @Configuration
 @EnableWebSecurity
 class WebSecurityConfiguration(private val userRepository: UserRepository) : VaadinWebSecurity() {

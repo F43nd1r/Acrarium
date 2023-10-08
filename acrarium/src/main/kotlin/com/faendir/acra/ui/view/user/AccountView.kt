@@ -32,10 +32,6 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout
 import com.vaadin.flow.router.Route
 import org.springframework.beans.factory.annotation.Autowired
 
-/**
- * @author lukas
- * @since 26.02.19
- */
 @View
 @Route(value = "account", layout = MainView::class)
 class AccountView(

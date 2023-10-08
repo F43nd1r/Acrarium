@@ -24,10 +24,6 @@ import com.faendir.acra.ui.view.bug.tabs.admincards.DangerBugAdminCard
 import com.faendir.acra.ui.view.bug.tabs.admincards.PropertiesBugAdminCard
 import com.vaadin.flow.router.Route
 
-/**
- * @author lukas
- * @since 18.10.18
- */
 @View
 @Route(value = "admin", layout = BugView::class)
 class AdminBugTab : SpringComposite<CardView<AdminCard>>() {

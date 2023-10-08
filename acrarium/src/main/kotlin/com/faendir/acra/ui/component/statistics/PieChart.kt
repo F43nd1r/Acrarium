@@ -21,10 +21,6 @@ import com.github.appreciated.apexcharts.ApexChartsBuilder
 import com.github.appreciated.apexcharts.config.builder.ChartBuilder
 import com.github.appreciated.apexcharts.config.chart.Type
 
-/**
- * @author lukas
- * @since 01.06.18
- */
 internal class PieChart(captionId: String, vararg params: Any) : Chart<String>(captionId, *params) {
 
     override fun createChart(map: Map<String, Int>): ApexCharts {
@@ -38,8 +34,8 @@ internal class PieChart(captionId: String, vararg params: Any) : Chart<String>(c
         return ApexChartsBuilder.get()
             .withChart(ChartBuilder.get().withType(Type.PIE).withBackground("transparent").build())
             .withLabels(*list.map { it.first }.toTypedArray())
-                .withSeries(*list.map {it.second.toDouble() }.toTypedArray())
-                .build()
+            .withSeries(*list.map { it.second.toDouble() }.toTypedArray())
+            .build()
     }
 
     companion object {

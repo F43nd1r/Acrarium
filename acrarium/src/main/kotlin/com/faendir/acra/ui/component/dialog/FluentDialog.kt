@@ -15,10 +15,6 @@
  */
 package com.faendir.acra.ui.component.dialog
 
-/**
- * @author Lukas
- * @since 19.12.2017
- */
 class FluentDialog : AcrariumDialog() {
     private val fields: MutableMap<ValidatedField<*, *>, Pair<Boolean, (Boolean) -> Unit>> = mutableMapOf()
 

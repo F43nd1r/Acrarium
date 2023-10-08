@@ -33,10 +33,6 @@ import com.vaadin.flow.router.RoutePrefix
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
 
-/**
- * @author lukas
- * @since 08.09.18
- */
 @UIScope
 @SpringComponent
 @RoutePrefix("app/:$PARAM_APP/installation/:$PARAM_INSTALLATION")

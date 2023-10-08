@@ -23,10 +23,6 @@ import com.faendir.acra.ui.view.app.AppView
 import com.faendir.acra.ui.view.app.tabs.admincards.*
 import com.vaadin.flow.router.Route
 
-/**
- * @author lukas
- * @since 18.10.18
- */
 @View
 @Route(value = "admin", layout = AppView::class)
 class AdminAppTab : SpringComposite<CardView<AdminCard>>() {

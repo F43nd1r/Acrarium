@@ -35,10 +35,6 @@ import com.vaadin.flow.component.textfield.NumberField
 import org.jooq.Condition
 import org.jooq.impl.DSL
 
-/**
- * @author lukas
- * @since 21.05.18
- */
 open class Statistics(appId: AppId, private val baseExpression: Condition?, reportRepository: ReportRepository, versionRepository: VersionRepository) : Composite<FlexLayout>() {
     private val properties: MutableList<Property<*, *, *, *, *>> = mutableListOf()
 

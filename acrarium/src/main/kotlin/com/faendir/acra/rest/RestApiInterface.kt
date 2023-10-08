@@ -31,10 +31,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import java.time.Instant
 
-/**
- * @author lukas
- * @since 23.08.18
- */
 @RestController
 @RequestMapping(RestApiInterface.API_PATH)
 @PreAuthorize("isApi()")

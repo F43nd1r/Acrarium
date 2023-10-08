@@ -24,10 +24,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-/**
- * @author Lukas
- * @since 26.05.2017
- */
 open class TimeSpanRenderer<T>(valueProvider: (T) -> LocalDateTime?) : ComponentRenderer<Span, T>({ t: T ->
     valueProvider(t)?.let {
         Span(PrettyTime(Locale.US).formatUnrounded(it)).apply {

@@ -17,10 +17,6 @@ package com.faendir.acra.ui.component
 
 import com.vaadin.flow.component.*
 
-/**
- * @author lukas
- * @since 29.11.18
- */
 @Tag(Tag.INPUT)
 class RangeInput : AbstractSinglePropertyField<RangeInput, Double>("value", 0.0, false), Focusable<RangeInput>, HasSize, HasStyle {
 

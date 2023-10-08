@@ -18,10 +18,6 @@ package com.faendir.acra.ui.component
 import com.vaadin.flow.component.html.Anchor
 import com.vaadin.flow.server.AbstractStreamResource
 
-/**
- * @author lukas
- * @since 15.11.18
- */
 class DownloadButton(href: AbstractStreamResource, captionId: String, vararg params: Any) : Anchor(href, "") {
     init {
         element.setAttribute("download", true)

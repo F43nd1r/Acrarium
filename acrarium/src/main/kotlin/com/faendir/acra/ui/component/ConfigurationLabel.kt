@@ -28,10 +28,6 @@ import com.vaadin.flow.server.VaadinRequest
 import com.vaadin.flow.server.VaadinService
 import org.springframework.beans.factory.annotation.Value
 
-/**
- * @author lukas
- * @since 09.11.18
- */
 class ConfigurationLabel private constructor(
     @Value("\${server.context-path}")
     private val baseUrl: String?

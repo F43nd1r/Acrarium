@@ -22,10 +22,6 @@ import com.faendir.acra.ui.view.bug.BugView
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.router.Route
 
-/**
- * @author lukas
- * @since 19.11.18
- */
 @View
 @Route(value = "report", layout = BugView::class)
 class ReportBugTab(

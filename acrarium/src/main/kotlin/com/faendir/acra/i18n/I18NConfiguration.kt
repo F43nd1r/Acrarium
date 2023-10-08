@@ -19,10 +19,6 @@ import com.vaadin.flow.i18n.I18NProvider
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
-/**
- * @author lukas
- * @since 10.11.18
- */
 @Configuration
 class I18NConfiguration {
     @Bean

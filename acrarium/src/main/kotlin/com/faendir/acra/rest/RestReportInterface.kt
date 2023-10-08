@@ -25,29 +25,20 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartHttpServletRequest
-import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.security.Principal
 
-/**
- * @author Lukas
- * @since 22.03.2017
- */
 @RestController
 @PreAuthorize("isReporter()")
 class RestReportInterface(private val reportService: ReportService) {
     @RequestMapping(value = [REPORT_PATH], consumes = [MediaType.APPLICATION_JSON_VALUE], method = [RequestMethod.POST])
-    fun report(
-        @RequestBody
-        content: String, principal: Principal
-    ) {
+    fun report(@RequestBody content: String, principal: Principal) {
         if (content.isNotBlank()) {
             reportService.create(principal.name, content, emptyList())
         }
     }
 
     @RequestMapping(value = [REPORT_PATH], consumes = [MediaType.MULTIPART_FORM_DATA_VALUE], method = [RequestMethod.POST])
-    @Throws(IOException::class)
     fun report(request: MultipartHttpServletRequest, principal: Principal): ResponseEntity<*> {
         val fileMap = request.multiFileMap
         val reportFiles = fileMap[REPORT]

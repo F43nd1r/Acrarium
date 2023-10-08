@@ -32,10 +32,6 @@ import com.vaadin.flow.server.VaadinService
 import com.vaadin.flow.server.VaadinSession
 import com.vaadin.flow.theme.lumo.Lumo
 
-/**
- * @author lukas
- * @since 10.09.19
- */
 @View
 @Route(value = "settings", layout = MainView::class)
 class SettingsView(localSettings: LocalSettings) : Composite<FlexLayout>(), HasAcrariumTitle {

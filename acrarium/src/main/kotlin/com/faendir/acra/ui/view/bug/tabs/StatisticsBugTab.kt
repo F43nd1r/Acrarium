@@ -24,10 +24,6 @@ import com.faendir.acra.ui.component.statistics.Statistics
 import com.faendir.acra.ui.view.bug.BugView
 import com.vaadin.flow.router.Route
 
-/**
- * @author lukas
- * @since 11.10.18
- */
 @View
 @Route(value = "statistics", layout = BugView::class)
 class StatisticsBugTab(

@@ -23,10 +23,6 @@ import com.vaadin.flow.component.Tag
 import com.vaadin.flow.component.dependency.JsModule
 import com.vaadin.flow.component.littemplate.LitTemplate
 
-/**
- * @author lukas
- * @since 24.04.19
- */
 @Tag("acrarium-dialog-content")
 @JsModule("./elements/dialog-content.ts")
 class DialogContent : LitTemplate(), HasSize, HasStyle, HasComponents, HasSlottedComponents<DialogContent.Slot> {

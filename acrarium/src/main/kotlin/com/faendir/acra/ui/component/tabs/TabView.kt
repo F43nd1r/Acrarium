@@ -34,10 +34,6 @@ import com.vaadin.flow.router.RouterLayout
 import java.io.Serializable
 import kotlin.reflect.KClass
 
-/**
- * @author lukas
- * @since 03.12.18
- */
 @Suppress("LeakingThis")
 open class TabView(
     private val name: String,

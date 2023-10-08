@@ -22,10 +22,6 @@ import com.vaadin.flow.component.upload.receivers.MemoryBuffer
 import org.springframework.util.StreamUtils
 import java.nio.charset.Charset
 
-/**
- * @author lukas
- * @since 06.03.19
- */
 class UploadField : CustomField<String?>() {
     private val buffer: MemoryBuffer = MemoryBuffer()
 

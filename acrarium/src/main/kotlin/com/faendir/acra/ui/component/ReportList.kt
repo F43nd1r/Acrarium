@@ -45,10 +45,6 @@ import com.vaadin.flow.data.renderer.ComponentRenderer
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.UIScope
 
-/**
- * @author lukas
- * @since 17.09.18
- */
 class ReportList(
     private val app: AppId,
     private val dataProvider: AcrariumDataProvider<ReportRow, ReportRow.Filter, ReportRow.Sort>,

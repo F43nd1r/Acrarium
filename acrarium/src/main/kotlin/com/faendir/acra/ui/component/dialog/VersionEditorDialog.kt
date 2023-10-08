@@ -22,10 +22,6 @@ import com.faendir.acra.persistence.version.VersionRepository
 import com.faendir.acra.ui.component.Translatable
 import com.vaadin.flow.component.orderedlayout.FlexLayout
 
-/**
- * @author lukas
- * @since 24.04.19
- */
 class VersionEditorDialog(versionRepository: VersionRepository, appId: AppId, onUpdate: (() -> Unit) = {}, old: Version? = null) : AcrariumDialog() {
 
     init {
