@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2020-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,16 @@
  */
 package com.faendir.acra.rest
 
+import com.github.ziplet.filter.compression.CompressingFilter
+import jakarta.servlet.Filter
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 
 @Configuration
-class RestConfiguration {/*
+class RestConfiguration {
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
-    fun gzipFilter(): Filter = CompressingFilter() // TODO migrate to jakarta*/
+    fun gzipFilter(): Filter = CompressingFilter()
 }
