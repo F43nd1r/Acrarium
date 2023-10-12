@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package com.faendir.acra.navigation
 
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.bug.BugId
-import com.faendir.acra.util.*
+import com.faendir.acra.util.toNullable
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.router.BeforeEnterEvent
 import com.vaadin.flow.router.BeforeEnterListener
@@ -49,8 +49,9 @@ class RouteParams : UIInitListener, BeforeEnterListener {
     fun installationId(): String = parse(PARAM_INSTALLATION) { it }
 
     fun <T> parse(param: String, parse: (String) -> T?): T {
-        return parse(cache[UI.getCurrent().uiId]?.get(param)?.toNullable() ?: throw IllegalArgumentException("Parameter $param not present"))
-            ?: throw IllegalArgumentException("Parse failure for parameter $param")
+        val id = UI.getCurrent()?.uiId ?: throw IllegalStateException("No UI present")
+        val value = cache[id]?.get(param)?.toNullable() ?: throw IllegalArgumentException("Parameter $param not present")
+        return parse(value) ?: throw IllegalArgumentException("Parse failure for parameter $param")
     }
 }
 
