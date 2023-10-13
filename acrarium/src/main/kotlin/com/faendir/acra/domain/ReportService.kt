@@ -26,6 +26,7 @@ import com.faendir.acra.settings.AcrariumConfiguration
 import com.faendir.acra.util.findInt
 import com.faendir.acra.util.findString
 import com.faendir.acra.util.toDate
+import mu.KotlinLogging
 import org.acra.ReportField
 import org.intellij.lang.annotations.Language
 import org.jooq.JSON
@@ -35,6 +36,8 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
+
+private val logger = KotlinLogging.logger {}
 
 @Service
 class ReportService(
@@ -63,6 +66,11 @@ class ReportService(
         } catch (e: JSONException) {
             throw IllegalArgumentException("Invalid JSON:\n$content", e)
         }
+        val reportId = json.getString(ReportField.REPORT_ID.name)
+        reportRepository.find(reportId)?.let {
+            logger.info { "Received report with id $reportId a second time, ignoring." }
+            return it
+        }
 
         val stacktrace = json.getString(ReportField.STACK_TRACE.name)
         val bugIdentifier = BugIdentifier.fromStacktrace(acrariumConfiguration, appId, stacktrace)
@@ -79,7 +87,6 @@ class ReportService(
 
         val phoneModel = json.optString(ReportField.PHONE_MODEL.name)
         val device = json.optJSONObject(ReportField.BUILD.name)?.optString("DEVICE") ?: ""
-        val reportId = json.getString(ReportField.REPORT_ID.name)
         val report = Report(
             id = reportId,
             androidVersion = json.optString(ReportField.ANDROID_VERSION.name),
