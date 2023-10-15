@@ -38,7 +38,6 @@ import com.faendir.acra.ui.view.report.ReportView
 import com.vaadin.flow.component.Composite
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.grid.GridSortOrder
-import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.icon.Icon
 import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.data.renderer.ComponentRenderer
@@ -78,12 +77,7 @@ class ReportList(
                 setFilterableIs(versions, { it.name }, { ReportRow.Filter.VERSION(it.code, it.flavor) }, Messages.APP_VERSION)
                 setCaption(Messages.APP_VERSION)
             }
-            column({ it.androidVersion }) {
-                setSortable(ReportRow.Sort.ANDROID_VERSION)
-                setFilterableContains({ ReportRow.Filter.ANDROID_VERSION(it) }, Messages.ANDROID_VERSION)
-                setCaption(Messages.ANDROID_VERSION)
-            }
-            column(ComponentRenderer { report -> Span(report.marketingDevice).apply { element.setProperty("title", report.phoneModel) } }) {
+            column({ it.installationId }) {
                 setSortable(ReportRow.Sort.MARKETING_DEVICE)
                 setFilterableContains({ ReportRow.Filter.MARKETING_DEVICE(it) }, Messages.DEVICE)
                 setCaption(Messages.DEVICE)
