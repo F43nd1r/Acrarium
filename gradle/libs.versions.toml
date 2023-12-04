@@ -48,4 +48,4 @@ kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotl
 kotlin-noarg = { id = "org.jetbrains.kotlin.plugin.noarg", version.ref = "kotlin" }
 springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
 vaadin = { id = "com.vaadin", version.ref = "vaadin-base" }
-spotless = { id = "com.diffplug.spotless", version = "6.22.0" }
+spotless = { id = "com.diffplug.spotless", version = "6.23.3" }
