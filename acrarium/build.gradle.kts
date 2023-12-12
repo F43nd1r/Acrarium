@@ -149,6 +149,10 @@ jooq {
                                 converter = "com.faendir.acra.persistence.jooq.InstantConverter"
                                 includeTypes = "DATETIME"
                             },
+                            ForcedType().apply {
+                                name = "BOOLEAN"
+                                includeTypes = "(?i:TINYINT\\(1\\))"
+                            }
                         )
                     }
                     target.apply {
