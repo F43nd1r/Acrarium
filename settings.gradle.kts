@@ -8,7 +8,7 @@ pluginManagement {
     }
 }
 plugins {
-    id("com.faendir.gradle.bom-version-catalog") version "1.4.4"
+    id("com.faendir.gradle.bom-version-catalog") version "1.4.6"
 }
 dependencyResolutionManagement {
     repositories {
