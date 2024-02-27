@@ -7,7 +7,7 @@ vaadin-base = "24.3.1"
 kotlinPoet = "1.15.3"
 testContainers = "1.19.3"
 jooq = "3.18.5"
-karibu = "2.1.0"
+karibu = "2.1.4"
 
 [libraries]
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
