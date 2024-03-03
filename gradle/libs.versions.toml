@@ -1,7 +1,7 @@
 [versions]
 kotlin = "1.9.22"
 dokka = "1.9.10"
-springBoot = "3.2.0"
+springBoot = "3.2.3"
 vaadin-flow = "24.3.6"
 vaadin-base = "24.3.1"
 kotlinPoet = "1.15.3"
