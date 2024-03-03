@@ -38,7 +38,7 @@ karibu-testing = { module = "com.github.mvysny.kaributesting:karibu-testing-v24"
 karibu-spring = { module = "com.github.mvysny.kaributesting:karibu-testing-v10-spring", version.ref = "karibu" }
 
 [plugins]
-jooq = { id = "nu.studer.jooq", version = "8.2.1" }
+jooq = { id = "nu.studer.jooq", version = "8.2.3" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 jgitver = { id = "fr.brouillard.oss.gradle.jgitver", version = "0.10.0-rc03" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
