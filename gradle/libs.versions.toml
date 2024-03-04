@@ -1,10 +1,10 @@
 [versions]
 kotlin = "1.9.22"
 dokka = "1.9.10"
-springBoot = "3.2.0"
+springBoot = "3.2.3"
 vaadin-flow = "24.3.6"
 vaadin-base = "24.3.6"
-kotlinPoet = "1.15.3"
+kotlinPoet = "1.16.0"
 testContainers = "1.19.6"
 jooq = "3.18.5"
 karibu = "2.1.4"
@@ -38,7 +38,7 @@ karibu-testing = { module = "com.github.mvysny.kaributesting:karibu-testing-v24"
 karibu-spring = { module = "com.github.mvysny.kaributesting:karibu-testing-v10-spring", version.ref = "karibu" }
 
 [plugins]
-jooq = { id = "nu.studer.jooq", version = "8.2.3" }
+jooq = { id = "nu.studer.jooq", version = "9.0" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 jgitver = { id = "fr.brouillard.oss.gradle.jgitver", version = "0.10.0-rc03" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
