@@ -1,11 +1,11 @@
 [versions]
-kotlin = "1.9.22"
+kotlin = "1.9.23"
 dokka = "1.9.20"
 springBoot = "3.2.3"
 vaadin-flow = "24.3.6"
 vaadin-base = "24.3.6"
 kotlinPoet = "1.16.0"
-testContainers = "1.19.6"
+testContainers = "1.19.7"
 jooq = "3.18.5"
 karibu = "2.1.4"
 
