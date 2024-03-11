@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.comFasterxmlJacksonModule.jacksonModuleKotlin)
     implementation(libs.kotlin.logging)
     implementation(libs.springdoc)
+    implementation(libs.orgAspectj.aspectjweaver)
     developmentOnly(libs.orgSpringframeworkBoot.springBootDevtools)
     testImplementation(libs.orgSpringframeworkBoot.springBootStarterTest)
     testImplementation(libs.orgSpringframeworkSecurity.springSecurityTest)

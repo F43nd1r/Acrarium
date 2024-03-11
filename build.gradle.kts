@@ -19,7 +19,7 @@ tasks.register("build") {
 
 tasks.register<Delete>("clean") {
     group = "build"
-    delete = setOf(buildDir)
+    delete = setOf(layout.buildDirectory)
 }
 
 subprojects {

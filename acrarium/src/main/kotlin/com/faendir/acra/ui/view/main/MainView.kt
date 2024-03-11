@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2017-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,20 +50,19 @@ import org.springframework.security.core.context.SecurityContextHolder
 @SpringComponent
 class MainView(applicationContext: GenericApplicationContext) : Composite<AppLayout>(), RouterLayout {
     private val targets: MutableMap<Class<out HasElement>, Tab> = mutableMapOf()
-    private val tabs: Tabs
+    private val tabs: Tabs = Tabs().apply {
+        orientation = Tabs.Orientation.VERTICAL
+        add(createTab<Overview>(Messages.HOME))
+        add(AppPath(applicationContext))
+        add(createTab<AccountView>(Messages.ACCOUNT))
+        if (SecurityUtils.hasRole(Role.ADMIN)) {
+            add(createTab<UserManager>(Messages.USER_MANAGER))
+        }
+        add(createTab<SettingsView>(Messages.SETTINGS))
+        add(createTab<AboutView>(Messages.ABOUT))
+    }
 
     init {
-        tabs = Tabs().apply {
-            orientation = Tabs.Orientation.VERTICAL
-            add(createTab<Overview>(Messages.HOME))
-            add(AppPath(applicationContext))
-            add(createTab<AccountView>(Messages.ACCOUNT))
-            if (SecurityUtils.hasRole(Role.ADMIN)) {
-                add(createTab<UserManager>(Messages.USER_MANAGER))
-            }
-            add(createTab<SettingsView>(Messages.SETTINGS))
-            add(createTab<AboutView>(Messages.ABOUT))
-        }
         content {
             element.style["width"] = "100%"
             element.style["height"] = "100%"

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,12 @@ import com.faendir.acra.rest.RestApiInterface.Companion.API_PATH
 import com.faendir.acra.rest.RestReportInterface.Companion.REPORT_PATH
 import com.faendir.acra.ui.view.login.LoginView
 import com.faendir.acra.ui.view.login.SetupView
+import com.vaadin.flow.spring.SpringSecurityAutoConfiguration
 import com.vaadin.flow.spring.security.VaadinWebSecurity
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Import
 import org.springframework.core.annotation.Order
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.AuthenticationProvider
@@ -46,6 +48,7 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector
 
 @Configuration
 @EnableWebSecurity
+@Import(SpringSecurityAutoConfiguration::class)
 class WebSecurityConfiguration(private val userRepository: UserRepository) : VaadinWebSecurity() {
 
 
