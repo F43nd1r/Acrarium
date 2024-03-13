@@ -2,8 +2,7 @@
 kotlin = "1.9.23"
 dokka = "1.9.20"
 springBoot = "3.2.3"
-vaadin-flow = "24.3.6"
-vaadin-base = "24.3.6"
+vaadin-base = "24.1.16"
 kotlinPoet = "1.16.0"
 testContainers = "1.19.7"
 jooq = "3.18.5"
@@ -12,7 +11,6 @@ karibu = "2.1.4"
 [libraries]
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
 vaadin-base-bom = { module = "com.vaadin:vaadin-bom", version.ref = "vaadin-base" }
-vaadin-flow-bom = { module = "com.vaadin:flow-bom", version.ref = "vaadin-flow" }
 kotlinPoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinPoet" }
 ektorp = "org.ektorp:org.ektorp.spring:1.5.0"
 acraJava = "ch.acra:acra-javacore:5.8.4"

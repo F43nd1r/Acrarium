@@ -21,6 +21,14 @@ plugins {
     alias(libs.plugins.jooq)
 }
 
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "com.vaadin" && (requested.name.startsWith("flow") || requested.name.startsWith("vaadin"))) {
+            useVersion(libs.versions.vaadin.base.get())
+        }
+    }
+}
+
 dependencies {
     implementation(libs.orgSpringframeworkBoot.springBootStarterWeb)
     implementation(libs.orgSpringframeworkBoot.springBootStarterSecurity)
@@ -134,27 +142,22 @@ jooq {
                             Property().withKey("databaseName").withValue(inputSchema),
                             Property().withKey("scripts").withValue(changelogPath),
                         )
-                        forcedTypes = listOf(
-                            ForcedType().apply {
-                                userType = "com.faendir.acra.persistence.app.AppId"
-                                converter = "com.faendir.acra.persistence.app.AppIdConverter"
-                                includeExpression = ".*\\.app_id|app.id"
-                            },
-                            ForcedType().apply {
-                                userType = "com.faendir.acra.persistence.bug.BugId"
-                                converter = "com.faendir.acra.persistence.bug.BugIdConverter"
-                                includeExpression = ".*\\.bug_id|bug.id"
-                            },
-                            ForcedType().apply {
-                                userType = "java.time.Instant"
-                                converter = "com.faendir.acra.persistence.jooq.InstantConverter"
-                                includeTypes = "DATETIME"
-                            },
-                            ForcedType().apply {
-                                name = "BOOLEAN"
-                                includeTypes = "(?i:TINYINT\\(1\\))"
-                            }
-                        )
+                        forcedTypes = listOf(ForcedType().apply {
+                            userType = "com.faendir.acra.persistence.app.AppId"
+                            converter = "com.faendir.acra.persistence.app.AppIdConverter"
+                            includeExpression = ".*\\.app_id|app.id"
+                        }, ForcedType().apply {
+                            userType = "com.faendir.acra.persistence.bug.BugId"
+                            converter = "com.faendir.acra.persistence.bug.BugIdConverter"
+                            includeExpression = ".*\\.bug_id|bug.id"
+                        }, ForcedType().apply {
+                            userType = "java.time.Instant"
+                            converter = "com.faendir.acra.persistence.jooq.InstantConverter"
+                            includeTypes = "DATETIME"
+                        }, ForcedType().apply {
+                            name = "BOOLEAN"
+                            includeTypes = "(?i:TINYINT\\(1\\))"
+                        })
                     }
                     target.apply {
                         packageName = "com.faendir.acra.jooq.generated"

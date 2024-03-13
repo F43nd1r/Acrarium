@@ -24,7 +24,6 @@ dependencyResolutionManagement {
         createWithBomSupport("libs") {
             fromBomAlias("spring-boot-bom")
             fromBomAlias("vaadin-base-bom")
-            fromBomAlias("vaadin-flow-bom")
         }
     }
 }
