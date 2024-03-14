@@ -28,7 +28,7 @@ kotlin-coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0"
 kotlin-logging = "io.github.microutils:kotlin-logging-jvm:3.0.5"
 spring-mockk = "com.ninja-squad:springmockk:4.0.2"
 strikt = "io.strikt:strikt-core:0.34.1"
-springdoc = "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0"
+springdoc = "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0"
 guava = "com.google.guava:guava:33.0.0-jre"
 testContainers-mysql = { module = "org.testcontainers:mysql", version.ref = "testContainers" }
 testContainers-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testContainers" }
