@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package com.faendir.acra.persistence.app
 
 import com.faendir.acra.jooq.generated.tables.references.APP
+import com.faendir.acra.jooq.generated.tables.references.BUG
 import com.faendir.acra.jooq.generated.tables.references.REPORT
 import com.faendir.acra.persistence.SortDefinition
 import org.jooq.Field
@@ -39,11 +40,12 @@ class AppIdConverter : AbstractConverter<Int, AppId>(Int::class.javaPrimitiveTyp
 
 data class App(val id: AppId, val name: String, val reporterUsername: String)
 
-data class AppStats(val id: AppId, val name: String, val reportCount: Int, val bugCount: Int) {
+data class AppStats(val id: AppId, val name: String, val reportCount: Int, val totalBugCount: Int, val unsolvedBugCount: Int) {
     enum class Sort(override val field: Field<*>) : SortDefinition {
         NAME(APP.NAME),
         REPORT_COUNT(DSL.count(REPORT.ID)),
-        BUG_COUNT(DSL.countDistinct(REPORT.BUG_ID))
+        TOTAL_BUG_COUNT(DSL.countDistinct(BUG.ID)),
+        UNSOLVED_BUG_COUNT(DSL.countDistinct(BUG.ID).filterWhere(BUG.SOLVED_VERSION_CODE.isNull))
     }
 }
 

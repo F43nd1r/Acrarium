@@ -19,6 +19,7 @@ import com.faendir.acra.dataprovider.AcrariumDataProvider
 import com.faendir.acra.dataprovider.AcrariumSort
 import com.faendir.acra.jooq.generated.tables.references.APP
 import com.faendir.acra.jooq.generated.tables.references.APP_REPORT_COLUMNS
+import com.faendir.acra.jooq.generated.tables.references.BUG
 import com.faendir.acra.jooq.generated.tables.references.REPORT
 import com.faendir.acra.persistence.*
 import com.faendir.acra.persistence.user.Permission
@@ -140,12 +141,15 @@ class AppRepository(private val jooq: DSLContext, private val userRepository: Us
             APP.ID,
             APP.NAME,
             DSL.count(REPORT.ID).`as`("REPORT_COUNT"),
-            DSL.countDistinct(REPORT.BUG_ID).`as`("BUG_COUNT"),
+            DSL.countDistinct(BUG.ID).`as`("TOTAL_BUG_COUNT"),
+            DSL.countDistinct(BUG.ID).filterWhere(BUG.SOLVED_VERSION_CODE.isNull).`as`("UNSOLVED_BUG_COUNT"),
         )
             .from(APP)
             .leftJoin(REPORT).on(REPORT.APP_ID.eq(APP.ID))
+            .leftJoin(BUG).on(REPORT.BUG_ID.eq(BUG.ID))
             .where(hasViewPermission())
             .groupBy(APP.ID)
+            .orderBy(sort.asOrderFields())
             .offset(offset)
             .limit(limit)
             .fetchListInto<AppStats>()

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2017-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,9 +58,13 @@ class Overview(private val appRepository: AppRepository, private val reportServi
                     setCaption(Messages.NAME)
                     flexGrow = 1
                 }
-                column({ it.bugCount }) {
-                    setSortable(AppStats.Sort.BUG_COUNT)
-                    setCaption(Messages.BUGS)
+                column({ it.unsolvedBugCount }) {
+                    setSortable(AppStats.Sort.UNSOLVED_BUG_COUNT)
+                    setCaption(Messages.UNSOLVED_BUGS)
+                }
+                column({ it.totalBugCount }) {
+                    setSortable(AppStats.Sort.TOTAL_BUG_COUNT)
+                    setCaption(Messages.TOTAL_BUGS)
                 }
                 column({ it.reportCount }) {
                     setSortable(AppStats.Sort.REPORT_COUNT)

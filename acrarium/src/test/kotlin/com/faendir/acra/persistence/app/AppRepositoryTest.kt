@@ -352,23 +352,17 @@ class AppRepositoryTest(
         fun `should return all visible apps`() {
             val app1 = testDataBuilder.createApp(name = "app1")
             val bug1 = testDataBuilder.createBug(app1)
-            val bug2 = testDataBuilder.createBug(app1)
+            val bug2 = testDataBuilder.createBug(app1, solvedVersion = testDataBuilder.createVersion(app1))
             testDataBuilder.createReport(app1, bug1)
             testDataBuilder.createReport(app1, bug1)
             testDataBuilder.createReport(app1, bug2)
             val app2 = testDataBuilder.createApp(name = "app2")
             val app3 = testDataBuilder.createApp()
-            SecurityContextHolder.setContext(
-                SecurityContextImpl(
-                    TestingAuthenticationToken(
-                        null, null, listOf(Role.ADMIN, Permission(app3, Permission.Level.NONE))
-                    )
-                )
-            )
+            SecurityContextHolder.setContext(SecurityContextImpl(TestingAuthenticationToken(null, null, listOf(Role.ADMIN, Permission(app3, Permission.Level.NONE)))))
 
             expectThat(provider.size(emptySet())).isEqualTo(2)
             expectThat(provider.fetch(emptySet(), emptyList(), 0, 10).toList()).containsExactlyInAnyOrder(
-                AppStats(app1, "app1", 3, 2), AppStats(app2, "app2", 0, 0)
+                AppStats(app1, "app1", 3, 2, 1), AppStats(app2, "app2", 0, 0, 0)
             )
         }
 
@@ -385,8 +379,8 @@ class AppRepositoryTest(
             val app2 = testDataBuilder.createApp(name = "app2")
 
             expectThat(provider.fetch(
-                emptySet(), listOf(AcrariumSort(AppStats.Sort.NAME, SortDirection.ASCENDING)), 0, 10
-            ).toList().map { it.id }).containsExactly(app1, app2)
+                emptySet(), listOf(AcrariumSort(AppStats.Sort.NAME, SortDirection.DESCENDING)), 0, 10
+            ).toList().map { it.id }).containsExactly(app2, app1)
         }
 
         @Test

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,9 +99,11 @@ class TestDataBuilder(private val jooq: DSLContext, private val randomStringGene
     /**
      * Use with caution! The created bug is not valid without a report!
      */
-    fun createBug(app: AppId = createApp(), title: String = randomString("title")) = jooq.insertInto(BUG)
+    fun createBug(app: AppId = createApp(), title: String = randomString("title"), solvedVersion: VersionKey? = null) = jooq.insertInto(BUG)
         .set(BUG.APP_ID, app)
         .set(BUG.TITLE, title)
+        .set(BUG.SOLVED_VERSION_CODE, solvedVersion?.code)
+        .set(BUG.SOLVED_VERSION_FLAVOR, solvedVersion?.flavor)
         .returningResult(BUG.ID).fetchValue()!!
 
     fun createBugIdentifier(
