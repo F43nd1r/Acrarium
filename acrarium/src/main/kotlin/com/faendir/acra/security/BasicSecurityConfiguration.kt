@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,5 +40,5 @@ class BasicSecurityConfiguration {
 
     @Bean
     fun grantedAuthoritiesMapper() =
-        GrantedAuthoritiesMapper { authorities -> Role.values().filter { role -> authorities.any { it?.authority == role.authority } } }
+        GrantedAuthoritiesMapper { authorities -> Role.entries.filter { role -> authorities.any { it?.authority == role.authority } } }
 }

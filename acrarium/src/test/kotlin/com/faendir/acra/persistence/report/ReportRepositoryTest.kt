@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -573,8 +573,7 @@ internal class ReportRepositoryTest(
                 CustomColumn(name = "nested custom field column name", "NESTED_CUSTOM_FIELD"), CustomColumn(name = "custom field column name", "CUSTOM_FIELD")
             )
             appRepository.setCustomColumns(appId, customColumns)
-            val version = testDataBuilder.createVersion(appId)
-            testDataBuilder.createReport(appId, version = version, content = "{\"CUSTOM_FIELD\": \"customField\"}")
+            testDataBuilder.createReport(appId, content = "{\"CUSTOM_FIELD\": \"customField\"}")
             val provider = reportRepository.getProvider(appId, customColumns)
 
             expectThat(provider.fetch(emptySet(), emptyList(), 0, 1).toList().first().customColumns).isEqualTo(listOf(null, "customField"))

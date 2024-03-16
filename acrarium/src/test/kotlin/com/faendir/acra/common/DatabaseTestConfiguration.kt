@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2023-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 package com.faendir.acra.common
 
 import com.faendir.acra.jooq.generated.Acrarium
+import com.faendir.acra.jooq.generated.tables.references.REPORT
+import com.faendir.acra.persistence.app.isCustomColumn
+import com.faendir.acra.persistence.app.isCustomColumnIndex
 import com.faendir.acra.persistence.jooq.JooqConfigurationCustomizer
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.boot.jdbc.DataSourceBuilder
@@ -40,9 +43,10 @@ class DatabaseCleanupTestExecutionListener : TestExecutionListener {
     override fun afterTestMethod(testContext: org.springframework.test.context.TestContext) {
         try {
             val jooq = testContext.applicationContext.getBean(org.jooq.DSLContext::class.java)
-            Acrarium.ACRARIUM.tables.forEach {
-                jooq.deleteFrom(it).execute()
-            }
+            Acrarium.ACRARIUM.tables.forEach { jooq.deleteFrom(it).execute() }
+            val reportMeta = jooq.meta().getTables(REPORT.name).first()
+            jooq.alterTable(REPORT).dropColumns(reportMeta.fields().filter { it.isCustomColumn }).execute()
+            reportMeta.indexes.filter { it.isCustomColumnIndex }.forEach { jooq.dropIndex(it).execute() }
         } catch (e: NoSuchBeanDefinitionException) {
             // not a database test
         }

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,9 @@ class AppRepositoryTest(
     }
 
     @Nested
-    inner class Delete {
+    inner class Delete(
+        @Autowired private val jooq: DSLContext,
+    ) {
         @Test
         fun `should delete app and reporter`() {
             val reporter = testDataBuilder.createUser()
@@ -146,6 +148,18 @@ class AppRepositoryTest(
 
             expectThat(appRepository.find(appId)).isNull()
             expectThat(userRepository.find(reporter)).isNull()
+        }
+
+        @Test
+        fun `should remove custom columns`() {
+            val app = testDataBuilder.createApp()
+            appRepository.setCustomColumns(app, listOf(CustomColumn("c1", "p1")))
+
+            appRepository.delete(app)
+
+            val meta = jooq.meta().getTables(REPORT.name).first()
+            expectThat(meta.fields().toList().map { it.name }).doesNotContain("custom_p1")
+            expectThat(meta.indexes.toList().map { it.name }).doesNotContain("idx_custom_p1")
         }
     }
 
@@ -301,7 +315,6 @@ class AppRepositoryTest(
 
         @Test
         fun `should not touch any other columns or indexes`() {
-
             val app1 = testDataBuilder.createApp()
 
             appRepository.setCustomColumns(app1, listOf())
@@ -309,6 +322,20 @@ class AppRepositoryTest(
             val meta = jooq.meta().getTables(REPORT.name).first()
             expectThat(meta.fields().map { it.name }).isEqualTo(REPORT.fields().map { it.name })
             expectThat(meta.indexes.map { it.name }).isEqualTo(REPORT.indexes.map { it.name })
+        }
+
+        @Test
+        fun `should not touch any custom columns of other apps`() {
+            val app1 = testDataBuilder.createApp()
+            val app2 = testDataBuilder.createApp()
+
+            appRepository.setCustomColumns(app2, listOf(CustomColumn("c2", "p2")))
+
+            appRepository.setCustomColumns(app1, listOf())
+
+            val meta = jooq.meta().getTables(REPORT.name).first()
+            expectThat(meta.fields().map { it.name }).isEqualTo(REPORT.fields().map { it.name } + "custom_p2")
+            expectThat(meta.indexes.map { it.name }).isEqualTo(REPORT.indexes.map { it.name } + "idx_custom_p2")
         }
     }
 

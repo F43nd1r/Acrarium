@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,8 @@ class AppRepository(private val jooq: DSLContext, private val userRepository: Us
         val reporterUsername = jooq.select(APP.REPORTER_USERNAME).from(APP).where(APP.ID.eq(id)).fetchValue() ?: return
         // app is cascade deleted
         userRepository.delete(reporterUsername)
+        // might need to remove custom columns
+        ensureCustomColumns()
     }
 
     @PreAuthorize("isUser()")
@@ -89,19 +91,7 @@ class AppRepository(private val jooq: DSLContext, private val userRepository: Us
     @Transactional
     @PreAuthorize("hasAdminPermission(#id)")
     fun setCustomColumns(id: AppId, customColumns: List<CustomColumn>) {
-        val tableMeta = jooq.meta().getTables(REPORT.name).first()
-        val fields = tableMeta.fields()
-        val indexes = tableMeta.indexes
-
         jooq.deleteFrom(APP_REPORT_COLUMNS).where(APP_REPORT_COLUMNS.APP_ID.eq(id), APP_REPORT_COLUMNS.PATH.notIn(customColumns.map { it.path })).execute()
-        indexes.filter { index -> index.isCustomColumnIndex && customColumns.none { it.indexName == index.name } }.forEach {
-            jooq.dropIndex(it).on(REPORT).execute()
-        }
-        val columnsToDelete = fields.filter { field -> field.isCustomColumn && customColumns.none { it.fieldName == field.name } }
-        if (columnsToDelete.isNotEmpty()) {
-            jooq.alterTable(REPORT).dropColumns(columnsToDelete).execute()
-        }
-
         for (customColumn in customColumns) {
             jooq.insertInto(APP_REPORT_COLUMNS)
                 .set(APP_REPORT_COLUMNS.APP_ID, id)
@@ -110,14 +100,37 @@ class AppRepository(private val jooq: DSLContext, private val userRepository: Us
                 .onDuplicateKeyUpdate()
                 .set(APP_REPORT_COLUMNS.NAME, customColumn.name)
                 .execute()
-            if (fields.none { it.name == customColumn.fieldName }) {
-                jooq.execute(
-                    "ALTER TABLE `${REPORT.name}` ADD COLUMN `${customColumn.fieldName}` VARCHAR(255) GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_VALUE(`${REPORT.name}`.`content`, '$.${customColumn.path}'))) STORED",
-                )
-            }
-            if (indexes.none { it.name == customColumn.indexName }) {
-                jooq.createIndex(customColumn.indexName).on(REPORT.name, customColumn.fieldName).execute()
-            }
+        }
+
+        ensureCustomColumns()
+    }
+
+    private fun ensureCustomColumns() {
+        val tableMeta = jooq.meta().getTables(REPORT.name).first()
+        val fields = tableMeta.fields()
+        val indexes = tableMeta.indexes
+
+        val wantedCustomColumns = jooq.select(APP_REPORT_COLUMNS.NAME, APP_REPORT_COLUMNS.PATH).from(APP_REPORT_COLUMNS).fetchListInto<CustomColumn>().distinctBy { it.path }
+        // drop unwanted indices
+        val wantedCustomColumnIndexNames = wantedCustomColumns.mapTo(mutableSetOf()) { it.indexName }
+        for (index in indexes.filter { it.isCustomColumnIndex && it.name !in wantedCustomColumnIndexNames }) {
+            jooq.dropIndex(index).on(REPORT).execute()
+        }
+        // drop unwanted columns
+        val wantedCustomColumnFieldNames = wantedCustomColumns.mapTo(mutableSetOf()) { it.fieldName }
+        val columnsToDelete = fields.filter { it.isCustomColumn && it.name !in wantedCustomColumnFieldNames }
+        if (columnsToDelete.isNotEmpty()) {
+            jooq.alterTable(REPORT).dropColumns(columnsToDelete).execute()
+        }
+        // create missing columns
+        for (customColumn in wantedCustomColumns.filter { customColumn -> fields.none { it.name == customColumn.fieldName } }) {
+            jooq.execute(
+                "ALTER TABLE `${REPORT.name}` ADD COLUMN `${customColumn.fieldName}` VARCHAR(255) GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_VALUE(`${REPORT.name}`.`content`, '$.${customColumn.path}'))) STORED",
+            )
+        }
+        // create missing indices
+        for (customColumn in wantedCustomColumns.filter { customColumn -> indexes.none { it.name == customColumn.indexName } }) {
+            jooq.createIndex(customColumn.indexName).on(REPORT.name, customColumn.fieldName).execute()
         }
     }
 
