@@ -470,6 +470,26 @@ internal class ReportRepositoryTest(
 
             expectThat(reportRepository.get(appId, REPORT.ID)).containsExactlyInAnyOrder(keep1, keep2)
         }
+
+        @Test
+        fun `should not delete reports of other apps by time`() {
+            val now = Instant.now()
+            val otherAppId = testDataBuilder.createApp()
+            val keep = testDataBuilder.createReport(otherAppId, date = now.minus(1, ChronoUnit.DAYS))
+            reportRepository.deleteBefore(appId, now)
+
+            expectThat(reportRepository.find(keep)).isNotNull()
+        }
+
+        @Test
+        fun `should not delete reports of other apps by version`() {
+            val otherAppId = testDataBuilder.createApp()
+            val version = testDataBuilder.createVersion(otherAppId, code = 1)
+            val keep = testDataBuilder.createReport(otherAppId, version = version)
+            reportRepository.deleteBefore(appId, 1)
+
+            expectThat(reportRepository.find(keep)).isNotNull()
+        }
     }
 
     @Nested

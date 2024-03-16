@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,19 +100,19 @@ class ReportRepository(
     @Transactional
     @PreAuthorize("hasEditPermission(#appId)")
     fun delete(appId: AppId, reportId: String) {
-        jooq.deleteFrom(REPORT).where(REPORT.ID.eq(reportId)).execute()
+        jooq.deleteFrom(REPORT).where(REPORT.APP_ID.eq(appId), REPORT.ID.eq(reportId)).execute()
     }
 
     @Transactional
     @PreAuthorize("hasEditPermission(#appId)")
     fun deleteBefore(appId: AppId, instant: Instant) {
-        jooq.deleteFrom(REPORT).where(REPORT.DATE.lt(instant)).execute()
+        jooq.deleteFrom(REPORT).where(REPORT.APP_ID.eq(appId), REPORT.DATE.lt(instant)).execute()
     }
 
     @Transactional
     @PreAuthorize("hasEditPermission(#appId)")
     fun deleteBefore(appId: AppId, versionCode: Int) {
-        jooq.deleteFrom(REPORT).where(REPORT.VERSION_CODE.lt(versionCode)).execute()
+        jooq.deleteFrom(REPORT).where(REPORT.APP_ID.eq(appId), REPORT.VERSION_CODE.lt(versionCode)).execute()
     }
 
     @PreAuthorize("hasViewPermission(#appId)")
