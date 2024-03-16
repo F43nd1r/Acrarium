@@ -36,6 +36,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
+import java.sql.SQLIntegrityConstraintViolationException
 
 private val logger = KotlinLogging.logger {}
 
@@ -110,7 +111,15 @@ class ReportService(
             versionCode = versionCode,
             versionFlavor = flavor ?: "",
         )
-        reportRepository.create(report, attachments.associate { (it.originalFilename ?: it.name) to it.bytes })
+        try {
+            reportRepository.create(report, attachments.associate { (it.originalFilename ?: it.name) to it.bytes })
+        } catch (e: SQLIntegrityConstraintViolationException) {
+            reportRepository.find(reportId)?.let {
+                logger.warn { "Race condition while saving $reportId, ignoring." }
+                return it
+            }
+            throw e
+        }
         mailService?.onNewReport(report)
         return report
     }
