@@ -33,4 +33,4 @@ COPY --from=builder application/application/ ./
 RUN uid=$(($(($((`date +%s` / 60)) % 165535)) + 100000)) && adduser -D -h /application/ -u $uid acrarium && chown -R acrarium:acrarium /application
 USER acrarium
 
-ENTRYPOINT java org.springframework.boot.loader.JarLauncher
+ENTRYPOINT java org.springframework.boot.loader.launch.JarLauncher
