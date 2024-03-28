@@ -14,6 +14,19 @@ A Backend for [ACRA](https://github.com/ACRA/acra) written in Kotlin using Sprin
 
 See [Wiki Setup guide](https://github.com/F43nd1r/acra-backend/wiki/Setup-guide)
 
+## Build
+
+### Podman
+
+Steps:
+1. Clone repository
+2. Execute the following in the repository:
+```bash
+./gradlew bootJar -x test -Pvaadin.productionMode=true
+cd acrarium/
+podman build . --tag acrarium:git
+```
+
 # Screenshots
 
 ###### Listing reports
