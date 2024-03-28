@@ -17,22 +17,51 @@ See [Wiki Setup guide](https://github.com/F43nd1r/acra-backend/wiki/Setup-guide)
 # Screenshots
 
 ###### Listing reports
+
 ![report list](screenshots/reports.png)
 
 ###### Statistics
+
 ![statistics](screenshots/statistics.png)
 
 ###### Proguard and Export Support
+
 ![admin tab](screenshots/admin.png)
 
 ###### Report Summary and Attachment Support
+
 ![report summary](screenshots/summary.png)
 
 ###### Full Report content
+
 ![report content](screenshots/details.png)
 
 ###### Dark Theme
+
 ![dark theme](screenshots/dark.png)
+
+# Development
+
+## Running locally
+
+```shell
+./gradlew bootRun
+```
+
+## Building release
+
+### Jar
+
+```shell
+./gradlew bootJar -x test -Pvaadin.productionMode=true
+```
+
+### Docker Image
+
+```shell
+./gradlew bootJar -x test -Pvaadin.productionMode=true
+docker build -t f43nd1r/acrarium:git acrarium
+```
 
 # License
 
@@ -40,6 +69,8 @@ All source code in this repository is licensed under the Apache License 2.0 (see
 
 # Credits
 
- Thanks to 
-  - [Mirza Zulfan](https://github.com/mirzazulfan) for creating the logo.
-  - [aptly-io](https://github.com/aptly-io) (Dutch), [Federico Iosue](https://github.com/federicoiosue) (Italian), [Astarivi](https://github.com/astarivi) (Spanish), [iisimpler](https://github.com/iisimpler) (Chinese) for contributing to localization.
+Thanks to
+
+- [Mirza Zulfan](https://github.com/mirzazulfan) for creating the logo.
+- [aptly-io](https://github.com/aptly-io) (Dutch), [Federico Iosue](https://github.com/federicoiosue) (Italian), [Astarivi](https://github.com/astarivi) (
+  Spanish), [iisimpler](https://github.com/iisimpler) (Chinese) for contributing to localization.
