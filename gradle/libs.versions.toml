@@ -27,7 +27,7 @@ vaadin-paperMenuButton = "com.github.appreciated:vaadin-paper-menu-button:2.0.2"
 kotlin-coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1"
 kotlin-logging = "io.github.microutils:kotlin-logging-jvm:3.0.5"
 spring-mockk = "com.ninja-squad:springmockk:4.0.2"
-strikt = "io.strikt:strikt-core:0.34.1"
+strikt = "io.strikt:strikt-core:0.35.1"
 springdoc = "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0"
 guava = "com.google.guava:guava:33.2.1-jre"
 testContainers-mysql = { module = "org.testcontainers:mysql", version.ref = "testContainers" }
