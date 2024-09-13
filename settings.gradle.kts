@@ -1,4 +1,4 @@
-import com.faendir.gradle.createWithBomSupport
+import dev.aga.gradle.versioncatalogs.Generator.generate
 
 pluginManagement {
     repositories {
@@ -8,7 +8,7 @@ pluginManagement {
     }
 }
 plugins {
-    id("com.faendir.gradle.bom-version-catalog") version "1.5.1"
+    id("dev.aga.gradle.version-catalog-generator") version ("2.0.0-beta.2")
 }
 dependencyResolutionManagement {
     repositories {
@@ -21,9 +21,11 @@ dependencyResolutionManagement {
         maven { setUrl("https://repository.apache.org/content/repositories/snapshots") }
     }
     versionCatalogs {
-        createWithBomSupport("libs") {
-            fromBomAlias("spring-boot-bom")
-            fromBomAlias("vaadin-base-bom")
+        generate("springLibs") {
+            from(toml("spring-boot-bom"))
+        }
+        generate("vaadinLibs") {
+            from(toml("vaadin-base-bom"))
         }
     }
 }

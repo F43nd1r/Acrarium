@@ -3,12 +3,15 @@ plugins {
 }
 
 dependencies {
-    libs.bundles.bom.get().map { implementation(platform(it)) }
-    implementation(libs.orgLiquibase.liquibaseCore)
-    implementation(libs.orgJooq.jooqMeta)
-    implementation(libs.orgSlf4j.slf4jApi)
-    implementation(libs.orgSlf4j.slf4jSimple)
-    implementation(libs.testContainers.mysql)
+    listOf(libs.spring.boot.bom).forEach {
+        implementation(it)
+        testImplementation(it)
+    }
+    implementation(springLibs.liquibase.liquibaseCore)
+    implementation(springLibs.jooq.jooqMeta)
+    implementation(springLibs.slf4j.slf4jApi)
+    implementation(springLibs.slf4j.slf4jSimple)
+    implementation(springLibs.testcontainers.mysql)
 }
 
 kotlin {

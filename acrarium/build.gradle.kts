@@ -21,24 +21,20 @@ plugins {
     alias(libs.plugins.jooq)
 }
 
-configurations.all {
-    resolutionStrategy.eachDependency {
-        if (requested.group == "com.vaadin" && (requested.name.startsWith("flow") || requested.name.startsWith("vaadin"))) {
-            useVersion(libs.versions.vaadin.base.get())
-        }
-    }
-}
-
 dependencies {
-    implementation(libs.orgSpringframeworkBoot.springBootStarterWeb)
-    implementation(libs.orgSpringframeworkBoot.springBootStarterSecurity)
-    implementation(libs.orgSpringframeworkBoot.springBootStarterMail)
-    implementation(libs.orgSpringframeworkBoot.springBootStarterActuator)
-    implementation(libs.orgSpringframeworkBoot.springBootStarterJooq)
-    implementation(libs.comVaadin.vaadin)
-    implementation(libs.comVaadin.vaadinSpringBootStarter)
-    implementation(libs.comMysql.mysqlConnectorJ)
-    implementation(libs.orgLiquibase.liquibaseCore)
+    listOf(libs.spring.boot.bom, libs.vaadin.base.bom).forEach {
+        implementation(it)
+        testImplementation(it)
+    }
+    implementation(springLibs.spring.springBootStarterWeb)
+    implementation(springLibs.spring.springBootStarterSecurity)
+    implementation(springLibs.spring.springBootStarterMail)
+    implementation(springLibs.spring.springBootStarterActuator)
+    implementation(springLibs.spring.springBootStarterJooq)
+    implementation(vaadinLibs.vaadin.vaadin)
+    implementation(vaadinLibs.vaadin.vaadinSpringBootStarter)
+    implementation(springLibs.mysql.mysqlConnectorJ)
+    implementation(springLibs.liquibase.liquibaseCore)
     implementation(libs.ektorp)
     implementation(libs.acraJava)
     implementation(libs.orgJson)
@@ -46,28 +42,28 @@ dependencies {
     implementation(libs.xbibTime)
     implementation(libs.retrace)
     implementation(libs.fuzzywuzzy)
-    implementation(libs.orgHibernateValidator.hibernateValidator)
+    implementation(springLibs.hibernate.hibernateValidator)
     implementation(libs.ziplet)
     implementation(libs.univocityParser)
     implementation(libs.avatarGenerator)
     implementation(libs.apexCharts)
     implementation(libs.vaadin.paperMenuButton)
     implementation(libs.kotlin.coroutines)
-    implementation(libs.comFasterxmlJacksonModule.jacksonModuleKotlin)
+    implementation(springLibs.jackson.jacksonModuleKotlin)
     implementation(libs.kotlin.logging)
     implementation(libs.springdoc)
-    implementation(libs.orgAspectj.aspectjweaver)
-    developmentOnly(libs.orgSpringframeworkBoot.springBootDevtools)
-    testImplementation(libs.orgSpringframeworkBoot.springBootStarterTest)
-    testImplementation(libs.orgSpringframeworkSecurity.springSecurityTest)
+    implementation(springLibs.aspectj.aspectjweaver)
+    developmentOnly(springLibs.spring.springBootDevtools)
+    testImplementation(springLibs.spring.springBootStarterTest)
+    testImplementation(springLibs.spring.springSecurityTest)
     testImplementation(libs.spring.mockk)
     testImplementation(libs.strikt)
     testImplementation(libs.testContainers.mysql)
     testImplementation(libs.testContainers.junit)
     testImplementation(libs.karibu.testing)
     testImplementation(libs.karibu.spring)
-    jooqGenerator(libs.comMysql.mysqlConnectorJ)
-    jooqGenerator(libs.orgYaml.snakeyaml)
+    jooqGenerator(springLibs.mysql.mysqlConnectorJ)
+    jooqGenerator(springLibs.yaml.snakeyaml)
     jooqGenerator(projects.jooqHelper)
 }
 
