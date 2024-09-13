@@ -7,6 +7,7 @@ kotlinPoet = "1.16.0"
 testContainers = "1.19.8"
 jooq = "3.18.5"
 karibu = "2.1.6"
+liquibase = "4.29.2"
 
 [libraries]
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
