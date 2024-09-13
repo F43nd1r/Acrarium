@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ class MySqlLiquibaseDatabase : MySQLDatabase() {
     override fun create0(): DSLContext {
         if (conn == null) {
             val scripts = Objects.requireNonNull(properties.getProperty("scripts"))
-            val mySqlVersion = properties.getProperty("mySqlVersion", "8.0.31")
+            val mySqlVersion = properties.getProperty("mySqlVersion", "8.0.39")
             val dbName = properties.getProperty("databaseName", "test")
             try {
                 mySQLContainer = MySQLContainer(DockerImageName.parse("mysql:$mySqlVersion"))

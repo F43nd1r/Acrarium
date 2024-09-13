@@ -36,7 +36,7 @@ class BasicSecurityConfiguration {
     @Bean
     fun randomStringGenerator(secureRandom: SecureRandom): RandomStringGenerator =
         RandomStringGenerator.Builder().usingRandom { secureRandom.nextInt(it) }.withinRange('0'.code, 'z'.code)
-            .filteredBy(CharacterPredicate { Character.isLetterOrDigit(it) }).build()
+            .filteredBy(CharacterPredicate { Character.isLetterOrDigit(it) }).get()
 
     @Bean
     fun grantedAuthoritiesMapper() =
