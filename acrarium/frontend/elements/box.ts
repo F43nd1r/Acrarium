@@ -14,27 +14,28 @@
  * limitations under the License.
  */
 
-import {css, customElement, html, LitElement} from 'lit-element'
+import {css, html, LitElement} from 'lit-element'
+import {customElement} from "lit/decorators.js"
 
 @customElement("acrarium-box")
 export default class Box extends LitElement {
     static get styles() {
         return css`
-                :host {
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                }
+            :host {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+            }
 
-                .acrarium-box-title {
-                    font-weight: bold;
-                }
+            .acrarium-box-title {
+                font-weight: bold;
+            }
 
-                .acrarium-box-text {
-                    display: flex;
-                    flex-direction: column;
-                    flex: 1;
-                }
+            .acrarium-box-text {
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+            }
         `
     }
 

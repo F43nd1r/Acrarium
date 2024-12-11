@@ -1,4 +1,3 @@
-import com.vaadin.gradle.vaadin
 import org.jooq.meta.jaxb.ForcedType
 import org.jooq.meta.jaxb.Property
 
@@ -107,12 +106,7 @@ noArg {
 }
 
 tasks.withType<Test> {
-    project.properties["vaadinProKey"]?.let { systemProperty("vaadin.proKey", it) }
     useJUnitPlatform()
-}
-
-vaadin {
-    // productionMode = true
 }
 
 val changelogPath = "src/main/resources/db/db.changelog-master.yml"

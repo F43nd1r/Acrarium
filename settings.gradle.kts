@@ -23,6 +23,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         generate("springLibs") {
             from(toml("spring-boot-bom"))
+            propertyOverrides = mapOf("jooq.version" to versionRef("jooq"))
         }
         generate("vaadinLibs") {
             from(toml("vaadin-base-bom"))

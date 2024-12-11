@@ -1,6 +1,3 @@
 body {
-    --paper-menu-button: {
-        padding: 0;
-    };
     --paper-menu-button-dropdown-background: var(--lumo-base-color);
 }

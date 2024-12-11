@@ -14,38 +14,39 @@
  * limitations under the License.
  */
 
-import {css, customElement, html, LitElement} from 'lit-element'
+import {css, html, LitElement} from 'lit-element'
+import {customElement} from "lit/decorators.js"
 
 @customElement("acrarium-dialog-content")
 export default class DialogContent extends LitElement {
     static get styles() {
         //language=css
         return css`
-                :host {
-                    display: block;
-                    max-width: 1000px;
-                }
-                
-                .content {
-                    display: flex;
-                    flex-direction: column;
-                }
+            :host {
+                display: block;
+                max-width: 1000px;
+            }
 
-                .footer {
-                    background-color: var(--lumo-contrast-5pct);
-                    display: flex;
-                    margin: calc(var(--lumo-space-l) * -1);
-                    margin-top: var(--lumo-space-l);
-                    padding: var(--lumo-space-s) var(--lumo-space-l);
-                }
+            .content {
+                display: flex;
+                flex-direction: column;
+            }
 
-                .spacer {
-                    flex: 1;
-                }
+            .footer {
+                background-color: var(--lumo-contrast-5pct);
+                display: flex;
+                margin: calc(var(--lumo-space-l) * -1);
+                margin-top: var(--lumo-space-l);
+                padding: var(--lumo-space-s) var(--lumo-space-l);
+            }
 
-                slot[name="header"]::slotted(*) {
-                    margin-top: var(--lumo-space-s) !important;
-                }
+            .spacer {
+                flex: 1;
+            }
+
+            slot[name="header"]::slotted(*) {
+                margin-top: var(--lumo-space-s) !important;
+            }
         `
     }
 

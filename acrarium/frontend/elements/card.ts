@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {css, customElement, html, LitElement, property} from 'lit-element'
+import {css, html, LitElement} from 'lit-element'
+import {customElement, property} from "lit/decorators.js"
 
 @customElement("acrarium-card")
 export default class Card extends LitElement {
@@ -24,47 +25,47 @@ export default class Card extends LitElement {
 
     static get styles() {
         return css`
-                :host {
-                    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-                    border-radius: 2px;
-                    margin: 1rem;
-                    display: inline-flex;
-                    flex-direction: column;
-                }
+            :host {
+                box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+                border-radius: 2px;
+                margin: 1rem;
+                display: inline-flex;
+                flex-direction: column;
+            }
 
-                .acrarium-card-header {
-                    padding: 1rem;
-                  box-sizing: border-box;
-                  background-color: var(--acrarium-card-header-color, var(--lumo-contrast-5pct));
-                  color: var(--acrarium-card-header-text-color);
-                  display: inline-block;
-                  width: 100%;
-                }
+            .acrarium-card-header {
+                padding: 1rem;
+                box-sizing: border-box;
+                background-color: var(--acrarium-card-header-color, var(--lumo-contrast-5pct));
+                color: var(--acrarium-card-header-text-color);
+                display: inline-block;
+                width: 100%;
+            }
 
-          .acrarium-card-content {
-            padding: 1rem;
-            box-sizing: border-box;
-            display: inline-flex;
-            flex-direction: column;
-            align-content: center;
-            width: 100%;
-            height: 100%;
-          }
+            .acrarium-card-content {
+                padding: 1rem;
+                box-sizing: border-box;
+                display: inline-flex;
+                flex-direction: column;
+                align-content: center;
+                width: 100%;
+                height: 100%;
+            }
 
-          .acrarium-card-content-wrapper {
-            width: 100%;
-            flex: 1;
-            min-height: 0;
-          }
+            .acrarium-card-content-wrapper {
+                width: 100%;
+                flex: 1;
+                min-height: 0;
+            }
 
-          .collapse {
-                    display: none;
-                }
+            .collapse {
+                display: none;
+            }
 
-                .divider > ::slotted(:not(:first-of-type)) {
-                    border-top: 1px solid var(--lumo-contrast-20pct);
-                    margin-top: 0.5em;
-                }
+            .divider > ::slotted(:not(:first-of-type)) {
+                border-top: 1px solid var(--lumo-contrast-20pct);
+                margin-top: 0.5em;
+            }
         `
     }
 

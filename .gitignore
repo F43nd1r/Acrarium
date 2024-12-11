@@ -47,3 +47,4 @@ pnpmfile.js
 /acrarium/.pnpm-debug.log
 /acrarium/frontend/generated
 /acrarium/.pnpmfile.cjs
+/acrarium/src/main/bundles/prod.bundle

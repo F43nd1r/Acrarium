@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2021 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2021-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package com.faendir.acra.ui.component
 
+import com.faendir.acra.ui.ext.SizeUnit
+import com.faendir.acra.ui.ext.setPadding
 import com.github.appreciated.papermenubutton.PaperMenuButton
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.Composite
@@ -30,6 +32,7 @@ open class PopupButton(private val icon: VaadinIcon) : Composite<PaperMenuButton
     override fun initContent(): PaperMenuButton {
         return PaperMenuButton(Button(Icon(icon)).apply { element.appendChild(Icon(VaadinIcon.CHEVRON_DOWN_SMALL).element) }, container).apply {
             setDynamicAlign(true)
+            setPadding(0.0, SizeUnit.PIXEL)
         }
     }
 

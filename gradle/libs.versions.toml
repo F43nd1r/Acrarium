@@ -2,10 +2,10 @@
 kotlin = "2.0.20"
 dokka = "1.9.20"
 springBoot = "3.3.3"
-vaadin-base = "24.1.16"
+vaadin-base = "24.5.8"
 kotlinPoet = "1.18.1"
 testContainers = "1.20.1"
-jooq = "3.18.5"
+jooq = "3.19.10"
 karibu = "2.1.6"
 
 [libraries]
