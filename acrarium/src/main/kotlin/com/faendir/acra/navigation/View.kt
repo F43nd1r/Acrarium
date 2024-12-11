@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2021-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2021-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import com.faendir.acra.security.RequiresRole
 import com.vaadin.flow.spring.annotation.SpringComponent
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
 import java.lang.annotation.Inherited
 
 @Inherited
@@ -29,13 +28,4 @@ import java.lang.annotation.Inherited
 @Scope(scopeName = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @SpringComponent
 @RequiresRole(Role.USER)
-annotation class View(
-    /**
-     * The value may indicate a suggestion for a logical component name, to be
-     * turned into a Spring bean in case of an autodetected component.
-     *
-     * @see Component.value
-     * @return the suggested component name, if any
-     */
-    val value: String = ""
-)
+annotation class View

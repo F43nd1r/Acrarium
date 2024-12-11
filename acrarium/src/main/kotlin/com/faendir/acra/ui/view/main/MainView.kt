@@ -40,13 +40,14 @@ import com.vaadin.flow.component.tabs.Tab
 import com.vaadin.flow.component.tabs.Tabs
 import com.vaadin.flow.router.RouterLayout
 import com.vaadin.flow.spring.annotation.SpringComponent
-import com.vaadin.flow.spring.annotation.UIScope
+import org.springframework.beans.factory.config.ConfigurableBeanFactory
+import org.springframework.context.annotation.Scope
 import org.springframework.context.support.GenericApplicationContext
 import org.springframework.security.core.context.SecurityContextHolder
 
 @JsModule("./styles/shared-styles.js")
 @CssImport("./styles/global.css")
-@UIScope
+@Scope(scopeName = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @SpringComponent
 class MainView(applicationContext: GenericApplicationContext) : Composite<AppLayout>(), RouterLayout {
     private val targets: MutableMap<Class<out HasElement>, Tab> = mutableMapOf()
