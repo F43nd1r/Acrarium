@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,9 @@ package com.faendir.acra.util
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean
 import org.springframework.core.env.PropertiesPropertySource
 import org.springframework.core.env.PropertySource
-import org.springframework.core.env.PropertySource.StubPropertySource
 import org.springframework.core.io.support.EncodedResource
 import org.springframework.core.io.support.PropertySourceFactory
-
+import java.io.FileNotFoundException
 
 class YamlPropertySourceFactory : PropertySourceFactory {
     override fun createPropertySource(name: String?, resource: EncodedResource): PropertySource<*> {
@@ -30,7 +29,7 @@ class YamlPropertySourceFactory : PropertySourceFactory {
             factory.setResources(resource.resource)
             PropertiesPropertySource(resource.resource.filename!!, factory.getObject()!!)
         } else {
-            StubPropertySource(name ?: "")
+            throw FileNotFoundException("Resource $resource not found")
         }
     }
 }
