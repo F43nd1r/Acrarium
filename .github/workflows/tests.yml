@@ -1,6 +1,6 @@
 name: tests
 
-on: [push]
+on: [ push ]
 
 jobs:
   tests:
@@ -9,9 +9,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: ['17']
+        java: [ '17', '21' ]
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-java@v4
@@ -23,7 +23,6 @@ jobs:
         with:
           job-id: jdk${{ matrix.java }}
           arguments: test
-          properties: vaadinProKey=${{ secrets.VAADIN_PROKEY }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload Test Results
