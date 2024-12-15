@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2023-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@ package com.faendir.acra.common
 
 import com.faendir.acra.annotation.AcrariumTest
 import com.faendir.acra.ui.view.error.ErrorView
+import com.github.mvysny.fakeservlet.FakeRequest
+import com.github.mvysny.kaributesting.v10.MockRouteAccessDeniedError
 import com.github.mvysny.kaributesting.v10.MockVaadin
 import com.github.mvysny.kaributesting.v10.Routes
 import com.github.mvysny.kaributesting.v10._expectOne
@@ -71,8 +73,18 @@ abstract class UiTest {
     fun setup_internal() {
         uiParams = setup()
         val uiFactory = ::UI
+        routes.errorRoutes.remove(MockRouteAccessDeniedError::class.java)
         val servlet = MockSpringServlet(routes, applicationContext, uiFactory)
         MockVaadin.setup(uiFactory, servlet)
+        MockVaadin.mockRequestFactory = {
+            object : FakeRequest(it) {
+                override fun getUserPrincipal() = SecurityContextHolder.getContext().authentication
+
+                override fun getProtocolRequestId() = throw UnsupportedOperationException()
+                override fun getRequestId() = throw UnsupportedOperationException()
+                override fun getServletConnection() = throw UnsupportedOperationException()
+            }
+        }
 
         setAuthentication(uiParams.requiredAuthorities)
         navigateTo()

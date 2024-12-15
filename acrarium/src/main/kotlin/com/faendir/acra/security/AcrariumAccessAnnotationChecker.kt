@@ -22,6 +22,7 @@ import com.vaadin.flow.server.auth.NavigationContext
 import com.vaadin.flow.spring.security.NavigationAccessControlConfigurer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import kotlin.jvm.optionals.getOrNull
 
 @Configuration
 class AcrariumAccessAnnotationConfiguration {
@@ -32,12 +33,13 @@ class AcrariumAccessAnnotationConfiguration {
 
 class AcrariumAccessAnnotationChecker : NavigationAccessChecker {
     override fun check(context: NavigationContext): AccessCheckResult {
+        if (context.isErrorHandling) return AccessCheckResult.neutral()
+        val parents = context.router.resolveNavigationTarget(context.location).getOrNull()?.routeTarget?.parentLayouts.orEmpty()
         val parameters = RouteParameterParser { context.parameters }
-        return if (SecurityUtils.hasAccess(parameters::appId, context.navigationTarget)) {
+        return if ((listOf(context.navigationTarget) + parents).all { SecurityUtils.hasAccess(parameters::appId, it) }) {
             AccessCheckResult.allow()
         } else {
-            val appId = runCatching { parameters.appId() }.getOrNull()
-            AccessCheckResult.deny("User ${context.principal} does not have access to ${context.navigationTarget}${appId?.let { " for app $it" }}")
+            AccessCheckResult.deny("Access denied")
         }
     }
 }

@@ -15,23 +15,19 @@
  */
 package com.faendir.acra.security
 
-import com.faendir.acra.navigation.RouteParams
 import com.faendir.acra.persistence.user.UserRepository
 import com.faendir.acra.ui.view.login.SetupView
-import com.vaadin.flow.router.NotFoundException
 import com.vaadin.flow.server.UIInitEvent
 import com.vaadin.flow.server.UIInitListener
 import org.springframework.stereotype.Component
 
 
 @Component
-class AuthenticationUIListener(private val userRepository: UserRepository, private val routeParams: RouteParams) : UIInitListener {
+class SetupUIListener(private val userRepository: UserRepository) : UIInitListener {
     override fun uiInit(init: UIInitEvent) {
         init.ui.addBeforeEnterListener { event ->
-            if (event.navigationTarget != SetupView::class.java && !userRepository.hasAnyAdmin()) {
+            if (event.navigationTarget != SetupView::class.java && !SecurityUtils.isLoggedIn() && !userRepository.hasAnyAdmin()) {
                 event.forwardTo(SetupView::class.java)
-            } else if (!SecurityUtils.hasAccess(routeParams::appId, event.navigationTarget) || event.layouts.any { !SecurityUtils.hasAccess(routeParams::appId, it) }) {
-                event.rerouteToError(NotFoundException::class.java)
             }
         }
     }

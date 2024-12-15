@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,7 @@ import com.faendir.acra.rest.RestReportInterface.Companion.ATTACHMENT
 import com.faendir.acra.rest.RestReportInterface.Companion.REPORT
 import com.faendir.acra.rest.RestReportInterface.Companion.REPORT_PATH
 import com.ninjasquad.springmockk.MockkBean
-import com.vaadin.flow.server.auth.ViewAccessChecker
-import com.vaadin.flow.spring.security.RequestUtil
+import com.vaadin.flow.spring.SpringServlet
 import com.vaadin.flow.spring.security.VaadinDefaultRequestCache
 import io.mockk.every
 import io.mockk.verify
@@ -34,6 +33,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.web.servlet.ServletRegistrationBean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.http.MediaType.*
 import org.springframework.mock.web.MockMultipartFile
@@ -52,11 +52,8 @@ class RestReportInterfaceTest {
     @MockkBean
     lateinit var requestCache: VaadinDefaultRequestCache
 
-    @MockkBean(relaxed = true)
-    lateinit var requestUtil: RequestUtil
-
-    @MockkBean(relaxed = true)
-    lateinit var viewAccessChecker: ViewAccessChecker
+    @MockkBean
+    lateinit var springServletServletRegistrationBean: ServletRegistrationBean<SpringServlet>
 
     @MockkBean
     lateinit var userRepository: UserRepository
