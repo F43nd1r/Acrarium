@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2020-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,7 +126,7 @@ class UserManager(private val userRepository: UserRepository, private val appRep
                                 .addValidator({ it == password.content.value }, Messages.PASSWORDS_NOT_MATCHING)
                         )
                         createButton {
-                            userRepository.create(name.content.value, password.content.value, null)
+                            userRepository.create(name.content.value, password.content.value, null, Role.USER)
                             dataProvider.refreshAll()
                         }
                     }
