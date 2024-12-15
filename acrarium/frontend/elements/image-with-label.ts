@@ -1,11 +1,11 @@
 /*
- * (C) Copyright 2019 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2019-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {css, html, LitElement} from 'lit-element'
-import {customElement, property} from "lit/decorators.js"
+import {css, html, LitElement} from "lit-element";
+import {customElement, property} from "lit/decorators.js";
 
 @customElement("acrarium-image-with-label")
 export default class ImageWithLabel extends LitElement {
-    @property() image: String = ""
-    @property() label: String = ""
+    @property() image: String = "";
+    @property() label: String = "";
 
     static get styles() {
         return css`
@@ -38,13 +38,13 @@ export default class ImageWithLabel extends LitElement {
             label {
                 padding-left: var(--lumo-space-s);
             }
-        `
+        `;
     }
 
     render() {
         return html`
             <img src="${this.image}" alt="${this.label}">
             <label>${this.label}</label>
-        `
+        `;
     }
 }

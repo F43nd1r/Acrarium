@@ -51,6 +51,10 @@ subprojects {
             target("src/**/*.yml")
             licenseHeader(buildLicenseHeader("#", "# ", "#"), "[^#].*:.*")
         }
+        typescript {
+            target("frontend/**/*.ts")
+            licenseHeader(buildLicenseHeader("/*", " * ", " */"), "(?!(/\\*| \\*| \\*/)).*")
+        }
         format("properties") {
             target("src/**/*.properties")
             licenseHeader(buildLicenseHeader("#", "# ", "#"), "[^#].*=.*")

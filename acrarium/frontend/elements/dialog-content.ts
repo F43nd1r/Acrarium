@@ -1,11 +1,11 @@
 /*
- * (C) Copyright 2019 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2019-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {css, html, LitElement} from 'lit-element'
-import {customElement} from "lit/decorators.js"
+import {css, html, LitElement} from "lit-element";
+import {customElement} from "lit/decorators.js";
 
 @customElement("acrarium-dialog-content")
 export default class DialogContent extends LitElement {
@@ -47,7 +47,7 @@ export default class DialogContent extends LitElement {
             slot[name="header"]::slotted(*) {
                 margin-top: var(--lumo-space-s) !important;
             }
-        `
+        `;
     }
 
     render() {
@@ -63,6 +63,6 @@ export default class DialogContent extends LitElement {
                 <div class="spacer"></div>
                 <slot name="positive"></slot>
             </div>
-        `
+        `;
     }
 }
