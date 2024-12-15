@@ -20,7 +20,6 @@ import com.faendir.acra.persistence.user.UserRepository
 import com.faendir.acra.rest.RestApiInterface.Companion.API_PATH
 import com.faendir.acra.rest.RestReportInterface.Companion.REPORT_PATH
 import com.faendir.acra.ui.view.login.LoginView
-import com.faendir.acra.ui.view.login.SetupView
 import com.vaadin.flow.spring.SpringSecurityAutoConfiguration
 import com.vaadin.flow.spring.security.VaadinWebSecurity
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest
@@ -111,9 +110,8 @@ class WebSecurityConfiguration(private val userRepository: UserRepository) : Vaa
     }
 
     override fun configure(http: HttpSecurity) {
-        http.authorizeHttpRequests { it.requestMatchers(antMatcher("/${SetupView.ROUTE}")).permitAll() }
-        http.formLogin { it.loginPage("/${LoginView.ROUTE}").permitAll() }
         super.configure(http)
+        setLoginView(http, LoginView::class.java)
     }
 
     override fun configure(web: WebSecurity) {
