@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,29 @@
  */
 package com.faendir.acra.security
 
-import com.faendir.acra.navigation.RouteParams
-import com.vaadin.flow.server.auth.AccessAnnotationChecker
-import org.springframework.stereotype.Component
-import java.lang.reflect.Method
-import java.security.Principal
-import java.util.function.Function
+import com.faendir.acra.navigation.RouteParameterParser
+import com.vaadin.flow.server.auth.AccessCheckResult
+import com.vaadin.flow.server.auth.NavigationAccessChecker
+import com.vaadin.flow.server.auth.NavigationContext
+import com.vaadin.flow.spring.security.NavigationAccessControlConfigurer
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 
-@Component
-class AcrariumAccessAnnotationChecker(private val routeParams: RouteParams) : AccessAnnotationChecker() {
-    override fun hasAccess(method: Method, principal: Principal?, roleChecker: Function<String, Boolean>): Boolean {
-        return SecurityUtils.hasAccess(routeParams::appId, method.declaringClass) || super.hasAccess(method, principal, roleChecker)
-    }
+@Configuration
+class AcrariumAccessAnnotationConfiguration {
+    @Bean
+    fun navigationAccessControlConfigurerCustomizer(): NavigationAccessControlConfigurer =
+        NavigationAccessControlConfigurer().withNavigationAccessChecker(AcrariumAccessAnnotationChecker())
+}
 
-    override fun hasAccess(cls: Class<*>, principal: Principal?, roleChecker: Function<String, Boolean>): Boolean {
-        return SecurityUtils.hasAccess(routeParams::appId, cls) || super.hasAccess(cls, principal, roleChecker)
+class AcrariumAccessAnnotationChecker : NavigationAccessChecker {
+    override fun check(context: NavigationContext): AccessCheckResult {
+        val parameters = RouteParameterParser { context.parameters }
+        return if (SecurityUtils.hasAccess(parameters::appId, context.navigationTarget)) {
+            AccessCheckResult.allow()
+        } else {
+            val appId = runCatching { parameters.appId() }.getOrNull()
+            AccessCheckResult.deny("User ${context.principal} does not have access to ${context.navigationTarget}${appId?.let { " for app $it" }}")
+        }
     }
 }

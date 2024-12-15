@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,10 @@ import org.springframework.stereotype.Component
 
 @Component
 @ListenerPriority(1000)
-class RouteParams : UIInitListener, BeforeEnterListener {
-    private val cache = mutableMapOf<Int, RouteParameters>()
+class RouteParams(private val cache: MutableMap<Int, RouteParameters> = mutableMapOf()) : UIInitListener, BeforeEnterListener, RouteParameterProvider by RouteParameterParser({
+    cache[UI.getCurrent()?.uiId ?: throw IllegalStateException("No UI present")] ?: throw IllegalStateException("No cache entry for UI present")
+}) {
+
     override fun uiInit(uiInitEvent: UIInitEvent) {
         uiInitEvent.ui.addBeforeEnterListener(this)
     }
@@ -39,20 +41,29 @@ class RouteParams : UIInitListener, BeforeEnterListener {
     override fun beforeEnter(event: BeforeEnterEvent) {
         cache[event.ui.uiId] = event.routeParameters
     }
+}
 
-    fun appId(): AppId = AppId(parse(PARAM_APP) { it.toInt() })
+interface RouteParameterProvider {
+    fun appId(): AppId
+    fun bugId(): BugId
+    fun reportId(): String
+    fun installationId(): String
+}
 
-    fun bugId(): BugId = BugId(parse(PARAM_BUG) { it.toInt() })
-
-    fun reportId(): String = parse(PARAM_REPORT) { it }
-
-    fun installationId(): String = parse(PARAM_INSTALLATION) { it }
-
-    fun <T> parse(param: String, parse: (String) -> T?): T {
-        val id = UI.getCurrent()?.uiId ?: throw IllegalStateException("No UI present")
-        val value = cache[id]?.get(param)?.toNullable() ?: throw IllegalArgumentException("Parameter $param not present")
+class RouteParameterParser(private val getRouteParameters: () -> RouteParameters) : RouteParameterProvider {
+    private fun <T> parse(param: String, parse: (String) -> T?): T {
+        val value = getRouteParameters().get(param)?.toNullable() ?: throw IllegalArgumentException("Parameter $param not present")
         return parse(value) ?: throw IllegalArgumentException("Parse failure for parameter $param")
     }
+
+    override fun appId(): AppId = AppId(parse(PARAM_APP) { it.toInt() })
+
+    override fun bugId(): BugId = BugId(parse(PARAM_BUG) { it.toInt() })
+
+    override fun reportId(): String = parse(PARAM_REPORT) { it }
+
+    override fun installationId(): String = parse(PARAM_INSTALLATION) { it }
+
 }
 
 const val PARAM_APP = "app"

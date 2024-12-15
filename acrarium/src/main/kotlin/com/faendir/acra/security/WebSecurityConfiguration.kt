@@ -50,8 +50,6 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector
 @EnableWebSecurity
 @Import(SpringSecurityAutoConfiguration::class)
 class WebSecurityConfiguration(private val userRepository: UserRepository) : VaadinWebSecurity() {
-
-
     @Bean(name = [BeanIds.AUTHENTICATION_MANAGER])
     fun authenticationManager(http: HttpSecurity): AuthenticationManager =
         http.getSharedObject(AuthenticationManagerBuilder::class.java)

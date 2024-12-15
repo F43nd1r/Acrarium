@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2020-2024 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,6 @@ import kotlin.math.max
 @View
 @Route(value = "app/:$PARAM_APP/bug/:$PARAM_BUG/report/:$PARAM_REPORT", layout = MainView::class)
 @LogicalParent(ReportBugTab::class)
-@RequiresPermission(Permission.Level.VIEW)
 @RequiresPermission(Permission.Level.VIEW)
 class ReportView(
     private val reportRepository: ReportRepository,
