@@ -4,7 +4,7 @@ dokka = "2.0.0"
 springBoot = "3.4.2"
 vaadin-base = "24.6.5"
 kotlinPoet = "2.0.0"
-testContainers = "1.20.4"
+testContainers = "1.20.5"
 jooq = "3.19.10"
 karibu = "2.2.1"
 
