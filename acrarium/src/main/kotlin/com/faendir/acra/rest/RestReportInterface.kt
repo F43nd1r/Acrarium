@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2025 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartHttpServletRequest
 import java.nio.charset.StandardCharsets
 import java.security.Principal
@@ -40,13 +41,12 @@ class RestReportInterface(private val reportService: ReportService) {
 
     @RequestMapping(value = [REPORT_PATH], consumes = [MediaType.MULTIPART_FORM_DATA_VALUE], method = [RequestMethod.POST])
     fun report(request: MultipartHttpServletRequest, principal: Principal): ResponseEntity<*> {
-        val fileMap = request.multiFileMap
-        val reportFiles = fileMap[REPORT]
-        if (reportFiles.isNullOrEmpty()) {
+        val parameterMap = request.parameterMap
+        if (!parameterMap.containsKey(REPORT)) {
             return ResponseEntity.badRequest().build<Any>()
         }
-        val content = StreamUtils.copyToString(reportFiles[0].inputStream, StandardCharsets.UTF_8)
-        val attachments = fileMap[ATTACHMENT] ?: emptyList()
+        val content = parameterMap[REPORT]!!.first()
+        val attachments = request.multiFileMap[ATTACHMENT] ?: emptyList()
         reportService.create(principal.name, content, attachments)
         return ResponseEntity.ok().build<Any>()
     }
