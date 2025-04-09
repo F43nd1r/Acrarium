@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2023-2025 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,21 @@ class RestReportInterfaceIntegrationTest(
             .postForEntity(
                 "http://localhost:$port/${RestReportInterface.REPORT_PATH}",
                 HttpEntity(ClassPathResource("example.stacktrace").contentAsByteArray, headers),
+                Void::class.java
+            )
+
+        expectThat(result.statusCode).isEqualTo(HttpStatus.OK)
+    }
+
+    @Test
+    fun `should be able to submit multipart report`() {
+        val headers = HttpHeaders()
+        headers.set(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA_VALUE + "; boundary=%&ACRA_REPORT_DIVIDER&%")
+        val result = restTemplate
+            .withBasicAuth(reporter.username, reporter.rawPassword)
+            .postForEntity(
+                "http://localhost:$port/${RestReportInterface.REPORT_PATH}",
+                HttpEntity(ClassPathResource("example.multipart").contentAsByteArray, headers),
                 Void::class.java
             )
 
