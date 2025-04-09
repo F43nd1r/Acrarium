@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2024 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2025 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,8 +104,9 @@ class RestReportInterfaceTest {
     @Test
     fun `should accept report with attachments`() {
         mvc.perform(
-            multipart("/$REPORT_PATH").file(MockMultipartFile(REPORT, TEST_STRING, APPLICATION_JSON_VALUE, ByteArray(0)))
+            multipart("/$REPORT_PATH")
                 .file(MockMultipartFile(ATTACHMENT, TEST_STRING, APPLICATION_OCTET_STREAM_VALUE, ByteArray(0)))
+                .param(REPORT, TEST_STRING)
                 .contentType(MULTIPART_FORM_DATA)
         ).andExpect(status().isOk)
         verify(exactly = 1) { reportService.create(any(), any(), any()) }
