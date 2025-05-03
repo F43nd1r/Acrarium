@@ -20,7 +20,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - name: Build release
-        uses: burrunan/gradle-cache-action@v2
+        uses: burrunan/gradle-cache-action@v3
         with:
           job-id: jdk17
           arguments: bootJar bootWar
