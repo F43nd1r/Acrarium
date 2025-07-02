@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2025 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ class MethodSecurityConfiguration(@Lazy private val userRepository: UserReposito
         override fun createEvaluationContext(authentication: Supplier<Authentication>, mi: MethodInvocation): EvaluationContext {
             val root = createCustomSecurityExpressionRoot(authentication, mi)
             val ctx = MethodBasedEvaluationContext(root, getSpecificMethod(mi), mi.arguments, parameterNameDiscoverer)
-            ctx.beanResolver = beanResolver
+            ctx.setBeanResolver(beanResolver)
             return ctx
         }
     }
