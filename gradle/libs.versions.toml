@@ -34,6 +34,7 @@ testContainers-mysql = { module = "org.testcontainers:mysql", version.ref = "tes
 testContainers-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testContainers" }
 karibu-testing = { module = "com.github.mvysny.kaributesting:karibu-testing-v24", version.ref = "karibu" }
 karibu-spring = { module = "com.github.mvysny.kaributesting:karibu-testing-v10-spring", version.ref = "karibu" }
+micrometer-prometheus = "io.micrometer:micrometer-registry-prometheus:1.14.5"
 
 [plugins]
 jooq = { id = "nu.studer.jooq", version = "9.0" }
