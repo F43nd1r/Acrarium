@@ -37,10 +37,8 @@ class I18nClassGenerator extends DefaultTask {
     String className
 
     I18nClassGenerator() {
-        project.afterEvaluate {
-            project.sourceSets.main.java.srcDirs outputs.files
-            project.plugins.withType(IdeaPlugin.class, { IdeaPlugin idea -> idea.model.module.generatedSourceDirs += outputs.files })
-        }
+        project.sourceSets.main.java.srcDirs outputs.files
+        project.plugins.withType(IdeaPlugin.class).configureEach { IdeaPlugin idea -> idea.model.module.generatedSourceDirs += outputs.files }
     }
 
     @TaskAction
