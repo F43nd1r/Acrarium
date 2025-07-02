@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -37,7 +37,7 @@ jobs:
       - name: Build release
         uses: burrunan/gradle-cache-action@v3
         with:
-          job-id: jdk17
+          job-id: jdk21
           arguments: bootJar
           properties: vaadin.productionMode=true
       - name: Get docker tags

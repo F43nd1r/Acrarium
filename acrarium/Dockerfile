@@ -1,8 +1,8 @@
 FROM alpine:latest as builder
 
-RUN apk --no-cache add openjdk17-jdk openjdk17-jmods binutils
+RUN apk --no-cache add openjdk21-jdk openjdk21-jmods binutils
 ENV JAVA_MINIMAL="/opt/java-minimal"
-RUN /usr/lib/jvm/java-17-openjdk/bin/jlink \
+RUN /usr/lib/jvm/java-21-openjdk/bin/jlink \
     --verbose \
     --add-modules \
         java.base,java.sql,java.naming,java.desktop,java.management,java.security.jgss,java.instrument,jdk.unsupported \
