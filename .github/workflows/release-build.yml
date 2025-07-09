@@ -18,11 +18,11 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
       - name: Build release
-        uses: burrunan/gradle-cache-action@v2
+        uses: burrunan/gradle-cache-action@v3
         with:
-          job-id: jdk17
+          job-id: jdk21
           arguments: bootJar bootWar
           properties: vaadin.productionMode=true
         env:

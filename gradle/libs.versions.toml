@@ -1,12 +1,12 @@
 [versions]
-kotlin = "2.1.20"
+kotlin = "2.2.0"
 dokka = "2.0.0"
-springBoot = "3.4.4"
-vaadin-base = "24.6.7"
-kotlinPoet = "2.1.0"
-testContainers = "1.20.6"
+springBoot = "3.5.3"
+vaadin-base = "24.8.2"
+kotlinPoet = "2.2.0"
+testContainers = "1.21.1"
 jooq = "3.19.10"
-karibu = "2.2.3"
+karibu = "2.3.0"
 
 [libraries]
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
@@ -28,7 +28,7 @@ kotlin-coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2"
 kotlin-logging = "io.github.microutils:kotlin-logging-jvm:3.0.5"
 spring-mockk = "com.ninja-squad:springmockk:4.0.2"
 strikt = "io.strikt:strikt-core:0.35.1"
-springdoc = "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6"
+springdoc = "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9"
 guava = "com.google.guava:guava:33.4.8-jre"
 testContainers-mysql = { module = "org.testcontainers:mysql", version.ref = "testContainers" }
 testContainers-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testContainers" }
@@ -46,4 +46,4 @@ kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotl
 kotlin-noarg = { id = "org.jetbrains.kotlin.plugin.noarg", version.ref = "kotlin" }
 springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
 vaadin = { id = "com.vaadin", version.ref = "vaadin-base" }
-spotless = { id = "com.diffplug.spotless", version = "7.0.3" }
+spotless = { id = "com.diffplug.spotless", version = "7.0.4" }

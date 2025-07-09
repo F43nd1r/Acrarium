@@ -8,7 +8,7 @@ pluginManagement {
     }
 }
 plugins {
-    id("dev.aga.gradle.version-catalog-generator") version ("3.2.1")
+    id("dev.aga.gradle.version-catalog-generator") version ("3.2.2")
 }
 dependencyResolutionManagement {
     repositories {
@@ -22,11 +22,13 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         generate("springLibs") {
-            from(toml("spring-boot-bom"))
-            propertyOverrides = mapOf("jooq.version" to versionRef("jooq"))
+            fromToml("spring-boot-bom")
+            using {
+                propertyOverrides = mapOf("jooq.version" to versionRef("jooq"))
+            }
         }
         generate("vaadinLibs") {
-            from(toml("vaadin-base-bom"))
+            fromToml("vaadin-base-bom")
         }
     }
 }

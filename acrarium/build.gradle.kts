@@ -77,7 +77,7 @@ sourceSets {
     }
 }
 
-val generateMessageClasses by tasks.creating(com.faendir.acra.gradle.I18nClassGenerator::class) {
+val generateMessageClasses by tasks.registering(com.faendir.acra.gradle.I18nClassGenerator::class) {
     inputDirectory = fileTree("src/main/resources/i18n/com/faendir/acra")
     outputDirectory = messagesOutput
     packageName = "com.faendir.acra.i18n"
@@ -85,7 +85,10 @@ val generateMessageClasses by tasks.creating(com.faendir.acra.gradle.I18nClassGe
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
+    compilerOptions {
+        freeCompilerArgs = listOf("-Xannotation-default-target=param-property")
+    }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
