@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2025 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,15 +103,26 @@ data class BugIdentifier(
             val lines = stacktrace.split('\n')
             return BugIdentifier(
                 appId = appId,
-                exceptionClass = lines.first().substringBefore(':'),
-                message = lines.first().takeIf { it.contains(':') }?.substringAfter(':')
+                exceptionClass = lines.first()
+                    .substringBefore(':')
+                    .trim(),
+                message = lines.first()
+                    .takeIf { it.contains(':') }
+                    ?.substringAfter(':')
                     ?.replace(acrariumConfiguration.messageIgnoreRegex, "")
-                    ?.take(255),
-                crashLine = lines.mapNotNull { codePointRegex.matchEntire(it) }
+                    ?.take(255)
+                    ?.trim(),
+                crashLine = lines
+                    .asSequence()
+                    .mapNotNull { codePointRegex.matchEntire(it) }
                     .mapNotNull { it.groups["codepoint"]?.value }
-                    .firstOrNull { !it.startsWith("android.") && !it.startsWith("java.") }?.take(255),
-                cause = lines.mapNotNull { causeRegex.matchEntire(it) }
+                    .firstOrNull { !it.startsWith("android.") && !it.startsWith("java.") }?.take(255)
+                    ?.trim(),
+                cause = lines
+                    .asSequence()
+                    .mapNotNull { causeRegex.matchEntire(it) }
                     .firstNotNullOfOrNull { it.groups["cause"]?.value }?.take(255)
+                    ?.trim()
             )
         }
     }
