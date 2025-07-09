@@ -29,7 +29,6 @@ dependencies {
     implementation(springLibs.spring.springBootStarterSecurity)
     implementation(springLibs.spring.springBootStarterMail)
     implementation(springLibs.spring.springBootStarterActuator)
-    implementation(libs.micrometer.prometheus)
     implementation(springLibs.spring.springBootStarterJooq)
     implementation(vaadinLibs.vaadin.vaadin)
     implementation(vaadinLibs.vaadin.vaadinSpringBootStarter)

@@ -102,17 +102,6 @@ class WebSecurityConfiguration(private val userRepository: UserRepository) : Vaa
             .authorizeHttpRequests { it.anyRequest().hasRole(Role.ADMIN.name) }
             .httpBasic(Customizer.withDefaults())
             .build()
-    @Bean
-    @Order(4)
-    fun actuatorSecurityChain(http: HttpSecurity, introspector: HandlerMappingIntrospector): SecurityFilterChain =
-        http.securityMatcher("/actuator/.*")
-            .csrf { it.disable() }
-            .headers { it.disable() }
-            .anonymous { it.disable() }
-            .exceptionHandling { it.authenticationEntryPoint(Http403ForbiddenEntryPoint()) }
-            .authorizeHttpRequests { it.anyRequest().hasRole(Role.ADMIN.name) }
-            .httpBasic(Customizer.withDefaults())
-            .build()
 
     @Bean("VaadinSecurityFilterChainBean")
     @Order(5)
