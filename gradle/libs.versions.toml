@@ -2,7 +2,7 @@
 kotlin = "2.2.0"
 dokka = "2.0.0"
 springBoot = "3.5.4"
-vaadin-base = "24.8.2"
+vaadin-base = "24.8.5"
 kotlinPoet = "2.2.0"
 testContainers = "1.21.3"
 jooq = "3.19.10"
