@@ -1,7 +1,7 @@
 [versions]
 kotlin = "2.2.10"
 dokka = "2.0.0"
-springBoot = "3.5.4"
+springBoot = "3.5.5"
 vaadin-base = "24.8.6"
 kotlinPoet = "2.2.0"
 testContainers = "1.21.3"
