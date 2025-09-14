@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2020-2025 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,51 +15,50 @@
  */
 package com.faendir.acra.i18n
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
+import strikt.assertions.containsExactlyInAnyOrder
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNull
 import java.util.*
 
 internal class ResourceBundleI18NProviderTest {
+    private val provider = ResourceBundleI18NProvider("com.faendir.acra.messages")
 
-    private lateinit var bundle: ResourceBundle
-
-    private lateinit var provider: ResourceBundleI18NProvider
-
-    private val test = "TEST"
-    private val result = "Hello"
-
-    @BeforeEach
-    fun setUp() {
-        provider = ResourceBundleI18NProvider(test)
-        mockkStatic(ResourceBundle::class)
-        bundle = mockk()
-        every { ResourceBundle.getBundle(any(), any(), any(), any()) } returns null
-        every { ResourceBundle.getBundle(any(), Locale.US, any(), any()) } returns bundle
-        every { bundle.getString(test) } returns result
-    }
-
-    @AfterEach
-    fun teardown() {
-        unmockkStatic(ResourceBundle::class)
+    @Test
+    fun `getProvidedLocales returns all available locales from resource files`() {
+        val locales = provider.getProvidedLocales()
+        expectThat(locales).containsExactlyInAnyOrder(Locale.ROOT, Locale.GERMAN, Locale.US)
     }
 
     @Test
-    fun getProvidedLocales() {
-        expectThat(provider.providedLocales).isEqualTo(listOf(Locale.US))
+    fun `getTranslation returns correct translation for default locale`() {
+        expectThat(provider.getTranslation("hello", Locale.ROOT)).isEqualTo("Hello")
+        expectThat(provider.getTranslation("bye", Locale.ROOT)).isEqualTo("Goodbye")
+        expectThat(provider.getTranslation("param", Locale.ROOT, "test")).isEqualTo("Value: test")
     }
 
     @Test
-    fun getTranslation() {
-        expectThat(provider.getTranslation(test, Locale.US)).isEqualTo(result)
-        expectThat(provider.getTranslation(result, Locale.US)).isNull()
-        expectThat(provider.getTranslation(test, Locale.FRANCE)).isNull()
+    fun `getTranslation returns correct translation for German locale`() {
+        expectThat(provider.getTranslation("hello", Locale.GERMAN)).isEqualTo("Hallo")
+        expectThat(provider.getTranslation("bye", Locale.GERMAN)).isEqualTo("Auf Wiedersehen")
+        expectThat(provider.getTranslation("param", Locale.GERMAN, "test")).isEqualTo("Wert: test")
+    }
+
+    @Test
+    fun `getTranslation returns correct translation for US English locale`() {
+        expectThat(provider.getTranslation("hello", Locale.US)).isEqualTo("Howdy")
+        expectThat(provider.getTranslation("bye", Locale.US)).isEqualTo("See ya")
+        expectThat(provider.getTranslation("param", Locale.US, "test")).isEqualTo("Value (US): test")
+    }
+
+    @Test
+    fun `getTranslation returns null for missing key`() {
+        expectThat(provider.getTranslation("nonexistent", Locale.ROOT)).isNull()
+    }
+
+    @Test
+    fun `getTranslation returns default for missing locale`() {
+        expectThat(provider.getTranslation("hello", Locale.FRENCH)).isEqualTo("Hello")
     }
 }
