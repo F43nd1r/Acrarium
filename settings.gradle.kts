@@ -8,7 +8,7 @@ pluginManagement {
     }
 }
 plugins {
-    id("dev.aga.gradle.version-catalog-generator") version ("3.3.0")
+    id("dev.aga.gradle.version-catalog-generator") version ("3.3.1")
 }
 dependencyResolutionManagement {
     repositories {
