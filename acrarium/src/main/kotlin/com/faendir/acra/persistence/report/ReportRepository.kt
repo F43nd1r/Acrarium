@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2025 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ private val logger = KotlinLogging.logger {}
 class ReportRepository(
     private val jooq: DSLContext
 ) {
-    @PostAuthorize("returnObject == null || hasViewPermission(returnObject.appId)")
+    @PostAuthorize("returnObject == null || isReporter() || hasViewPermission(returnObject.appId)")
     fun find(id: String): Report? = jooq.selectFrom(REPORT).where(REPORT.ID.eq(id)).fetchValueInto()
 
     fun findAttachmentNames(id: String) = jooq.select(ATTACHMENT.FILENAME.NOT_NULL).from(ATTACHMENT).where(ATTACHMENT.REPORT_ID.eq(id)).fetchList()

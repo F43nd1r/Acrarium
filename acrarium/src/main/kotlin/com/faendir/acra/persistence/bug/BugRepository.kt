@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2025 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import com.faendir.acra.persistence.*
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.version.VersionKey
 import jakarta.validation.constraints.Size
+import mu.KotlinLogging
 import org.jooq.DSLContext
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
@@ -32,14 +33,33 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.util.stream.Stream
 
+
+private val logger = KotlinLogging.logger {}
+
 @Repository
 class BugRepository(
     private val jooq: DSLContext,
 ) {
 
     @PreAuthorize("isReporter() || hasViewPermission(#identifier.appId)")
-    fun findId(identifier: BugIdentifier): BugId? =
-        jooq.select(BUG_IDENTIFIER.BUG_ID).from(BUG_IDENTIFIER).where(BUG_IDENTIFIER.matches(identifier)).fetchValue()
+    fun findId(identifier: BugIdentifier): BugId? {
+        val results =  jooq.select(BUG_IDENTIFIER.BUG_ID).from(BUG_IDENTIFIER).where(BUG_IDENTIFIER.matches(identifier)).fetchList()
+
+        if (results.size == 1) {
+            return results[0]
+        }
+        if (results.size > 1) {
+
+            var ids = ""
+            for (id in results) {
+                ids += "$id, "
+            }
+
+            logger.warn { "Found multiple bug ids[$ids] for identifier[$identifier]. Using ${results[0]}" }
+            return results[0]
+        }
+        return null
+    }
 
     @PostAuthorize("returnObject == null || hasViewPermission(returnObject.appId)")
     fun find(bugId: BugId): Bug? =
@@ -67,19 +87,31 @@ class BugRepository(
 
     @PreAuthorize("isReporter()")
     fun create(identifier: BugIdentifier, title: String): BugId {
-        val bugId = jooq.insertInto(BUG)
-            .set(BUG.APP_ID, identifier.appId)
-            .set(BUG.TITLE, title)
-            .returningResult(BUG.ID)
-            .fetchValue()!!
-        jooq.insertInto(BUG_IDENTIFIER)
-            .set(BUG_IDENTIFIER.BUG_ID, bugId)
-            .set(BUG_IDENTIFIER.APP_ID, identifier.appId)
-            .set(BUG_IDENTIFIER.EXCEPTION_CLASS, identifier.exceptionClass)
-            .set(BUG_IDENTIFIER.MESSAGE, identifier.message)
-            .set(BUG_IDENTIFIER.CRASH_LINE, identifier.crashLine)
-            .set(BUG_IDENTIFIER.CAUSE, identifier.cause)
-            .execute()
+        var bugId = findId(identifier)
+
+        if (bugId == null) {
+            val insertId = jooq.insertInto(BUG)
+                .set(BUG.APP_ID, identifier.appId)
+                .set(BUG.TITLE, title)
+                .returningResult(BUG.ID)
+                .fetchValue()
+
+            jooq.insertInto(BUG_IDENTIFIER)
+                .set(BUG_IDENTIFIER.BUG_ID, insertId)
+                .set(BUG_IDENTIFIER.APP_ID, identifier.appId)
+                .set(BUG_IDENTIFIER.EXCEPTION_CLASS, identifier.exceptionClass)
+                .set(BUG_IDENTIFIER.MESSAGE, identifier.message)
+                .set(BUG_IDENTIFIER.CRASH_LINE, identifier.crashLine)
+                .set(BUG_IDENTIFIER.CAUSE, identifier.cause)
+                .execute()
+
+            bugId = insertId
+        }
+
+        if (bugId == null) {
+            throw RuntimeException("BugId didn't exist and could not be created")
+        }
+
         return bugId
     }
 

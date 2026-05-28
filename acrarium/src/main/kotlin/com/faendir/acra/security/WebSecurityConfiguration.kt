@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2025 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ class WebSecurityConfiguration(private val userRepository: UserRepository) : Vaa
 
     @Bean
     @Order(3)
-    fun actuatorSecurityChain(http: HttpSecurity, introspector: HandlerMappingIntrospector): SecurityFilterChain =
+    fun swaggerSecurityChain(http: HttpSecurity, introspector: HandlerMappingIntrospector): SecurityFilterChain =
         http.securityMatcher(OrRequestMatcher(EndpointRequest.toAnyEndpoint(), MvcRequestMatcher(introspector, ".*/swagger-ui/.*")))
             .csrf { it.disable() }
             .headers { it.disable() }
@@ -104,7 +104,7 @@ class WebSecurityConfiguration(private val userRepository: UserRepository) : Vaa
             .build()
 
     @Bean("VaadinSecurityFilterChainBean")
-    @Order(4)
+    @Order(5)
     override fun filterChain(http: HttpSecurity): SecurityFilterChain {
         return super.filterChain(http)
     }

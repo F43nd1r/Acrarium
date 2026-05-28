@@ -16,6 +16,7 @@
 package com.faendir.acra.rest
 
 import com.faendir.acra.domain.ReportService
+import mu.KotlinLogging
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -23,19 +24,32 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.security.Principal
 
+private val logger = KotlinLogging.logger {}
+
 @RestController
 @PreAuthorize("isReporter()")
 class RestReportInterface(private val reportService: ReportService) {
     @RequestMapping(value = [REPORT_PATH], consumes = [MediaType.APPLICATION_JSON_VALUE], method = [RequestMethod.POST])
-    fun report(@RequestBody content: String, principal: Principal) {
-        if (content.isNotBlank()) {
-            reportService.create(principal.name, content, emptyList())
+    fun report(@RequestBody content: String, principal: Principal):ResponseEntity<*> {
+        try {
+            if (content.isNotBlank()) {
+                reportService.create(principal.name, content, emptyList())
+            }
+        } catch (e: Exception) {
+            logger.error(e) { "Error while creating report ${e.message}" }
+            return ResponseEntity.internalServerError().body<Any>(e.message)
         }
+        return ResponseEntity.ok().build<Any>()
     }
 
     @RequestMapping(value = [REPORT_PATH], consumes = [MediaType.MULTIPART_FORM_DATA_VALUE], method = [RequestMethod.POST])
     fun report(@RequestParam(REPORT) content: String, @RequestParam(ATTACHMENT) attachments: List<MultipartFile>, principal: Principal): ResponseEntity<*> {
-        reportService.create(principal.name, content, attachments)
+        try {
+            reportService.create(principal.name, content, attachments)
+        } catch (e: Exception) {
+            logger.error(e) { "Error while creating report ${e.message}" }
+            return ResponseEntity.internalServerError().body<Any>(e.message)
+        }
         return ResponseEntity.ok().build<Any>()
     }
 
