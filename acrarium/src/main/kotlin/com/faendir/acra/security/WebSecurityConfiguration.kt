@@ -102,6 +102,7 @@ class WebSecurityConfiguration(private val userRepository: UserRepository) {
     @Bean
     @Order(4)
     fun vaadinSecurityChain(http: HttpSecurity): SecurityFilterChain =
-        http.with(VaadinSecurityConfigurer.vaadin()) { vaadin -> vaadin.loginView(LoginView::class.java) }
+        http.authorizeHttpRequests { it.requestMatchers("/images/**", "/favicon.ico").permitAll() }
+            .with(VaadinSecurityConfigurer.vaadin()) { vaadin -> vaadin.loginView(LoginView::class.java) }
             .build()
 }
