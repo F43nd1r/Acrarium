@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,8 +93,8 @@ data class BugIdentifier(
     val cause: String?
 ) {
     companion object {
-        private val codePointRegex = Regex("\\s*at\\s+(<?codepoint>.*)")
-        private val causeRegex = Regex("\\s*Caused by:\\s+(<?cause>.*)")
+        private val codePointRegex = Regex("\\s*at\\s+(?<codepoint>.*)")
+        private val causeRegex = Regex("\\s*Caused by:\\s+(?<cause>.*)")
         fun fromStacktrace(
             acrariumConfiguration: AcrariumConfiguration,
             appId: AppId,
@@ -103,15 +103,18 @@ data class BugIdentifier(
             val lines = stacktrace.split('\n')
             return BugIdentifier(
                 appId = appId,
-                exceptionClass = lines.first().substringBefore(':'),
+                exceptionClass = lines.first().substringBefore(':').trim(),
                 message = lines.first().takeIf { it.contains(':') }?.substringAfter(':')
+                    ?.trim()
                     ?.replace(acrariumConfiguration.messageIgnoreRegex, "")
                     ?.take(255),
                 crashLine = lines.mapNotNull { codePointRegex.matchEntire(it) }
                     .mapNotNull { it.groups["codepoint"]?.value }
-                    .firstOrNull { !it.startsWith("android.") && !it.startsWith("java.") }?.take(255),
+                    .firstOrNull { !it.startsWith("android.") && !it.startsWith("java.") }
+                    ?.trim()?.take(255),
                 cause = lines.mapNotNull { causeRegex.matchEntire(it) }
-                    .firstNotNullOfOrNull { it.groups["cause"]?.value }?.take(255)
+                    .firstNotNullOfOrNull { it.groups["cause"]?.value }
+                    ?.trim()?.take(255)
             )
         }
     }

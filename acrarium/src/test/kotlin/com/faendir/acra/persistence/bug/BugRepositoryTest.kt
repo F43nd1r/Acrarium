@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,21 @@ class BugRepositoryTest(
         @BeforeEach
         fun setup() {
             bugId = testDataBuilder.createBug(appId)
+        }
+
+        @Test
+        fun `should return a result instead of throwing when duplicate identifiers exist`() {
+            val exceptionClass = "exceptionClass"
+            val message = "message"
+            val crashLine = "crashLine"
+            val cause = "cause"
+            // Simulate the aftermath of a race: two identical bug_identifier rows for different bugs
+            val bug1 = testDataBuilder.createBug(appId)
+            testDataBuilder.createBugIdentifier(appId, bug1, exceptionClass, message, crashLine, cause)
+            val bug2 = testDataBuilder.createBug(appId)
+            testDataBuilder.createBugIdentifier(appId, bug2, exceptionClass, message, crashLine, cause)
+
+            expectThat(bugRepository.findId(BugIdentifier(appId, exceptionClass, message, crashLine, cause))).isNotNull()
         }
 
         @Test

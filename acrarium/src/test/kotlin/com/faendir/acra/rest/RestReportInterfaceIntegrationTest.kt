@@ -66,6 +66,28 @@ class RestReportInterfaceIntegrationTest(
     }
 
     @Test
+    fun `should handle duplicate report submission gracefully`() {
+        val headers = HttpHeaders()
+        headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        val body = HttpEntity(ClassPathResource("example.stacktrace").contentAsByteArray, headers)
+        val authenticatedTemplate = restTemplate.withBasicAuth(reporter.username, reporter.rawPassword)
+
+        val first = authenticatedTemplate.postForEntity(
+            "http://localhost:$port/${RestReportInterface.REPORT_PATH}",
+            body,
+            Void::class.java
+        )
+        expectThat(first.statusCode).isEqualTo(HttpStatus.OK)
+
+        val second = authenticatedTemplate.postForEntity(
+            "http://localhost:$port/${RestReportInterface.REPORT_PATH}",
+            body,
+            Void::class.java
+        )
+        expectThat(second.statusCode).isEqualTo(HttpStatus.OK)
+    }
+
+    @Test
     fun `should be able to submit multipart report`() {
         val headers = HttpHeaders()
         headers.set(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA_VALUE + "; boundary=%&ACRA_REPORT_DIVIDER&%")

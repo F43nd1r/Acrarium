@@ -40,7 +40,7 @@ private val logger = KotlinLogging.logger {}
 class ReportRepository(
     private val jooq: DSLContext
 ) {
-    @PostAuthorize("returnObject == null || hasViewPermission(returnObject.appId)")
+    @PostAuthorize("returnObject == null || isReporter() || hasViewPermission(returnObject.appId)")
     fun find(id: String): Report? = jooq.selectFrom(REPORT).where(REPORT.ID.eq(id)).fetchValueInto()
 
     fun findAttachmentNames(id: String) = jooq.select(ATTACHMENT.FILENAME.NOT_NULL).from(ATTACHMENT).where(ATTACHMENT.REPORT_ID.eq(id)).fetchList()

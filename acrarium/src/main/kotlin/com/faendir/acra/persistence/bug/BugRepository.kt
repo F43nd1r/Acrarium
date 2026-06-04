@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import com.faendir.acra.persistence.*
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.version.VersionKey
 import jakarta.validation.constraints.Size
+import mu.KotlinLogging
 import org.jooq.DSLContext
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
@@ -32,14 +33,21 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.util.stream.Stream
 
+private val logger = KotlinLogging.logger {}
+
 @Repository
 class BugRepository(
     private val jooq: DSLContext,
 ) {
 
     @PreAuthorize("isReporter() || hasViewPermission(#identifier.appId)")
-    fun findId(identifier: BugIdentifier): BugId? =
-        jooq.select(BUG_IDENTIFIER.BUG_ID).from(BUG_IDENTIFIER).where(BUG_IDENTIFIER.matches(identifier)).fetchValue()
+    fun findId(identifier: BugIdentifier): BugId? {
+        val results = jooq.select(BUG_IDENTIFIER.BUG_ID).from(BUG_IDENTIFIER).where(BUG_IDENTIFIER.matches(identifier)).fetchList()
+        if (results.size > 1) {
+            logger.warn { "Found ${results.size} bug_identifier rows for $identifier — using first: ${results[0]}" }
+        }
+        return results.firstOrNull()
+    }
 
     @PostAuthorize("returnObject == null || hasViewPermission(returnObject.appId)")
     fun find(bugId: BugId): Bug? =
