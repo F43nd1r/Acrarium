@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2021 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2017-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ class AboutView(@Autowired val buildProperties: BuildProperties) : FlexLayout(),
         flexDirection = FlexDirection.COLUMN
         val info = Div()
         info.element.setProperty("innerHTML", getTranslation(Messages.FOOTER))
-        val version = Translatable.createDiv(Messages.ABOUT_VERSION, buildProperties.version)
+        val version = Translatable.createDiv(Messages.ABOUT_VERSION, buildProperties.version ?: "")
         add(info, version)
     }
 

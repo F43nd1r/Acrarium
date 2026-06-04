@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2023-2025 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2023-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import com.faendir.acra.withAuth
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.resttestclient.TestRestTemplate
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpEntity
@@ -36,12 +36,12 @@ import strikt.assertions.isEqualTo
 
 @AcrariumTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class RestReportInterfaceIntegrationTest(
-    @Autowired private val restTemplate: TestRestTemplate,
     @Autowired private val appRepository: AppRepository,
     @LocalServerPort private val port: Int,
 ) {
 
     private lateinit var reporter: Reporter
+    private val restTemplate = TestRestTemplate()
 
     @BeforeEach
     fun setup() {

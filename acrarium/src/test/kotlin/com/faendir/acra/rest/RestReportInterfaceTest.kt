@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2025 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,28 +25,34 @@ import com.faendir.acra.rest.RestReportInterface.Companion.REPORT
 import com.faendir.acra.rest.RestReportInterface.Companion.REPORT_PATH
 import com.ninjasquad.springmockk.MockkBean
 import com.vaadin.flow.spring.SpringServlet
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.cache.CacheManager
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager
+import org.springframework.context.annotation.Bean
 import com.vaadin.flow.spring.security.VaadinDefaultRequestCache
 import io.mockk.every
+import io.mockk.just
+import io.mockk.Runs
 import io.mockk.verify
 import org.jooq.JSON
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.boot.web.servlet.ServletRegistrationBean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.http.MediaType.*
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
+import com.faendir.acra.persistence.user.Role
 import java.time.Instant
 
 @WebMvcTest(controllers = [RestReportInterface::class], includeFilters = [ComponentScan.Filter(classes = [EnableWebSecurity::class])])
-@WithMockUser(roles = ["REPORTER", "USER"])
 class RestReportInterfaceTest {
 
     @MockkBean
@@ -93,11 +99,12 @@ class RestReportInterfaceTest {
             versionFlavor = ""
         )
         every { requestCache.getMatchingRequest(any(), any()) } returns null
+        every { requestCache.saveRequest(any(), any()) } just Runs
     }
 
     @Test
     fun `should accept report without attachments`() {
-        mvc.perform(post("/$REPORT_PATH").contentType(APPLICATION_JSON).content(TEST_STRING)).andExpect(status().isOk)
+        mvc.perform(post("/$REPORT_PATH").with(user("test").authorities(Role.REPORTER, Role.USER)).contentType(APPLICATION_JSON).content(TEST_STRING)).andExpect(status().isOk)
         verify(exactly = 1) { reportService.create(any(), any(), emptyList()) }
     }
 
@@ -108,11 +115,18 @@ class RestReportInterfaceTest {
                 .file(MockMultipartFile(ATTACHMENT, TEST_STRING, APPLICATION_OCTET_STREAM_VALUE, ByteArray(0)))
                 .param(REPORT, TEST_STRING)
                 .contentType(MULTIPART_FORM_DATA)
+                .with(user("test").authorities(Role.REPORTER, Role.USER))
         ).andExpect(status().isOk)
         verify(exactly = 1) { reportService.create(any(), any(), any()) }
     }
 
     companion object {
         private const val TEST_STRING = "TEST"
+    }
+
+    @TestConfiguration
+    class TestConfig {
+        @Bean
+        fun cacheManager(): CacheManager = ConcurrentMapCacheManager()
     }
 }

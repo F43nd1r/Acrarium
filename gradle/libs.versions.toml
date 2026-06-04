@@ -1,12 +1,12 @@
 [versions]
-kotlin = "2.2.21"
+kotlin = "2.3.21"
 dokka = "2.1.0"
-springBoot = "3.5.14"
-vaadin-base = "24.9.13"
+springBoot = "4.0.6"
+vaadin-base = "25.1.6"
 kotlinPoet = "2.2.0"
 testContainers = "1.21.4"
-jooq = "3.19.10"
-karibu = "2.4.2"
+jooq = "3.19.32"
+karibu = "2.7.0"
 
 [libraries]
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
@@ -24,11 +24,11 @@ univocityParser = "com.univocity:univocity-parsers:2.9.1"
 avatarGenerator = "com.talanlabs:avatar-generator:1.1.0"
 apexCharts = "com.github.appreciated:apexcharts:24.0.2"
 vaadin-paperMenuButton = "com.github.appreciated:vaadin-paper-menu-button:2.0.2"
-kotlin-coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2"
+kotlin-coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0"
 kotlin-logging = "io.github.microutils:kotlin-logging-jvm:3.0.5"
-spring-mockk = "com.ninja-squad:springmockk:4.0.2"
+spring-mockk = "com.ninja-squad:springmockk:5.0.1"
 strikt = "io.strikt:strikt-core:0.35.1"
-springdoc = "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17"
+springdoc = "org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3"
 guava = "com.google.guava:guava:33.6.0-jre"
 testContainers-mysql = { module = "org.testcontainers:mysql", version.ref = "testContainers" }
 testContainers-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testContainers" }

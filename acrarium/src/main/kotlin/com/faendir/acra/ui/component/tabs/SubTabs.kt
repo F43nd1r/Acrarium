@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2019-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2019-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ open class SubTabs(vararg tabs: Tab) : Tab() {
         hideIfEmpty()
     }
 
-    fun replace(oldComponent: Component?, newComponent: Component?) {
+    override fun replace(oldComponent: Component?, newComponent: Component?) {
         content.replace(oldComponent, newComponent)
         hideIfEmpty()
     }

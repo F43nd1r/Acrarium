@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2021-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2021-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 package com.faendir.acra.settings
 
 import com.faendir.acra.util.tryOrNull
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.server.VaadinRequest
 import com.vaadin.flow.server.VaadinResponse

@@ -21,8 +21,8 @@ import com.faendir.acra.rest.RestApiInterface.Companion.API_PATH
 import com.faendir.acra.rest.RestReportInterface.Companion.REPORT_PATH
 import com.faendir.acra.ui.view.login.LoginView
 import com.vaadin.flow.spring.SpringSecurityAutoConfiguration
-import com.vaadin.flow.spring.security.VaadinWebSecurity
-import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest
+import com.vaadin.flow.spring.security.VaadinSecurityConfigurer
+import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
@@ -35,20 +35,17 @@ import org.springframework.security.config.BeanIds
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.builders.WebSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint
-import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
 import org.springframework.security.web.util.matcher.OrRequestMatcher
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector
 
 @Configuration
 @EnableWebSecurity
 @Import(SpringSecurityAutoConfiguration::class)
-class WebSecurityConfiguration(private val userRepository: UserRepository) : VaadinWebSecurity() {
+class WebSecurityConfiguration(private val userRepository: UserRepository) {
     @Bean(name = [BeanIds.AUTHENTICATION_MANAGER])
     fun authenticationManager(http: HttpSecurity): AuthenticationManager =
         http.getSharedObject(AuthenticationManagerBuilder::class.java)
@@ -93,8 +90,8 @@ class WebSecurityConfiguration(private val userRepository: UserRepository) : Vaa
 
     @Bean
     @Order(3)
-    fun actuatorSecurityChain(http: HttpSecurity, introspector: HandlerMappingIntrospector): SecurityFilterChain =
-        http.securityMatcher(OrRequestMatcher(EndpointRequest.toAnyEndpoint(), MvcRequestMatcher(introspector, "/swagger-ui/**")))
+    fun actuatorSecurityChain(http: HttpSecurity): SecurityFilterChain =
+        http.securityMatcher(OrRequestMatcher(EndpointRequest.toAnyEndpoint(), PathPatternRequestMatcher.withDefaults().matcher("/swagger-ui/**")))
             .csrf { it.disable() }
             .headers { it.disable() }
             .anonymous { it.disable() }
@@ -105,29 +102,10 @@ class WebSecurityConfiguration(private val userRepository: UserRepository) : Vaa
 
     @Bean("VaadinSecurityFilterChainBean")
     @Order(4)
-    override fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        return super.filterChain(http)
-    }
-
-    override fun configure(http: HttpSecurity) {
-        super.configure(http)
-        setLoginView(http, LoginView::class.java)
-    }
-
-    override fun configure(web: WebSecurity) {
-        super.configure(web)
-        web.ignoring().requestMatchers(
-            antMatcher("/images/**"),
-
-            // Vaadin Flow static resources
-            antMatcher("/VAADIN/**"),
-
-            // the robots exclusion standard
-            antMatcher("/robots.txt"),
-
-            // (production mode) static resources
-            antMatcher("/frontend-es5/**"),
-            antMatcher("/frontend-es6/**"),
-        )
+    fun vaadinSecurityChain(http: HttpSecurity): SecurityFilterChain {
+        http.with(VaadinSecurityConfigurer.vaadin()) { vaadin ->
+            vaadin.loginView(LoginView::class.java)
+        }
+        return http.build()
     }
 }

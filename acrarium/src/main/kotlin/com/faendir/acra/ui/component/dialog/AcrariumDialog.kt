@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2019-2021 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2019-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import com.vaadin.flow.component.dialog.Dialog
 
 open class AcrariumDialog : Composite<Dialog>(), HasComponents {
     private val dialogContent: DialogContent = DialogContent()
+
+    override fun getChildren() = super<Composite>.getChildren()
 
     init {
         content.add(dialogContent)

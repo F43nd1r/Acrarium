@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2023-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 
 fun withAuth(vararg authorities: GrantedAuthority, block: () -> Unit) {
     val previous = SecurityContextHolder.getContext().authentication
-    SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken(null, null, authorities.toList())
+    SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken("test", "", authorities.toList())
     try {
         block()
     } finally {

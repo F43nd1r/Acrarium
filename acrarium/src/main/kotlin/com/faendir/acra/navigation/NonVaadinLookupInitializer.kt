@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import com.vaadin.flow.di.LookupInitializer
 import com.vaadin.flow.server.VaadinContext
 import org.springframework.web.context.WebApplicationContext
 import java.util.function.BiFunction
-import java.util.stream.Collectors
-import java.util.stream.Stream
 
 /**
  * this class needs to be abstract to not be picked up by vaadin
@@ -33,23 +31,18 @@ abstract class NonVaadinLookupInitializer : LookupInitializer() {
         factory: BiFunction<Class<*>, Class<*>, Any?>,
         services: Map<Class<*>, Collection<Class<*>>>
     ) : LookupImpl(services, factory) {
-        override fun <T> lookup(serviceClass: Class<T>): T? {
+        override fun <T : Any> lookup(serviceClass: Class<T>): T? {
             val beans = context.getBeansOfType(serviceClass).values
 
             // Check whether we have service objects instantiated without Spring
             val service = super.lookup(serviceClass)
-            val allFound: MutableCollection<T>
-            if ((service == null) || beans.isNotEmpty() && service.javaClass
-                    .getPackage().name.startsWith("com.vaadin.flow")
-            ) {
+            val allFound = if ((service == null) || beans.isNotEmpty() && service.javaClass.getPackage().name.startsWith("com.vaadin.flow")) {
                 // Ignore service impl class (from the super lookup) if it's
                 // absent or it's a default implementation and there are Spring
                 // beans
-                allFound = beans
+                beans
             } else {
-                allFound = ArrayList(beans.size + 1)
-                allFound.addAll(beans)
-                allFound.add(service)
+                beans + service
             }
             if (allFound.isEmpty()) {
                 return null
@@ -62,9 +55,9 @@ abstract class NonVaadinLookupInitializer : LookupInitializer() {
             )
         }
 
-        override fun <T> lookupAll(serviceClass: Class<T>): Collection<T> {
-            return Stream.concat(context.getBeansOfType(serviceClass).values.stream(), super.lookupAll(serviceClass).stream())
-                .collect(Collectors.toList())
+        override fun <T : Any> lookupAll(serviceClass: Class<T>): Collection<T> {
+            val beans = context.getBeansOfType(serviceClass).values
+            return beans + super.lookupAll(serviceClass)
         }
     }
 
@@ -73,17 +66,12 @@ abstract class NonVaadinLookupInitializer : LookupInitializer() {
         services: Map<Class<*>, Collection<Class<*>>>
     ): Lookup {
         val appContext = (context as NonVaadinContext).applicationContext
-        return SpringLookup(
-            appContext,
-            { spi: Class<*>, impl: Class<*> ->
-                instantiate(appContext, spi, impl)
-            }, services
-        )
+        return SpringLookup(appContext, { spi, impl -> instantiate(appContext, spi, impl) }, services)
     }
 
-    private fun <T> instantiate(context: WebApplicationContext, serviceClass: Class<T>, impl: Class<*>): T? {
+    private fun <T : Any> instantiate(context: WebApplicationContext, serviceClass: Class<T>, impl: Class<*>): T? {
         val beans: Collection<T> = context.getBeansOfType(serviceClass).values
-        return if (beans.stream().anyMatch { bean: T -> impl.isInstance(bean) }) {
+        return if (beans.any(impl::isInstance)) {
             // implementation classes found in classpath are ignored if there
             // are beans which are subclasses of these impl classes
             null

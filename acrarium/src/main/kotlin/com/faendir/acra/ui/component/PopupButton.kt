@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2021-2024 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2021-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout
 
 open class PopupButton(private val icon: VaadinIcon) : Composite<PaperMenuButton>(), HasComponents {
     private val container = FlexLayout()
+
+    override fun getChildren() = super<Composite>.getChildren()
 
     override fun initContent(): PaperMenuButton {
         return PaperMenuButton(Button(Icon(icon)).apply { element.appendChild(Icon(VaadinIcon.CHEVRON_DOWN_SMALL).element) }, container).apply {

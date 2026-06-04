@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2025 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,14 +43,13 @@ class MethodSecurityConfiguration(@Lazy private val userRepository: UserReposito
     @Primary
     @Bean
     fun customMethodSecurityExpressionHandler(): MethodSecurityExpressionHandler = object : DefaultMethodSecurityExpressionHandler() {
-        override fun createSecurityExpressionRoot(authentication: Authentication, invocation: MethodInvocation) =
+        override fun createSecurityExpressionRoot(authentication: Authentication?, invocation: MethodInvocation): MethodSecurityExpressionOperations =
             createCustomSecurityExpressionRoot({ authentication }, invocation)
 
         private fun createCustomSecurityExpressionRoot(
-            authentication: Supplier<Authentication>,
+            authentication: Supplier<Authentication?>,
             invocation: MethodInvocation
-        ) = CustomMethodSecurityExpressionRoot(authentication, userRepository, appRepository).apply {
-            setThis(invocation.`this`)
+        ) = CustomMethodSecurityExpressionRoot(authentication, invocation, userRepository, appRepository).apply {
             setPermissionEvaluator(permissionEvaluator)
             setTrustResolver(trustResolver)
             setRoleHierarchy(roleHierarchy)
@@ -59,8 +58,8 @@ class MethodSecurityConfiguration(@Lazy private val userRepository: UserReposito
 
         private fun getSpecificMethod(mi: MethodInvocation) = AopUtils.getMostSpecificMethod(mi.method, mi.getThis()?.let { AopProxyUtils.ultimateTargetClass(it) })
 
-        override fun createEvaluationContext(authentication: Supplier<Authentication>, mi: MethodInvocation): EvaluationContext {
-            val root = createCustomSecurityExpressionRoot(authentication, mi)
+        override fun createEvaluationContext(authentication: Supplier<out Authentication>, mi: MethodInvocation): EvaluationContext {
+            val root = createCustomSecurityExpressionRoot(authentication::get, mi)
             val ctx = MethodBasedEvaluationContext(root, getSpecificMethod(mi), mi.arguments, parameterNameDiscoverer)
             ctx.setBeanResolver(beanResolver)
             return ctx
@@ -69,18 +68,16 @@ class MethodSecurityConfiguration(@Lazy private val userRepository: UserReposito
 }
 
 class CustomMethodSecurityExpressionRoot(
-    authentication: Supplier<Authentication>,
+    authentication: Supplier<Authentication?>,
+    private val invocation: MethodInvocation,
     private val userRepository: UserRepository,
     private val appRepository: AppRepository,
-) : SecurityExpressionRoot(authentication),
+) : SecurityExpressionRoot<MethodInvocation>(authentication, invocation),
     MethodSecurityExpressionOperations {
     private var filterObject: Any? = null
-
     private var returnObject: Any? = null
 
-    private var target: Any? = null
-
-    override fun setFilterObject(filterObject: Any?) {
+    override fun setFilterObject(filterObject: Any) {
         this.filterObject = filterObject
     }
 
@@ -96,12 +93,8 @@ class CustomMethodSecurityExpressionRoot(
         return returnObject
     }
 
-    fun setThis(target: Any?) {
-        this.target = target
-    }
-
     override fun getThis(): Any? {
-        return target
+        return invocation.`this`
     }
 
     fun hasNoAdmins() = !userRepository.hasAnyAdmin()

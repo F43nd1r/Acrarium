@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ class ReportRepository(
             .where(REPORT.APP_ID.eq(appId), *listOfNotNull(where).toTypedArray())
             .groupBy(
                 *when (field) {
-                    is GroupField -> arrayOf(field)
+                    is GroupField -> arrayOf<GroupField>(field)
                     is Row -> field.fields()
                     else -> emptyArray()
                 }

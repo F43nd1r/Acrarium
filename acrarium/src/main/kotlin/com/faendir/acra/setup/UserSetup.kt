@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2021-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2021-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ class UserSetup(private val userRepository: UserRepository) : ApplicationRunner 
 
     override fun run(args: ApplicationArguments) {
         if (args.containsOption(CREATE_USER_OPTION)) {
-            val names = args.getOptionValues(CREATE_USER_OPTION)
+            val names = args.getOptionValues(CREATE_USER_OPTION) ?: emptyList()
             if (names.isEmpty()) {
                 logger.error { "No username provided. No users created." }
                 return
@@ -42,12 +42,12 @@ class UserSetup(private val userRepository: UserRepository) : ApplicationRunner 
                 logger.error { "No password provided. No users created." }
                 return
             }
-            val passwords = args.getOptionValues(PASSWORD_OPTION)
+            val passwords = args.getOptionValues(PASSWORD_OPTION) ?: emptyList()
             if (names.size != passwords.size) {
                 logger.error { "User and password count do not match. No users created." }
                 return
             }
-            val rolesList = (args.getOptionValues(ROLES_OPTION)?.map { rolesString ->
+            val rolesList = ((args.getOptionValues(ROLES_OPTION) ?: emptyList()).map { rolesString ->
                 rolesString.split(",").map {
                     try {
                         Role.valueOf(it.uppercase())
@@ -56,7 +56,7 @@ class UserSetup(private val userRepository: UserRepository) : ApplicationRunner 
                         return
                     }
                 }.toMutableSet().apply { if (contains(Role.ADMIN)) add(Role.USER) }
-            } ?: emptyList()).let { it + MutableList(names.size - it.size) { setOf(Role.ADMIN, Role.USER, Role.API) } }
+            } ).let { it + MutableList(names.size - it.size) { setOf(Role.ADMIN, Role.USER, Role.API) } }
             names.zip(passwords, rolesList).forEach { (name, password, roles) ->
                 if (name.isBlank()) {
                     logger.error { "Username may not be blank." }

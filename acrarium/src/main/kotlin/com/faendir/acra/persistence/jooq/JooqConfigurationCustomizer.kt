@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package com.faendir.acra.persistence.jooq
 
 import org.jooq.SQLDialect
 import org.jooq.impl.DefaultConfiguration
-import org.springframework.boot.autoconfigure.jooq.DefaultConfigurationCustomizer
+import org.springframework.boot.jooq.autoconfigure.DefaultConfigurationCustomizer
 import org.springframework.stereotype.Component
 
 @Component

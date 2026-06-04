@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.persistence.user.Role
 import com.faendir.acra.persistence.user.UserRepository
 import com.ninjasquad.springmockk.MockkBean
-import com.ninjasquad.springmockk.SpykBean
+import com.ninjasquad.springmockk.MockkSpyBean
 import com.vaadin.flow.data.provider.SortDirection
 import io.mockk.every
 import io.mockk.verify
@@ -44,7 +44,7 @@ import strikt.assertions.*
 class AppRepositoryTest(
     @Autowired private val appRepository: AppRepository,
     @Autowired private val testDataBuilder: TestDataBuilder,
-    @Autowired @SpykBean private val userRepository: UserRepository,
+    @Autowired @MockkSpyBean private val userRepository: UserRepository,
     @Autowired @MockkBean private val passwordEncoder: PasswordEncoder,
 ) {
     private val appName = "name"
@@ -173,8 +173,7 @@ class AppRepositoryTest(
             testDataBuilder.createApp()
             SecurityContextHolder.setContext(
                 SecurityContextImpl(
-                    TestingAuthenticationToken(
-                        null, null, listOf(
+                    TestingAuthenticationToken("test", "", listOf(
                             Role.USER, Permission(app1, Permission.Level.VIEW), Permission(app2, Permission.Level.EDIT), Permission(app3, Permission.Level.ADMIN)
                         )
                     )
@@ -192,8 +191,7 @@ class AppRepositoryTest(
             val app4 = testDataBuilder.createApp()
             SecurityContextHolder.setContext(
                 SecurityContextImpl(
-                    TestingAuthenticationToken(
-                        null, null, listOf(
+                    TestingAuthenticationToken("test", "", listOf(
                             Role.ADMIN, Permission(app1, Permission.Level.VIEW), Permission(app2, Permission.Level.EDIT), Permission(app3, Permission.Level.ADMIN)
                         )
                     )
@@ -208,8 +206,7 @@ class AppRepositoryTest(
             val app1 = testDataBuilder.createApp()
             SecurityContextHolder.setContext(
                 SecurityContextImpl(
-                    TestingAuthenticationToken(
-                        null, null, listOf(
+                    TestingAuthenticationToken("test", "", listOf(
                             Role.ADMIN,
                             Permission(app1, Permission.Level.NONE),
                         )
@@ -358,7 +355,7 @@ class AppRepositoryTest(
             testDataBuilder.createReport(app1, bug2)
             val app2 = testDataBuilder.createApp(name = "app2")
             val app3 = testDataBuilder.createApp()
-            SecurityContextHolder.setContext(SecurityContextImpl(TestingAuthenticationToken(null, null, listOf(Role.ADMIN, Permission(app3, Permission.Level.NONE)))))
+            SecurityContextHolder.setContext(SecurityContextImpl(TestingAuthenticationToken("test", "", listOf(Role.ADMIN, Permission(app3, Permission.Level.NONE)))))
 
             expectThat(provider.size(emptySet())).isEqualTo(2)
             expectThat(provider.fetch(emptySet(), emptyList(), 0, 10).toList()).containsExactlyInAnyOrder(
@@ -370,8 +367,7 @@ class AppRepositoryTest(
         fun `should sort returned apps`() {
             SecurityContextHolder.setContext(
                 SecurityContextImpl(
-                    TestingAuthenticationToken(
-                        null, null, listOf(Role.ADMIN)
+                    TestingAuthenticationToken("test", "", listOf(Role.ADMIN)
                     )
                 )
             )
@@ -387,8 +383,7 @@ class AppRepositoryTest(
         fun `should offset and limit returned apps`() {
             SecurityContextHolder.setContext(
                 SecurityContextImpl(
-                    TestingAuthenticationToken(
-                        null, null, listOf(Role.ADMIN)
+                    TestingAuthenticationToken("test", "", listOf(Role.ADMIN)
                     )
                 )
             )

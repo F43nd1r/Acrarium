@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,16 @@ package com.faendir.acra.persistence
 
 import com.faendir.acra.security.BasicSecurityConfiguration
 import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.cache.CacheManager
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 
 @TestConfiguration
 @ComponentScan(lazyInit = true)
 @Import(BasicSecurityConfiguration::class)
-class PersistenceTestConfiguration
+class PersistenceTestConfiguration {
+    @Bean
+    fun cacheManager(): CacheManager = ConcurrentMapCacheManager()
+}

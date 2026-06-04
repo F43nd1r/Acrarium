@@ -11,7 +11,7 @@ dependencies {
     implementation(springLibs.jooq.jooqMeta)
     implementation(springLibs.slf4j.slf4jApi)
     implementation(springLibs.slf4j.slf4jSimple)
-    implementation(springLibs.testcontainers.mysql)
+    implementation(springLibs.testcontainers.testcontainersMysql)
 }
 
 kotlin {
