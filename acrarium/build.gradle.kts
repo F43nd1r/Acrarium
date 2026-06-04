@@ -44,7 +44,6 @@ dependencies {
     implementation(libs.retrace)
     implementation(libs.fuzzywuzzy)
     implementation(springLibs.hibernate.hibernateValidator)
-    implementation(libs.ziplet)
     implementation(libs.univocityParser)
     implementation(libs.avatarGenerator)
     implementation(libs.apexCharts)
@@ -55,6 +54,7 @@ dependencies {
     implementation(libs.springdoc)
     implementation(springLibs.aspectj.aspectjweaver)
     developmentOnly(springLibs.spring.springBootDevtools)
+    developmentOnly(vaadinLibs.vaadin.vaadinDev)
     testImplementation(springLibs.spring.springBootStarterTest)
     testImplementation(springLibs.spring.springSecurityTest)
     testImplementation(springLibs.spring.springBootJooqTest)
@@ -177,4 +177,8 @@ jooq {
 tasks.getByName<nu.studer.gradle.jooq.JooqGenerate>("generateJooq") {
     inputs.file("$projectDir/$changelogPath")
     allInputsDeclared.set(true)
+}
+
+tasks.named("processResources") {
+    dependsOn("vaadinPrepareFrontend")
 }

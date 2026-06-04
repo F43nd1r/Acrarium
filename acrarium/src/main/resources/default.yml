@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
+# (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,17 +29,6 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: none
-    open-in-view: false
-    properties:
-      hibernate:
-        globally_quoted_identifiers: true
-        jdbc:
-          batch_size: 64
-        metadata_builder_contributor: com.faendir.acra.hibernate.FunctionDefinitions
-    show-sql: false
   liquibase:
     changelog: "classpath:db/db.changelog-master.yml"
   mail:

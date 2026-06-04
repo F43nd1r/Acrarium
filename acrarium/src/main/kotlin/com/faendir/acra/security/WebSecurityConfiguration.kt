@@ -95,17 +95,13 @@ class WebSecurityConfiguration(private val userRepository: UserRepository) {
             .csrf { it.disable() }
             .headers { it.disable() }
             .anonymous { it.disable() }
-            .exceptionHandling { it.authenticationEntryPoint(Http403ForbiddenEntryPoint()) }
             .authorizeHttpRequests { it.anyRequest().hasRole(Role.ADMIN.name) }
             .httpBasic(Customizer.withDefaults())
             .build()
 
-    @Bean("VaadinSecurityFilterChainBean")
+    @Bean
     @Order(4)
-    fun vaadinSecurityChain(http: HttpSecurity): SecurityFilterChain {
-        http.with(VaadinSecurityConfigurer.vaadin()) { vaadin ->
-            vaadin.loginView(LoginView::class.java)
-        }
-        return http.build()
-    }
+    fun vaadinSecurityChain(http: HttpSecurity): SecurityFilterChain =
+        http.with(VaadinSecurityConfigurer.vaadin()) { vaadin -> vaadin.loginView(LoginView::class.java) }
+            .build()
 }
