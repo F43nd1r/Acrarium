@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2023-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,6 @@ class DeviceSetupTest(
     fun `should set up devices`() {
         deviceSetup.onStartup(ContextRefreshedEvent(applicationContext))
 
-        expectThat(jooq.fetchCount(DEVICE)).isEqualTo(36317)
+        expectThat(jooq.fetchCount(DEVICE)).isEqualTo(46588)
     }
 }

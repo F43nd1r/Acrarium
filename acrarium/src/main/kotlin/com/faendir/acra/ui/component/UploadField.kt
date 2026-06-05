@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2021 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,18 @@ package com.faendir.acra.ui.component
 import com.faendir.acra.util.tryOrNull
 import com.vaadin.flow.component.customfield.CustomField
 import com.vaadin.flow.component.upload.Upload
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer
-import org.springframework.util.StreamUtils
+import com.vaadin.flow.server.streams.InMemoryUploadHandler
 import java.nio.charset.Charset
 
 class UploadField : CustomField<String?>() {
-    private val buffer: MemoryBuffer = MemoryBuffer()
+    private val handler = InMemoryUploadHandler { _, bytes -> value = bytes.tryOrNull { String(bytes, Charset.forName("utf-8")) } }
 
     init {
-        val upload = Upload(buffer)
-        upload.addSucceededListener { value = generateModelValue() }
+        val upload = Upload(handler)
         add(upload)
     }
 
-    override fun generateModelValue(): String? = tryOrNull { StreamUtils.copyToString(buffer.inputStream, Charset.defaultCharset()) }
+    override fun generateModelValue(): String? = value
 
     override fun setPresentationValue(newPresentationValue: String?) {}
 }
