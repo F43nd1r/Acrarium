@@ -19,11 +19,13 @@ import com.talanlabs.avatargenerator.Avatar
 import com.talanlabs.avatargenerator.IdenticonAvatar
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.html.Image
-import com.vaadin.flow.server.InputStreamFactory
-import com.vaadin.flow.server.StreamResource
+import com.vaadin.flow.server.streams.DownloadHandler
+import com.vaadin.flow.server.streams.DownloadResponse
+import com.vaadin.flow.server.streams.InputStreamDownloadHandler
 import jakarta.annotation.Resource
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import java.io.ByteArrayInputStream
 
@@ -38,9 +40,8 @@ class AvatarService {
     fun getAvatar(installationId: String): Component = Image(self.getAvatarResource(installationId), installationId)
 
     @Cacheable("avatars")
-    fun getAvatarResource(installationId: String): StreamResource {
+    fun getAvatarResource(installationId: String): DownloadHandler {
         val bytes = avatar.createAsPngBytes(installationId.hashCode().toLong())
-        return StreamResource("", InputStreamFactory { ByteArrayInputStream(bytes) })
+        return InputStreamDownloadHandler({ DownloadResponse(ByteArrayInputStream(bytes), "$installationId.png", MediaType.IMAGE_PNG_VALUE, bytes.size.toLong()) })
     }
-
 }
