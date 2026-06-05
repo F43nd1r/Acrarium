@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,48 +16,27 @@
 package com.faendir.acra.ui.component
 
 import com.faendir.acra.domain.AvatarService
-import com.faendir.acra.ui.ext.stringProperty
-import com.vaadin.flow.component.AttachEvent
-import com.vaadin.flow.component.DetachEvent
-import com.vaadin.flow.component.Tag
-import com.vaadin.flow.component.dependency.JsModule
-import com.vaadin.flow.component.littemplate.LitTemplate
-import com.vaadin.flow.server.StreamRegistration
-import com.vaadin.flow.server.StreamResource
-import com.vaadin.flow.server.StreamResourceRegistry
-import com.vaadin.flow.server.VaadinSession
+import com.vaadin.flow.component.html.Image
+import com.vaadin.flow.component.html.NativeLabel
+import com.vaadin.flow.component.orderedlayout.FlexComponent
+import com.vaadin.flow.component.orderedlayout.FlexLayout
 
-@Tag("acrarium-image-with-label")
-@JsModule("./elements/image-with-label.ts")
-class InstallationView(private val avatarService: AvatarService) : LitTemplate() {
-    private var resource: StreamResource? = null
-    private var registration: StreamRegistration? = null
+class InstallationView(private val avatarService: AvatarService) : FlexLayout() {
+    private val image = Image(ByteArray(0), "")
+    private val label = NativeLabel()
 
-    private var image by stringProperty("image")
-    private var label by stringProperty("label")
+    init {
+        add(image, label)
+        flexDirection = FlexDirection.ROW
+        alignItems = FlexComponent.Alignment.CENTER
+        image.width = "32px"
+        image.height = "32px"
+        label.style["padding-left"] = "var(--lumo-space-s)"
+    }
 
     fun setInstallationId(installationId: String) {
-        resource = avatarService.getAvatarResource(installationId)
-        image = StreamResourceRegistry.getURI(resource).toASCIIString()
-        label = installationId
-        if (parent.isPresent) {
-            register()
-        }
-    }
-
-    override fun onAttach(attachEvent: AttachEvent) {
-        if (resource != null) {
-            register()
-        }
-        super.onAttach(attachEvent)
-    }
-
-    private fun register() {
-        registration = VaadinSession.getCurrent().resourceRegistry.registerResource(resource)
-    }
-
-    override fun onDetach(detachEvent: DetachEvent) {
-        super.onDetach(detachEvent)
-        registration?.unregister()
+        image.setSrc(avatarService.getAvatarResource(installationId))
+        image.setAlt(installationId)
+        label.text = installationId
     }
 }

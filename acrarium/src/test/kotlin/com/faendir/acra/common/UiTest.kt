@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2023-2024 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2023-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,6 +79,10 @@ abstract class UiTest {
         MockVaadin.mockRequestFactory = {
             object : FakeRequest(it) {
                 override fun getUserPrincipal() = SecurityContextHolder.getContext().authentication
+
+                override fun getProtocolRequestId() = throw UnsupportedOperationException()
+                override fun getRequestId() = throw UnsupportedOperationException()
+                override fun getServletConnection() = throw UnsupportedOperationException()
             }
         }
 
