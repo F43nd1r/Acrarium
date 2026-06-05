@@ -15,7 +15,6 @@
  */
 package com.faendir.acra.persistence.jooq
 
-import org.jooq.SQLDialect
 import org.jooq.impl.DefaultConfiguration
 import org.springframework.boot.jooq.autoconfigure.DefaultConfigurationCustomizer
 import org.springframework.stereotype.Component
@@ -32,7 +31,6 @@ class JooqConfigurationCustomizer(private val customConverterProvider: CustomCon
             isRenderSchema = false
             isExecuteLogging = true
         }
-        configuration.setSQLDialect(SQLDialect.MYSQL)
         configuration.set(customConverterProvider)
     }
 }
