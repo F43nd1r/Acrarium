@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2021-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2021-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.context.event.EventListener
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Component
 import java.io.InputStream
-import java.net.URL
+import java.net.URI
 
 @Profile("!test")
 @Component
@@ -37,7 +37,7 @@ class DeviceSetup(private val deviceRepository: DeviceRepository, private val co
     @EventListener
     fun onStartup(event: ContextRefreshedEvent) {
         if (configuration.updateDeviceList) {
-            val url = URL("https://storage.googleapis.com/play_public/supported_devices.csv")
+            val url = URI("https://storage.googleapis.com/play_public/supported_devices.csv").toURL()
             fillDeviceTable(url.openStream())
         } else if (deviceRepository.isEmpty()) {
             fillDeviceTable(ClassPathResource("devices.csv").inputStream)

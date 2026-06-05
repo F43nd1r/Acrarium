@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,10 +62,8 @@ open class TabView(
             if (this::content.isInitialized) {
                 remove(this.content)
             }
-            @Suppress("UNCHECKED_CAST")
-            val kClass = content::class as KClass<out Component>
             this.content = content.apply { setFlexGrow(1) }
-            tabs.indexOfFirstOrNull { it.tabClass == kClass }?.let { header.selectedIndex = it }
+            tabs.indexOfFirstOrNull { it.tabClass == content::class }?.let { header.selectedIndex = it }
             add(content)
         }
     }

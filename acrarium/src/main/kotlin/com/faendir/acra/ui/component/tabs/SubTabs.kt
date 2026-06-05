@@ -71,6 +71,8 @@ open class SubTabs(vararg tabs: Tab) : Tab() {
         hideIfEmpty()
     }
 
+    @Suppress("DEPRECATION")
+    @Deprecated("deprecated in tabs")
     override fun remove(vararg components: Component) {
         content.remove(*components)
         hideIfEmpty()
@@ -81,11 +83,15 @@ open class SubTabs(vararg tabs: Tab) : Tab() {
         hideIfEmpty()
     }
 
+    @Suppress("DEPRECATION")
+    @Deprecated("deprecated in tabs")
     override fun addComponentAtIndex(index: Int, component: Component) {
         content.addComponentAtIndex(index, component)
         hideIfEmpty()
     }
 
+    @Suppress("DEPRECATION")
+    @Deprecated("deprecated in tabs")
     override fun replace(oldComponent: Component?, newComponent: Component?) {
         content.replace(oldComponent, newComponent)
         hideIfEmpty()
@@ -101,6 +107,6 @@ open class SubTabs(vararg tabs: Tab) : Tab() {
     var selectedTab: Tab? by content::selectedTab
 
     private fun hideIfEmpty() {
-        isVisible = content.componentCount > 0
+        isVisible = content.tabCount > 0
     }
 }

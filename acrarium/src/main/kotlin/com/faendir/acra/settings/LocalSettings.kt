@@ -16,7 +16,6 @@
 package com.faendir.acra.settings
 
 import com.faendir.acra.util.tryOrNull
-import tools.jackson.databind.ObjectMapper
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.server.VaadinRequest
 import com.vaadin.flow.server.VaadinResponse
@@ -24,6 +23,7 @@ import com.vaadin.flow.server.VaadinService
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.VaadinSessionScope
 import jakarta.servlet.http.Cookie
+import tools.jackson.databind.ObjectMapper
 import java.io.Serializable
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -38,7 +38,7 @@ class LocalSettings(private val objectMapper: ObjectMapper) : Serializable {
     var darkTheme: Boolean by Cookie({ it?.toBoolean() ?: false }, { it.toString() })
 
     var locale: Locale by Cookie({
-        it?.let { Locale(it) }
+        it?.let { Locale.of(it) }
             ?: UI.getCurrent()?.locale
             ?: VaadinService.getCurrent().instantiator.i18NProvider.providedLocales?.firstOrNull()
             ?: Locale.getDefault()
@@ -56,7 +56,8 @@ class LocalSettings(private val objectMapper: ObjectMapper) : Serializable {
     ) {
         operator fun getValue(localSettings: LocalSettings, property: KProperty<*>): T {
             val id = property.name
-            return localSettings.fromString(localSettings.cache[id]
+            return localSettings.fromString(
+                localSettings.cache[id]
                 ?: VaadinRequest.getCurrent()?.cookies?.firstOrNull { it.name == id }?.value?.also { localSettings.cache[id] = it })
         }
 

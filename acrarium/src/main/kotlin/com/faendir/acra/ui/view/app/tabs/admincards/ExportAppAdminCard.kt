@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2019-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2019-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,11 @@ import com.faendir.acra.ui.component.Translatable.Companion.createSpan
 import com.faendir.acra.ui.ext.comboBox
 import com.faendir.acra.ui.ext.content
 import com.faendir.acra.ui.ext.downloadButton
-import com.vaadin.flow.server.InputStreamFactory
-import com.vaadin.flow.server.StreamResource
+import com.vaadin.flow.server.streams.DownloadResponse
+import com.vaadin.flow.server.streams.InputStreamDownloadHandler
 import org.jooq.Condition
 import org.jooq.Field
+import org.springframework.http.MediaType
 import org.springframework.security.core.context.SecurityContextHolder
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
@@ -51,18 +52,20 @@ class ExportAppAdminCard(
                 setWidthFull()
             }
             val authentication = SecurityContextHolder.getContext().authentication
-            downloadButton(StreamResource("reports.json", InputStreamFactory {
-                SecurityContextHolder.getContext().authentication = authentication
-                try {
-                    val where = listOfNotNull(REPORT.USER_EMAIL.eqIfNotBlank(mailBox.value), REPORT.INSTALLATION_ID.eqIfNotBlank(idBox.value)).reduceOrNull(Condition::and)
-                    ByteArrayInputStream(
+            downloadButton(
+                InputStreamDownloadHandler {
+                    val bytes = try {
+                        SecurityContextHolder.getContext().authentication = authentication
+                        val where = listOfNotNull(REPORT.USER_EMAIL.eqIfNotBlank(mailBox.value), REPORT.INSTALLATION_ID.eqIfNotBlank(idBox.value)).reduceOrNull(Condition::and)
                         if (where == null) ByteArray(0) else reportRepository.get(appId, REPORT.CONTENT.NOT_NULL, where, sorted = false)
                             .joinToString(", ", "[", "]") { it.data() }.toByteArray(StandardCharsets.UTF_8)
-                    )
-                } finally {
-                    SecurityContextHolder.getContext().authentication = null
-                }
-            }), Messages.DOWNLOAD) {
+
+                    } finally {
+                        SecurityContextHolder.getContext().authentication = null
+                    }
+                    DownloadResponse(ByteArrayInputStream(bytes), "reports.json", MediaType.APPLICATION_JSON_VALUE, bytes.size.toLong())
+                }, Messages.DOWNLOAD
+            ) {
                 setSizeFull()
             }
         }

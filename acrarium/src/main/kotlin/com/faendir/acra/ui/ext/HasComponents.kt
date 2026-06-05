@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2021-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2021-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import com.vaadin.flow.component.textfield.TextArea
 import com.vaadin.flow.component.textfield.TextField
 import com.vaadin.flow.router.RouteParameters
 import com.vaadin.flow.router.RouterLink
-import com.vaadin.flow.server.AbstractStreamResource
+import com.vaadin.flow.server.streams.DownloadHandler
 
 fun HasComponents.gridLayout(initializer: CssGridLayout.() -> Unit = {}) {
     add(CssGridLayout().apply(initializer))
@@ -67,7 +67,7 @@ fun <T> HasComponents.forEach(iterable: Iterable<T>, initializer: HasComponents.
     iterable.forEach { initializer(it) }
 }
 
-fun HasComponents.anchor(resource: AbstractStreamResource, text: String, initializer: Anchor.() -> Unit = {}) {
+fun HasComponents.anchor(resource: DownloadHandler, text: String, initializer: Anchor.() -> Unit = {}) {
     add(Anchor(resource, text).apply(initializer))
 }
 
@@ -157,7 +157,7 @@ fun <T> HasComponents.comboBox(items: Collection<T>, captionId: String, vararg p
 }
 
 fun HasComponents.downloadButton(
-    resource: AbstractStreamResource,
+    resource: DownloadHandler,
     captionId: String,
     vararg params: Any,
     initializer: DownloadButton.() -> Unit = {}

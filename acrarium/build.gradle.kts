@@ -91,9 +91,6 @@ val generateMessageClasses by tasks.registering(com.faendir.acra.gradle.I18nClas
 
 kotlin {
     jvmToolchain(21)
-    compilerOptions {
-        freeCompilerArgs = listOf("-Xannotation-default-target=param-property")
-    }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

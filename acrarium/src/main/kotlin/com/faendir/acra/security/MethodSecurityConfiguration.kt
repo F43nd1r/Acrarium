@@ -49,12 +49,7 @@ class MethodSecurityConfiguration(@Lazy private val userRepository: UserReposito
         private fun createCustomSecurityExpressionRoot(
             authentication: Supplier<Authentication?>,
             invocation: MethodInvocation
-        ) = CustomMethodSecurityExpressionRoot(authentication, invocation, userRepository, appRepository).apply {
-            setPermissionEvaluator(permissionEvaluator)
-            setTrustResolver(trustResolver)
-            setRoleHierarchy(roleHierarchy)
-            setDefaultRolePrefix(defaultRolePrefix)
-        }
+        ) = CustomMethodSecurityExpressionRoot(authentication, invocation, userRepository, appRepository)
 
         private fun getSpecificMethod(mi: MethodInvocation) = AopUtils.getMostSpecificMethod(mi.method, mi.getThis()?.let { AopProxyUtils.ultimateTargetClass(it) })
 

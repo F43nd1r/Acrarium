@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2021 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 package com.faendir.acra.ui.component
 
 import com.vaadin.flow.component.html.Anchor
-import com.vaadin.flow.server.AbstractStreamResource
+import com.vaadin.flow.server.streams.DownloadHandler
 
-class DownloadButton(href: AbstractStreamResource, captionId: String, vararg params: Any) : Anchor(href, "") {
+class DownloadButton(href: DownloadHandler, captionId: String, vararg params: Any) : Anchor(href, "") {
     init {
         element.setAttribute("download", true)
         add(Translatable.createButton(captionId, *params))

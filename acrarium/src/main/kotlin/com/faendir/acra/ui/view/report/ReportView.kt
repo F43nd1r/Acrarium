@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020-2024 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2020-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,10 @@ import com.vaadin.flow.component.html.Div
 import com.vaadin.flow.router.NotFoundException
 import com.vaadin.flow.router.Route
 import com.vaadin.flow.router.RouteParameters
-import com.vaadin.flow.server.InputStreamFactory
-import com.vaadin.flow.server.StreamResource
+import com.vaadin.flow.server.streams.DownloadResponse
+import com.vaadin.flow.server.streams.InputStreamDownloadHandler
 import org.json.JSONObject
+import org.springframework.http.MediaType
 import org.xbib.time.pretty.PrettyTime
 import java.util.*
 import kotlin.math.log10
@@ -104,8 +105,13 @@ class ReportView(
                     span(mapping?.let { report.stacktrace.retrace(it) } ?: report.stacktrace) { honorWhitespaces() }
                     translatableSpan(Messages.ATTACHMENTS) { secondary() }
                     div {
-                        forEach(reportRepository.findAttachmentNames(report.id)) {
-                            anchor(StreamResource(it, InputStreamFactory { reportRepository.loadAttachment(report.id, it)!!.inputStream() }), it) {
+                        forEach(reportRepository.findAttachmentNames(report.id)) { attachment ->
+                            anchor(
+                                InputStreamDownloadHandler {
+                                    val bytes = reportRepository.loadAttachment(report.id, attachment)!!
+                                    DownloadResponse(bytes.inputStream(), attachment, MediaType.APPLICATION_OCTET_STREAM_VALUE, bytes.size.toLong())
+                                }, attachment
+                            ) {
                                 element.setAttribute("download", true)
                             }
                         }
