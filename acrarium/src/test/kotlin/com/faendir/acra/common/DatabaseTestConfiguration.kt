@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2023-2024 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2023-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,10 @@ import com.faendir.acra.jooq.generated.tables.references.REPORT
 import com.faendir.acra.persistence.app.isCustomColumn
 import com.faendir.acra.persistence.app.isCustomColumnIndex
 import com.faendir.acra.persistence.jooq.JooqConfigurationCustomizer
+import org.jooq.SQLDialect
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.boot.jdbc.DataSourceBuilder
+import org.springframework.boot.jooq.autoconfigure.DefaultConfigurationCustomizer
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
@@ -31,6 +33,11 @@ import javax.sql.DataSource
 @TestConfiguration
 @Import(JooqConfigurationCustomizer::class)
 class DatabaseTestConfiguration {
+
+    @Bean
+    fun jooqDialectCustomizer(): DefaultConfigurationCustomizer = DefaultConfigurationCustomizer {
+        it.setSQLDialect(SQLDialect.MYSQL)
+    }
 
     @Bean
     fun dataSource(): DataSource = DataSourceBuilder.create()
