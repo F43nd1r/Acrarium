@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2017-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,11 @@ import com.faendir.acra.persistence.bug.BugId
 import com.faendir.acra.persistence.bug.BugRepository
 import com.faendir.acra.persistence.report.Report
 import com.faendir.acra.persistence.report.ReportRepository
+import com.faendir.acra.persistence.user.Role
 import com.faendir.acra.persistence.version.VersionRepository
+import com.faendir.acra.security.SecurityUtils
 import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -47,7 +50,7 @@ class RestApiInterface(
     fun getApp(
         @PathVariable
         id: Int
-    ): App? = appRepository.find(AppId(id))
+    ): ResponseEntity<App> = appRepository.find(AppId(id)).toResponseEntity()
 
     @RequestMapping(value = ["apps/{id}/bugs"], produces = [MediaType.APPLICATION_JSON_VALUE], method = [RequestMethod.GET])
     fun listBugs(
@@ -59,7 +62,7 @@ class RestApiInterface(
     fun getBug(
         @PathVariable
         id: Int
-    ): Bug? = bugRepository.find(BugId(id))
+    ): ResponseEntity<Bug> = bugRepository.find(BugId(id)).toResponseEntity()
 
     @RequestMapping(value = ["apps/{id}/reports"], produces = [MediaType.APPLICATION_JSON_VALUE], method = [RequestMethod.GET])
     fun listReportsOfApp(
@@ -77,7 +80,7 @@ class RestApiInterface(
     fun getReport(
         @PathVariable
         id: String
-    ): Report? = reportRepository.find(id)
+    ): ResponseEntity<Report> = reportRepository.find(id).toResponseEntity()
 
     @RequestMapping(value = ["apps/{id}/version/upload/{code}"], consumes = [MediaType.TEXT_PLAIN_VALUE], method = [RequestMethod.POST])
     fun uploadProguardMapping(
@@ -99,5 +102,12 @@ class RestApiInterface(
     companion object {
         const val API_PATH = "api"
     }
+}
 
+private fun <T : Any> T?.toResponseEntity(): ResponseEntity<T> = when {
+    this != null -> ResponseEntity.ok(this)
+    // only admins get to know if something exists
+    SecurityUtils.hasRole(Role.ADMIN) -> ResponseEntity.notFound().build()
+    // normal users don't get to know if something exists in apps they can't access
+    else -> ResponseEntity.status(HttpStatus.FORBIDDEN).build()
 }

@@ -23,7 +23,7 @@ import com.vaadin.flow.server.VaadinService
 import com.vaadin.flow.spring.annotation.SpringComponent
 import com.vaadin.flow.spring.annotation.VaadinSessionScope
 import jakarta.servlet.http.Cookie
-import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
 import java.io.Serializable
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -32,7 +32,7 @@ import kotlin.reflect.KProperty
 
 @SpringComponent
 @VaadinSessionScope
-class LocalSettings(private val objectMapper: ObjectMapper) : Serializable {
+class LocalSettings(private val jsonMapper: JsonMapper) : Serializable {
     private val cache = mutableMapOf<String, String>()
 
     var darkTheme: Boolean by Cookie({ it?.toBoolean() ?: false }, { it.toString() })
@@ -58,7 +58,7 @@ class LocalSettings(private val objectMapper: ObjectMapper) : Serializable {
             val id = property.name
             return localSettings.fromString(
                 localSettings.cache[id]
-                ?: VaadinRequest.getCurrent()?.cookies?.firstOrNull { it.name == id }?.value?.also { localSettings.cache[id] = it })
+                    ?: VaadinRequest.getCurrent()?.cookies?.firstOrNull { it.name == id }?.value?.also { localSettings.cache[id] = it })
         }
 
         operator fun setValue(localSettings: LocalSettings, property: KProperty<*>, value: T) {
@@ -70,7 +70,7 @@ class LocalSettings(private val objectMapper: ObjectMapper) : Serializable {
     }
 
     private inline fun <reified T> jsonCookie() = Cookie(
-        { tryOrNull { objectMapper.readValue(URLDecoder.decode(it, Charsets.UTF_8), T::class.java) } },
-        { URLEncoder.encode(objectMapper.writeValueAsString(it), Charsets.UTF_8) })
+        { tryOrNull { jsonMapper.readValue(URLDecoder.decode(it, Charsets.UTF_8), T::class.java) } },
+        { URLEncoder.encode(jsonMapper.writeValueAsString(it), Charsets.UTF_8) })
 
 }

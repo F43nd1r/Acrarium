@@ -49,7 +49,7 @@ dependencies {
     implementation(libs.apexCharts)
     implementation(libs.vaadin.paperMenuButton)
     implementation(libs.kotlin.coroutines)
-    implementation(springLibs.jackson.jacksonModuleKotlin)
+    implementation(springLibs.jackson3.jacksonModuleKotlin)
     implementation(libs.kotlin.logging)
     implementation(libs.springdoc)
     implementation(springLibs.aspectj.aspectjweaver)

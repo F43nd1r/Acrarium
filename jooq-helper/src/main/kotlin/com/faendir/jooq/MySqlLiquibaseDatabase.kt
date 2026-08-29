@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.jooq.impl.DSL
 import org.jooq.meta.mysql.MySQLDatabase
 import org.jooq.tools.jdbc.JDBCUtils
 import org.slf4j.LoggerFactory
-import org.testcontainers.containers.MySQLContainer
+import org.testcontainers.mysql.MySQLContainer
 import org.testcontainers.utility.DockerImageName
 import java.io.File
 import java.sql.Connection
@@ -35,7 +35,7 @@ import java.util.*
 
 @Suppress("unused")
 class MySqlLiquibaseDatabase : MySQLDatabase() {
-    private lateinit var mySQLContainer: MySQLContainer<*>
+    private lateinit var mySQLContainer: MySQLContainer
     private var conn: Connection? = null
     private var ctx: DSLContext? = null
     override fun create0(): DSLContext {
