@@ -91,7 +91,13 @@ class WebSecurityConfiguration(private val userRepository: UserRepository) {
     @Bean
     @Order(3)
     fun actuatorSecurityChain(http: HttpSecurity): SecurityFilterChain =
-        http.securityMatcher(OrRequestMatcher(EndpointRequest.toAnyEndpoint(), PathPatternRequestMatcher.withDefaults().matcher("/swagger-ui/**")))
+        http.securityMatcher(OrRequestMatcher(
+            EndpointRequest.toAnyEndpoint(),
+            PathPatternRequestMatcher.withDefaults().matcher("/swagger-ui.html"),
+            PathPatternRequestMatcher.withDefaults().matcher("/swagger-ui/**"),
+            PathPatternRequestMatcher.withDefaults().matcher("/v3/api-docs"),
+            PathPatternRequestMatcher.withDefaults().matcher("/v3/api-docs/**"),
+        ))
             .csrf { it.disable() }
             .headers { it.disable() }
             .anonymous { it.disable() }
