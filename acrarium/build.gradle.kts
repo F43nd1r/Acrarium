@@ -107,6 +107,10 @@ tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
     archiveFileName.set("application.jar")
 }
 
+tasks.named<org.springframework.boot.gradle.tasks.bundling.BootWar>("bootWar") {
+    archiveFileName.set("application.war")
+}
+
 allOpen {
     annotation("com.vaadin.testbench.elementsbase.Element")
     annotation("org.acra.annotation.OpenAPI")

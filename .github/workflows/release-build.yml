@@ -19,17 +19,22 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-      - name: Build release
+      - name: Test and build release
         uses: burrunan/gradle-cache-action@v3.0.3
         with:
           job-id: jdk21
-          arguments: bootJar bootWar
+          arguments: test bootJar bootWar
           properties: vaadin.productionMode=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Extract version
         id: version
         run: echo ::set-output name=value::$(git describe --abbrev=0 | sed -e "s/^v//")
+      - name: Verify release assets
+        run: |
+          jar tf ./acrarium/build/libs/application.war | grep -qx 'WEB-INF/classes/com/faendir/acra/BackendApplicationKt.class'
+          jar tf ./acrarium/build/libs/application.jar | grep -qx 'BOOT-INF/classes/com/faendir/acra/BackendApplicationKt.class'
+          jar tf ./acrarium/build/libs/application.jar | grep -qx 'org/springframework/boot/loader/launch/JarLauncher.class'
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1.1.4
@@ -46,7 +51,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./acrarium/build/libs/acrarium-${{ steps.version.outputs.value }}.war
+          asset_path: ./acrarium/build/libs/application.war
           asset_name: acrarium-${{ steps.version.outputs.value }}.war
           asset_content_type: application/zip
       - name: Upload Release Jar
@@ -56,6 +61,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./acrarium/build/libs/acrarium-${{ steps.version.outputs.value }}.jar
+          asset_path: ./acrarium/build/libs/application.jar
           asset_name: acrarium-${{ steps.version.outputs.value }}.jar
           asset_content_type: application/zip
