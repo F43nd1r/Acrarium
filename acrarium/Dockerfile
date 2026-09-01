@@ -5,7 +5,7 @@ ENV JAVA_MINIMAL="/opt/java-minimal"
 RUN /usr/lib/jvm/java-21-openjdk/bin/jlink \
     --verbose \
     --add-modules \
-        java.base,java.sql,java.naming,java.desktop,java.management,java.security.jgss,java.instrument,jdk.unsupported,jdk.crypto.ec \
+        java.base,java.sql,java.naming,java.desktop,java.management,java.security.jgss,java.instrument,jdk.unsupported,jdk.zipfs,jdk.crypto.ec \
     --compress 2 --strip-debug --no-header-files --no-man-pages \
     --release-info="add:IMPLEMENTOR=f43nd1r:IMPLEMENTOR_VERSION=f43nd1r_JRE" \
     --output "$JAVA_MINIMAL"
