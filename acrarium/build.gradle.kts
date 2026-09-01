@@ -103,6 +103,10 @@ springBoot {
     buildInfo()
 }
 
+tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+    archiveFileName.set("application.jar")
+}
+
 allOpen {
     annotation("com.vaadin.testbench.elementsbase.Element")
     annotation("org.acra.annotation.OpenAPI")
