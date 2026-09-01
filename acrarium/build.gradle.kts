@@ -67,6 +67,7 @@ dependencies {
     testImplementation(libs.testContainers.junit)
     testImplementation(libs.karibu.testing)
     testImplementation(libs.karibu.spring)
+    testImplementation(libs.greenmail)
     jooqGenerator(springLibs.mysql.mysqlConnectorJ)
     jooqGenerator(springLibs.yaml.snakeyaml)
     jooqGenerator(projects.jooqHelper)
