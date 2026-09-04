@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,9 @@ import com.faendir.acra.dataprovider.AcrariumSort
 import com.faendir.acra.jooq.generated.tables.references.VERSION
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.asOrderFields
-import com.faendir.acra.persistence.fetchListInto
 import com.faendir.acra.persistence.fetchValue
-import com.faendir.acra.persistence.fetchValueInto
 import org.jooq.DSLContext
+import org.jooq.Records
 import org.jooq.impl.DSL.max
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Repository
@@ -72,16 +71,16 @@ class VersionRepository(private val jooq: DSLContext) {
 
     @PreAuthorize("hasViewPermission(#appId)")
     fun find(appId: AppId, versionCode: Int, flavor: String): Version? =
-        jooq.selectFrom(VERSION).where(VERSION.APP_ID.eq(appId), VERSION.CODE.eq(versionCode), VERSION.FLAVOR.eq(flavor)).fetchValueInto()
+        jooq.selectVersions().where(VERSION.APP_ID.eq(appId), VERSION.CODE.eq(versionCode), VERSION.FLAVOR.eq(flavor)).fetchOne(Records.mapping(::Version))
 
     @PreAuthorize("hasViewPermission(#appId)")
     fun getProvider(appId: AppId): AcrariumDataProvider<Version, Nothing, Version.Sort> = object : AcrariumDataProvider<Version, Nothing, Version.Sort>() {
-        override fun fetch(filters: Set<Nothing>, sort: List<AcrariumSort<Version.Sort>>, offset: Int, limit: Int): Stream<Version> = jooq.selectFrom(VERSION)
+        override fun fetch(filters: Set<Nothing>, sort: List<AcrariumSort<Version.Sort>>, offset: Int, limit: Int): Stream<Version> = jooq.selectVersions()
             .where(VERSION.APP_ID.eq(appId))
             .orderBy(sort.asOrderFields())
             .offset(offset)
             .limit(limit)
-            .fetchListInto<Version>()
+            .fetch(Records.mapping(::Version))
             .stream()
 
         override fun size(filters: Set<Nothing>): Int = jooq.selectCount().from(VERSION).where(VERSION.APP_ID.eq(appId)).fetchValue() ?: 0
@@ -94,5 +93,7 @@ class VersionRepository(private val jooq: DSLContext) {
 
     @PreAuthorize("hasViewPermission(#appId)")
     fun getVersionNames(appId: AppId): List<VersionName> =
-        jooq.select(VERSION.CODE, VERSION.FLAVOR, VERSION.NAME).from(VERSION).where(VERSION.APP_ID.eq(appId)).fetchInto(VersionName::class.java)
+        jooq.select(VERSION.CODE, VERSION.FLAVOR, VERSION.NAME).from(VERSION).where(VERSION.APP_ID.eq(appId)).fetch(Records.mapping(::VersionName))
 }
+
+private fun DSLContext.selectVersions() = select(VERSION.CODE, VERSION.NAME, VERSION.APP_ID, VERSION.MAPPINGS, VERSION.FLAVOR).from(VERSION)

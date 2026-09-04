@@ -1,3 +1,4 @@
+import com.faendir.acra.gradle.I18nClassGenerator
 import org.jooq.meta.jaxb.ForcedType
 import org.jooq.meta.jaxb.Property
 
@@ -83,11 +84,12 @@ sourceSets {
     }
 }
 
-val generateMessageClasses by tasks.registering(com.faendir.acra.gradle.I18nClassGenerator::class) {
+val generateMessageClasses = tasks.register<I18nClassGenerator>("generateMessageClasses") {
     inputDirectory = fileTree("src/main/resources/i18n/com/faendir/acra")
     outputDirectory = messagesOutput
     packageName = "com.faendir.acra.i18n"
     className = "Messages"
+    description = "Generates resource accessors"
 }
 
 kotlin {

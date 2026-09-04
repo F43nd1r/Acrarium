@@ -24,7 +24,7 @@ import com.faendir.acra.persistence.*
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.app.CustomColumn
 import com.faendir.acra.persistence.bug.BugId
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jooq.*
 import org.jooq.impl.DSL
 import org.springframework.security.access.prepost.PostAuthorize
@@ -41,7 +41,7 @@ class ReportRepository(
     private val jooq: DSLContext
 ) {
     @PostAuthorize("returnObject == null || isReporter() || hasViewPermission(returnObject.appId)")
-    fun find(id: String): Report? = jooq.selectFrom(REPORT).where(REPORT.ID.eq(id)).fetchValueInto()
+    fun find(id: String): Report? = jooq.selectReports().where(REPORT.ID.eq(id)).fetchOne(Records.mapping(::Report))
 
     fun findAttachmentNames(id: String) = jooq.select(ATTACHMENT.FILENAME.NOT_NULL).from(ATTACHMENT).where(ATTACHMENT.REPORT_ID.eq(id)).fetchList()
 
@@ -119,10 +119,10 @@ class ReportRepository(
     fun getProvider(appId: AppId, customColumns: List<CustomColumn>) = getProvider(REPORT.APP_ID.eq(appId), customColumns)
 
     @PreAuthorize("hasViewPermission(#appId)")
-    fun getProvider(appId: AppId, bugId: BugId, customColumns: List<CustomColumn>) = getProvider(REPORT.BUG_ID.eq(bugId), customColumns)
+    fun getProvider(@Suppress("unused") appId: AppId, bugId: BugId, customColumns: List<CustomColumn>) = getProvider(REPORT.BUG_ID.eq(bugId), customColumns)
 
     @PreAuthorize("hasViewPermission(#appId)")
-    fun getProvider(appId: AppId, installationId: String, customColumns: List<CustomColumn>) =
+    fun getProvider(@Suppress("unused") appId: AppId, installationId: String, customColumns: List<CustomColumn>) =
         getProvider(REPORT.INSTALLATION_ID.eq(installationId), customColumns)
 
     private fun getProvider(condition: Condition, customColumns: List<CustomColumn>) =
@@ -156,7 +156,7 @@ class ReportRepository(
                     .orderBy(sort.asOrderFields())
                     .offset(offset)
                     .limit(limit)
-                    .fetchListInto<ReportRow>()
+                    .fetch(Records.mapping(::ReportRow))
                     .stream()
             }
 
@@ -175,7 +175,7 @@ class ReportRepository(
             .orderBy(sort.asOrderFields())
             .offset(offset)
             .limit(limit)
-            .fetchListInto<Installation>()
+            .fetch(Records.mapping(::Installation))
             .stream()
 
         override fun size(filters: Set<Installation.Filter>) =
@@ -183,3 +183,28 @@ class ReportRepository(
 
     }
 }
+
+
+private fun DSLContext.selectReports() = select(
+    REPORT.ID,
+    REPORT.ANDROID_VERSION,
+    REPORT.CONTENT,
+    REPORT.DATE,
+    REPORT.PHONE_MODEL,
+    REPORT.USER_COMMENT,
+    REPORT.USER_EMAIL,
+    REPORT.BRAND,
+    REPORT.INSTALLATION_ID,
+    REPORT.IS_SILENT,
+    REPORT.DEVICE,
+    REPORT.MARKETING_DEVICE,
+    REPORT.BUG_ID,
+    REPORT.APP_ID,
+    REPORT.STACKTRACE,
+    REPORT.EXCEPTION_CLASS,
+    REPORT.MESSAGE,
+    REPORT.CRASH_LINE,
+    REPORT.CAUSE,
+    REPORT.VERSION_CODE,
+    REPORT.VERSION_FLAVOR,
+).from(REPORT)

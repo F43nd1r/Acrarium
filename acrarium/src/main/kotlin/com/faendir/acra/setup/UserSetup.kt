@@ -18,7 +18,7 @@ package com.faendir.acra.setup
 import com.faendir.acra.persistence.user.Role
 import com.faendir.acra.persistence.user.UserRepository
 import com.faendir.acra.util.zip
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
@@ -56,7 +56,7 @@ class UserSetup(private val userRepository: UserRepository) : ApplicationRunner 
                         return
                     }
                 }.toMutableSet().apply { if (contains(Role.ADMIN)) add(Role.USER) }
-            } ).let { it + MutableList(names.size - it.size) { setOf(Role.ADMIN, Role.USER, Role.API) } }
+            }).let { it + MutableList(names.size - it.size) { setOf(Role.ADMIN, Role.USER, Role.API) } }
             names.zip(passwords, rolesList).forEach { (name, password, roles) ->
                 if (name.isBlank()) {
                     logger.error { "Username may not be blank." }

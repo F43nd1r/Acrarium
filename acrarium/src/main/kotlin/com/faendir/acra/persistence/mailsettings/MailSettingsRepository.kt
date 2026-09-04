@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,8 @@ package com.faendir.acra.persistence.mailsettings
 
 import com.faendir.acra.jooq.generated.tables.references.MAIL_SETTINGS
 import com.faendir.acra.persistence.app.AppId
-import com.faendir.acra.persistence.fetchListInto
-import com.faendir.acra.persistence.fetchValueInto
 import org.jooq.DSLContext
+import org.jooq.Records
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Repository
 
@@ -28,12 +27,12 @@ class MailSettingsRepository(private val jooq: DSLContext) {
 
     @PreAuthorize("isCurrentUser(#username)")
     fun find(appId: AppId, username: String): MailSettings? =
-        jooq.selectFrom(MAIL_SETTINGS).where(MAIL_SETTINGS.APP_ID.eq(appId), MAIL_SETTINGS.USERNAME.eq(username)).fetchValueInto()
+        jooq.selectMailSettings().where(MAIL_SETTINGS.APP_ID.eq(appId), MAIL_SETTINGS.USERNAME.eq(username)).fetchOne(Records.mapping(::MailSettings))
 
-    fun getAll(): List<MailSettings> = jooq.selectFrom(MAIL_SETTINGS).fetchListInto()
+    fun getAll(): List<MailSettings> = jooq.selectMailSettings().fetch(Records.mapping(::MailSettings))
 
     fun findAll(appId: AppId): List<MailSettings> =
-        jooq.selectFrom(MAIL_SETTINGS).where(MAIL_SETTINGS.APP_ID.eq(appId)).fetchListInto()
+        jooq.selectMailSettings().where(MAIL_SETTINGS.APP_ID.eq(appId)).fetch(Records.mapping(::MailSettings))
 
     @PreAuthorize("isCurrentUser(#mailSettings.username)")
     fun store(mailSettings: MailSettings) {
@@ -52,3 +51,12 @@ class MailSettingsRepository(private val jooq: DSLContext) {
             .execute()
     }
 }
+
+private fun DSLContext.selectMailSettings() = select(
+    MAIL_SETTINGS.APP_ID,
+    MAIL_SETTINGS.USERNAME,
+    MAIL_SETTINGS.NEW_BUG,
+    MAIL_SETTINGS.REGRESSION,
+    MAIL_SETTINGS.SPIKE,
+    MAIL_SETTINGS.SUMMARY,
+).from(MAIL_SETTINGS)

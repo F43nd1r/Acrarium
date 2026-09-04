@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,7 @@ import org.jooq.*
 
 fun <T, R : Record1<T>> ResultQuery<R>.fetchValue(): T? = fetchOne()?.value1()
 
-inline fun <reified T> ResultQuery<*>.fetchValueInto(): T? = fetchOneInto(T::class.java)
-
 fun <T, R : Record1<T>> ResultQuery<R>.fetchList(): List<T> = fetch().map { it.value1() }
-
-inline fun <reified T> ResultQuery<*>.fetchListInto(): List<T> = fetchInto(T::class.java)
 
 fun <T> Field<T>.direction(direction: SortDirection): SortField<T> = if (direction == SortDirection.ASCENDING) asc() else desc()
 

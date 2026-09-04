@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2025 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package com.faendir.acra.i18n
 
 import com.faendir.acra.util.tryOrNull
 import com.vaadin.flow.i18n.I18NProvider
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import java.util.*
 

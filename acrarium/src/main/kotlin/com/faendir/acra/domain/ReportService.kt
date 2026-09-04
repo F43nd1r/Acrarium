@@ -26,7 +26,7 @@ import com.faendir.acra.settings.AcrariumConfiguration
 import com.faendir.acra.util.findInt
 import com.faendir.acra.util.findString
 import com.faendir.acra.util.toDate
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.acra.ReportField
 import org.intellij.lang.annotations.Language
 import org.jooq.JSON

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2021-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2021-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import com.vaadin.flow.router.BeforeEnterEvent
 import com.vaadin.flow.router.ErrorParameter
 import com.vaadin.flow.router.HasErrorParameter
 import com.vaadin.flow.server.auth.AnonymousAllowed
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
@@ -50,7 +50,7 @@ class UnexpectedErrorView : FlexLayout(), HasErrorParameter<Exception> {
     }
 
     override fun setErrorParameter(event: BeforeEnterEvent?, parameter: ErrorParameter<Exception>): Int {
-        logger.warn("Unexpected Error", parameter.exception)
+        logger.warn(parameter.exception) { "Unexpected Error" }
         return 500
     }
 }

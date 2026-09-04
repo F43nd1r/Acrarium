@@ -23,9 +23,12 @@ import com.faendir.acra.jooq.generated.tables.references.REPORT
 import com.faendir.acra.persistence.*
 import com.faendir.acra.persistence.app.AppId
 import com.faendir.acra.persistence.version.VersionKey
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.validation.constraints.Size
-import mu.KotlinLogging
 import org.jooq.DSLContext
+import org.jooq.Records
+import org.jooq.SelectField
+import org.jooq.impl.DSL.row
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Repository
@@ -51,22 +54,28 @@ class BugRepository(
 
     @PostAuthorize("returnObject == null || hasViewPermission(returnObject.appId)")
     fun find(bugId: BugId): Bug? =
-        jooq.selectFrom(BUG).where(BUG.ID.eq(bugId)).fetchValueInto()
+        jooq.selectBugs().where(BUG.ID.eq(bugId)).fetchOne(Records.mapping(::Bug))
 
     fun findInRange(appId: AppId, range: ClosedRange<Instant>): List<Bug> =
-        jooq.selectFrom(BUG)
+        jooq.selectBugs()
             .where(
                 BUG.APP_ID.eq(appId),
                 BUG.LATEST_REPORT.greaterOrEqual(range.start),
                 BUG.LATEST_REPORT.lessOrEqual(range.endInclusive)
             )
-            .fetchListInto()
+            .fetch(Records.mapping(::Bug))
 
     fun getIdentifiers(bugId: BugId): List<BugIdentifier> =
-        jooq.select(BUG_IDENTIFIER.fields().toList() - BUG_IDENTIFIER.BUG_ID)
+        jooq.select(
+            BUG_IDENTIFIER.APP_ID,
+            BUG_IDENTIFIER.EXCEPTION_CLASS,
+            BUG_IDENTIFIER.MESSAGE,
+            BUG_IDENTIFIER.CRASH_LINE,
+            BUG_IDENTIFIER.CAUSE,
+        )
             .from(BUG_IDENTIFIER)
             .where(BUG_IDENTIFIER.BUG_ID.eq(bugId))
-            .fetchListInto()
+            .fetch(Records.mapping(::BugIdentifier))
 
     @PreAuthorize("hasViewPermission(#appId)")
     fun getAllIds(appId: AppId): List<BugId> =
@@ -170,11 +179,9 @@ class BugRepository(
                 BUG.ID,
                 BUG.TITLE,
                 BUG.REPORT_COUNT,
-                BUG.LATEST_VERSION_CODE,
-                BUG.LATEST_VERSION_FLAVOR,
+                BUG.LATEST_VERSION_KEY,
                 BUG.LATEST_REPORT,
-                BUG.SOLVED_VERSION_CODE,
-                BUG.SOLVED_VERSION_FLAVOR,
+                BUG.SOLVED_VERSION_KEY,
                 BUG.AFFECTED_INSTALLATIONS,
             )
                 .from(BUG)
@@ -182,7 +189,7 @@ class BugRepository(
                 .orderBy(sort.asOrderFields())
                 .offset(offset)
                 .limit(limit)
-                .fetchListInto<BugStats>()
+                .fetch(Records.mapping(::BugStats))
                 .stream()
         }
 
@@ -191,3 +198,23 @@ class BugRepository(
 
     }
 }
+
+private fun DSLContext.selectBugs() = select(
+    BUG.ID,
+    BUG.TITLE,
+    BUG.APP_ID,
+    BUG.REPORT_COUNT,
+    BUG.LATEST_REPORT,
+    BUG.SOLVED_VERSION_KEY,
+    BUG.LATEST_VERSION_KEY,
+    BUG.AFFECTED_INSTALLATIONS,
+).from(BUG)
+
+private val com.faendir.acra.jooq.generated.tables.Bug.LATEST_VERSION_KEY: SelectField<VersionKey>
+    get() = row(LATEST_VERSION_CODE, LATEST_VERSION_FLAVOR).mapping { code: Int?, flavor: String? ->
+        VersionKey(requireNotNull(code), requireNotNull(flavor))
+    }
+private val com.faendir.acra.jooq.generated.tables.Bug.SOLVED_VERSION_KEY: SelectField<VersionKey?>
+    get() = row(SOLVED_VERSION_CODE, SOLVED_VERSION_FLAVOR).mapping { code: Int?, flavor: String? ->
+        if (code != null && flavor != null) VersionKey(code, flavor) else null
+    }

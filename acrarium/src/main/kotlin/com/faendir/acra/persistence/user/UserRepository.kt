@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,19 @@ package com.faendir.acra.persistence.user
 
 import com.faendir.acra.dataprovider.AcrariumDataProvider
 import com.faendir.acra.dataprovider.AcrariumSort
+import com.faendir.acra.jooq.generated.tables.UserPermissions
+import com.faendir.acra.jooq.generated.tables.UserRoles
 import com.faendir.acra.jooq.generated.tables.references.USER
 import com.faendir.acra.jooq.generated.tables.references.USER_PERMISSIONS
 import com.faendir.acra.jooq.generated.tables.references.USER_ROLES
-import com.faendir.acra.persistence.*
+import com.faendir.acra.persistence.NOT_NULL
 import com.faendir.acra.persistence.app.AppId
+import com.faendir.acra.persistence.asOrderFields
+import com.faendir.acra.persistence.fetchList
+import com.faendir.acra.persistence.fetchValue
 import org.jooq.DSLContext
+import org.jooq.Records
+import org.jooq.SelectField
 import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.springframework.security.access.prepost.PreAuthorize
@@ -34,11 +41,10 @@ import java.util.stream.Stream
 
 @Repository
 class UserRepository(private val jooq: DSLContext, private val passwordEncoder: PasswordEncoder) {
-
     fun exists(username: String): Boolean = jooq.fetchExists(USER, USER.USERNAME.eq(username))
 
     @PreAuthorize("isCurrentUser(#username) || isAdmin()")
-    fun find(username: String): User? = jooq.selectFrom(USER).where(USER.USERNAME.eq(username)).fetchValueInto<User>()
+    fun find(username: String): User? = jooq.select(USER.USERNAME, USER.PASSWORD, USER.MAIL).from(USER).where(USER.USERNAME.eq(username)).fetchOne(Records.mapping(::User))
 
     /**
      * @return if the user was successfully created
@@ -59,7 +65,7 @@ class UserRepository(private val jooq: DSLContext, private val passwordEncoder: 
                 .execute()
         }
         true
-    } catch (e: DataAccessException) {
+    } catch (_: DataAccessException) {
         false
     }
 
@@ -102,9 +108,11 @@ class UserRepository(private val jooq: DSLContext, private val passwordEncoder: 
     }
 
     fun getAuthorities(username: String): List<GrantedAuthority> =
-        jooq.select(USER_ROLES.ROLES).from(USER_ROLES).where(USER_ROLES.USER_USERNAME.eq(username)).fetchListInto<Role>() +
-                jooq.select(USER_PERMISSIONS.APP_ID, USER_PERMISSIONS.LEVEL).from(USER_PERMISSIONS).where(USER_PERMISSIONS.USER_USERNAME.eq(username))
-                    .fetchListInto<Permission>()
+        jooq.select(USER_ROLES.ROLE).from(USER_ROLES).where(USER_ROLES.USER_USERNAME.eq(username)).fetchList() +
+                jooq.select(USER_PERMISSIONS.APP_ID, USER_PERMISSIONS.PERMISSION_LEVEL)
+                    .from(USER_PERMISSIONS)
+                    .where(USER_PERMISSIONS.USER_USERNAME.eq(username))
+                    .fetch(Records.mapping(::Permission))
 
     @Transactional
     @PreAuthorize("!isCurrentUser(#username) && isAdmin() || hasAdminPermissionForReporter(#username)")
@@ -162,3 +170,9 @@ class UserRepository(private val jooq: DSLContext, private val passwordEncoder: 
                 jooq.select(DSL.countDistinct(USER_ROLES.USER_USERNAME)).from(USER_ROLES).where(USER_ROLES.ROLES.eq(Role.USER.name)).fetchValue() ?: 0
         }
 }
+
+private val UserPermissions.PERMISSION_LEVEL: SelectField<Permission.Level>
+    get() = LEVEL.convertFrom { it?.let(Permission.Level::valueOf) }
+
+private val UserRoles.ROLE: SelectField<Role>
+    get() = ROLES.convertFrom { it?.let(Role::valueOf) }

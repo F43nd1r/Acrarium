@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,10 @@ import com.faendir.acra.jooq.generated.tables.references.APP
 import com.faendir.acra.jooq.generated.tables.references.APP_REPORT_COLUMNS
 import com.faendir.acra.jooq.generated.tables.references.BUG
 import com.faendir.acra.jooq.generated.tables.references.REPORT
-import com.faendir.acra.persistence.*
+import com.faendir.acra.persistence.NOT_NULL
+import com.faendir.acra.persistence.asOrderFields
+import com.faendir.acra.persistence.fetchList
+import com.faendir.acra.persistence.fetchValue
 import com.faendir.acra.persistence.user.Permission
 import com.faendir.acra.persistence.user.Role
 import com.faendir.acra.persistence.user.UserRepository
@@ -29,6 +32,7 @@ import com.faendir.acra.security.SecurityUtils
 import org.apache.commons.text.RandomStringGenerator
 import org.jooq.Condition
 import org.jooq.DSLContext
+import org.jooq.Records
 import org.jooq.impl.DSL
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Repository
@@ -38,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional
 class AppRepository(private val jooq: DSLContext, private val userRepository: UserRepository, private val randomStringGenerator: RandomStringGenerator) {
 
     @PreAuthorize("hasViewPermission(#id)")
-    fun find(id: AppId): App? = jooq.selectFrom(APP).where(APP.ID.eq(id)).fetchValueInto<App>()
+    fun find(id: AppId): App? = jooq.select(APP.ID, APP.NAME, APP.REPORTER_USERNAME).from(APP).where(APP.ID.eq(id)).fetchOne(Records.mapping(::App))
 
     @PreAuthorize("hasViewPermission(#id)")
     fun findName(id: AppId): String? = jooq.select(APP.NAME).from(APP).where(APP.ID.eq(id)).fetchValue()
@@ -83,11 +87,11 @@ class AppRepository(private val jooq: DSLContext, private val userRepository: Us
     fun getVisibleIds(): List<AppId> = jooq.select(APP.ID.NOT_NULL).from(APP).where(hasViewPermission()).fetchList()
 
     @PreAuthorize("isAdmin()")
-    fun getAllNames(): List<AppName> = jooq.select(APP.ID, APP.NAME).from(APP).fetchListInto()
+    fun getAllNames(): List<AppName> = jooq.select(APP.ID, APP.NAME).from(APP).fetch(Records.mapping(::AppName))
 
     @PreAuthorize("hasViewPermission(#id)")
     fun getCustomColumns(id: AppId): List<CustomColumn> =
-        jooq.select(APP_REPORT_COLUMNS.NAME, APP_REPORT_COLUMNS.PATH).from(APP_REPORT_COLUMNS).where(APP_REPORT_COLUMNS.APP_ID.eq(id)).fetchListInto()
+        jooq.select(APP_REPORT_COLUMNS.NAME, APP_REPORT_COLUMNS.PATH).from(APP_REPORT_COLUMNS).where(APP_REPORT_COLUMNS.APP_ID.eq(id)).fetch(Records.mapping(::CustomColumn))
 
     @Transactional
     @PreAuthorize("hasAdminPermission(#id)")
@@ -111,7 +115,8 @@ class AppRepository(private val jooq: DSLContext, private val userRepository: Us
         val fields = tableMeta.fields()
         val indexes = tableMeta.indexes
 
-        val wantedCustomColumns = jooq.select(APP_REPORT_COLUMNS.NAME, APP_REPORT_COLUMNS.PATH).from(APP_REPORT_COLUMNS).fetchListInto<CustomColumn>().distinctBy { it.path }
+        val wantedCustomColumns =
+            jooq.select(APP_REPORT_COLUMNS.NAME, APP_REPORT_COLUMNS.PATH).from(APP_REPORT_COLUMNS).fetch(Records.mapping(::CustomColumn)).distinctBy { it.path }
         // drop unwanted indices
         val wantedCustomColumnIndexNames = wantedCustomColumns.mapTo(mutableSetOf()) { it.indexName }
         for (index in indexes.filter { it.isCustomColumnIndex && it.name !in wantedCustomColumnIndexNames }) {
@@ -152,7 +157,7 @@ class AppRepository(private val jooq: DSLContext, private val userRepository: Us
             .orderBy(sort.asOrderFields())
             .offset(offset)
             .limit(limit)
-            .fetchListInto<AppStats>()
+            .fetch(Records.mapping(::AppStats))
             .stream()
 
         override fun size(filters: Set<Nothing>) = jooq.selectCount()
