@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import com.faendir.acra.dataprovider.AcrariumDataProvider
 import com.faendir.acra.dataprovider.AcrariumSort
 import com.faendir.acra.persistence.TestDataBuilder
 import com.faendir.acra.persistence.app.AppId
+import com.faendir.acra.persistence.bug.BugRepository
 import com.vaadin.flow.data.provider.SortDirection
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -38,6 +39,8 @@ class VersionRepositoryTest(
     private val versionRepository: VersionRepository,
     @Autowired
     private val testDataBuilder: TestDataBuilder,
+    @Autowired
+    private val bugRepository: BugRepository,
 ) {
     private var appId by Delegates.notNull<AppId>()
 
@@ -126,6 +129,38 @@ class VersionRepositoryTest(
             versionRepository.delete(version!!)
 
             expectThat(versionRepository.find(appId, id)).isNull()
+        }
+
+        @Test
+        fun `should delete bugs with no remaining reports`() {
+            val versionKey = testDataBuilder.createVersion(appId)
+            val version = versionRepository.find(appId, versionKey)!!
+            val bugId = testDataBuilder.createBug(appId)
+            val identifier = testDataBuilder.createBugIdentifier(appId, bugId)
+            testDataBuilder.createReport(appId, bugId, identifier, versionKey)
+
+            versionRepository.delete(version)
+
+            expectThat(bugRepository.find(bugId)).isNull()
+        }
+
+        @Test
+        fun `should update remaining bug stats`() {
+            val olderVersion = testDataBuilder.createVersion(appId, 1)
+            val newerVersionKey = testDataBuilder.createVersion(appId, 2)
+            val newerVersion = versionRepository.find(appId, newerVersionKey)!!
+            val bugId = testDataBuilder.createBug(appId)
+            val identifier = testDataBuilder.createBugIdentifier(appId, bugId)
+            testDataBuilder.createReport(appId, bugId, identifier, olderVersion)
+            testDataBuilder.createReport(appId, bugId, identifier, newerVersionKey)
+
+            versionRepository.delete(newerVersion)
+
+            expectThat(bugRepository.find(bugId)).isNotNull().and {
+                get { latestVersionKey }.isEqualTo(olderVersion)
+                get { reportCount }.isEqualTo(1)
+                get { affectedInstallations }.isEqualTo(1)
+            }
         }
     }
 
