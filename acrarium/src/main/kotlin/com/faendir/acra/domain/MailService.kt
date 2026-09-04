@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2018-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import com.faendir.acra.persistence.report.ReportRepository
 import com.faendir.acra.persistence.user.User
 import com.faendir.acra.persistence.user.UserRepository
 import com.faendir.acra.persistence.version.VersionRepository
+import com.faendir.acra.security.SecurityUtils.withSystemAuthentication
 import com.faendir.acra.ui.view.bug.tabs.ReportBugTab
 import com.faendir.acra.util.ensureTrailing
 import com.vaadin.flow.i18n.I18NProvider
@@ -64,15 +65,15 @@ class MailService(
     private val routeConfiguration: RouteConfiguration
 ) {
 
-    @Value("\${server.context-path}")
+    @Value($$"${server.context-path}")
     private val baseUrl: String? = null
 
-    @Value("\${spring.mail.sender}")
+    @Value($$"${spring.mail.sender}")
     private val sender: String? = null
 
     @Transactional
     @Async
-    fun onNewReport(report: Report) {
+    fun onNewReport(report: Report) = withSystemAuthentication {
         val settings = mailSettingsRepository.findAll(report.appId)
         val newBugReceiver = getMailsBy(settings, MailSettings::newBug)
         val regressionReceiver = getMailsBy(settings, MailSettings::regression)
@@ -129,18 +130,20 @@ class MailService(
     private fun getMailsBy(list: List<MailSettings>, predicate: (MailSettings) -> Boolean): List<String> =
         list.filter(predicate).map(MailSettings::username).mapNotNull(userRepository::find).mapNotNull(User::mail)
 
+
     private fun fetchReportCountOnDay(bug: Bug, subtractDays: Long): Int {
         val today = OffsetDateTime.now().truncatedTo(ChronoUnit.DAYS)
         return reportRepository.countInRange(bug.appId, bug.id, today.minusDays(subtractDays).toInstant()..today.minusDays(subtractDays - 1).toInstant())
     }
 
     @Scheduled(cron = "0 0 0 * * SUN")
-    fun weeklyReport() {
+    fun weeklyReport() = withSystemAuthentication {
         val settings = mailSettingsRepository.getAll().filter { it.summary }.groupBy { it.appId }
         for ((appId, mailSettings) in settings) {
             val today = OffsetDateTime.now().truncatedTo(ChronoUnit.DAYS)
             val bugs = bugRepository.findInRange(appId, today.minusWeeks(1L).toInstant()..today.toInstant())
-            var body = bugs.joinToString("\n") { bug -> getTranslation(Messages.WEEKLY_MAIL_BUG_TEMPLATE, getBugUrl(bug), bug.title, bug.reportCount, bug.affectedInstallations) }
+            var body =
+                bugs.joinToString("\n") { bug -> getTranslation(Messages.WEEKLY_MAIL_BUG_TEMPLATE, getBugUrl(bug), bug.title, bug.reportCount, bug.affectedInstallations) }
             if (body.isEmpty()) {
                 body = getTranslation(Messages.WEEKLY_MAIL_NO_REPORTS)
             }

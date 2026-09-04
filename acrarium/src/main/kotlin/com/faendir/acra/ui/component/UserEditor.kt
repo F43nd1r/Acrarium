@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2020-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ class UserEditor(userRepository: UserRepository, mailService: MailService?, exis
         contract {
             returns(true) implies (mailService != null)
         }
-        return user.mail.isNotBlank() == true && mailService != null
+        return user.mail.isNotBlank() && mailService != null
     }
 
     /**

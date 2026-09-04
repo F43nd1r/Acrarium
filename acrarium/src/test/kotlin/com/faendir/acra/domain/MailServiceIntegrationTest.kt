@@ -15,57 +15,89 @@
  */
 package com.faendir.acra.domain
 
-import com.faendir.acra.i18n.ResourceBundleI18NProvider
-import com.faendir.acra.persistence.app.AppRepository
-import com.faendir.acra.persistence.bug.BugRepository
-import com.faendir.acra.persistence.mailsettings.MailSettingsRepository
-import com.faendir.acra.persistence.report.ReportRepository
-import com.faendir.acra.persistence.user.UserRepository
-import com.faendir.acra.persistence.version.VersionRepository
-import com.icegreen.greenmail.util.GreenMail
-import com.icegreen.greenmail.util.ServerSetupTest
-import com.vaadin.flow.router.RouteConfiguration
-import io.mockk.mockk
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
+import com.faendir.acra.annotation.AcrariumTest
+import com.faendir.acra.persistence.TestDataBuilder
+import com.faendir.acra.persistence.report.Report
+import com.faendir.acra.persistence.user.Role
+import com.faendir.acra.withAuth
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import jakarta.mail.Session
+import jakarta.mail.internet.MimeMessage
+import org.jooq.JSON
 import org.junit.jupiter.api.Test
-import org.springframework.mail.javamail.JavaMailSenderImpl
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.test.context.TestPropertySource
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import java.time.Instant
+import java.util.*
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
-class MailServiceIntegrationTest {
-    private lateinit var greenMail: GreenMail
-    private lateinit var service: MailService
+@AcrariumTest
+@TestPropertySource(properties = ["spring.mail.host=localhost", "management.health.mail.enabled=false"])
+class MailServiceIntegrationTest(
+    @Autowired private val mailService: MailService,
+    @Autowired private val testDataBuilder: TestDataBuilder,
+    @Autowired @MockkBean private val mailSender: JavaMailSender,
+) {
+    @Test
+    fun `should send new bug notification`() {
+        val appId = testDataBuilder.createApp()
+        val bugId = testDataBuilder.createBug(appId)
+        val version = testDataBuilder.createVersion(appId)
+        testDataBuilder.createReport(appId, bugId, version = version)
+        val username = testDataBuilder.createUser(username = "recipient", mail = "recipient@example.com", roles = arrayOf(Role.ADMIN))
+        val mailSent = CountDownLatch(1)
+        testDataBuilder.createMailSettings(appId, username, newBug = true)
+        every { mailSender.createMimeMessage() } returns MimeMessage(Session.getInstance(Properties()))
+        every { mailSender.send(any<MimeMessage>()) } answers { mailSent.countDown() }
 
-    @BeforeEach
-    fun setUp() {
-        greenMail = GreenMail(ServerSetupTest.SMTP).apply { start() }
-        service = MailService(
-            mailSettingsRepository = mockk<MailSettingsRepository>(),
-            appRepository = mockk<AppRepository>(),
-            bugRepository = mockk<BugRepository>(),
-            versionRepository = mockk<VersionRepository>(),
-            reportRepository = mockk<ReportRepository>(),
-            userRepository = mockk<UserRepository>(),
-            i18nProvider = ResourceBundleI18NProvider("i18n.com.faendir.acra.messages"),
-            mailSender = JavaMailSenderImpl().apply {
-                host = greenMail.smtp.bindTo
-                port = greenMail.smtp.port
-            },
-            routeConfiguration = mockk<RouteConfiguration>(),
-        )
-    }
+        withAuth(Role.REPORTER) {
+            mailService.onNewReport(
+                Report(
+                    id = "report",
+                    androidVersion = null,
+                    content = JSON.json("{}"),
+                    date = Instant.now(),
+                    phoneModel = null,
+                    userComment = null,
+                    userEmail = null,
+                    brand = null,
+                    installationId = "installation",
+                    isSilent = false,
+                    device = "device",
+                    marketingDevice = "device",
+                    bugId = bugId,
+                    appId = appId,
+                    stacktrace = "stacktrace",
+                    exceptionClass = "Exception",
+                    message = null,
+                    crashLine = null,
+                    cause = null,
+                    versionCode = version.code,
+                    versionFlavor = version.flavor,
+                )
+            )
+        }
 
-    @AfterEach
-    fun tearDown() {
-        greenMail.stop()
+        expectThat(mailSent.await(5, TimeUnit.SECONDS)).isEqualTo(true)
     }
 
     @Test
-    fun `test message is delivered through SMTP`() {
-        service.testMessage("admin@example.com")
+    fun `should send weekly report`() {
+        val appId = testDataBuilder.createApp()
+        val username = testDataBuilder.createUser(username = "recipient", mail = "recipient@example.com", roles = arrayOf(Role.ADMIN))
+        val mailSent = CountDownLatch(1)
+        testDataBuilder.createMailSettings(appId, username, summary = true)
+        every { mailSender.createMimeMessage() } returns MimeMessage(Session.getInstance(Properties()))
+        every { mailSender.send(any<MimeMessage>()) } answers { mailSent.countDown() }
 
-        expectThat(greenMail.waitForIncomingEmail(5_000, 1)).isEqualTo(true)
-        expectThat(greenMail.receivedMessages.single().allRecipients.single().toString()).isEqualTo("admin@example.com")
+        mailService.weeklyReport()
+
+        expectThat(mailSent.await(5, TimeUnit.SECONDS)).isEqualTo(true)
     }
+
 }

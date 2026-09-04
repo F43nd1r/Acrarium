@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2024 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +40,13 @@ class TestDataBuilder(private val jooq: DSLContext, private val randomStringGene
     fun createUser(
         username: String = randomString("test-user"),
         password: String = randomString("test-password"),
+        mail: String? = null,
         vararg roles: Role
     ): String {
         jooq.insertInto(USER)
             .set(USER.USERNAME, username)
             .set(USER.PASSWORD, password)
+            .set(USER.MAIL, mail)
             .execute()
         for (role in roles) {
             jooq.insertInto(USER_ROLES)
