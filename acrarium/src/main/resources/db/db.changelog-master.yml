@@ -613,6 +613,8 @@ databaseChangeLog:
   - changeSet:
       id: 2.0.0-expand-report-table
       author: *F43ND1R
+      validCheckSum:
+        - 9:4ba63fc628568ef898e8c650fe6425e3
       changes:
         - addColumn:
             tableName: *REPORT
@@ -620,7 +622,7 @@ databaseChangeLog:
               - column:
                   name: marketing_device
                   type: *STRING
-                  valueComputed: IFNULL((SELECT d.`marketing_name` FROM `device` d WHERE d.`model` = `phone_model` AND d.`device` = `device`), `device`)
+                  valueComputed: IFNULL((SELECT d.`marketing_name` FROM `device` d WHERE d.`model` = `report`.`phone_model` AND d.`device` = `report`.`device`), `report`.`device`)
                   constraints:
                     nullable: false
               - column:
