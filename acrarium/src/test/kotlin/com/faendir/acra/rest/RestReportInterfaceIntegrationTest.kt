@@ -31,14 +31,21 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.test.context.TestPropertySource
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import java.io.ByteArrayOutputStream
+import java.util.zip.GZIPOutputStream
 
 @AcrariumTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource(properties = ["server.servlet.context-path=/acra"])
 class RestReportInterfaceIntegrationTest(
     @Autowired private val appRepository: AppRepository,
     @LocalServerPort private val port: Int,
 ) {
+    private companion object {
+        const val REPORT_PATH = "/acra/${RestReportInterface.REPORT_PATH}"
+    }
 
     private lateinit var reporter: Reporter
     private val restTemplate = TestRestTemplate()
@@ -57,8 +64,28 @@ class RestReportInterfaceIntegrationTest(
         val result = restTemplate
             .withBasicAuth(reporter.username, reporter.rawPassword)
             .postForEntity(
-                "http://localhost:$port/${RestReportInterface.REPORT_PATH}",
+                "http://localhost:$port$REPORT_PATH",
                 HttpEntity(ClassPathResource("example.stacktrace").contentAsByteArray, headers),
+                Void::class.java
+            )
+
+        expectThat(result.statusCode).isEqualTo(HttpStatus.OK)
+    }
+
+    @Test
+    fun `should be able to submit gzip compressed report`() {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers.set(HttpHeaders.CONTENT_ENCODING, "gzip")
+        val compressedReport = ByteArrayOutputStream().use { output ->
+            GZIPOutputStream(output).use { it.write(ClassPathResource("example.stacktrace").contentAsByteArray) }
+            output.toByteArray()
+        }
+        val result = restTemplate
+            .withBasicAuth(reporter.username, reporter.rawPassword)
+            .postForEntity(
+                "http://localhost:$port$REPORT_PATH",
+                HttpEntity(compressedReport, headers),
                 Void::class.java
             )
 
@@ -73,14 +100,14 @@ class RestReportInterfaceIntegrationTest(
         val authenticatedTemplate = restTemplate.withBasicAuth(reporter.username, reporter.rawPassword)
 
         val first = authenticatedTemplate.postForEntity(
-            "http://localhost:$port/${RestReportInterface.REPORT_PATH}",
+            "http://localhost:$port$REPORT_PATH",
             body,
             Void::class.java
         )
         expectThat(first.statusCode).isEqualTo(HttpStatus.OK)
 
         val second = authenticatedTemplate.postForEntity(
-            "http://localhost:$port/${RestReportInterface.REPORT_PATH}",
+            "http://localhost:$port$REPORT_PATH",
             body,
             Void::class.java
         )
@@ -94,7 +121,7 @@ class RestReportInterfaceIntegrationTest(
         val result = restTemplate
             .withBasicAuth(reporter.username, reporter.rawPassword)
             .postForEntity(
-                "http://localhost:$port/${RestReportInterface.REPORT_PATH}",
+                "http://localhost:$port$REPORT_PATH",
                 HttpEntity(ClassPathResource("example.multipart").contentAsByteArray, headers),
                 Void::class.java
             )
