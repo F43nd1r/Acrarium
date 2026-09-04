@@ -19,10 +19,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 
-fun withAuth(vararg authorities: GrantedAuthority, block: () -> Unit) {
+fun <T> withAuth(vararg authorities: GrantedAuthority, block: () -> T): T {
     val previous = SecurityContextHolder.getContext().authentication
     SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken("test", "", authorities.toList())
-    try {
+    return try {
         block()
     } finally {
         SecurityContextHolder.getContext().authentication = previous

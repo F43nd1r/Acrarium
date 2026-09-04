@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022-2023 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2022-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,12 @@ import org.intellij.lang.annotations.Language
 import org.jooq.JSON
 import org.json.JSONException
 import org.json.JSONObject
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.multipart.MultipartFile
-import java.sql.SQLIntegrityConstraintViolationException
 
 private val logger = KotlinLogging.logger {}
 
@@ -49,9 +50,10 @@ class ReportService(
     private val versionRepository: VersionRepository,
     private val acrariumConfiguration: AcrariumConfiguration,
     private val mailService: MailService?,
+    transactionManager: PlatformTransactionManager,
 ) {
+    private val transaction = TransactionTemplate(transactionManager)
 
-    @Transactional
     @PreAuthorize("isReporter()")
     fun create(
         reporterUserName: String,
@@ -60,8 +62,6 @@ class ReportService(
         attachments: List<MultipartFile>
     ): Report {
         val appId = appRepository.findId(reporterUserName) ?: throw IllegalArgumentException("No app for reporter $reporterUserName")
-
-
         val json = try {
             JSONObject(content)
         } catch (e: JSONException) {
@@ -72,48 +72,50 @@ class ReportService(
             logger.info { "Received report with id $reportId a second time, ignoring." }
             return it
         }
+        val report = try {
+            transaction.execute {
+                val stacktrace = json.getString(ReportField.STACK_TRACE.name)
+                val bugIdentifier = BugIdentifier.fromStacktrace(acrariumConfiguration, appId, stacktrace)
 
-        val stacktrace = json.getString(ReportField.STACK_TRACE.name)
-        val bugIdentifier = BugIdentifier.fromStacktrace(acrariumConfiguration, appId, stacktrace)
+                val date = json.getString(ReportField.USER_CRASH_DATE.name).toDate()
+                val buildConfig: JSONObject? = json.optJSONObject(ReportField.BUILD_CONFIG.name)
+                val versionCode: Int = buildConfig?.findInt("VERSION_CODE") ?: json.findInt(ReportField.APP_VERSION_CODE.name) ?: 0
+                val versionName: String = buildConfig?.findString("VERSION_NAME") ?: json.findString(ReportField.APP_VERSION_NAME.name) ?: "N/A"
+                val flavor: String? = buildConfig?.findString("FLAVOR")
 
-        val date = json.getString(ReportField.USER_CRASH_DATE.name).toDate()
-        val buildConfig: JSONObject? = json.optJSONObject(ReportField.BUILD_CONFIG.name)
-        val versionCode: Int = buildConfig?.findInt("VERSION_CODE") ?: json.findInt(ReportField.APP_VERSION_CODE.name) ?: 0
-        val versionName: String = buildConfig?.findString("VERSION_NAME") ?: json.findString(ReportField.APP_VERSION_NAME.name) ?: "N/A"
-        val flavor: String? = buildConfig?.findString("FLAVOR")
+                versionRepository.ensureExists(appId, versionCode, flavor, versionName)
 
-        versionRepository.ensureExists(appId, versionCode, flavor, versionName)
+                val bugId = bugRepository.findId(bugIdentifier) ?: bugRepository.create(bugIdentifier, stacktrace.substringBefore('\n'))
 
-        val bugId = bugRepository.findId(bugIdentifier) ?: bugRepository.create(bugIdentifier, stacktrace.substringBefore('\n'))
-
-        val phoneModel = json.optString(ReportField.PHONE_MODEL.name)
-        val device = json.optJSONObject(ReportField.BUILD.name)?.optString("DEVICE") ?: ""
-        val report = Report(
-            id = reportId,
-            androidVersion = json.optString(ReportField.ANDROID_VERSION.name),
-            content = JSON.json(content),
-            date = date,
-            phoneModel = phoneModel,
-            userComment = json.optString(ReportField.USER_COMMENT.name),
-            userEmail = json.optString(ReportField.USER_EMAIL.name),
-            brand = json.optString(ReportField.BRAND.name),
-            installationId = json.getString(ReportField.INSTALLATION_ID.name),
-            isSilent = json.optBoolean(ReportField.IS_SILENT.name),
-            device = device,
-            marketingDevice = deviceRepository.findMarketingName(phoneModel, device) ?: device,
-            bugId = bugId,
-            appId = appId,
-            stacktrace = stacktrace,
-            exceptionClass = bugIdentifier.exceptionClass,
-            message = bugIdentifier.message,
-            crashLine = bugIdentifier.crashLine,
-            cause = bugIdentifier.cause,
-            versionCode = versionCode,
-            versionFlavor = flavor ?: "",
-        )
-        try {
-            reportRepository.create(report, attachments.associate { (it.originalFilename ?: it.name) to it.bytes })
-        } catch (e: SQLIntegrityConstraintViolationException) {
+                val phoneModel = json.optString(ReportField.PHONE_MODEL.name)
+                val device = json.optJSONObject(ReportField.BUILD.name)?.optString("DEVICE") ?: ""
+                val report = Report(
+                    id = reportId,
+                    androidVersion = json.optString(ReportField.ANDROID_VERSION.name),
+                    content = JSON.json(content),
+                    date = date,
+                    phoneModel = phoneModel,
+                    userComment = json.optString(ReportField.USER_COMMENT.name),
+                    userEmail = json.optString(ReportField.USER_EMAIL.name),
+                    brand = json.optString(ReportField.BRAND.name),
+                    installationId = json.getString(ReportField.INSTALLATION_ID.name),
+                    isSilent = json.optBoolean(ReportField.IS_SILENT.name),
+                    device = device,
+                    marketingDevice = deviceRepository.findMarketingName(phoneModel, device) ?: device,
+                    bugId = bugId,
+                    appId = appId,
+                    stacktrace = stacktrace,
+                    exceptionClass = bugIdentifier.exceptionClass,
+                    message = bugIdentifier.message,
+                    crashLine = bugIdentifier.crashLine,
+                    cause = bugIdentifier.cause,
+                    versionCode = versionCode,
+                    versionFlavor = flavor ?: "",
+                )
+                reportRepository.create(report, attachments.associate { (it.originalFilename ?: it.name) to it.bytes })
+                report
+            }
+        } catch (e: DuplicateKeyException) {
             reportRepository.find(reportId)?.let {
                 logger.warn { "Race condition while saving $reportId, ignoring." }
                 return it
