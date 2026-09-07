@@ -27,10 +27,6 @@ server:
   context-path: ''
 
 spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jooq:
-    dialect: MySQL
   liquibase:
     changelog: "classpath:db/db.changelog-master.yml"
   mail:

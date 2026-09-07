@@ -31,6 +31,7 @@ strikt = "io.strikt:strikt-core:0.35.1"
 springdoc = "org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1"
 guava = "com.google.guava:guava:33.7.1-jre"
 testContainers-mysql = { module = "org.testcontainers:mysql", version.ref = "testContainers" }
+testContainers-mariadb = { module = "org.testcontainers:mariadb", version.ref = "testContainers" }
 testContainers-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testContainers" }
 karibu-testing = { module = "com.github.mvysny.kaributesting:karibu-testing-v24", version.ref = "karibu" }
 karibu-spring = { module = "com.github.mvysny.kaributesting:karibu-testing-v10-spring", version.ref = "karibu" }

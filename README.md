@@ -14,6 +14,8 @@ A Backend for [ACRA](https://github.com/ACRA/acra) written in Kotlin using Sprin
 
 See [Wiki Setup guide](https://github.com/F43nd1r/acra-backend/wiki/Setup-guide)
 
+For MySQL and MariaDB connection settings, including migration from a MySQL JDBC URL on MariaDB, see [Database configuration](docs/database-configuration.md).
+
 # Screenshots
 
 ###### Listing reports
