@@ -16,7 +16,6 @@
 
 package com.faendir.acra.gradle
 
-import com.google.common.base.CaseFormat
 import com.squareup.kotlinpoet.*
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileTree
@@ -58,7 +57,7 @@ class I18nClassGenerator extends DefaultTask {
     private void writeKotlin(Set<String> keys) throws IOException {
         TypeSpec.Builder builder = TypeSpec.objectBuilder(className);
         for (String key : keys) {
-            builder.addProperty(PropertySpec.builder(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, key), TypeNames.STRING, KModifier.CONST).initializer("%S", key).build());
+            builder.addProperty(PropertySpec.builder(key.replaceAll(/(?!^)([A-Z])/, '_$1').toUpperCase(Locale.ROOT), TypeNames.STRING, KModifier.CONST).initializer("%S", key).build());
         }
         FileSpec.builder(packageName, className)
                 .addType(builder.build())

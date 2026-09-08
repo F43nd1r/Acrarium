@@ -8,7 +8,6 @@ repositories {
 
 dependencies {
     implementation(libs.kotlinPoet)
-    implementation(libs.guava)
 }
 
 kotlin {
