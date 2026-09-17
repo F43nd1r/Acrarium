@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-java@v6.0.1
         with:
           distribution: 'temurin'
-          java-version: '21.0.12+8.0.LTS'
+          java-version: '21.0.12+101.0.LTS'
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4.3.0
       - name: Set up Docker Buildx
