@@ -5,7 +5,7 @@ springBoot = "4.1.1"
 vaadin-base = "25.2.8"
 kotlinPoet = "2.3.0"
 jooq = "3.21.8"
-karibu = "2.7.2"
+karibu = "2.7.3"
 greenmail = "2.1.13"
 
 [libraries]
