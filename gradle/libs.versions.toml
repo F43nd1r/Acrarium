@@ -6,7 +6,7 @@ vaadin-base = "25.2.8"
 kotlinPoet = "2.4.0"
 jooq = "3.21.8"
 karibu = "2.7.3"
-greenmail = "2.1.14"
+greenmail = "2.1.15"
 
 [libraries]
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
