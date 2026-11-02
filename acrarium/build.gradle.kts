@@ -166,7 +166,7 @@ jooq {
                             includeTypes = "DATETIME"
                         }, ForcedType().apply {
                             name = "BOOLEAN"
-                            includeTypes = "(?i:TINYINT)"
+                            includeTypes = "(?i:TINYINT\\(1\\))"
                         })
                     }
                     target.apply {
