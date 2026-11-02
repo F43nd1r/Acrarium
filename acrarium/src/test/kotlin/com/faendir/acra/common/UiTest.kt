@@ -79,6 +79,10 @@ abstract class UiTest {
         MockVaadin.mockRequestFactory = {
             object : FakeRequest(it) {
                 override fun getUserPrincipal() = SecurityContextHolder.getContext().authentication
+
+                override fun getProtocolRequestId() = throw UnsupportedOperationException()
+                override fun getRequestId() = throw UnsupportedOperationException()
+                override fun getServletConnection() = throw UnsupportedOperationException()
             }
         }
 
