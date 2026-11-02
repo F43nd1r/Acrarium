@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2021-2024 Lukas Morawietz (https://github.com/F43nd1r)
+ * (C) Copyright 2021-2026 Lukas Morawietz (https://github.com/F43nd1r)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 package com.faendir.acra.security
 
 import com.faendir.acra.persistence.user.UserRepository
+import com.faendir.acra.ui.view.Overview
+import com.faendir.acra.ui.view.login.LoginView
 import com.faendir.acra.ui.view.login.SetupView
 import com.vaadin.flow.server.UIInitEvent
 import com.vaadin.flow.server.UIInitListener
@@ -26,8 +28,14 @@ import org.springframework.stereotype.Component
 class SetupUIListener(private val userRepository: UserRepository) : UIInitListener {
     override fun uiInit(init: UIInitEvent) {
         init.ui.addBeforeEnterListener { event ->
-            if (event.navigationTarget != SetupView::class.java && !SecurityUtils.isLoggedIn() && !userRepository.hasAnyAdmin()) {
-                event.forwardTo(SetupView::class.java)
+            val hasAnyAdmin = userRepository.hasAnyAdmin()
+            val loggedIn = SecurityUtils.isLoggedIn()
+            if (event.navigationTarget != SetupView::class.java) {
+                if (!loggedIn && !hasAnyAdmin) {
+                    event.forwardTo(SetupView::class.java)
+                }
+            } else if (hasAnyAdmin) {
+                event.forwardTo(if (loggedIn) Overview::class.java else LoginView::class.java)
             }
         }
     }
